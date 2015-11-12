@@ -1,0 +1,73 @@
+<html>
+	<head>
+		<title>Station Admin: Playlist shuffeln</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>Playlists shuffeln</h1>
+
+<p class="subheading">
+Vorraussetzungen
+</p>
+<p>
+Du kannst Playlists von Station Admin shuffeln lassen - d. h. die einer Playlist werden in eine zufällige Reihenfolge gebracht. Enthält die Playlist mehrere Titel eines Artists so werden diese einigermaßen gleichtmäßig über die Playlist verteilt.
+</p>
+<p>
+Du kannst in den Playlist-Eigenschaften festlegen ob Playlists durch Station Admin geshuffelt werden dürfen oder nicht:
+<ul>
+<li>Laß Dir die entsprechende Playlist anzeigen
+<li>Klicke auf <img src="../icons/configure.png">
+<li>Aktiviere bei <span class="menuref">Shuffle</span> die Option <span class="menuref">durch Station Admin</span>
+</ul>
+</p>
+<div class="hint">
+Es macht keinen Sinn Playlists von Station Admin zu shuffeln die bereits durch laut.fm geshuffelt werden - laut.fm würde die von Station Admin erzeugte Reihenfolge ja ohnehin ignorieren.
+</div>
+
+<p class="subheading">
+Einzelne Playlist shuffeln
+</p>
+<p>
+Wenn Du Dir eine Playlist anzeigen läßt kannst Du durch einen Klick auf <img src="../icons/shuffle.png"> die Playlist shuffeln. Die Playlist wird hierbei nicht automatisch abgespeichert - das mußt Du selbst noch tun.
+</p>
+<p class="subheading">
+Mehrere Playlist shuffeln
+</p>
+<img src="../images/multishuffle.jpg">
+<p>
+Du kannst auch alle Playlists die gemäß Sendeplan in der nächsten Zeit gespielt werden auf einmal shuffeln lassen.
+</p>
+<p>
+Wähle im <span class="menuref">Playlists</span>-Menü <span class="menuref">Playlists shuffeln / generieren</span>. Es öffnet sich ein Dialog. Wähle den Zeitraum aus. In der Liste werden alle Playlists angezeigt die in diesem Zeitraum gespielt werden und für die das Shuffeln durch Station Admin erlaubt ist. Du kannst hier entweder alle Playlists ausgewählt lassen oder nur einzelne Playlists auswählen. Klicke auf <span class="menuref">Start</span> unm das Shuffeln zu starten. 
+</p>
+<p>
+Die Playlists die auf diese Weise geshuffelt werden werden automatisch auch abgespeichert.
+</p>
+
+<p class="subheading">
+Umgang mit Jingles und Wortbeitr&auml;gen
+</p>
+<img src="../images/einstellungen-playlists.jpg">
+<p>
+Es gibt einige Konfigurationsm&ouml;glichkeiten die den Umgang mit Jingles und Wortbeitr&auml;gen steuern. &Ouml;ffne dazu im <span class="menuref">Extras</span>-Men&uuml; <span class="menuref">Einstellungen</span> und wechsele auf das <span class="menuref">Playlists</span>-Tab.
+</p>
+<p>
+Alle in einer Playlist enthaltenen Jingles werden normalerweise beim Shufflen gleichm&auml;&szlig;ig und in zuf&auml;lliger Reihenfolge &uuml;ber die Playlist verteilt. Mit folgenden Optionen l&auml;&szlig;t sich das Verhalten &auml;ndern:
+<ul>
+<li><span class="menuref">Jingle am Anfang der Playlist nicht verschieben</span> sorgt daf&uuml;r dass wenn eine Playlist mit einem Jingle beginnt dieses Jingle beim Shuffeln nicht verschoben wird. Dies ist sinnvoll f&uuml;r Show-Opener. F&uuml;r Playlists die nicht mit einem Jingle beginnen hat diese Option keinerlei Wirkung.
+<li><span class="menuref">alle [ ] Minuten ein Jingle einstreuen</span> sorgt daf&uuml;r dass in festen Zeitabst&auml;nden Jingles eingestreut werden. Grundlage hierf&uuml;r sind alle in der Playlist enthaltenen Jingles. Wurden alle Jingles einmal verwendet so wird als n&auml;chstes das zuerst verwendete Jingle erneut eingestreut - die Jingles wiederholen sich also. Sind in der Playlist so viele Jingles vorhanden dass eigentlich nicht alle Jingles eingestreut werden k&ouml;nnen werden die verbleibenden Jingles ans Ende der Playlist geh&auml;ngt damit sie nicht verloren gehen.
+</ul>
+</p>
+<p>
+F&uuml;r Wortbeitr&auml;ge gibt es folgende M&ouml;glichkeiten:
+<ul>
+<li><span class="menuref">zuf&auml;llig verteilen</span>: Die Wortbeitr&auml;ge werden wie normale Musiktitel zuf&auml;llig verteilt.
+<li><span class="menuref">nicht verschieben</span>: Die Wortbeitr&auml;ge bleiben an den Positionen an denen sie sind. Kommt also z. B. an 5. Stelle in einer Playlist ein Wortbeitrag so steht nach dem Shuffeln auch genau dieser Wortbeitrag wieder an 5. Stelle.
+<li><span class="menuref">an folgenden Titel koppeln</span>: Die Wortbeitr&auml;ge werden an die nachfolgenden Musiktitel gekoppelt: Werden beim Shuffeln Musiktitel verschoben so verschieben sich Wortbeitr&auml;ge die vor diesen Titeln platziert sind entsprechend mit. Diese Option sollte gew&auml;hlt werden wenn die Wortbeitr&auml;ge Anmoderationen nachfolgender Titel beinhalten.
+</ul>
+</p>
+
+</body>
+</html>

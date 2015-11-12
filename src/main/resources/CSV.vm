@@ -1,0 +1,6 @@
+#foreach($day in ["Stunde", "Mo","Di","Mi","Do","Fr","Sa","So"])"$day"#if($day != "So"),#end#end
+
+#foreach($hour in [0..23])
+"${hour}h",#foreach($day in [0..6])#if($entries.get($day).get($hour).isPlaylistStart())"$entries.get($day).get($hour).playlist.name"#else""#end#if($day < 6),#end#end
+
+#end

@@ -1,0 +1,396 @@
+package de.stationadmin.base;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+
+import org.apache.log4j.Logger;
+import org.json.JSONException;
+
+import com.thoughtworks.xstream.XStream;
+
+import de.stationadmin.base.backup.BackupService;
+import de.stationadmin.base.loganalyzer.LogAnalyzerService;
+import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.base.playlist.Playlist.Entry;
+import de.stationadmin.base.playlist.PlaylistRegistry;
+import de.stationadmin.base.playlist.PlaylistService;
+import de.stationadmin.base.schedule.Schedule;
+import de.stationadmin.base.statistics.StatisticsService;
+import de.stationadmin.base.subscription.SubscriptionService;
+import de.stationadmin.base.tag.TagManager;
+import de.stationadmin.base.tasks.TaskExecutionService;
+import de.stationadmin.base.track.RegisteredTrack;
+import de.stationadmin.base.track.TrackRegistry;
+import de.stationadmin.base.track.TrackService;
+import de.stationadmin.base.util.XStreamFactory;
+import de.stationadmin.lfm.backend.LautfmAdminService;
+import de.stationadmin.lfm.backend.Station;
+import de.stationadmin.lfmapi.LautfmService;
+
+/**
+ * Main class for administrative access
+ * 
+ * @author Frank Korf
+ */
+public class StationAdminClient {
+  private static final Logger log = Logger.getLogger(StationAdminClient.class);
+  private SessionCtx sessionCtx;
+  private TaskExecutionService taskExecutionService;
+  private TrackService trackService;
+  private PlaylistService playlistService;
+  private SubscriptionService subscriptionService;
+  private Schedule schedule;
+  private StatisticsService statisticsService;
+  private LogAnalyzerService logAnalyzerService;
+  private List<Service> services = new ArrayList<Service>();
+
+  private Settings settings = new Settings();
+
+  private TagManager tagManager;
+  private BackupService backupService;
+
+  public StationAdminClient(LautfmAdminService service, Station station) throws IOException, JSONException {
+    Properties props = this.readStationAdminConfig();
+    if (props.containsKey("proxy.host")) {
+      System.setProperty("http.proxyHost", props.getProperty("proxy.host"));
+      System.setProperty("http.proxyPort", props.getProperty("proxy.port"));
+    }
+
+    String dataDirectory = props.getProperty("data.dir", System.getProperty("user.home") + File.separatorChar + "laut.fm/beta/" + File.separatorChar);
+    String settingsDirectory = props.getProperty("settings.dir", dataDirectory + station.getName().toLowerCase());
+
+    this.sessionCtx = new SessionCtx(service, new LautfmService(), station.getId(), station.getName().toLowerCase(), dataDirectory, settingsDirectory);
+
+    this.taskExecutionService = new TaskExecutionService(this);
+
+    TrackRegistry titleRegistry = new TrackRegistry();
+    PlaylistRegistry playlistRegistry = new PlaylistRegistry();
+    this.trackService = new TrackService(this.sessionCtx, titleRegistry, this.settings);
+    this.playlistService = new PlaylistService(this.sessionCtx, titleRegistry, playlistRegistry);
+    this.schedule = new Schedule(sessionCtx, playlistRegistry);
+    this.logAnalyzerService = new LogAnalyzerService(this.sessionCtx, this.settings, titleRegistry);
+    this.tagManager = new TagManager(this.sessionCtx, this.trackService, this.playlistService.getPlaylistRegistry(), logAnalyzerService,
+        this.schedule);
+    this.statisticsService = new StatisticsService(this.sessionCtx, this.settings);
+    this.subscriptionService = new SubscriptionService(this.sessionCtx, titleRegistry);
+
+    this.backupService = new BackupService(sessionCtx, this.playlistService, this.trackService, this.tagManager, this.schedule,
+        this.taskExecutionService, this.settings);
+    this.services.addAll(Arrays.asList(this.taskExecutionService, this.trackService, this.tagManager, this.playlistService, this.schedule,
+        this.statisticsService, this.backupService, this.subscriptionService, this.logAnalyzerService));
+
+    this.loadSettings();
+  }
+
+  private Properties readStationAdminConfig() {
+    Properties props = new Properties();
+    try {
+      InputStream confStream = this.getClass().getClassLoader().getResourceAsStream("stationadmin-default.conf");
+      if (confStream != null) {
+        props.load(confStream);
+      }
+    } catch (IOException e) {
+      // forget it...
+    }
+    try {
+      InputStream confStream = this.getClass().getClassLoader().getResourceAsStream("stationadmin.conf");
+      if (confStream != null) {
+        props.load(confStream);
+      }
+    } catch (IOException e) {
+      // forget it...
+    }
+    return props;
+
+  }
+
+  public void close() {
+    for (Service service : this.services) {
+      service.close();
+    }
+    // this.sessionCtx.getServer().logout();
+  }
+
+  /**
+   * Gets the playlist registry
+   * 
+   * @return playlist registry
+   */
+  @Deprecated
+  public PlaylistRegistry getPlaylistRegistry() {
+    return playlistService.getPlaylistRegistry();
+  }
+
+  public void initBackgroundTasks() {
+    for (Service service : this.services) {
+      service.initBackgroundTasks();
+    }
+  }
+
+  /**
+   * @return the playlistService
+   */
+  public PlaylistService getPlaylistService() {
+    return playlistService;
+  }
+
+  /**
+   * Gets the playlist schedule for the station
+   * 
+   * @return schedule
+   */
+  public Schedule getSchedule() {
+    return schedule;
+  }
+
+  /**
+   * @return the sessionCtx
+   */
+  public SessionCtx getSessionCtx() {
+    return sessionCtx;
+  }
+
+  /**
+   * Gets the configuraiton settings
+   * 
+   * @return settings
+   */
+  public Settings getSettings() {
+    return settings;
+  }
+
+  /**
+   * Gets the name of the station
+   * 
+   * @return
+   */
+  public String getStation() {
+    return sessionCtx.getStation();
+  }
+
+  /**
+   * Gets the station status. This includes data like current listeners, rank,
+   * current title or current playlist
+   * 
+   * @return station status
+   */
+  public StationStatus getStationStatus() {
+    return this.sessionCtx.getStationStatus();
+  }
+
+  /**
+   * @return the statisticsService
+   */
+  public StatisticsService getStatisticsService() {
+    return statisticsService;
+  }
+
+  // /**
+  // * Gets the URL that is used by {@link #isUpToDate()} to check if this
+  // version
+  // * of Station Admin is up to date
+  // *
+  // * @return URL for update check
+  // */
+  // public String getUpdateCheckURL() {
+  // return updateCheckURL;
+  // }
+
+  public Status getStatus() {
+    return this.sessionCtx.getStatus();
+  }
+
+  /**
+   * Gets the title registry
+   * 
+   * @return title registry
+   */
+  @Deprecated
+  public TrackRegistry getTitleRegistry() {
+    return this.trackService.getTrackRegistry();
+  }
+
+  /**
+   * @return the titleService
+   */
+  public TrackService getTrackService() {
+    return trackService;
+  }
+
+  /**
+   * @return the titleTagManager
+   */
+  public TagManager getTagManager() {
+    return tagManager;
+  }
+
+  private XStream getXStream() {
+    XStream xstream = XStreamFactory.newXStream();
+    xstream.alias("playlist", Playlist.class);
+    xstream.alias("entry", Entry.class);
+    xstream.alias("title", RegisteredTrack.class);
+    xstream.alias("settings", Settings.class);
+    xstream.alias("scheduledShow", Schedule.Entry.class);
+    return xstream;
+  }
+
+  /**
+   * Checks if the radio is started
+   * 
+   * @return
+   * @throws IOException
+   */
+  public boolean isRadioStarted() throws IOException {
+    return true; // FIXME this.sessionCtx.getServer().isRadioStarted();
+  }
+
+  public boolean isLiveEnabled() throws IOException {
+    return this.sessionCtx.isLiveEnabled();
+  }
+
+  public boolean isUploadAvailable() throws IOException {
+    return false; // FIXME this.sessionCtx.getServer().isUploadAvailable();
+  }
+
+  /**
+   * Loads all persisted data from disk
+   * 
+   * @throws IOException
+   */
+  public void load() throws IOException {
+    try {
+      for (Service service : this.services) {
+        System.out.println(service.getClass().getName() + ": load");
+        service.load();
+      }
+      this.updateStatus(null);
+    } catch (IOException e) {
+      log.error("error while loading data", e);
+      throw e;
+    }
+
+  }
+
+  private void loadSettings() {
+    try {
+      File settingsFile = new File(this.sessionCtx.getSettingsDirectory() + File.separatorChar + "settings.xml");
+      if (new File(this.sessionCtx.getDataDirectory() + "settings.xml").lastModified() > settingsFile.lastModified()) {
+        settingsFile = new File(this.sessionCtx.getDataDirectory() + "settings.xml");
+      }
+      if (settingsFile.exists()) {
+        XStream xstream = this.getXStream();
+        FileInputStream settingsStream = new FileInputStream(settingsFile);
+        Settings settings = (Settings) xstream.fromXML(settingsStream);
+        settingsStream.close();
+        if (settings.getBackupDirectory() == null) {
+          settings.setBackupDirectory(this.backupService.getBackupDirectory());
+        }
+        this.settings.copyFrom(settings);
+      }
+    } catch (IOException e) {
+      log.error("failed to load settings", e);
+    }
+
+  }
+
+  /**
+   * Persists settings
+   * 
+   * @throws IOException
+   */
+  public void saveSettings() throws IOException {
+    try {
+      log.info("save settings");
+      String dir = this.sessionCtx.getSettingsDirectory();
+      new File(dir).mkdirs();
+      XStream xstream = this.getXStream();
+      FileOutputStream settingsStream = new FileOutputStream(dir + "settings.xml");
+      BufferedOutputStream out = new BufferedOutputStream(settingsStream, 2048);
+      xstream.toXML(this.settings, out);
+      out.flush();
+      settingsStream.flush();
+      settingsStream.close();
+    } catch (IOException e) {
+      log.error("error while saving setting", e);
+      throw e;
+    }
+
+  }
+
+  /**
+   * Starts the radio
+   * 
+   * @return
+   * @throws IOException
+   */
+  public boolean startRadio() throws IOException {
+    return false; // FiXME this.sessionCtx.getServer().startRadio();
+  }
+
+  /**
+   * Synchronizes against the laut.fm server.
+   * <p>
+   * This includes:
+   * <ul>
+   * <li>retrieving the latest playlists
+   * <li>retrieving the latest version of the schedule
+   * <li>persisting this data in the local data directory
+   * </ul>
+   * 
+   * @throws IOException
+   * @throws JSONException
+   */
+  public void synchronize() throws IOException, JSONException {
+    log.info("synchronize");
+    this.sessionCtx.checkSession();
+    try {
+      this.trackService.synchronize();
+      this.playlistService.synchronize();
+      this.tagManager.synchronize();
+      this.schedule.synchronize();
+      this.trackService.getTrackRegistry().removeUnused();
+      this.trackService.saveTracks();
+    } catch (IOException e) {
+      log.error("error during synchronization", e);
+      throw e;
+    } finally {
+      this.updateStatus(null);
+    }
+  }
+
+  void updateStatus(String key, String... parameters) {
+    if (key != null) {
+      this.sessionCtx.setStatus(new Status(key, parameters));
+    } else {
+      this.sessionCtx.setStatus(null);
+    }
+  }
+
+  /**
+   * @return the backupService
+   */
+  public BackupService getBackupService() {
+    return backupService;
+  }
+
+  public SubscriptionService getSubscriptionService() {
+    return subscriptionService;
+  }
+
+  public TaskExecutionService getTaskExecutionService() {
+    return taskExecutionService;
+  }
+
+  public LogAnalyzerService getLogAnalyzerService() {
+    return logAnalyzerService;
+  }
+
+}

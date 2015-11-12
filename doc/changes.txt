@@ -1,0 +1,579 @@
+=====================================================================
+Station Admin für laut.fm - Änderungen
+=====================================================================
+
+[*] = Bugfix
+[+] = Erweiterung
+[#] = Änderung
+
+Version 3.13.2
+--------------
+[*] Gelöschte oder umbenannte Tags führen nicht mehr zu Fehlern beim Generieren von Playlists wenn Playlists noch 
+    auf diese verweisen.
+[*] Die "Live"-Playlist wird nicht mehr zum Shuffeln angeboten.    
+
+Version 3.13.1
+--------------
+
+[*] Fehlerkorrekturen bezüglich dem Löschen von Titeln aus einer Playlist die in dieser Playlist mehrfach vorkommen.
+[*] "Playlists durchsuchen"-Dialog markiert jetzt alle Vorkommen eines Titels in einer Playlist
+
+Version 3.13.0
+--------------
+
+[+] Interner Player für das Reinhören in Titel
+[+] Gruppen für Tags
+[+] Statische Tags als neues Filterkriterium für dynamische Tags
+{+] Playlistgenerator: "gar nicht" als neue Gewichtungsoption
+[+] Option "Wortbeiträge nicht verschieben" funktioniert jetzt auch beim Generieren (vorher: nur beim Shuffeln)
+[#] Überarbeitung des MP3-Explorers - Einschränkung von angezeigten Playlists und Tags
+[#] Schnelleres Laden der Playlists beim Start
+
+Version 3.12.0
+--------------
+
+[+] Erweiterung der dynamischen Tags - Playlists sowie Sendung und Uhrzeit gespielter Titel als neue Filter
+[+] Protokollierung der täglichen Statistik mit Hördauer und Einschaltvorgängen 
+[+] zusätzliche statistische Auswertungen für Hörerzahlen
+[+] Die meisten Analyse-Tabellen lassen sich jetzt über das Kontextmenü ins Clipboard kopieren oder als Excel-Datei abspeichern
+
+
+Version 3.11.1
+--------------
+
+[*] Gespielte Titel liessen sich nicht öffnen wenn die Live-Playlist im Sendeplan enthalten war
+[+] Unterstützung für Live-Playlist im Sendeplan
+[*] Speicherort für Einstellungen jetzt wieder im Station-Directory
+[*] Nach Werbeblock setzte die Titelprotokollierung für 3 Minuten aus
+
+Version 3.11.0
+--------------
+[+] Gespielte Titel: Hörerzahlen und Sendung als optionale Spalten
+[+] Anzeige ungespielter Titel
+[+] Dynamische Tags für kürzlich gespielte Titel
+[+] Tags hervorheben: Optionen "alle Tags" bzw. "alle statistischen Tags"
+[+] Überprüfung ob Session noch gültig ist vor dem Synchronisieren
+[+] Playlistgenerator: Option zum Vermeiden von Wiederholungen gleichnamiger Titel kurz hintereinander
+[#] Einarbeitung von zur Laufzeit geloggten Titeln / Hörerzahlen in Analysefunktion - weniger Remoteabfragen
+[#] Sicherheitsabfrage beim Synchronisieren wenn ungesicherte Playlists existieren
+[#] Stationsname im Fenstertitel
+[#] Spaltenbreiten einiger Tabellen geändert
+
+Version 3.10.0
+--------------
+
+[+] Analyse von gespielten Titeln und Hörerzahlen
+[+] Konfigurationsdatei kann vom eigentlichen Datenverzeichnis getrennt gespeichert werden - dazu stationadmin.conf anpassen
+[#] Aufsplittung in stationadmin-default.conf (wird beim Update überschrieben) und stationadmin.conf (wird nicht überschrieben)
+[*] Fehler in der Berechnung der Ausführungszeit von Aufgaben behoben
+
+Version 3.9.1
+-------------
+[*] Hauptfenster ließ sich unter MacOS nach dem Minimieren nicht mehr maximieren.
+[*] Beim Wiederherstellen von Playlists aus einer Backupdatei werden Einfügedaten von Titeln jetzt auch rekonstruiert.
+[*] Importieren von Tags aus Backup funktioniert wieder
+[+] Backup-Dateien enthalten Aufgaben
+
+Version 3.9.0
+-------------
+[+] Playlists speichern Datum wann ein Track hinzugefügt wurde. Anzeige optional einschaltbar im Playlistviewer.
+[+] Namen für Aufgaben
+[+] Aufgabentypen Shuffeln und Generieren unterstützen Neustart des Radios nach Ausführung
+[+] Filedialoge zum Exportieren und Importieren von Playlists merken sich das letzte Verzeichnis
+[+] Verzeichnis für Station Admin-Dateien kann geändert werden
+
+Version 3.8.0
+-------------
+[+] Automatisches Ausführen von Aufgaben auf Basis eines Zeitplans
+[*] Aufruf von externem MP3-Player angepasst - vorherige Variante funktioniert mit neueren Java-Versionen nicht mehr
+[*] Snippets werden wie im Radioadmin mit 15/10/15 Sekunden von Anfang/Mitte/Ende abgespielt
+[#] Die Dateidialoge im DJ-Mix-Uploadfenster merken sich zumindest zur Laufzeit das letzte Verzeichnis
+
+Version 3.7.0
+-------------
+[+] Automatisches Suchen nach neuen Uploads zu vorgegebenen Kriterien (Artists, Genres, ...)
+[+] Upload von DJ Mixen: Trackliste kann von Mixcloud übernommen werden - einfach Mixcloud URL in die Titel-Tabelle kopieren
+[#] IPv4 als bevorzugter Stack voreingestellt.Java 7 präferiert IPv6, das gibt aber offenbar Probleme mit manchen Firewalls
+
+Version 3.6.2
+-------------
+[#] Anpassungen / Optimierungen im Playlistgenerator - Unterstützung für mehr als 3 Title pro Artist und Playlist
+[+] Maximale Zahl der Titel pro Artist für die Generierung per Playlist einstellbar
+[#] GVL-Regelcheck für Playlists die auf dem laut.fm-Server geshuffelt werden gelockert: Nur noch Mecker wenn die 
+    maximale Zahl an Titeln für einen Artist größer ist als die Spieldauer in Stunden
+
+Version 3.6.1
+-------------
+[#] Wegfall der 3-Artists-Beschränkung beim Speichern von Playlists
+[#] Warnung bei GVL-Regelverletzung beim Speichern von Playlists aus dem Sendeplan
+
+Version 3.6.0
+-------------
+[+] Option um Titelwiederholungen möglichst ganz zu vermeiden beim Generieren meherer Playlists
+[+] Richtlinien für die Playlistgenierung
+[+] Die Verwendung bevorzugter Titel lässt sich beim Generieren über eine Höchstgrenze (in % der Gesamtdauer 
+    der Playlist) limitieren
+[+] Beim Generieren von Playlists wird versucht die vorgegebene Länge besser einzuhalten
+[+] Möglichkeit eine Notiz zu Playlists abzulegen. Diese wird nur im Konfigurationsdialog für Playlists angezeigt.
+
+Version 3.5.0
+-------------
+[*] Neues Dateiformat für die Tags - wesentlich kleinere Dateigröße, schnellere Verarbeitung
+[+] Vorfilterung in "Meine Titel" auf Basis eigener Ansichten
+[+] Ein neuer Toggle-Button in der Toolbar erlaubt die Darstellung der "Playlists" und
+    "Meine Titel"-Tabs in eigenen Fenstern. Titel können dann per Drag & Drop von 
+    "Meine Titel" in eine Playlist gezogen werden.
+[*] Auswahl des Exportformats beim Exportieren von Playlists vorab über Menü anstatt innerhalb 
+    des Filedialogs
+[+] Export von Playlists als Excel-Datei
+[+] Export von "Meine Titel" als Excel-Datei
+[+] "Titeldetails anzeigen" im Kontextmenü von Playlist und "Meine Titel" - öffnet den gleichen 
+    Dialog wie beim Doppelklik
+[+] Titel die für einen DJ-Mix hochgeladen werden können jetzt automatisch mit einem 
+    vorgegebenen Tag versehen werden
+[*] Die gesplitteten DJ-Mix-Titel werden jetzt mit ID3V2-Tags (statt V1) versehen - d. h. 
+    Artist oder Titel werden nicht mehr nach 30 Zeichen abgeschnitten    
+[+] CSV Import/Export der Trackliste für einen DJ-Mix
+[+] Button zum Einfügen einer Tracklist für einen DJ-Mix aus dem Clipboard (Ctrl-V hat 
+    schon vorher funktioniert, war aber nicht so offensichtlich)
+
+
+Version 3.4.2
+-------------
+[*] Anspielen von Titeln funktionierte nach Einführung der neuen laut.fm-Website nicht mehr
+[#] Bereinigung der internen APIs - Entfernen von Funktionen die ohnehin nicht mehr funktionieren 
+[+] Importieren von Playlists aus der Kommandozeile (... -playlistimport <directory>)
+
+Version 3.4.1
+-------------
+[+] Neue Option: Rang in Hörerzahlen-Logfile mit einbeziehen
+[+] Backup importieren: Buttons zum Selektieren / Deselektieren aller Playlists
+[#] Kommentarbox entfernt - wegen neuer Website obsolet
+[#] Aufsplittung der Statistik auf der Übersichtsseite in mehrere Boxen
+[#] Intern: Anpassung an erweiterte Statistik aus dem Radioadmin
+
+
+Version 3.4.0
+-------------
+[*] Login per Return-Taste im Passwortfeld funktionierte nicht wenn das Feld beim Start leer war
+[*] Unsinnige Startzeiten nach dem Verschieben von Einträgen in einer Playlist korrigiert.
+[+] Station Admin merkt sich die aktuelle Fenstergröße und Position und stellt diese nach dem nächsten Start 
+    wieder her
+[+] Exportfunktion in "Meine Titel" - Auswahl kann als CSV oder Textdatei gespeichert werden
+[+] Die für die Playlist festgelegte Farbe kann optional in der Playlistauswahlliste angezeigt werden -
+    dazu auf das Dreieck rechts oben klicken und Option aktivieren
+[+] "In Titel reinhören"-Funktion aus "Meine Titel" und Playlists heraus über Kontextmenü verfügbar
+[+] Wenn der aktuell ausgewählte aus der Trefferliste für die Suche im laut.fm-Pool in der aktuell angezeigten 
+    oder einer anderen Playlist bereits verwendet wird wird der Titel bzw. die Playlist farbig markiert.
+[+] Optionale zusätzliche Spalte im MP3-Explorer für die Dateigröße - muß im Menü in der Ecke rechts oben 
+    aktiviert werden    
+
+Version 3.3.0
+-------------
+
+[+] Analog zu der Möglichkeite alle geänderten Playlists zu speichern können nun auch alle
+    noch nicht gespeicherten Änderungen in allen Playlists verworfen werden.
+[+] Playlists durchsuchen: Titel können jetzt direkt aus der Ergebnisliste heraus aus den 
+    Playlists gelöscht werden.
+[+] Wortbeiträge können jetzt beim Shuffeln auch an vorhergehende anstatt an nachfolgende Titel 
+    gekoppelt werden
+[+] In der Playlistansicht können getaggte Titel hervorgehoben werden
+[+] Die Playlistanzeige kann auf Konflikte (Verletzung der 3-Titel-Regel / GVL-Regeln) reduziert 
+    werden
+
+Version 3.2.1
+-------------
+
+[#] Anpassung an erweiterte Statistik
+[*] Einstellung der Stärke der Gewichtungstags wurde nicht gespeichert
+[*] Titelvorschau funktionierte in einigen Konstellationen (z. B. bei nur einer Playlist
+    für den ganzen Tag) nicht richtig
+
+
+Version 3.2.0
+-------------
+
+[*] Playlistgenerator: Abstand zwischen zwei Titeln eines Artists war unter Umständen wesentlich kürzer
+    als er hätte sein können
+[+] Einstellungen / Playlist-Generierung: Wirkungsstärke der "häufiger"-Tags ist konfigurierbar.
+[+] Playlist-Optionen / Generierung: Einstellbar ob Artistwiederholungen minimiert werden sollen oder
+    nicht (bislang wurden sie immer minimiert) und ob Titelwiederholungen zugelassen sind.
+[+] Generierung mehrerer Playlisten: Einstellbar ob Artist- und Titelwiederholungen unwahrscheinlicher
+    gemacht werden sollen (beide Optionen waren bislang immer aktiviert)
+[*] Bei den Gewichtungen wurde "null" als "Phantom"tag angezeigt wenn zuvor ein anderes Tag angegeben wurde.    
+[#] Upload: Nach dem Upload werden die neuen Titel automatisch in "Meine Titel" übernommen.  
+[+] MP3-Explorer: Neue Kontextmenüs zum Auswählen aller Titel oder unbenutzter Titel
+[*] MP3-Explorer: Scrollbar bei langen Titeln in der Titelinfo-Anzeige - Tags-Box war sonst evt.
+    nicht mehr sichtbar.
+
+Version 3.1.0
+-------------
+
+[+] Kopieren von ausgewählten Titel in andere Playlist über Kontextmenü
+[+] Beim Speichern von Titeln im Upload-Dialog kann man eine Playlist auswählen in die die Titel 
+    eingefügt werden oder die Titel gleichmäßig auf mehrere Playlists verteilen.
+[+] Warnung / Bestätigungsanfrage beim Upload von Titeln die bereits im eigenen Bestand vorhanden sind. 
+[#] Aktueller Upload kann durch Entf-Taste abgebrochen werden.
+[+] DJ-Mix-Upload: Copy & Paste von Titellisten im Format "Startzeit Artist - Titel"
+[+] Nachfrage beim Versuch das Programm zu beenden wenn noch ungesicherte Playlists existieren.
+[*] Fehlermeldung bezüglich fehlender titles.xml beim erstmaligen Start entfernt
+[*] Beim Versuch eine Playlist mit Titeln zu archivieren die noch nicht in "Meine Titel" enthalten waren
+    gab's einen Fehler und die Playlist wurde nicht gespeichert.
+
+Version 3.0.0
+-------------
+
+[+] Playlists archivieren
+[+] Automatisches Erzeugen von Backups
+[+] Option zur partiellen Synchronisation wenn Änderung auf dem Server erkannt wurde
+[+] Mehrfachauswahl von Tags in "Meine Titel"
+[+] Editieren von Titelinformationen (falls für den aktuell angezeigten Titel möglich)
+[+] Optionale zusätzliche Spalten in der Playlistanzeige
+[*] Sendeplan bearbeiten: Zwei aufeinanderfolgende Einträge für die gleiche Playlist werden 
+    zu einem verschmolzen. 
+[*] Sendeplan bearbeiten: Ein komplett leerer Sendeplan (für eine neue Station) wird mit
+    der Basisplaylist für 0 Uhr an jedem Tag initialisiert. Zuvor liefen Playlists in der Anzeige 
+    über fälschlicherweise über Tagesgrenzen hinweg.
+[#] Interne Restrukturierungen im Code
+
+
+Version 2.3.1
+-------------
+[*] Problem mit Zeitstempel bei Synchronisierung behoben - hoffentlich keine unnötigen Aufforderungen
+    zur Synchronisierung mehr
+[*] Dialog mit Titeldetails ist jetzt in der Höhe begrenzt.
+[*] Problem mit Groß-/Kleinschreibung von Stationsnamen in Zusammenhang mit der Verwendung der
+    laut.fm-API behoben - Titelprotokollierung funktionierte z. B. nicht wenn beim Login 
+    Großbuchstaben verwendet wurden
+[+] In die Titeltabelle beim Upload von DJ-Mixen können jetzt komplette Titellisten per Copy & Paste
+    eingefügt werden. 
+
+
+Version 2.3.0
+-------------
+[+] Blättern in der Ergebnisliste bei mehr als 100 Treffern
+[+] Memo-Funktion beim Upload: Bei Abbruch oder Neustart bleiben noch nicht upgeloadedete Songs in der Liste
+[+] Sprachauswahl Deutsch / Englisch im Login-Dialog
+[*] Titelvorschau funktionierte Sonntags unter Umständen nicht
+[*] Workaround für Java 7-Kompatiblität
+[#] Update-Check entfernt
+
+Version 2.2.0
+-------------
+
+[#] Umstellung einer Funktionen auf laut.fm Public API
+[#] Stopp-Funktion auf Wunsch von laut.fm entfernt
+[+] Upload-Funktion für DJ-Mixe
+[+] Drag & Drop von Titeln in eine Playlist aus der Playlistliste
+[#] Exportieren von Playlists: Playlist-Backup ist jetzt Default-Format
+[*] Exportieren von temporären Playlists: Vorgeschlagener Dateiname ist nicht mehr "null"
+[*] Importieren von Playlists: lfm-Dateien (Playlist-Backup) werden vom Filedialog akzeptiert
+
+
+Version 2.1.0
+-------------
+
+[+] MP3-Explorer: Mehrfachauswahl für Verzeichnise möglich
+[+] MP3-Explorer: Option "Unterverzeichnisse einbeziehen"
+[+] MP3-Explorer: Tabelle mit den Files markiert gefundene Titel in fetter Schrift
+[+] MP3-Explorer: Ausgewählte Titel können per Kontextmenü in der Tabelle upgeloaded werden
+[+] Playlists durchsuchen: Dialogbox mit Meldung wenn kein passender Titel gefunden wurde
+[+] Shuffeln: Behandlung von Wortbeiträge konfiguriertbar: "zufällig verteilen", "nicht verschieben"
+    oder "an nachfolgenden Titel koppeln"
+[#] Einstellungen-Dialog: Einstellungen wurden auf mehrere Tabs verteilt
+[+] In den Einstellungen kann ein MP3-Player konfiguriert werden der zum Abspielen von mp3s und Snippets
+    verwendet wird. Ist nichts konfiguriert wird wie bisher versucht den Default-Player zu verwenden.
+[+] In den Einstellungen kann ein Verzeichnis konfiguriert werden das als Standard vorausgewählt ist wenn
+    mp3s zu öffnen sind (z. B. beim Upload oder im MP3-Explorer)     
+[+] Optional: Automatisches Login beim Programmstart - in den Einstellungen aktivierbar / deaktivierbar    
+
+Version 2.0.0
+-------------
+
+[#] Umstrukturiertes Menü
+[+] Die wichtigsten Aktionen aus dem Menü gibt's jetzt auch in einer Toolbar
+[+] MP3-Explorer: Einfaches Abgleichen von MP3s aus dem dem Dateisystem mit Playlists / Tags
+[+] Titel-Aliase: ID3-Tags in der lokalen Datei weichen von den Tags des Titels auf dem Server
+    ab? Man mußte bislang jedes Mal auf's neue nach dem Titel suchen. Jetzt merkt sich Station
+    Admin das.
+{+] Titel / Tags verwalten: Titel-Tags können jetzt endlich auch gelöscht oder umbenannt werden
+[+] Dynamische Tags: Zugehörigkeit auf Basis von Artist, Album oder Länge definieren
+[+] "Meine Titel": Filterung nach Titeln die mit irgendeinem Tag versehen sind - hilfreich um
+ungetaggte Titel zu finden.
+[+] Playlistgenerierung: Anstatt nur ein Tag für bevorzugte Titel können jetzt mehrere Tags mit 
+unterschiedlichen Gewichtungen konfiguriert werden. Das beinhaltet auch dass Titel weniger häufig
+ausgewählt werden können.
+[+] Suche nach Titel: Reinhören in Titel via Doppelklick oder Kontextmenü
+[#] Neue Dokumentation, erreichbar durch's Hilfe-Menü
+
+Version 1.7.0
+-------------
+
+[*] Beim Shuffeln mit der Option das erste Jingle nicht zu verschieben wurde das Jingle unter
+    Umständen doppelt am Anfang der Playlist platziert. 
+[+] Komplettes Backup von Playlists, Sendeplan und Tags "per Knopfdruck" über das Tools-Menü
+[+] Temporäre Playlists 
+
+Version 1.6.1
+-------------
+[*] Beim Synchronisieren werden jetzt auch neue eigene Titel registriert die noch nicht in einer
+    Playlist vorkommen.
+[+] Leiste mit Erklärung der Symbole und Farben in "Meine Titel"
+[#] Anzeige der Details zu einem Titel: Wenn der Titel ein eigener Upload ist und somit alle 
+    Daten vorliegen werden die Detailinformationen nicht mehr wie bislang von laut.fm nachgeladen.
+    Für fremde Uploads ist das nach wie vor notwendig.
+[#] Upload: Korrektur des Farbschemas für Hintergrundfarbe der Checkboxen  
+[#] Importieren von mp3s/m3us: Mögliche Aktionen für nicht gefundene Titel (Suchen, Uploaden) werden
+    jetzt eingeblendet wenn die Maus über dem Eintrag steht und können per Klick erreicht werden.
+[#] Sprung zu aktueller Playlist / Titel aus der Statusleiste benötigt nur noch 1 Klick statt
+    Doppelklick. Bessere optische Hervorhebung durch Farbänderung wenn Maus über dem Label steht.
+[#] Updateprüfung via stationadmin.sourceforge.net statt lautclient.emjoy.net.
+
+Version 1.6.0
+-------------
+
+[*] Jingles werden beim Shuffeln ohne vorgegebenes Jingle-Interval jetzt korrekt und
+    gleichmaessig verteilt
+[#] Ueberzaehlige Jingles (aufgrund des vorgegeben Intervals) werden beim Shuffeln ans
+    Ende gehaengt damit sie nicht verloren gehen.
+[*] Es sollten keine falschen Titel mehr in der Statusbar unten angezeigt werden.
+[*] Station Admin respektiert eine Upload-Sperre durch laut.fm und bietet gegebenfalls die
+    Upload-Funktion nicht mehr an.
+[*] HTML in Kommentartiteln wird jetzt korrekt umgewandelt
+[+] Nach dem Upload können die Felder mehrerer Titel auf einmal bearbeiten werden: Titel aus
+    der Tabelle auswählen und im Kontextmenü "Ausgewählte Titel bearbeiten" aufrufen.
+[+] Für die eigenen Uploads werden jetzt auch Album, Genre, Uploaddatum etc mit abgespeichert
+    und stehen in "Meine Titel" zur Verfügung wenn man die Liste auf eigene Uploads einschränkt.
+[+] Neue Filtermöglichkeiten in "Meine Titel": Neben fremden und eigenen Uploads lassen sich eigene
+    Uploads noch auf private / öffentliche Tracks einschränken.    
+
+Version 1.5.1
+-------------
+
+[*] Genre-Information fehlte beim Upload
+[*] Nicht vorhandenes Jahr wurde beim Upload als "0" eingetragen - führte zu Mecker beim
+    editieren im Radioadmin
+
+Version 1.5.0
+-------------
+
+[*] "Zuletzt gespielte Titel" bekommt bei zu geringer Fensterbreite Scrollbar, "Statistik"-Spalte
+    bleibt sichtbar.
+[*] Shuffeln: Fehler beim Shuffeln von Playlists mit genau einem Jingle am Playlistanfang    
+[*] Playlistgenerierung: Generierung schlug gelegentlich mit IndexOutOfBoundsException fehl
+[*] Titel auf Playlists verteilen: Für Jingles und Wortbeiträge wurde fälschlicherweise die
+    3-Titel-Regel angewendet
+[+] Upload von mp3-Files - siehe "Server"-Menü
+[#] Titelimport: Suchmaske für nicht automatisch gefundene Titel wird jetzt bei Klick auf den
+    Titel genau unter dem Eintrag geöffnet
+[+] Titelimport: Nicht gefundene Titel können direkt upgeloadet werden
+[+] Automatischer Updatecheck beim Programmstart kann über Einstellungen abgeschaltet werden
+[+] Neuer Menüpunkt für manuellen Updatecheck unter "Hilfe"
+
+Version 1.4.1
+-------------
+
+[*] Zusätzliche Fehlerbehandlung beim Laden der Datei "fingerprint" (wird benötigt um zu ermitteln
+    ob eine Synchronisation nötig ist) - Programm startete bei defekter Datei nicht mehr.
+[*] Shuffeln: Wortbeiträge werden wie Musiktitel behandelt und geshuffelt.
+[*] Shuffeln funktioniert jetzt auch auf Playlists mit überwiegenden Wortbeiträgen und Jingles.
+[*] Shufflen: Reihenfolge der Jingles wird geshuffelt.
+[*] Hängender Update-Check blockiert den Programmstart nicht mehr.
+[*] Übersichts-Fenster: Scrollbar für den Sendeplan falls nötig
+[*] Ermittlung des aktuellen Titels kommt mit den Änderungen durch das jüngste laut.fm-Update klar
+[+] Meine Titel: Titel für ausgewähltes Tag können wahlweise angezeigt oder ausgeblendet werden
+
+Version 1.4.0
+-------------
+
+[#] Aus "Verwendete Titel" ist "Meine Titel" geworden - neben den in den Playlists enthaltenen 
+Titeln werden auch nicht verwendete eigene Uploads angezeigt
+[#] Meine Titel: Auswahlbox für die Tags enthält jetzt auch die Optionen "verwendete Titel"
+    und "nicht verwendete Titel"
+[+] Meine Titel: Neuer Filter:  "eigene Uploads" / "fremde Uploads"
+[+] Neuer Menüpunkt: Server / Eigene Uploads neu laden - lädt die Liste eigener Titel komplett neu
+[#] Synchronisieren lädt neue eigene Uploads mit herunter
+[*] Laden der Kommentare verursachte eine Fehlermeldung wenn diese abgeschaltet waren (war jedoch 
+    nicht in der Oberfläche sichtbar)
+
+Version 1.3.0
+-------------
+
+[+] Playlist generieren: Wiederholungen von Titeln und Artists werden wenn möglich vermieden
+    wenn mehrere Playlists "in einem Rutsch" generiert werden
+[+] Playlist generieren: Mehre Tags werden jetzt wahlweise mit und / oder verknüpft
+[+] Playlist generieren: Bevorzugung von Titeln auf Basis eines Tags
+[#] Titelsuche bei laut.fm: Wenn mehr als die angezeigten (100) Treffer vorhanden sind wird
+    bei Änderung der Sortierreihenfolge eine neue Anfrage an den Server geschickt um sicher zu
+    stellen dass die besten Titel angezeigt werden können.
+[+] Titelimport-Fenster: Gefundene Titel könne auf Wunsch ausgeblendet werden - es bleiben dann 
+    nur noch die "Problemtitel" stehen
+[+] Titelimport-Fenster: Suche kann auf Wunsch für noch nicht gefundene Titel wiederholt werden -
+    sinnvoll nach einem Upload
+[+] Titelimport-Fenster: Klick auf nicht gefundene Titel / Titel ohne mp3-Tags öffnen ein Fenster
+    zum Suchen mit eigenem Suchbegriff
+[+] Die Logdatei mit den Titeln enthält auf Wunsch jetzt auch die Hörerzahl 
+
+Version 1.2.2
+-------------
+
+[*] Generieren über Menü "Playlist shuffeln / generieren" shuffelt jetzt auch wirklich
+[*] Fehler beim Wechsel der Tag-Einschränkung in der Playlistauswahl führte unter Umständen
+    kurzzeitig zu Darstellungsfehlern im Playlistfenster.
+
+Version 1.2.1
+-------------
+
+[*] Bearbeiten der Playlisteinstellungen funktioniert wieder.
+
+Version 1.2.0
+-------------
+
+[+] Taggen von Titeln
+[+] Generieren von Playlists auf Basis von getaggten Titeln
+[+] Automatisches Verteilen von Titeln auf Playlists
+[#] Verbesserte Fehlertoleranz bei der Suche nach Titeln 
+
+
+Version 1.1.1
+-------------
+
+[*] Playlistauswahl in "Doppelte Titel finden" funktioniert wieder
+
+Version 1.1.0
+-------------
+
+[*] Drag & Drop aus Ergebnisliste der Suche funktioniert jetzt auch richitg 
+    wenn die Tabelle nach einer Spalte sortiert ist.
+[#] Bei der Suche nach Titeln wird bei sehr kurzen Titelnamen nach Artist anstatt nach Titelnamen
+    gesucht - Suche kann sonst sehr lange dauern.
+[+] Der laut.fm-Server wird nach dem Programmstart und alle 30 Minuten auf Änderungen bei den Playlists
+    überprüft und gegebenenfalls wird eine Synchronisierung angeboten. Kann allerdings nur Längenänderungen
+    von Playlists erkennen!
+[+] Es können Tags (Schlagworte) für Playlists vergeben werden. Nach diesen Tags lassen sich Playlisten
+    filtern.
+[+] Für jede Playlist kann angegeben werden ob sie durch Station Admin geshuffelt werden darf. Ist
+    das nicht erlaubt bietet Station Admin die Playlist auch nicht mehr zum Shuffeln an.    
+[+] Alle geänderten Playlists können jetzt "in einem Rutsch" über Tools / Geänderte Playlists Speichern gespeichert 
+    werden.
+[#] Erweiterte Auswahl für den Zeitraum in Tools / Playlists shuffeln
+
+Version 1.0.0
+-------------
+[*] Titel aus der Suche enthalten jetzt korrekten Typ (Musik, Jingle, ...)
+[+] Exportieren und Importieren von Sendeplänen
+[+] Shuffeln von Playlists der nächsten x Stunden 
+[+] Shuffeln via Kommandozeile
+[+] Optionen für Shuffeln von Playlists: Jingles am Anfang der Playlist können geschützt werden 
+    (z. B. Show Opener) und Jingles - insofern in der Playlist vorhanden - können alle x Minuten eingestreut 
+    werden.
+[+] Zusätzlche Formate für Import / Paste: "Artist - Titel" und CSV
+[+] Zusätzliche Spalte für Playlists und verwendete Titel: Typ (Musik, Jingle...)
+[+] Menü "Hilfe" mit Kurzanleitung und About-Dialog
+[#] Kommentare werden alle 30 Minuten aktualisiert
+     
+
+Version 0.7.2
+-------------
+[*] "Verbrauchertips" werden nicht mehr mehrfach in der Titelliste geloggt
+[+] interne Aufräumroutine für vermüllte Sendepläne (2 Sendungen zur gleichen Zeit) - sollte Darstellungsprobleme
+    reduzieren
+[#] Statusmeldung während des Speicherns von Playlists
+
+
+Version 0.7.1
+-------------
+
+[*] Speichern von Playlists auf dem laut.fm-Server geht wieder
+[*] Jingles werden bei den Regelchecks jetzt ignoriert und produzieren somit keine Fehlermeldungen mehr
+
+
+Version 0.7.0
+-------------
+
+[+] Update-Check: Verfügbarkeit einer neueren Version wird in der Statuszeile unten angezeigt
+[+] Titelvorschau in den Tools
+[+] Bearbeiten des Sendeplans
+[+] Sendeplan als HTML exportieren
+[+] Zusätzliches (internes) Format für Playlistexport - Basis für spätere Import-Funktion
+[+] Doppelklick auf Titel in der Statusbar führt zu diesem Titeln in der aktuellen Playlist.
+[+] Doppelklick auf Playlist in der Statusbar öffnet diese Playlist.
+[+] Auswahl einer Playlist im Titeldialog selektiert diesen Titel in der entsprechenden Playlist.
+    Selbiges gilt für die Playlistenträge in "Doppelte Titel finden".
+[+] Doppelklick auf Playlist im Sendeplan öffnet diese Playlist.
+
+
+Version 0.6.1
+-------------
+
+[*] Löschen und Hinzufügen desselben Titels in einer Playlist brachte die Titeldatenbank in einen 
+    inkonsitenten Zustand - das passiert vor allem beim Shuffeln.
+[*] Unter Linux wurden Dateien z. T. nur unvollständig geschrieben. Ein zusätzlicher Buffer beim 
+    Schreiben sollte dies beheben.
+
+
+Version 0.6
+-----------
+
+[*] Titelakualisierung: Wenn Radio nicht spielt wird nur alle 3 Minuten geprüft (vorher: alle paar Sekunden!)
+[*] Titelsuche: "Eigene Titel"-Flag wird jetzt berücksichtigt
+[*] Anfangszeiten / Gesamtzeit bei bearbeiteten Playlists sollte jetzt stimmig sein
+[*] Kombination aus Playlists speichern und zurücksetzen konnte die interne Titeldatenbank in eine inkonsistenten 
+    Zustand bringen - sollte jetzt nicht mehr passieren.
+[#] Hauptfenster wird früher sichtbar und füllt sich erst danach mit Daten    
+[#] Start/Stop Radio: Menüpunkte sind immer aktiv. Eine sinnvolle Erfolgskontrolle (außer Station hören) 
+    scheint es nicht zu geben. 
+[#] Anzeige von Statusmeldungen während des Synchronisierens
+[+] Login-Dialog: Bei falschem Benutzernamen oder Password wird ein Fehlertext angezeigt.
+[+] Neue Funktion: Playlist shuffeln
+[+] Überprüfung der Playlists gemäß GVL-Regeln
+[+] Popup-Menü im Playlistviewer mit Cut/Copy/Paste/Delete
+    
+
+Version 0.5
+-----------
+
+[#] Titel mit mehr Details (lädt Daten von laut.fm nach)
+[+] Neueste Kommentare in der Übersicht
+[+] Tools / Playlists durchsuchen
+[+] Playlists bearbeiten durch Suchen von Titeln in laut.fm-Datenbank, Löschen, 
+    Cut, Copy & Paste, Drag & Drop innerhalb der Playlisten
+[+] Importieren von mp3- und m3u-Dateien via Drag & Drop oder via Import-Button in der 
+    Playlist-Toolbar
+[+] Alphabetische Sortierung von Playlists nach Artist / Titel
+[+] Radio starten / stoppen (ungetestet!)
+
+
+Version 0.4
+-----------
+
+[*] Sendeplan-Einträge sind jetzt immer sortiert
+[*] Logfile-Einstellungen werden auch ohne editieren des Textfelds übernommen
+[#] Neuer Login-Dialog - kann sich die Logindaten merken
+[+] Hörerstatistik kann optional zum Beginn eines neuen Titels statt alle x Minuten aktualisiert werden
+[+] Anzeige Zahl der Titel + Zahl der verschiedenen Interpreten in der Statusbar der Playlist
+
+
+Version 0.3
+-----------
+
+[#] Wenn das Fenster geschlossen wird wird die Anwendung wieder beendet. Wenn das 
+    Hauptfenster minimiert wird läuft die Anwednung im Tray weiter.
+[+] Anzeige des Sendeplans für den aktuellen Tag in der "Übersicht". 
+[+] Anzeige der aktuellen Playlist in der Statusleiste
+
+
+Version 0.2
+-----------
+
+[*] fehlende Längenangabe für Titel in Playlist wird toleriert und führt
+    nicht mehr zum Abbruch der Synchronisierung
+[*] Sortierung von Einträgen in "Doppelete Titel" nach Playliste und Startzeit
+[+] Nach dem Schließen des Hauptfensters läuft die Anwendung im Tray weiter.
+    Aktuelle Hörerzahl und Titel sind als Tooltip des Tray-Icons sichtbar.
+[+] Neuer Bereich "Übersicht" mit letzten Titeln und Statistiken (wird noch ausgebaut)
+[+] Die Dateinamen für die Logfiles können %day% als Platzhalter beinhalten -
+    das erlaubt das Erzeugen von einer Datei pro Tag
+[+] Filedialog für Logfiles schlägt Dateinamen vor
+
+

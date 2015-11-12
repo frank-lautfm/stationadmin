@@ -1,0 +1,46 @@
+<style>
+  table.schedule {
+    border-spacing:1px;
+    font-family:Arial,Helvectica;
+    font-size:9pt;
+  }
+  td.head { background:#CCCCCC; padding:5px; }
+  td.hour { background:#CCCCCC; padding:5px; }
+#foreach($hour in [0..23])
+#foreach($day in [0..6])
+#set($id = $entries.get($day).get($hour).playlist.id)
+#set($bgColor = $entries.get($day).get($hour).rgbColor)
+#set($fontColor = $entries.get($day).get($hour).rgbFontColor)
+#if($marked.get($id) == false)
+  td.pl$id {background:$bgColor; color:$fontColor; padding:5px; vertical-align:top  } $!marked.set($id)
+#end
+#end
+#end
+</style>
+
+<table class='schedule'>
+<tr>
+<td class="head" width='5%'>Stunde</td>
+#foreach($day in ["Mo","Di","Mi","Do","Fr","Sa","So"])
+  <td class="head" width='13%'>$day</td>
+#end
+</tr>
+
+#foreach($hour in [0..23])
+  <tr>
+  <td class="hour">$hour</td>
+#foreach($day in [0..6])
+#if($entries.get($day).get($hour).isPlaylistStart())
+#set($rowspan = 0)
+#foreach($h in [$hour..23])
+#if($h > $hour && $entries.get($day).get($h).isPlaylistStart())
+#break;
+#end
+#set($rowspan = $rowspan + 1)
+#end
+    <td class="pl$entries.get($day).get($hour).playlist.id" rowspan='$rowspan'>$entries.get($day).get($hour).playlist.name</td>
+#end
+#end
+  </tr>  
+#end
+</table>

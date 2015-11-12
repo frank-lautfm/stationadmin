@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+
+<project name="Station Admin 4" default="dist" basedir=".">
+	<description> Build file for StationAdmin</description>
+
+	<!--
+  ====================================================================
+  The file which contains the user's properties.
+  Settings in that file override settings made here.
+  ====================================================================
+  -->
+	<property file="build.properties" />
+
+	<!--
+  ====================================================================
+    Compiler properties
+  ====================================================================
+  -->
+	<property name="javac.source" value="1.6" />
+	<property name="javac.target" value="1.6" />
+
+	<!--
+  ====================================================================
+    Global properties
+  ====================================================================
+  -->
+	<property name="build.compiler" value="modern" />
+	<property name="debug" value="false" />
+	<property name="optimize" value="true" />
+	<property name="deprecation" value="false" />
+
+	<!--
+  ==============================================================================
+    Directory properties
+  ==============================================================================
+  -->
+	<property name="src.dir.java" value="${basedir}/src/main/java" />
+	<property name="src.dir.resources" value="${basedir}/src/main/resources" />
+	<property name="buildbase" value="${basedir}" />
+	<property name="build.dir" value="${buildbase}/build" />
+	<property name="dist.dir" value="${basedir}/dist" />
+	<property name="dist.dir.app" value="${dist.dir}/application" />
+	<property name="dist.dir.lib" value="${dist.dir}/library" />
+	<property name="dist.dir.src" value="${dist.dir}/src" />
+
+
+	<!--
+  ====================================================================
+    Set the classpath
+  ====================================================================
+  -->
+
+	<path id="classpath">
+		<fileset dir="${basedir}/lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<!--
+  ==============================================================================
+    Target: compile
+  ==============================================================================
+  -->
+	<target name="compile" description="Compiles it">
+		<mkdir dir="${build.dir}" />
+		<javac srcdir="${src.dir.java}" destdir="${build.dir}" debug="${debug}" optimize="${optimize}" deprecation="${deprecation}" excludes="**/Test*.java" source="1.6" target="1.6">
+			<classpath refid="classpath" />
+		</javac>
+
+		<!-- copy resources -->
+		<copy todir="${build.dir}">
+			<fileset dir="${src.dir.resources}" excludes="*.vm stationadmin-default.conf" />
+		</copy>
+
+	</target>
+
+	<target name="dist" depends="compile">
+		<mkdir dir="${dist.dir.app}/" />
+		<mkdir dir="${dist.dir.app}/lib" />
+		<mkdir dir="${dist.dir.app}/conf" />
+
+		<copy todir="${dist.dir.app}/lib/">
+			<fileset dir="${basedir}/lib" />
+		</copy>
+
+		<copy todir="${dist.dir.app}/conf">
+			<fileset dir="${src.dir.resources}">
+				<include name="*.vm"/>
+        <include name="stationadmin-default.conf"/>
+			</fileset>
+		</copy>
+
+		<copy todir="${dist.dir.app}//">
+			<fileset dir="${basedir}/doc" includes="license.txt changes.txt userguide/**" />
+			<fileset dir="${basedir}/src/main/launch4j" includes="*.exe" />
+		</copy>
+
+		<manifestclasspath property="jar.classpath" jarfile="${dist.dir.app}/StationAdmin.jar">
+			<classpath>
+				<pathelement path="${dist.dir.app}/conf/" />
+				<pathelement path="${dist.dir.app}/userguide/" />
+				<fileset dir="${dist.dir.app}/lib/" includes="**/*.jar" />
+			</classpath>
+		</manifestclasspath>
+
+		<jar jarfile="${dist.dir.app}/StationAdmin.jar" compress="true">
+			<fileset dir="${build.dir}">
+				<include name="**/*" />
+			</fileset>
+			<manifest>
+				<attribute name="Main-Class" value="de.emjoy.stationadmin.gui.Start" />
+				<attribute name="Class-Path" value="${jar.classpath}" />
+			</manifest>
+		</jar>
+	</target>
+
+
+	<!--
+	Builds the core library without GUI
+	-->
+	<target name="dist.lib" depends="compile">
+		<mkdir dir="${dist.dir.lib}/" />
+
+		<jar jarfile="${dist.dir.lib}/stationadmin-core.jar" compress="true">
+			<fileset dir="${build.dir}">
+				<exclude name="**/gui/**" />
+				<exclude name="icons/**" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="dist.lib.raw" depends="compile">
+		<mkdir dir="${dist.dir.lib}/" />
+
+		<jar jarfile="${dist.dir.lib}/stationadmin-raw.jar" compress="true">
+			<fileset dir="${build.dir}">
+				<exclude name="**/base/**" />
+				<exclude name="**/gui/**" />
+				<exclude name="icons/**" />
+			</fileset>
+		</jar>
+	</target>
+
+
+	<target name="dist.src" depends="compile">
+		<mkdir dir="${dist.dir.src}/" />
+		<copy todir="${dist.dir.src}//">
+			<fileset dir="${basedir}">
+				<include name="lib/**" />
+				<include name="src/**" />
+				<exclude name="src/local/**" />
+				<include name="doc/*.txt" />
+				<include name="doc/javadoc/**" />
+				<include name="build.xml" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="javadoc">
+		<javadoc access="protected" author="false" classpath="lib/swinglabs/swing-worker-1.2.jar;lib/jid3/JID3.jar;lib/apache/commons-httpclient-3.1-beta1.jar;lib/xstream/xstream-1.2.2.jar;lib/apache/commons-codec-1.3.jar;lib/apache/commons-logging-1.1.jar;lib/jgoodies/binding-2.0.6.jar;lib/swinglabs/swingx-1.0.jar;lib/apache/commons-lang-2.0.jar;lib/apache/commons-io-1.4.jar;lib/apache/log4j-1.2.15.jar;lib/jgoodies/forms-1.2.1.jar" destdir="doc/javadoc" doctitle="Station Admin" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" source="1.6" sourcepath="src/main/java" splitindex="true" use="true" version="true" />
+	</target>
+
+	<target name="clean">
+		<delete includeEmptyDirs="true" failonerror="false">
+			<fileset dir="${build.dir}" />
+			<fileset dir="${dist.dir}" />
+		</delete>
+
+	</target>
+
+
+</project>

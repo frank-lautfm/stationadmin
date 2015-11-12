@@ -1,0 +1,54 @@
+<html>
+	<head>
+		<title>Station Admin: Synchronisieren</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>Synchronisieren</h1>
+
+<p class="subheading">
+Wozu dient das Synchronisieren?
+</p>
+
+<p>
+Station Admin speichert eine Kopien Deiner Playlists und Deines Sendplans sowie eine Liste der von Dir hochgeladen Titel lokal auf der Festplatte ab und arbeitet mit diesen Kopien. Wenn nun außerhalb von Station Admin - z. B. via Radioadmin - Playlists oder der Sendeplan geändert wurde oder neue Titel hochgeladen wurden sind die Kopien in Station Admin veraltet. 
+</p>
+
+<p>
+Beim Synchronisieren werden
+</p>
+<ul>
+<li>alle Playlists neu geladen
+<li>der Sendeplan neu geladen
+<li>eine Liste neuer eigener Uploads heruntergeladen
+</ul>
+<p>
+Beim Synchroniseren werden übrigens keine Daten von Station Admin an laut.fm übertragen. Wenn Du in Station Admin eine Playlist oder den Sendeplan änderst werden diese Änderungen sofort an den laut.fm-Server übertragen.
+</p>
+
+<p class="subheading">
+Wie kann ich eine Synchronisierung durchführen?
+</p>
+<p>
+Du kannst jederzeit eine Synchronisierung durchführen in dem Du im Menü <span class="menuref">Server</span> den Menüpunkt <span class="menuref">Synchronisieren</span> auswählst. Das muß nach dem ersten Start von Station Admin auf jeden Fall einmal gemacht werden.
+</p>
+<p>
+Nach dem Programmstart überprüft Station Admin automatisch alle 30 Minuten ob sich die Playlists auf dem laut.fm-Server geändert haben. Wenn eine Änderung erkannt wurde fragt Station Admin nach ob eine Synchronisierung gewünscht ist und führt diese beim Bestätigen sofort durch.<br>
+Die automatische Erkennung hat allerdings ihre Grenzen: Wenn sich die Länge mindestens einer Playlist geändert hat wird eine Änderung erkannt. Wurden nur Titel vertauscht, die Länge aber unverändert gelassen, wird Station Admin das nicht erkennen.
+</p>
+
+<p class="subheading">
+Wozu dient "Eigene Titel neu laden"?
+</p>
+<p>
+Im Menü <span class="menuref">Server</span> gibt es neben Synchronisieren auch noch <span class="menuref">Eigenen Titel neu laden</span>. Damit wird die Liste der eigenen Titel komplett neue geladen und nicht - wie beim Synchronisieren - nur nach neuen Titeln geschaut. Das kann notwendig sein wenn Titel via Radioadmin oder durch laut.fm geändert oder gelöscht wurden. 
+</p>
+
+<p>
+Die eigenen Titeln komplett neu zu laden ist eine relativ teure Aktion - bei manchen Stations sind das mehrere tausend Titel -, deshalb wird das nicht automatisch im Rahmen der Synchronisierung gemacht. 
+</p>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+<html>
+	<head>
+		<title>Station Admin: Sendeplan als HTML</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>Sendeplan als HTML</h1>
+
+<img src="../images/sendeplan-html.jpg">
+
+<p class="subheading">
+HTML oder CSV erzeugen
+</p>
+
+<p>
+Station Admin kann Dir für Deinen Sendeplan HTML-Code erzeugen den Du in Deine Homepage übernehmen kannst. Auch ein Export im CSV-Format ist möglich. Klicke dazu im Sendeplan-Fenster auf <img src="../icons/html.png">. Es öffnet sich ein Fenster wo Du oben ein Template auswählen kannst. Im Textfeld darunter wird dann der zugehörige Code angezeigt. Diesen kannst Du ins Clipboard kopieren oder in eine Datei speichern.
+</p>
+<p>
+Standardmäßig bietet Station Admin die folgenden Optionen an:
+<ul>
+<li><span class="menuref">CSV</span> exportiert den Sendeplan ins CSV-Format mit einer Spalte pro Tag und einer Zeile pro Stunde
+<li><span class="menuref">Tabelle einfach</span> erzeugt eine einfache Tabelle mit einer Spalte pro Tag und einer Zeile pro Stunde
+<li><span class="menuref">Tabelle farbig</span> ist ähnlich wie <span class="menuref">Tabelle einfach</span>, jedoch werden farbige Tabellenzellen verwendet.
+</ul>
+</p>
+
+<p class="subheading">
+Eigene Formate
+</p>
+<p>
+Du möchtest Kleinigkeiten ändern oder ein eigenes Format für den Export definieren? Kein Problem: Gehe in das Verzeichnis in das Du Station Admin installiert hast und schaue dort ins conf/-Verzeichnis. Dort findest Du diverse .vm-Dateien die die Templates für die Generierung von HTML & Co enthalten. Diese .vm-Dateien enthalten <a href="http://velocity.apache.org/engine/releases/velocity-1.7/user-guide.html" target="_blank">Apache Velocity</a>-Templates.
+</p>
+<p>
+Erstelle eine Kopie der Datei die Du anpassen möchtest - Änderungen in der Originaldatei sind keine gute Idee weil die mit dem nächsten Station Admin-Update verloren gingen - und bearbeite die Datei in einem Texteditor. Die Templates sind im Grunde normale Textdateien mit ein paar Schleifen und Variablen - wer über Grundkenntnisse in der Programmierung verfügt sollte das verstehen können. <br>
+Nach einem Neustart von Station Admin solltest Du die neue Datei als Option beim Exportieren sehen.
+</p>
+<p>
+Die Dateien wie sie mit Station Admin mitgeliefert werden sind zugunsten eines lesbaren HTML-Codes zugegebenmaßen ziemlich grausam formatiert. <a href="Tabelle_einfach.vm.txt">Hier</a> findest Du eine lesbarere und kommentierte Fassung für die einfache HTML-Tabelle.
+</p>
+
+</body>
+</html>

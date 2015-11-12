@@ -1,0 +1,85 @@
+<html>
+	<head>
+		<title>Station Admin: Aufgaben</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>Aufgaben automatisch ausf&uuml;hren</h1>
+<img src="../images/tasks.jpg">
+<p>
+Station Admin kann eine Reihe von Aufgaben automatisch nach einem angegebenen Zeitplan ausf&uuml;hren.
+</p>
+<p>
+Um Aufgaben zu verwalten klicke im <span class="menuref">Extras</span>-Men&uuml; auf <span class="menuref">Aufgaben</span>.
+</p>
+<p>
+ Es &ouml;ffnet sich das Fenster f&uuml;r die Aufgabenverwaltung. Im oberen Teil siehst Du die bereits konfigurierten Aufgaben, im unteren Teil siehst Du die Details zu der gerade ausgew&auml;hlten Aufgaben. <br>
+ In den Details f&uuml;r eine einzelne Aufgabe siehst du die Konfiguration der eigentlichen Aufgabe (links oben), die Konfiguration des Zeitplans (rechts oben) und die Statusmeldungen der letzten Ausf&uuml;hrung (unten).
+</p>
+<p>
+Um eine neue Aufgabe zu erstellen klicke auf <img src="../icons/filenew.png">	und w&auml;hle den Typ der Aufgabe. Konfiguriere dann die Details und den Zeitplan und klicke auf <img src="../icons/save.png">.<br>
+Um eine bestehende Aufgabe zu l&ouml;schen w&auml;hle sie aus und klicke auf <img src="../icons/delete.png">.<br>
+</p>
+<h2>Arten von Aufgaben</h2>
+<p>
+	Es stehen zur Zeit folgende Arten von Aufgaben zur Verfügung:
+</p>
+<h3>Playlists shuffeln</h3>
+<p>
+F&uuml;r das Shuffeln von Playlists gibt es zwei Varianten:
+<ul>
+	<li>Zum angegebenen Zeitpunkt wird eine einzelne Playlist geshuffelt. W&auml;hle dazu die zu shuffelnde Playlist aus.</li>
+	<li>Zum angegebenen Zeitpunkt werden alle Playlists geshuffelt die im Sendeplan f&uuml;r die folgenden Stunden eingetragen werden und f&uuml;r die das Shuffeln durch Station Admin erlaubt ist. Gebe dazu die Zahl der Stunden an.</li>
+</ul>
+</p>
+<h3>Playlists generieren</h3>
+<p>
+F&uuml;r das Generieren von Playlists gibt es zwei Varianten:
+<ul>
+	<li>Zum angegebenen Zeitpunkt wird eine einzelne Playlist generiert. W&auml;hle dazu die zu shuffelnde Playlist aus.</li>
+	<li>Zum angegebenen Zeitpunkt werden alle Playlists generiert die im Sendeplan f&uuml;r die folgenden Stunden eingetragen werden und f&uuml;r die Regeln zum Generieren konfirugiert sind. Gebe dazu die Zahl der Stunden an. Weiterhin kannst Du ausw&auml;hlen ob Artist- oder Titelwiederholungen in aufeinanderfolgenden Playlists minimiert werden sollen oder nicht.</li>
+</ul>
+</p>
+<h3>Sendung in Sendplan eintragen</h3>
+<p>
+	Um eine einzelne Sendung in den Sendeplan einzutragen w&auml;hle bitte Wochentag und Stunde aus an dem die Sendung eingetragen werden soll sowie die Playlist die eingetragen werden soll. Die Sendung l&auml;uft dann bis zum Start der folgenden Sendung. Ist bereits eine Sendung zu dem Zeitpunkt eingetragen wird der alte Eintrag &uuml;berschrieben.
+</p>
+<h3>Sendeplan importieren</h3>
+<p>
+Innerhalb von Station Admin kannst Du den Sendeplan in eine Datei exportieren und zu einem sp&auml;teren Zeitpunkt wieder importieren. Um dies &uuml;ber eine Aufgabe zu erledigen w&auml;hle einfach die zu importierende Sendeplandatei aus.
+</p>
+
+<h2>Zeitplan</h2>
+<p>
+	Es gibt folgende Varianten f&uuml;r einen Zeitplan:
+	<ul>
+		<li>Die Aufgabe wird an bestimmten Wochentagen zu einer angegebenen Uhrzeit ausgef&uuml;hrt - entweder jede Woche oder nur an jedem x-ten Wochentag im Monat (z. B. jeden 3. Montag im Monat).</li>
+		<li>Die Aufgaben wird an einem bestimmten Tag im Monat zu einer angegebenen Uhrzeit ausgef&uuml;hrt.</li>
+		<li>Die Aufgabe wird einmalig zu einem angegebenen Zeitpunkt ausgef&uuml;hrt.</li>
+	</ul>
+	F&uuml;r alle Varianten kann eine Zeitspanne angegeben werden in der die Aufgabe trotzdem noch ausgef&uuml;hrt wird wenn Station Admin zum angegebenen Zeitpunkt nicht lief und sp&auml;ter gestartet wurde (&quot;innerhalb von ... Stunden&quot;). Wurde also z. B. die Ausf&uuml;hrung f&uuml;r Montags um 20 Uhr mit einer Toleranzzeit von 3 Stunden konfiguriert und wird Station Admin erst um 22 Uhr gestartet wird die Aufgabe trotzdem noch ausgef&uuml;hrt.
+</p>
+<h3>Ausf&uuml;hrung an bestimmten Wochentagen</h3>
+<p>
+	W&auml;hle die Wochentage aus an denen die Aufgabe ausgef&uuml;hrt werden soll. Jede Kombination von Wochentagen ist m&ouml;glich.<br>
+	W&auml;hle die Wochen des Monats aus in denen die Aufgabe ausgef&uuml;hrt werden soll. W&auml;hle alle Wochen (1-5) wenn die Aufgabe jede Woche ausgef&uuml;hrt werden soll.<br>
+	W&auml;hle eine Uhrzeit aus zu der die Aufgabe ausgef&uuml;hrt werden soll.
+	
+</p>
+<h3>Ausf&uuml;hrung an bestimmten Tagen des Monats</h3>
+<p>
+	W&auml;hle die Tage aus an denen die Aufgabe ausgef&uuml;hrt werden soll. Jede Kombination von Tagen ist m&ouml;glich. Soll eine Aufgaben immer am letzten Tag des Monats ausgef&uuml;hrt werden w&auml;hle bitte die 31 aus.<br>
+	W&auml;hle eine Uhrzeit aus zu der die Aufgabe ausgef&uuml;hrt werden soll.<br>
+</p>
+<h3>Ausf&uuml;hrung zu einem bestimmten Zeitpunkt</h3>
+<p>
+	Eine Aufgabe kann auch einmalig zu einem bestimmten Zeitpunkt ausgeführt. Gib dazu das Datum und die Uhrzeit an.
+</p>
+<h2>Status</h2>
+<p>
+Im Statusbereich findest Du Informationen dar&uuml;ber wann die Aufgabe das letzte Mal ausgef&uuml;hrt wurde und was dabei gemacht wurden. Wurden z. B. Playlists f&uuml;r mehrere Stunden generiert findest Du f&uuml;r jede generierte Playlist eine Meldung. Ist etwas schief gegangen findest Du eine Fehlermeldung.
+</p>
+</body>
+</html>

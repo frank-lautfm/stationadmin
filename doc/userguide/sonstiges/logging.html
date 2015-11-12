@@ -1,0 +1,35 @@
+<html>
+	<head>
+		<title>Station Admin: Protokollierung</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>H&ouml;rerzahlen und Titel protokollieren</h1>
+<img src="../images/config-logging.jpg">
+<p>
+Station Admin kann die H&ouml;rerzahlen Deiner Station sowie gespielte Titel in Logfiles protokollieren. 
+</p>
+<p>
+Um dies zu konfigurieren klicke im <span class="menuref">Extras</span>-Men&uuml; auf <span class="menuref">Einstellungen</span> und wechsele auf das <span class="menuref">Logging</span>-Tab. 
+</p>
+<p>
+Im Bereich <span class="menuref">Statistik</span> konfigurierst Du die Protokollierung der H&ouml;rerzahlen:
+<ul>
+<li>Unter <span class="menuref">Aktualisierung</span> konfigurierst Du wann die aktuellen H&ouml;rerzahlen vom laut.fm-Server abgerufen werden sollen. Dies kann entweder alle x Minuten passieren oder zum Beginn eines neuen Titels. Beachte dabei bitte dass laut.fm den Wert auch nur alle paar Minuten aktualisiert. Es macht also wenig Sinn die Zahl jede Minute abzurufen.
+<li>Unter <span class="menuref">Logfile</span> gibst Du den Dateinamen f&uuml;r das Logfile an. Du kannst dabei <i>%day%</i> als Platzhalter f&uuml;r das aktuelle Datum verwenden - so erzeugst du eine Datei pro Tag.
+</ul>
+</p>
+<p>
+Im Bereich <span class="menuref">Gespielte Titel</span> konfigurierst Du die Protokollierung der gespielten Titel:
+<ul>
+<li>Unter <span class="menuref">Logfile</span> gibst Du den Dateinamen f&uuml;r das Logfile an. Du kannst dabei <i>%day%</i> als Platzhalter f&uuml;r das aktuelle Datum verwenden - so erzeugst du eine Datei pro Tag.
+<li>Wenn Du <span class="menuref">mit H&ouml;rerzahl</span> aktivierst wird zus&auml;tzlich zum Titel auch noch die aktuelle H&ouml;rerzahl ins Logfile geschrieben. 
+</ul>
+</p>
+<p>
+Für beide Bereiche gilt: Gibst Du kein Logfile an wird auch nichts protokolliert.
+</p>
+</body>
+</html>

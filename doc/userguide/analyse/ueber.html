@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<title>Station Admin: Analyse-Funktionen</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>Analyse von Logfiles</h1>
+
+
+<p class="subheading">
+Quelle
+</p>
+<p>
+	Auf stationadmin.emjoy.net werden zentral alle gespielten Titel aller Stations sowie die H&ouml;rerzahlen im 10-Minuten-Takt mitprotokolliert. Station Admin kann diese Daten für die eigene Station herunterladen und auswerten. Es gibt derzeit keine
+	M&ouml;glichkeit diese Daten direkt von laut.fm zu bekommen.
+</p>
+<p class="subheading">
+Einverst&auml;ndnis zum Download
+</p>
+
+<p>
+	Bevor Station Admin das erste Mal eine Verbindung zu stationadmin.emjoy.net herstellt wirst Du gefragt ob Du damit einverstanden bist - das geschieht wenn Du eine der Funktionen im Analyse-Men&uuml; das erste mal aufrufst. Es werden selbstverst&auml;ndlich nur die absolut notwendigen Daten - Stationsname und das Datum f&uuml;r das die Daten abgefragt werden - &uuml;bertragen.<br> 
+  Du kannst Dein Einverst&auml;ndnis jederzeit unter <span class="menuref">Extras/Einstellungen</span> auf dem Tab <span class="menuref">Sonstiges</span> widerrufen. Die Analyse-Funktionen sind dann nicht mehr nutzbar.<br>
+  Du kannst weiterhin Station Admin erlauben die Daten automatisch beim Programmstart herunterzuladen. Da nur die Daten der letzten 7 Tage vom Server abgerufen werden k&ouml;nnen ist dies sinnvoll um keine L&uuml;cken in den lokal verf&uuml;gbaren Logs enststehen zu lassen. 
+</p>
+<p class="subheading">
+Was genau wird heruntergeladen?
+</p>
+<p>
+	Die Logs f&uuml;r die gespielten Titel und die H&ouml;rerzahlen werden auf stationadmin.emjoy.net tageweise zur Verf&uuml;gung gestellt. Die Daten f&uuml;r die vergangenen Tage werden von Station Admin nur einmal abgerufen und lokal abgespeichert. Die Daten f&uuml;r den aktuellen Tag werden nicht lokal abgelegt da sie ja noch nicht vollst&auml;ndig sind - diese werden jedes Mal wenn Station Admin diese ben&ouml;tigt erneut vom Server abgerufen. 
+</p>
+<p>
+	Die Daten f&uuml;r die H&ouml;rerzahlen beinhalten pro Eintrag die Uhrzeit sowie die Zahl der H&ouml;rer zu diesem Zeitpunkt. Diese Zahlen stammen von http://api.laut.fm/listeners.<br>
+	Die Daten f&uuml;r die gespielten Titel beinhalten pro Titel die Startzeit sowie die interne Titel-ID. Diese Daten wurden &uuml;ber
+	den Abruf von http://api.laut.fm/song_change.stream.json aufgezeichnet.
+</p>
+<p class="subheading">
+Vollständigkeit
+</p>
+<p>
+Das Logging der Daten l&auml;uft normalerweise rund um die Uhr. Eine 100%ige Vollst&auml;ndigkeit kann aber selbstverst&auml;ndlich nicht garantiert werden da auch dieser Server ab und an zu Wartungszwecken mal neu gestartet werden mu&szlig; - oder weil einfach ab und an mal Dinge schief laufen.
+</p>
+
+</body>
+</html>

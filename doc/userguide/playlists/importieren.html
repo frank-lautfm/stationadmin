@@ -1,0 +1,49 @@
+<html>
+	<head>
+		<title>Station Admin: Titel importieren</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>Titel in eine Playlist importieren</h1>
+
+<p>
+Du kannst mp3-Dateien und Playlists (m3u-Dateien) aus Deinem Dateisystem direkt in eine Playlist einf&uuml;gen. Station Admin liest dann die ID3-Tags der Datei(en) aus, sucht die passenden aus dem laut.fm-Titelpool und f&uuml;gt sie in die Playlist ein. 
+</p>
+<p>
+Zum Einf&uuml;gen von Titeln aus mp3/m3u-Files hast Du zwei M&ouml;glichkeiten:
+<ul>
+<li>Klicke auf den <img src="../icons/import.png"> Importieren-Button und w&auml;hle eine Datei
+<li>Ziehe die Datei per Drag &amp; Drop direkt ins Playlistfenster. Dies funktioniert allerdings m&ouml;glicherweise nicht unter allen Betriebssystemen.
+</ul>
+</p>
+<p>
+Sind alle zu importierenden Titel schon bekannt - d. h. es handelt sich um von Dir hochgeladene Titel oder Du verwendest sie schon in anderen Playlists - fügt Station Admin die Titel ohne weitere Nachfrage einfach ein. Kann einer oder können mehrere Titel nicht im lokalen Titelpool gefunden werden öffnet sich eine Dialogbox in der Du den Status aller Titel siehts.
+</p>
+<img src="../images/titelimport.jpg">
+<p>
+Station Admin versucht zun&auml;chst die fehlenden Titel selbst in der laut.fm-Titeldatenbank zu finden. Gelingt das werden die Titel mit einem Haken als gefunden markiert. Wurden mehrere m&ouml;gliche Titel gefunden haben Titel deren Album mit dem der mp3-Datei &uuml;bereinstimmt Vorrang vor anderen. Auch haben eigene Uploads Vorrang vor fremden Uploads. Gibt es immer noch mehrere Kandidaten kannst Du aus einer Auswahlliste einen Titel ausw&auml;hlen.
+</p>
+<p>
+Konnte Station Admin keinen passenden Titel finden bleiben die Titel mit einem roten Kreuz stehen. Du hast jetzt mehrere M&ouml;glichkeiten:
+<ul>
+<li>Du kannst selber nochmal in der Trackdatenbank nach dem Titel suchen. Positioniere die Maus dazu auf dem Titel und klicke dann auf <span class="menuref">Suchen</span>.<br>
+Das macht oft Sinn weil es z. B. kleine Abweichungen zwischen den ID3-Tags in Deiner Datei und dem Eintrag bei laut.fm geben kann. Station Admin findet den Titel selbst aber nur bei genauer &Uuml;bereinstiummung.<br>
+Hast Du einen passenden Titel gefunden merkt sich Station Admin &uuml;brigens die Abweichung als Alias und kann den Titel dann in Zukunft zuordnen.
+<li>Du kannst den Titel uploaden. Positioniere die Maus dazu auf dem Titel und klicke dann auf <span class="menuref">Uploaden</span>. Es &ouml;ffnet sich dann der Dialog f&uuml;r den <a href="../titel/upload.html">Titelupload</a> und der Titel wird hochgeladen.
+</ul>
+</p>
+<p>
+Hast Du Titel hochgeladen solltest Du nach erfolgreichem Upload noch einmal auf <span class="menuref">Suche wiederholen</span> klicken - dann sucht Station Admin erneut nach den fehlenden Titeln und wird sie dieses Mal (hoffentlich) finden.
+</p>
+<p>
+Sind schlie&szlig;lich alle Titel gefunden kannst Du auf <span class="menuref">Hinzuf&uuml;gen</span> klicken um die Titel der Playlist hinzuf&uuml;gen. Sollte es Titel geben die nicht gefunden wurden werden diese einfach ausgelassen.
+</p>
+
+<div class="hint">
+Das Importieren funktioniert auch in einer tempor&auml;ren Playliste - diese kannst Du &uuml;ber das <span class="menuref">Playlists</span>-Men&uuml; &ouml;ffnen. Tempor&auml;re Playlists lassen sich nicht abspeichern. Wenn du aber nur Titel taggen oder auf andere Playlists verteilen m&ouml;chtest (funktioniert &uuml;ber Kontextmen&uuml;) sind tempor&auml;re Playlists hilfreich.
+</div>
+
+</body>
+</html>

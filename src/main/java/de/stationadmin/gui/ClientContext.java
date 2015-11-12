@@ -1,0 +1,118 @@
+package de.stationadmin.gui;
+
+import java.awt.Desktop;
+import java.io.File;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+
+import org.jdesktop.swingx.error.ErrorInfo;
+
+import com.jgoodies.binding.value.ValueHolder;
+
+import de.stationadmin.base.StationAdminClient;
+import de.stationadmin.gui.upload.UploadWindowManager;
+import de.stationadmin.gui.util.AppUtils;
+
+/**
+ * Context object for all classes of the GUI - provides access to relevant
+ * objects and resources
+ * 
+ * @author Frank Korf
+ */
+public class ClientContext {
+
+  private StationAdminClient adminClient;
+  private TextProvider textProvider = new TextProvider();
+  private JumpHandler jumpHandler = new JumpHandler();
+
+  private ValueHolder radioStatus = new ValueHolder(Boolean.FALSE);
+  private UploadWindowManager uploadWindowManager = new UploadWindowManager(this);
+  private Desktop desktop;
+
+  public ClientContext() {
+    if (Desktop.isDesktopSupported()) {
+      this.desktop = Desktop.getDesktop();
+    }
+  }
+
+  public static String getHomeDir() {
+    return System.getProperty("user.home") + File.separatorChar + "laut.fm" + File.separatorChar;
+  }
+
+  /**
+   * Gets a localized string
+   * 
+   * @param key
+   * @param parameters
+   * @return
+   */
+  public String getString(String key, String... parameters) {
+    return this.textProvider.getString(key, parameters);
+  }
+
+  /**
+   * Gets an icon
+   * 
+   * @param name
+   * @return
+   */
+  public ImageIcon getIcon(String name) {
+    return AppUtils.getIcon(name);
+  }
+
+  public StationAdminClient getAdminClient() {
+    return adminClient;
+  }
+
+  public void setAdminClient(StationAdminClient adminClient) {
+    this.adminClient = adminClient;
+  }
+
+  /**
+   * @return the radioStatus
+   */
+  public ValueHolder getRadioStatus() {
+    return radioStatus;
+  }
+
+  public ErrorInfo createErrorInfo(Throwable exception, String msgKey, String... msgParameters) {
+    return this.textProvider.createErrorInfo(exception, msgKey, msgParameters);
+  }
+
+  /**
+   * @return the rootWindow
+   */
+  public JFrame getRootWindow() {
+    return AppUtils.getRootFrame();
+  }
+
+  /**
+   * @return the uploadWindowManager
+   */
+  public UploadWindowManager getUploadWindowManager() {
+    return uploadWindowManager;
+  }
+
+  /**
+   * @return the desktop
+   */
+  public Desktop getDesktop() {
+    return desktop;
+  }
+
+  /**
+   * @return the jumpHandler
+   */
+  public JumpHandler getJumpHandler() {
+    return jumpHandler;
+  }
+
+  /**
+   * @return the textProvider
+   */
+  public TextProvider getTextProvider() {
+    return textProvider;
+  }
+
+}

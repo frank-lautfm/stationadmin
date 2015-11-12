@@ -1,0 +1,117 @@
+<html>
+	<head>
+		<title>Station Admin: Playlist generieren</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>Playlists generieren</h1>
+
+<p class="subheading">
+Was ist das?
+</p>
+<p>
+Station Admin kann Playlists generieren: Das hei&szlig;t eine Playlist wird auf Basis einer Liste von verf&uuml;gbaren Titeln und gem&auml;&szlig; gewisser Regeln neu erstellt. Im Gegensatz zum Shuffeln wo nur Titel umsortiert werden unterscheidet siche nach dem erneuten Generieren die Liste der verwendeten Titel von der vorherigen Version. 
+</p>
+<p>
+Grundlage f&uuml;r das Generieren sind <a href="../titel/taggen.html">getaggte Titel</a>: Titel die mit einem oder mehreren Titeltags versehen sind bilden den Pool aus dem Titel f&uuml;r die Generierung ausgew&auml;hlt werden. Die Titel m&uuml;ssen allerdings in irgendeiner anderen Playlist vorhanden sein - hierzu empfehlen sich spezielle Playlists die als Titelpool fungieren.
+</p>
+<p>
+Der Vorteil des Generierens gegen&uuml;ber dem Shuffeln ist das oft ein wesentlich gr&ouml;&szlig;rerer Titelpool herangezogen werden kann: F&uuml;r einzelne Playlist gilt eine Beschr&auml;nkung auf maximal 3 Titel pro Artist. Beim Generieren kann das umgangen werden in dem man auf Titel aus mehreren Playlists zugreift.
+</p>
+
+<p class="subheading">
+Konfiguration
+</p>
+<img src="../images/playlistgenerierung.jpg">
+<p>
+Öffne die Playlist für die Du die Generierung konfigurieren willst im Playlist-Viewer und öffne durch Klick auf <img src="../icons/configure.png"> die Eigenschaften und wechsele zum <span class="menuref">Generierung</span>-Tab.
+<ul>
+<li><span class="menuref">Tags</span>: W&auml;hle eines oder mehrer Titeltags aus. Titel die mit diesen Tags versehen sind bilden den Pool aus dem Titel ausgw&auml;hlt werden.<br>
+Wenn Du mehrere Tags ausgew&auml;hlt hast kannst Du angeben ob Titel verwendet werden die mit allen diesen Tags versehen sind oder Titel die mit mindestens einem dieser Tags versehen sind.
+<li><span class="menuref">L&auml;nge</span>: Gib hier die L&auml;nge an die die generierte Playlist haben soll. Du solltest Dich hier am Sendeplan orientieren: Schaue nach wie lange die Sendung maximal dauert und w&auml;hle das als L&auml;nge.
+<li><span class="menuref">Wiederholungen</span>: Gib an ob Artistwiederholungen minimiert werden sollen und ob Titelwiederholungen zul&auml;ssig sein sollen. Du kannst Titelwiederholungen auch nur f&uuml;r h&ouml;her gewichtete Titel (siehe n&auml;chster Punkt) zulassen.
+<li><span class="menuref">Bevorzugte Titel</span>: Optional kannst Du noch Regeln angeben um bestimmte Titel bei der Auswahl zu bevorzugen oder die Wahrscheinlichkeit f&uuml;r eine Auswahl zu reduzieren.<br> 
+Auch das funktioniert wieder auf Basis von Titeltags: W&auml;hle ein Tag und eine H&auml;ufigkeitsstufe f&uuml;r Titel die mit diesem Tag versehen sind. Entsprechende Titel k&ouml;nnen h&auml;ufiger oder seltener gespielt werden als &quot;normale&quot; Titel - f&uuml;r beide Varianten stehen jeweils drei Stufen zur Verf&uuml;gung.
+</ul>
+</p>
+<img src="../images/playlistgenerierung-advices.jpg">
+</p>
+<p>
+Optional kannst Du noch zusätzliche Richtlinien angeben die Station Admin bei der Generierung von Playlists beachten soll. Dies geschieht wieder auf Basis von Tags: Eine Richtlinie besteht aus einer Folge von Tags die vorkommen müssen damit die Regel greift und einem Tag dass in diesem Fall möglichst verwendet oder nicht verwendet werden soll.
+</p>
+<p>
+Ein Beispiel: Du möchtest verhindern dass mehr als zwei langsame Titel hintereinander gespielt werden. Du hast alle langsamen Titel mit einem Tag "langsam" versehen. Als Bedingung wählst Du dann 2x das "langsam"-Tag aus (klicke auf die kleine graue Box um die Tagauswahl zu öffnen), in der Auswahlbox wählst Du "verwende nicht" und danach dann erneut "langsam".<br>
+Du kannst auch positive Richtlinien angeben - also z. B. so etwas wie "Wenn 'langsam', 'langsam' dann 'schnell'". 
+</p>
+<p>
+Bitte beachte dass die Einhaltung dieser Richtlinien nicht garantiert werden kann. Grundsätzlich hat die Minimierung von
+Artist- und Titelwiederholungen - insofern aktiviert - Vorrang. Wenn während der Generierung ein ausgewählter Titel eine Richtlinie verletzt werden die nächsten verfügbaren Titel getestet - sollten die nächsten 10 Titel jedoch alle eine Richtlinie verletzen so wird dies hingenommen.
+</p>
+<div class="hint">
+Was passiert wenn f&uuml;r einen Titel mehrere konkurrierende Regeln bez&uuml;glich der H&auml;ufigkeit gelten weil er mit mehreren Tags versehen ist? Sind die Regeln gleichen Typs (h&auml;ufiger bzw. seltener) gilt der maximale Wert (also &quot;sehr viel h&auml;ufiger&quot; wenn eine Regel &quot;viel h&auml;ufiger&quot; und eine andere Regel &quot;sehr viel h&auml;ufiger&quot; sagt. Sind die Regel entgegensetzen Typs schw&auml;cht die schw&auml;chere die st&auml;rkere ab (aus &quot;seltener&quot; und &quot;viel h&auml;ufiger&quot; wird &quot;h&auml;ufiger&quot;) oder die Regeln heben sich auf (&quot;seltener&quot; und &quot;h&auml;ufiger&quot;)
+</div>
+<p>
+<div class="hint">
+Unter <span class="menuref">Extras / Einstellungen / Playlists</span> kannst Du einstellen wie stark bevorzugte Titel bei der Auswahl &uuml;bergewichtet werden sollen: Stellst Du den Regler auf den maximalen Wert werden Titel die mit einem "sehr viel h&auml;ufiger"-Tag versehen sind praktisch immer ausgew&auml;hlt (solange dem keine anderen Regeln wie die 3-Titel-Regel entgegen stehen).
+</div>
+
+<p class="subheading">
+Einzelne Playlist generieren
+</p>
+<p>
+Wenn Du Dir eine Playlist anzeigen läßt kannst Du durch einen Klick auf <img src="../icons/generate.png"> die Playlist neu generieren lassen. Die Playlist wird hierbei nicht automatisch abgespeichert - das mußt Du selbst noch tun.
+</p>
+<p class="subheading">
+Mehrere Playlist generieren
+</p>
+<img src="../images/multishuffle.jpg">
+<p>
+Du kannst auch alle Playlists die gemäß Sendeplan in der nächsten Zeit gespielt werden auf einmal generieren lassen.
+</p>
+<p>
+Wähle im <span class="menuref">Playlists</span>-Menü <span class="menuref">Playlists shuffeln / generieren</span>. Es öffnet sich ein Dialog. Wähle den Zeitraum und die Option <span class="menuref">generieren</span> aus. In der Liste werden alle Playlists angezeigt die in diesem Zeitraum gespielt werden und für Regeln zum Generieren festgelegt wurden. Du kannst hier entweder alle Playlists ausgewählt lassen oder nur einzelne Playlists auswählen. Klicke auf <span class="menuref">Start</span> unm das Generieren zu starten. 
+</p>
+<p>
+Normalerweise werden Artists und Titel die w&auml;hrend der Generierung einer Playlist verwendet wurden bei der Generierung der folgenden Playlists abgewertet, eine erneute Auswahl ist damit weniger wahrscheinlich. M&ouml;chtest Du dass sich Artists und Titel wiederholen k&ouml;nnen entferne bitte die Auswahl bei den Checkboxes vor &quot;Artist-Wiederholungen&quot; bzw. &quot;Titel-Wiederholungen&quot; unten.<br>
+Die Abwertungen f&uuml;r bereits verwendete Artists und Titel schw&auml;chen sich &uuml;ber die Zeit ab - d. h. nach einiger
+Zeit wird es wieder wahrscheinlicher dass ein Titel der in einer fr&uuml;hen Playlist schon einmal verwendet wurde erneut 
+verwendet wird. M&ouml;chtest Du dies nicht w&auml;hle bitte <span class="menuref">m&ouml;glichst ganz ausschlie&szlig;en</span> hinter <span class="menuref">Titelwiederholungen</span> - dann werden verwendete Titel dauerhaft und st&auml;rker abgewertet.
+</p>
+<p>
+Die Playlists die auf diese Weise generieren werden werden automatisch auch abgespeichert.
+</p>
+
+<p class="subheading">
+Umgang mit Jingles
+</p>
+<img src="../images/einstellungen-playlists.jpg">
+<p>
+Es gibt einige Konfigurationsm&ouml;glichkeiten die den Umgang mit Jingles steuern. &Ouml;ffne dazu im <span class="menuref">Extras</span>-Men&uuml; <span class="menuref">Einstellungen</span> und wechsele auf das <span class="menuref">Playlists</span>-Tab.
+</p>
+<p>
+Alle in einer Playlist enthaltenen Jingles werden normalerweise beim Generieren gleichm&auml;&szlig;ig und in zuf&auml;lliger Reihenfolge &uuml;ber die Playlist verteilt. Mit folgenden Optionen l&auml;&szlig;t sich das Verhalten &auml;ndern:
+<ul>
+<li><span class="menuref">Jingle am Anfang der Playlist nicht verschieben</span> sorgt daf&uuml;r dass wenn eine Playlist mit einem Jingle beginnt dieses Jingle beim Shuffeln nicht verschoben wird. Dies ist sinnvoll f&uuml;r Show-Opener. F&uuml;r Playlists die nicht mit einem Jingle beginnen hat diese Option keinerlei Wirkung.
+<li><span class="menuref">alle [ ] Minuten ein Jingle einstreuen</span> sorgt daf&uuml;r dass in festen Zeitabst&auml;nden Jingles eingestreut werden. Grundlage hierf&uuml;r sind alle in der Playlist enthaltenen Jingles. Wurden alle Jingles einmal verwendet so wird als n&auml;chstes das zuerst verwendete Jingle erneut eingestreut - die Jingles wiederholen sich also. Sind in der Playlist so viele Jingles vorhanden dass eigentlich nicht alle Jingles eingestreut werden k&ouml;nnen werden die verbleibenden Jingles ans Ende der Playlist geh&auml;ngt damit sie nicht verloren gehen.
+</ul>
+</p>
+<p>
+Wortbeitr&auml;ge werden beim Generieren immer zuf&auml;llig verteilt. Die f&uuml;r das Shuffeln verf&uuml;gbaren alternativen Optionen funktionieren beim Generieren nicht.
+</p>
+
+
+<p class="subheading">
+Best Practices
+</p>
+<p>
+Alle Titel die für die Generierung zur Verfügung stehen sollen müssen in irgendeiner Playlist vorhanden sein - sonst hätte Station Admin keinen Zugriff auf die Titel. Es empfiehlt sich hierfür spezielle Playlisten anzulegen die als Pool fungieren, selbst aber nie gespielt werden. Man kann hier entweder mit einem Pool pro Sendunge ("Lounge 1", "Lounge 2", "Lounge 3", ...) oder mit einem globalen Pool arbeiten.<br>
+Station Admin unterstützt das Erzeugen von Pools durch die <span class="menuref">Auf Playlists verteilen</span>-Option aus dem Kontextmenü für Titel in einer Playlist oder in <span class="menuref">Meine Titel</span> - die ausgewählten Titel werden dabei so auf die Playlists verteilt dass nicht mehr als 3 Titel eines Artists in einer Playlist vorkommen.
+</p>
+<p>
+Grundlage für das Generieren sind wie gesagt <a href="../titel/taggen.html">getaggte Titel</a>. Man kann z. B. ein Tag pro Sendung anlegen. Außerdem sollte man Tags anlegen für Titel die besonders häufig oder selten gespielt werden sollen ("Neue CDs").
+</p>
+
+</body>
+</html>

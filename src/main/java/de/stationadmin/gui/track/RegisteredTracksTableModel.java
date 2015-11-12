@@ -1,0 +1,284 @@
+/**
+ * 
+ */
+package de.stationadmin.gui.track;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.swing.table.AbstractTableModel;
+
+import com.jgoodies.binding.value.ValueHolder;
+import com.jgoodies.binding.value.ValueModel;
+
+import de.stationadmin.base.tag.TagManager;
+import de.stationadmin.base.tag.TagSet;
+import de.stationadmin.base.track.RegisteredTrack;
+import de.stationadmin.base.track.TrackComparator;
+import de.stationadmin.base.track.TrackRegistry;
+import de.stationadmin.base.util.TimeFormat;
+import de.stationadmin.gui.TextProvider;
+
+/**
+ * @author korf
+ * 
+ */
+public class RegisteredTracksTableModel extends AbstractTableModel {
+  private static final long serialVersionUID = 8386716830573914408L;
+  public static final String USED_TITLES = "#USED#";
+  public static final String UNUSED_TITLES = "#UNUSED#";
+  public static final String TAGGED_TITLES = "#TAGGED#";
+  private TextProvider textProvider;
+  private TrackRegistry titleRegistry;
+  private TagManager tagManager;
+  private List<RegisteredTrack> titles;
+  private ValueModel tagSet;
+  private ValueModel tag;
+  private ValueModel uploadedBy;
+  private ValueModel invertTag;
+  private ValueModel numTitles = new ValueHolder(0);
+  private ValueModel length = new ValueHolder(0);
+
+  public RegisteredTracksTableModel(TextProvider textProvidder, TrackRegistry titleRegistry,
+      TagManager titleTagService, ValueModel tagSet, ValueModel tag, ValueModel invertTag, ValueModel updloadedBy) {
+    super();
+    this.textProvider = textProvidder;
+    this.titleRegistry = titleRegistry;
+    this.tagManager = titleTagService;
+    this.tagSet = tagSet;
+    this.tag = tag;
+    this.invertTag = invertTag;
+    this.uploadedBy = updloadedBy;
+
+    this.titles = this.filterTitles(this.titleRegistry.getAllTracks());
+    Collections.sort(titles, new TrackComparator());
+
+    // update model if number of titles changes
+    PropertyChangeListener changeListener = new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        titles = filterTitles(RegisteredTracksTableModel.this.titleRegistry.getAllTracks());
+        Collections.sort(titles, new TrackComparator());
+        int length = 0;
+        for (RegisteredTrack title : titles) {
+          length += title.getLength();
+        }
+        fireTableDataChanged();
+        numTitles.setValue(titles.size());
+        RegisteredTracksTableModel.this.length.setValue(length);
+      }
+
+    };
+    this.titleRegistry.addPropertyChangeListener("numTracks", changeListener);
+    this.tagSet.addValueChangeListener(changeListener);
+    this.tag.addValueChangeListener(changeListener);
+    this.invertTag.addValueChangeListener(changeListener);
+    this.uploadedBy.addValueChangeListener(changeListener);
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<RegisteredTrack> filterTitles(List<RegisteredTrack> titles) {
+    Set<String> tags = new HashSet<String>();
+    if (this.tag.getValue() instanceof List) {
+      tags.addAll((List<String>) this.tag.getValue());
+    } else {
+      String tag = (String) this.tag.getValue();
+      if (tag != null) {
+        if (tag.equals(TAGGED_TITLES)) {
+          tags.addAll(this.tagManager.getTags());
+        } else {
+          tags.add(tag);
+        }
+      }
+    }
+
+    UploadFilter uploadFilter = (UploadFilter) this.uploadedBy.getValue();
+    List<RegisteredTrack> filtered = new ArrayList<RegisteredTrack>();
+    try {
+      TagSet set = (TagSet)tagSet.getValue();
+      BitSet tagSetBits = null;
+      if(set != null) {
+        tagSetBits = tagManager.getTrackIds(set);
+      }
+      
+      BitSet bits = null;
+      for (String tag : tags) {
+        bits = this.markTitles(tag, bits);
+      }
+      for (RegisteredTrack title : titles) {
+        boolean accepted = (bits == null || bits.get(title.getId())) && (tagSetBits == null || tagSetBits.get(title.getId()));
+        if (((Boolean) invertTag.getValue()).booleanValue()) {
+          accepted = !accepted;
+        }
+        if (accepted && uploadFilter != null && uploadFilter != UploadFilter.ANYBODY) {
+          switch (uploadFilter) {
+            case FOREIGN :
+              accepted = accepted && !title.isOwnTitle();
+              break;
+            case USER_ALL :
+              accepted = accepted && title.isOwnTitle();
+              break;
+            case USER_PRIVATE :
+              accepted = accepted && title.isOwnTitle() && title.isPrivateTrack();
+              break;
+            case USER_PUBLIC :
+              accepted = accepted && title.isOwnTitle() && !title.isPrivateTrack();
+              break;
+          }
+
+        }
+        if (accepted) {
+          filtered.add(title);
+        }
+      }
+
+      return filtered;
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return titles;
+  }
+
+  private BitSet markTitles(String tag, BitSet bits) throws IOException {
+    if (bits == null) {
+      bits = new BitSet();
+    }
+
+    int[] ids = null;
+    if (tag.equals(USED_TITLES)) {
+      for (RegisteredTrack title : this.titleRegistry.getAllTracks()) {
+        if (title.getPlaylistIds().size() > 0) {
+          bits.set(title.getId());
+        }
+      }
+      return bits;
+    } else if (tag.equals(UNUSED_TITLES)) {
+      for (RegisteredTrack title : this.titleRegistry.getAllTracks()) {
+        if (title.getPlaylistIds().size() == 0) {
+          bits.set(title.getId());
+        }
+      }
+      return bits;
+    } else {
+      ids = tagManager.getTrackIds(tag);
+      if (ids != null) {
+        for (int id : ids) {
+          bits.set(id);
+        }
+        return bits;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * @see javax.swing.table.TableModel#getColumnCount()
+   */
+  @Override
+  public int getColumnCount() {
+    return Column.values().length;
+  }
+
+  @Override
+  public String getColumnName(int column) {
+    Column col = Column.values()[column];
+    return this.textProvider.getString("titletable.column." + col.name().toLowerCase());
+  }
+
+  /**
+   * @return the length
+   */
+  protected ValueModel getLength() {
+    return length;
+  }
+
+  public ValueModel getNumTitles() {
+    return this.numTitles;
+  }
+
+  /**
+   * @see javax.swing.table.TableModel#getRowCount()
+   */
+  @Override
+  public int getRowCount() {
+    return this.titles.size();
+  }
+
+  public RegisteredTrack getTitleAt(int row) {
+    if (row > -1 && row < this.titles.size()) {
+      return titles.get(row);
+    } else {
+      return null;
+    }
+  }
+  
+  public List<RegisteredTrack> getTitles() {
+    return new ArrayList<RegisteredTrack>(this.titles);
+  }
+
+  /**
+   * @see javax.swing.table.TableModel#getValueAt(int, int)
+   */
+  @Override
+  public Object getValueAt(int rowIndex, int columnIndex) {
+    RegisteredTrack title = this.titles.get(rowIndex);
+    Column col = Column.values()[columnIndex];
+
+    switch (col) {
+      case ARTIST :
+        return title.getArtist();
+      case TITLE :
+        return title.getTitle();
+      case ALBUM :
+        return title.getAlbum();
+      case GENRE :
+        return title.getGenre();
+      case YEAR :
+        return title.getYear();
+      case LENGTH :
+        return TimeFormat.format(title.getLength(), false);
+      case TYPE :
+        return title.getType();
+      case NUM_PLAYLISTS :
+        return title.getPlaylistStatistics();
+      case UPLOAD :
+        return title.getUploadDate();
+    }
+
+    return null;
+  }
+
+  /**
+   * @param length
+   *          the length to set
+   */
+  protected void setLength(ValueModel length) {
+    this.length = length;
+  }
+
+  /**
+   * @param numTitles
+   *          the numTitles to set
+   */
+  protected void setNumTitles(ValueModel numTitles) {
+    this.numTitles = numTitles;
+  }
+
+  public enum UploadFilter {
+    ANYBODY, FOREIGN, USER_ALL, USER_PUBLIC, USER_PRIVATE,
+  }
+
+  public enum Column {
+    TYPE, ARTIST, TITLE, ALBUM, LENGTH, GENRE, YEAR, UPLOAD, NUM_PLAYLISTS
+  }
+
+}

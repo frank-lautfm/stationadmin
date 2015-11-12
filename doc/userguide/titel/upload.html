@@ -1,0 +1,74 @@
+<html>
+	<head>
+		<title>Station Admin: Upload</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>Upload</h1>
+<img src="../images/upload.jpg">
+<p class="subheading">
+Titel direkt uploaden
+</p>
+<p>
+Du kannst mit Station Admin Titel auf den laut.fm-Server uploaden. Klicke dazu entweder auf den <img src="../icons/upload.png"> Upload-Button in der Toolbar oder wähle aus dem <span class="menuref">Server</span>-Menü <span class="menuref">Upload</span>.
+</p>
+<p>
+Die Funktionalität entspricht in etwa der des Upload-Dialogs im laut.fm-Radioadmin. Du kannst über den <img src="../icons/schedule_import.png"> Öffnen-Button einen Filedialog öffnen und Titel zum Upload auswählen. Alternativ kannst Du mp3-Dateien per Drag & Drop in die Upload-Liste einfügen. 
+</p>
+<p>
+Der Titel der aktuell hochgeladen wird steht oben in der Liste und wird fett dargestellt. Noch nicht hochgeladene Titel stehen weiter unten in der Liste. Du kannst jederzeit einen Titel auswählen und mittels der Entfernen-Tase aus der Liste entfernen. Du kannst auch während der Upload läuft weitere Titel hinzufügen.
+</p>
+<p>
+In der Mitte werden zwei Fortschrittsbalken angezeigt: Der obere zeigt den Fortschritt für den aktuellen Titel an, der untere den Gesamtfortschritt für alle Titel.<br>
+Beachte bitte dass die Titel auf dem laut.fm-Server noch einmal neu codiert werden. Das dauert einen Moment. In dieser Zeit steht der obere Fortschrittsbalken für einige Zeit auf 100%.
+</p>
+<p>
+Nach erfolgreichem Upload werden die Titel unten noch einmal aufgelistet. Du kannst jetzt noch einmal die Titelinformationen bearbeiten bevor Du die Titel mit <span class="menuref">Titel speichern</span> freigibst.<br>
+Du kannst übrigens Informationen für mehrere Titel auf einmal ändern: Wähle die Titel aus und öffne im Kontextmenü <span class="menuref">Ausgewählte Titel bearbeiten</span>. Es öffnet sich ein Dialog mit dem Du einzelne Felder für alle Titel überschreiben kannst.
+</p>
+
+<p class="subheading">
+Upload aus MP3-Explorer oder Titelimport
+</p>
+<p>
+Wenn Du direkt Titel für den Upload auswählst findet keinerlei Vorprüfung statt ob es den Titel bei laut.fm schon gibt oder ob Du gar den Titel selbst schon verwendest. Von daher solltest Du nur dann Titel direkt über den Upload-Dialog hinzufügen wenn Du sicher bist dass es die Titel bei laut.fm noch nicht gibt oder Du sie auf jeden Fall neu uploaden möchtest.
+</p>
+<p>
+Auch über den <a href="mp3explorer.html">MP3-Explorer</a> und über <a href="importieren.html">Titel importieren</a> können Titel hochgeladen werden. Insbesondere <a href="importieren.html">Titel importieren</a> eignet sich wenn für eine Liste von Titeln erst mal überprüft werden soll ob die Titel nicht schon vorhanden sind.
+</p>
+
+<p class="subheading">
+Einen DJ Mix uploaden
+</p>
+<p>
+Station Admin kann eine l&auml;ngere mp3-Datei mit einem DJ Mix an vorgegebenen Stellen splitten, die Teile uploaden und in eine Playlist einf&uuml;gen.
+</p>
+<p>
+Um einen DJ Mix upzuloaden klicke auf den <span class="menuref">DJ Mix</span>-Button im Upload-Fenster. Es &ouml;ffnet sich ein weiteres Fenster in dem Du die Angaben zu Deinem DJ Mix machen kannst.
+</p>
+<img src="../images/upload-djxmix.jpg">
+<p>
+<ul>
+<li>Klicke auf <span class="menuref">...</span> und w&auml;hle die Datei mit dem Mix aus
+<li>W&auml;hle eine Playlist aus in die die Titel eingef&uuml;gt werden sollen. W&auml;hlst Du hier nichts aus, werden die Titel zwar hochgeladen, aber in keine Playlist eingef&uuml;gt.
+<li>Gebe die Titel mit Startzeit, Artist, Titelname und Album (optional) an. Die Startpositionen werden im Format <i>Minuten:Sekunden:Millisekunden</i> angezeigt. Bei der Eingabe kannst Du die Millisekundenangabe weglassen wenn Du's so genau nicht angeben m&ouml;chtest. Der erste Eintrag sollte immer Startposition 0:00:00 haben. 
+<li>Nachdem Du alle Titelinformationen angegeben hast, klicke auf <span class="menuref">Splitten</span>. Dies erzeugt die Teildateien - diese werden im gleichen Verzeichnis gespeichert in dem auch die Originaldatei liegt.
+<li>Klicke auf <span class="menuref">Reinh&ouml;ren</span> wenn Du in die gesplitteten Files vor dem Upload noch einmal hinein h&ouml;ren m&ouml;chtest.
+<li>Ist alles ok, klicke auf <span class="menuref">Uploaden<span>. Die Teildateien werden jetzt &uuml;ber den normalen Upload-Mechanismus an laut.fm &uuml;bertragen.
+<li>Ein paar Besonderheiten gibt's bei <span class="menuref">Titel speichern</span>: Die Titel aus dem Mix werden automatisch als &quot;privat&quot; markiert. &quot;Save&quot; ist ebenfalls immer aktiviert, auch wenn es schon Titel gleichen Namens bei laut.fm gibt.
+<li>Nach dem Klick auf <span class="menuref">Titel speichern</span> f&uuml;hrt Station Admin eine Suche nach diesen Titeln aus und f&uuml;gt sie in die Playlist ein. Je nach Anzahl der Titel kann das ein paar Sekunden oder gar Minuten dauern. 
+</ul>
+</p>
+<p>
+Hinweis: Das automatischen Einf&uuml;gen von Titeln in die Playlist funktioniert nur wenn das Speichern der Titel in einem Rutsch erfolgt und Station Admin nicht zwischendurch neu gestartet wurde!
+</p>
+
+
+
+</p>
+
+
+</body>
+</html>

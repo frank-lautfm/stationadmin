@@ -1,0 +1,109 @@
+<html>
+	<head>
+		<title>Station Admin: Titel taggen</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>Titel taggen</h1>
+
+<p class="subheading">
+Was sind Titel-Tags?
+</p>
+<p>
+Station Admin erlaubt Dir Titel mit beliebigen Tags (Schlagw&ouml;rtern) zu versehen. Diese kannst Du zum Filtern in der <a href="meinetitel.html">Titelansicht</a> verwenden. Vor allem sind Tags aber die Grundlage f&uuml;r die <a href="../playlists/generieren.html">Generierung</a> von Playlists.
+</p>
+<p>
+Es macht z. B. Sinn Tags anzulegen
+<ul>
+<li>die alle Titel beinhalten die f&uuml;r eine bestimmte Sendung verwendet werden k&ouml;nnen
+<li>die beim Generieren h&auml;ufiger (z. B. "Neue CDs") oder weniger h&auml;ufig ("Lange Titel" oder "Alte Kamellen") verwendet werden sollen 
+</ul>
+</p>
+<p>
+Station Admin unterst&uuml;tzt zwei Arten von Tags:
+<ul>
+<li>Statische Tags: Du legst selber ausdr&uuml;cklich fest welche Titel mit diesem Tag versehen werden.
+<li>Dynamische Tags: Du legst nur Suchkriterien wie z. B. Artists oder L&auml;nge fest. Alle passenden Titel sind automatisch mit diesem Tag getaggt.
+</ul>
+</p>
+<p>
+Tags k&ouml;nnen Gruppen zugewiesen werden. Das Men&uuml; zum Taggen von Titeln (siehe unten) enth&auml;lt die Gruppen dann als Untermen&uuml; - das kann
+&uuml;bersichtlicher sein als eine einzige lange Liste. Auch im MP3-Explorer kannst Du die angezeigten Tags nach Gruppen filtern.
+</p>
+<p class="subheading">
+Statische Tags: Titel taggen
+</p>
+<img src="../images/titel-taggen.jpg">
+<p>
+&Uuml;berall wo Du Listen von Titeln siehst - in einer Playlist, in der Titel&uuml;bersicht, in Suchergebnissen - findest Du im Konextmen&uuml; die Optionen <span class="menuref">Taggen</span> und <span class="menuref">Tag l&ouml;schen</span>. W&auml;hlst Du eines dieser Men&uuml;s an &ouml;ffnet sich eine Liste aller existierenden statischen Tags - w&auml;hle einfach das Tag aus mit dem Du die ausgew&auml;hlten Titel taggen willst bzw. das Du von den ausgew&auml;hlten Titeln entfernen m&ouml;chtest.
+<p>
+Im <span class="menuref">Taggen</span>-Men&uuml; gibt es zus&auml;tzlich noch die Option <span class="menuref">Neues Tag</span> mit der Du ganz einfach ein neues statisches Tag anlegen kannst. Alternativ funktioniert dies auch &uuml;ber <span class="menuref">Titel / Tags verwalten</span>
+</p>
+<p class="subheading">
+Tags verwalten
+</p>
+<img src="../images/titel-tagverwaltung.jpg">
+<p>
+&Uuml;ber <span class="menuref">Tags verwalten</span> im <span class="menuref">Titel</span>-Men&uuml; &ouml;ffnest Du einen Dialog in dem Du Deine Tags verwalten kannst.
+</p>
+<p>
+Links siehst Du eine Liste aller Tags. Wenn Du eines ausw&auml;hlst werden die Detailinformationen rechts dargestellt. Bei statischen Tags ist das nur der Name, bei dynamischen Tags die Filterkriterien. Du kannst den Namen bzw. die Filterkriterin &auml;ndern und durck Klick auf den <img src="../icons/save.png"> Speichern-Button speichern. Durch Klicken auf den <img src="../icons/delete.png"> L&ouml;schen-Button kannst Du das Tag l&ouml;schen.
+</p>
+<img src="../images/titel-tag-anlegen.jpg">
+<p>
+Zum Erzeugen eines neuen Tags klickst Du auf <img src="../icons/filenew.png"> und w&auml;hlst den Typ des Tags aus. Danach kannst Du Namen bzw. Filterkiterien eingeben und das Tag speichern.
+</p>
+<p class="subheading">
+Konfiguration eines dynamischen Tags
+</p>
+<p>
+F&uuml;r dynamische Tags kannst Du neben dem Namen und der Gruppe noch einige Kriterien angeben. Diese sind auf verschiedenen Tabs gruppiert.
+</p>
+<p>
+Auf dem <span class="menuref">Metadaten</span>-Tab kannst Du Titel auf Basis von Metadaten wie Artist, Titel oder L&auml;nge ausw&auml;hlen:
+</p>
+<ul>
+<li>Artists: Einen oder mehrer Artists
+<li>Titel: Einen oder mehrere Titel
+<li>Alben: Einen oder mehrere Alben (funktioniert nur bei eigenenen Uploads)
+<li>L&auml;nge: Eine minimale und / oder maximale Titell&auml;nge in Sekunden
+</ul>
+</p>
+<p>
+Bei den Textfeldern kannst Du jeweils mehrere Werte angeben - verwende einen Eintrag pro Zeile. Wildcards (*) sind erlaubt. Um etwa alle CDs der "Space Night"-Reihe zu treffen w&uuml;rdest Du als Album "Space Night*" angeben.
+</p>
+<p>
+Wenn Du mehrere Felder ausf&uuml;llst gelten die Kriterien in Kombination - d. h. z. B. alle Titel auf die Album <i>und</i> L&auml;nge passen.
+</p>
+<p>
+Auf dem <span class="menuref">Gespielte Titel</span>-Tab kannst Du Titel ausw&auml;hlen die innerhalb der letzten Stunden gespielt wurden:
+</p>
+<ul>
+<li>Gespielt innerhalb der letzten ... Stunden: Trage hier die Zahl der Stunden ein die ber&uuml;cksichtigt werden sollen.</li>
+<li>in der Sendung: Hier kannst Du optional die Titel auf eine Sendung einschr&auml;nken in der die Titel gelaufen sein m&uuml;ssen.</li>	
+<li>zwischen ... - ... Uhr: Hier kannst Du optional die Uhrzeit einschr&auml;nken in der die Titel gelaufen sein m&uuml;ssen.</li>
+</ul>
+<p>
+Ohne die Angabe eines Wertes f&uuml;r die letzten x Stunden sind die weiteren Optionen ohne Bedeutung - gespielte Titel sind dann 
+einfach kein Auswahlkriterium.
+</p>
+<p>
+N&uuml;tzlich ist diese Form von Selektion um gezielt k&uuml;rzlich gespielte Titel beim Generieren einer Playlist untergewichten zu k&ouml;nnen.
+Man kann z. B. f&uuml;r ein Tag die Titel der letzten 3 Tage (78 Stunden) in der Sendung X ausw&auml;hlen und dieses Tag dann bei der Generierung mit der
+Gewichtung &quot;sehr viel seltener&quot; versehen um Wiederholungen zu vermeiden.
+</p>
+<p>
+Auf dem <span class="menuref">Playlists</span>-Tab kannst Du eine oder mehrere Playlists ausw&auml;hlen. Alle Titel dieser Playlists werden dann f&uuml;r das
+dynamische Tag ausgew&auml;hlt und mit den anderen Kriterien abgeglichen. Auf diese Weise kannst Du Playlists auf Tags mappen.
+</p>
+<p>
+Auf dem <span class="menuref">Tags</span>-Tab kannst Du eine oder mehrere statische Tags ausw&auml;hlen. Alle mit diesen Tags versehenen Titel werden dann f&uuml;r das
+dynamische Tag ausgew&auml;hlt und mit den anderen Kriterien abgeglichen. 
+</p>
+
+
+
+</body>
+</html>
