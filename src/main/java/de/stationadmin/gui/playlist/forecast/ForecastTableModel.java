@@ -11,7 +11,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import de.stationadmin.base.schedule.PlaylistForecast;
-import de.stationadmin.base.schedule.PlaylistForecast.ScheduledTitle;
+import de.stationadmin.base.schedule.PlaylistForecast.ScheduledTrack;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.ClientContext;
 
@@ -21,10 +21,15 @@ import de.stationadmin.gui.ClientContext;
  * 
  */
 public class ForecastTableModel extends AbstractTableModel {
-  private static final long serialVersionUID = 8500250654473106105L;
+  public enum Column {
+    INDEX, TIME, ARTIST, TITLE, LENGTH, PLAYLIST,
 
+  }
+
+  private static final long serialVersionUID = 8500250654473106105L;
   private ClientContext ctx;
-  private List<PlaylistForecast.ScheduledTitle> titles = new ArrayList<ScheduledTitle>();
+  private List<PlaylistForecast.ScheduledTrack> tracks = new ArrayList<ScheduledTrack>();
+
   private BitSet gvlValidationErrors = new BitSet();
 
   public ForecastTableModel(ClientContext ctx) {
@@ -54,14 +59,14 @@ public class ForecastTableModel extends AbstractTableModel {
    */
   @Override
   public int getRowCount() {
-    return this.titles.size();
+    return this.tracks.size();
   }
 
   /**
    * @return the titles
    */
-  public List<PlaylistForecast.ScheduledTitle> getTitles() {
-    return titles;
+  public List<PlaylistForecast.ScheduledTrack> getTracks() {
+    return tracks;
   }
 
   /**
@@ -69,7 +74,7 @@ public class ForecastTableModel extends AbstractTableModel {
    */
   @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
-    PlaylistForecast.ScheduledTitle schedTitle = this.titles.get(rowIndex);
+    PlaylistForecast.ScheduledTrack schedTitle = this.tracks.get(rowIndex);
     Column col = Column.values()[columnIndex];
     SimpleDateFormat fmt = new SimpleDateFormat("HH:mm");
     switch (col) {
@@ -90,36 +95,31 @@ public class ForecastTableModel extends AbstractTableModel {
     return null;
   }
 
-  /**
-   * @param titles
-   *          the titles to set
-   */
-  public void setTitles(List<PlaylistForecast.ScheduledTitle> titles) {
-    this.titles = titles;
-    this.gvlValidationErrors.clear();
-    this.fireTableDataChanged();
-  }
-
-  public enum Column {
-    INDEX, TIME, ARTIST, TITLE, LENGTH, PLAYLIST,
-
-  }
-  
   public boolean isGVLValidationError(int row) {
     return this.gvlValidationErrors.get(row);
   }
-
+  
   /**
    * @param violations the violations to set
    */
-  public void setGVLViolations(List<PlaylistForecast.ScheduledTitle> violations) {
+  public void setGVLViolations(List<PlaylistForecast.ScheduledTrack> violations) {
     this.gvlValidationErrors.clear();
-    for(ScheduledTitle violation : violations) {
-      int idx = this.titles.indexOf(violation);
+    for(ScheduledTrack violation : violations) {
+      int idx = this.tracks.indexOf(violation);
       if(idx > 0) {
         this.gvlValidationErrors.set(idx);
       }
     }
+  }
+
+  /**
+   * @param titles
+   *          the titles to set
+   */
+  public void setTracks(List<PlaylistForecast.ScheduledTrack> titles) {
+    this.tracks = titles;
+    this.gvlValidationErrors.clear();
+    this.fireTableDataChanged();
   }
 
 }

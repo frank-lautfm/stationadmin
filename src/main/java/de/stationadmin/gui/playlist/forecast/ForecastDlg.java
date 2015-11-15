@@ -33,7 +33,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.schedule.PlaylistForecast;
-import de.stationadmin.base.schedule.PlaylistForecast.ScheduledTitle;
+import de.stationadmin.base.schedule.PlaylistForecast.ScheduledTrack;
 import de.stationadmin.base.schedule.Schedule.Weekday;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.playlist.forecast.ForecastTableModel.Column;
@@ -70,10 +70,12 @@ public class ForecastDlg extends JFrame {
   }
 
   private void init() {
-    this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,100dlu:grow,5dlu"));
+    this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,100dlu:grow,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
     this.getContentPane().add(this.createSettingsPanel(), cc.xy(2, 2));
     this.getContentPane().add(this.createListPanel(), cc.xy(2, 4));
+    JLabel label = new JLabel("Für geshuffelte Playlists kann keine korrekte Vorschau erstellt werden. Diese Playlists sind grau dargestellt.");
+    this.getContentPane().add(label, cc.xy(2, 6));
 
     this.setTitle(ctx.getString("playlistforecast.title"));
     this.setSize(new Dimension(600, 500));
@@ -91,10 +93,10 @@ public class ForecastDlg extends JFrame {
       @Override
       public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-        setText(ctx.getString("weekday." + ((Weekday)value).name().toLowerCase()));
+        setText(ctx.getString("weekday." + ((Weekday) value).name().toLowerCase()));
         return this;
       }
-      
+
     });
     panel.add(weekdayCmb);
 
@@ -112,41 +114,40 @@ public class ForecastDlg extends JFrame {
     panel.add(startHourTf);
     panel.add(new JLabel(":00 " + ctx.getString("playlistforecast.label.for")));
     panel.add(hoursTf);
-    panel.add(new JLabel(" "  + ctx.getString("playlistforecast.label.hours")));
+    panel.add(new JLabel(" " + ctx.getString("playlistforecast.label.hours")));
 
     return panel;
   }
 
   public void updateForecast() {
-    List<ScheduledTitle> titles = this.forecast.generateForecast(settings.getStartTime(), settings.getHours(), settings.getOffset());
-    model.setTitles(titles != null ? titles : new ArrayList<ScheduledTitle>());
-    List<ScheduledTitle> violations = new ArrayList<ScheduledTitle>(); 
-    this.forecast.checkGVLRules(model.getTitles(), violations);
+    List<ScheduledTrack> titles = this.forecast.generateForecast(settings.getStartTime(), settings.getHours(), settings.getOffset());
+    model.setTracks(titles != null ? titles : new ArrayList<ScheduledTrack>());
+    List<ScheduledTrack> violations = new ArrayList<ScheduledTrack>();
+    this.forecast.checkGVLRules(model.getTracks(), violations);
     model.setGVLViolations(violations);
   }
 
   private JComponent createListPanel() {
     final JXTable table = new JXTable(this.model);
-    
+
     table.getColumnModel().getColumn(Column.INDEX.ordinal()).setPreferredWidth(30);
     table.getColumnModel().getColumn(Column.INDEX.ordinal()).setMaxWidth(30);
     table.getColumnModel().getColumn(Column.TIME.ordinal()).setPreferredWidth(70);
     table.getColumnModel().getColumn(Column.TIME.ordinal()).setMaxWidth(70);
     table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(70);
     table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(70);
-    
+
     table.addHighlighter(new AbstractHighlighter() {
 
       @Override
       protected Component doHighlight(Component comp, ComponentAdapter adapter) {
         int row = table.convertRowIndexToModel(adapter.row);
-        if (adapter.column == Column.PLAYLIST.ordinal()) {
-          ScheduledTitle title = model.getTitles().get(row);
-          if (title.getPlaylist().isShuffle()) {
-            comp.setFont(ComponentFactory.italicLabelFont);
-          }
+        ScheduledTrack title = model.getTracks().get(row);
+        if (title.getPlaylist().isShuffle() || title.getPlaylist().getId() == 0) {
+          // comp.setFont(ComponentFactory.italicLabelFont);
+          comp.setForeground(Color.GRAY);
         }
-        if(model.isGVLValidationError(row)) {
+        if (model.isGVLValidationError(row)) {
           comp.setBackground(new Color(255, 230, 230));
         }
         return comp;

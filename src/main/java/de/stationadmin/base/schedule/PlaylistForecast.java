@@ -10,12 +10,13 @@ import java.util.Date;
 import java.util.List;
 
 import de.stationadmin.base.playlist.Playlist;
-import de.stationadmin.base.playlist.PlaylistRegistry;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
+import de.stationadmin.base.playlist.PlaylistRegistry;
 import de.stationadmin.base.playlist.shuffle.PlaylistShuffler;
 import de.stationadmin.base.playlist.validation.GVLValidator;
 import de.stationadmin.base.schedule.Schedule.Weekday;
+import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.Title;
 import de.stationadmin.base.track.TrackRegistry;
 
@@ -34,7 +35,7 @@ public class PlaylistForecast {
     this.schedule = schedule;
   }
 
-  public List<ScheduledTitle> generateForecast(Date start, int hours, int delay) {
+  public List<ScheduledTrack> generateForecast(Date start, int hours, int delay) {
     Weekday weekday = Weekday.getWeekday(start);
     Calendar cal = Calendar.getInstance();
     cal.setTime(start);
@@ -48,7 +49,7 @@ public class PlaylistForecast {
     if (entries.size() < 2) {
       return null; // forecast impossible
     }
-    
+
     int numEntries = entries.size();
 
     // find the entry of the last show before the requested time
@@ -68,15 +69,14 @@ public class PlaylistForecast {
     // jumped too far
     Schedule.Entry next = entries.get(idx % numEntries);
     if ((next.getWeekday() == weekday && next.getHour() > hour) || next.getWeekday() != weekday) {
-      idx--;
+      idx = idx > 0 ? idx - 1 : numEntries - 1;
     }
     // idx is now the index of the current playlist
 
     // check overlap from previous day
     if (idx > 0 && entries.get(idx - 1).getPlaylistId() == entries.get(idx).getPlaylistId()) {
       idx--;
-    }
-    else if (idx == 0 && entries.get(entries.size() - 1).getPlaylistId() == entries.get(idx).getPlaylistId()) {
+    } else if (idx == 0 && entries.get(entries.size() - 1).getPlaylistId() == entries.get(idx).getPlaylistId()) {
       idx = entries.size() - 1;
     }
 
@@ -102,7 +102,7 @@ public class PlaylistForecast {
       }
     }
 
-    ArrayList<ScheduledTitle> titles = new ArrayList<ScheduledTitle>();
+    ArrayList<ScheduledTrack> titles = new ArrayList<ScheduledTrack>();
 
     Context ctx = new Context();
     ctx.setScheduleEntry(currentEntry);
@@ -110,7 +110,7 @@ public class PlaylistForecast {
     int nextIdx = (idx + 1) % entries.size();
 
     while (cal.getTimeInMillis() < endTime.getTime()) {
-      ScheduledTitle t = new ScheduledTitle(cal.getTime(), ctx.playlist, ctx.getNextTitle());
+      ScheduledTrack t = new ScheduledTrack(cal.getTime(), ctx.playlist, ctx.getNextTitle());
       if (cal.getTimeInMillis() / 60000 >= start.getTime() / 60000) {
         titles.add(t);
       }
@@ -132,24 +132,24 @@ public class PlaylistForecast {
 
     return titles;
   }
-  
-  public void checkGVLRules(List<ScheduledTitle> titles, List<ScheduledTitle> violoations) {
+
+  public void checkGVLRules(List<ScheduledTrack> titles, List<ScheduledTrack> violoations) {
     ArrayList<Title> titleList = new ArrayList<Title>();
-    
-    for(ScheduledTitle t : titles) {
+
+    for (ScheduledTrack t : titles) {
       titleList.add(t.getTitle());
     }
-    
+
     Playlist playlist = new Playlist(new TrackRegistry(), PlaylistType.TEMPORARY);
     playlist.setTracks(titleList);
-    
+
     GVLValidator validator = new GVLValidator();
     List<Playlist.Entry> playlistViolations = new ArrayList<Entry>();
-    if(!validator.validate(playlist, playlistViolations)) {
+    if (!validator.validate(playlist, playlistViolations)) {
       List<Playlist.Entry> entries = playlist.getEntries();
-      for(Playlist.Entry entry : playlistViolations) {
+      for (Playlist.Entry entry : playlistViolations) {
         int idx = entries.indexOf(entry);
-        if(idx > -1) {
+        if (idx > -1) {
           violoations.add(titles.get(idx));
         }
       }
@@ -164,7 +164,7 @@ public class PlaylistForecast {
     void setScheduleEntry(Schedule.Entry scheduleEntry) {
       this.playlist = playlistRegistry.getPlaylist(scheduleEntry.getPlaylistId());
       this.playlistEntries = this.playlist.getEntries();
-      if (this.playlist.isShuffle()) {
+      if (this.playlist.isShuffle() || this.playlist.getId() == 0) {
         this.playlistEntries = new PlaylistShuffler().randomize(this.playlistEntries);
       }
       this.plIdx = 0;
@@ -172,6 +172,13 @@ public class PlaylistForecast {
     }
 
     Title getNextTitle() {
+      if (this.playlist.getId() == PlaylistRegistry.LIVE_PLAYLIST_ID || this.playlist.getId() == PlaylistRegistry.LIVE_PLAYLIST_ID2) {
+        DetailedTrack track = new DetailedTrack();
+        track.setArtist("Live");
+        track.setTitle("");
+        track.setLength(60 * 60);
+        return track;
+      }
       Playlist.Entry plEntry = this.playlistEntries.get(this.plIdx);
       Title title = this.playlist.getTrackRegistry().getTrack(plEntry.getTrackId());
       this.plIdx++;
@@ -182,12 +189,12 @@ public class PlaylistForecast {
     }
   }
 
-  public static class ScheduledTitle {
+  public static class ScheduledTrack {
     private Date time;
     private Playlist playlist;
     private Title title;
 
-    public ScheduledTitle(Date time, Playlist playlist, Title title) {
+    public ScheduledTrack(Date time, Playlist playlist, Title title) {
       super();
       this.time = time;
       this.playlist = playlist;
