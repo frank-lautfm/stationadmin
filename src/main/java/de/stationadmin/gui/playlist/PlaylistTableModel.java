@@ -17,6 +17,7 @@ import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.validation.GVLValidator;
 import de.stationadmin.base.track.DetailedTrack;
+import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.Title;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.TextProvider;
@@ -97,6 +98,7 @@ public class PlaylistTableModel extends AbstractTableModel {
     Column col = Column.values()[columnIndex];
     switch (col) {
       case ENTRYNO :
+      case NUMPLAYLISTS :
         return Integer.class;
       default :
         return String.class;
@@ -143,7 +145,7 @@ public class PlaylistTableModel extends AbstractTableModel {
   @Override
   public Object getValueAt(int row, int column) {
     Entry entry = playlist.getEntries().get(row);
-    Title title = entry.getTrack();
+    Title track = entry.getTrack();
     Column col = Column.values()[column];
 
     switch (col) {
@@ -152,19 +154,26 @@ public class PlaylistTableModel extends AbstractTableModel {
       case STARTTIME :
         return TimeFormat.format(entry.getStart(), true);
       case ARTIST :
-        return title != null ? title.getArtist() : "<unknown>";
+        return track != null ? track.getArtist() : "<unknown>";
       case TITLE :
-        return title != null ? title.getTitle() : "<unknown>";
+        return track != null ? track.getTitle() : "<unknown>";
       case LENGTH :
-        return title != null ? TimeFormat.format(title.getLength(), false) : null;
+        return track != null ? TimeFormat.format(track.getLength(), false) : null;
       case GENRE:
-        return title instanceof DetailedTrack ? ((DetailedTrack)title).getGenre() : null;
+        return track instanceof DetailedTrack ? ((DetailedTrack)track).getGenre() : null;
       case YEAR:
-        return title instanceof DetailedTrack ? ((DetailedTrack)title).getYear() : 0;
+        return track instanceof DetailedTrack ? ((DetailedTrack)track).getYear() : 0;
       case TYPE :
-        return title != null ? title.getType() : -1;
+        return track != null ? track.getType() : -1;
       case ADDED :
         return new Date(entry.getTimestamp());
+      case NUMPLAYLISTS:
+        if(track instanceof RegisteredTrack) {
+          return ((RegisteredTrack)track).getPlaylistStatistics().getNumberOfPlaylistsTotal();
+        }
+        else {
+          return 0;
+        }
     }
 
     return null;
@@ -197,7 +206,7 @@ public class PlaylistTableModel extends AbstractTableModel {
   }
 
   public enum Column {
-    ENTRYNO, TYPE, STARTTIME, ARTIST, TITLE, GENRE, YEAR, LENGTH, ADDED
+    ENTRYNO, TYPE, STARTTIME, ARTIST, TITLE, GENRE, YEAR, LENGTH, ADDED, NUMPLAYLISTS
   }
 
   /**

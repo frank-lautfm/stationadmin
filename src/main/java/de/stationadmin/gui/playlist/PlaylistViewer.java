@@ -256,8 +256,8 @@ public class PlaylistViewer extends JPanel {
     final DateTableCellRenderer timeRenderer = new DateTableCellRenderer(new SimpleDateFormat(this.ctx.getTextProvider().getString("timeFormat")));
     this.table = new JXTable(tableModel);
     
-    table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setPreferredWidth(30);
-    table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setMaxWidth(30);
+    table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setPreferredWidth(40);
+    table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setMaxWidth(40);
     table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setPreferredWidth(70);
     table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setMaxWidth(70);
     table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(70);
@@ -268,6 +268,8 @@ public class PlaylistViewer extends JPanel {
     table.getColumnModel().getColumn(Column.YEAR.ordinal()).setMaxWidth(40);
     table.getColumnModel().getColumn(Column.ADDED.ordinal()).setPreferredWidth(110);
     table.getColumnModel().getColumn(Column.ADDED.ordinal()).setMaxWidth(110);
+    table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setMaxWidth(40);
+    table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setPreferredWidth(40);
     table.getColumn(Column.TYPE.ordinal()).setCellRenderer(typeRenderer);
     table.getColumn(Column.ADDED.ordinal()).setCellRenderer(timeRenderer);
 
@@ -279,6 +281,7 @@ public class PlaylistViewer extends JPanel {
     table.getColumnExt(table.convertColumnIndexToView(Column.YEAR.ordinal())).setVisible(false);
     table.getColumnExt(table.convertColumnIndexToView(Column.GENRE.ordinal())).setVisible(false);
     table.getColumnExt(table.convertColumnIndexToView(Column.ADDED.ordinal())).setVisible(false);
+    table.getColumnExt(table.convertColumnIndexToView(Column.NUMPLAYLISTS.ordinal())).setVisible(false);
 
     if (entryHolder != null) {
       entryHolder.addValueChangeListener(new PropertyChangeListener() {

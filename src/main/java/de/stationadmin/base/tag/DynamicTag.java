@@ -112,7 +112,7 @@ public class DynamicTag implements Tag {
     // verflixte Frickelei - ich brauch 'ne Datenbank :-(
     FileInputStream input = new FileInputStream(new File(this.filename));
     @SuppressWarnings("unchecked")
-    List<String> lines = (List<String>) IOUtils.readLines(input);
+    List<String> lines = (List<String>) IOUtils.readLines(input, "UTF-8");
     input.close();
 
     for (String line : lines) {
