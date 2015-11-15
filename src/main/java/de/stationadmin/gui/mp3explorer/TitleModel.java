@@ -66,7 +66,7 @@ public class TitleModel extends Model {
   }
 
   public boolean isOwnTitle() {
-    return this.title instanceof RegisteredTrack ? ((RegisteredTrack) this.title).isOwnTitle() : Boolean.FALSE;
+    return this.title instanceof RegisteredTrack ? ((RegisteredTrack) this.title).isOwnTrack() : Boolean.FALSE;
   }
 
   /**

@@ -57,7 +57,7 @@ public class ExtendedTrackFormat implements TrackExportFormat {
             reg.setUploadDate(uploadDate > 0 ? new Date(uploadDate) : null);
             reg.setPrivateTrack(parts[9].equalsIgnoreCase("true"));
             if (parts.length >= 11) {
-              reg.setOwnTitle(parts[10].equalsIgnoreCase("true"));
+              reg.setOwnTrack(parts[10].equalsIgnoreCase("true"));
             }
           }
         }
@@ -97,7 +97,7 @@ public class ExtendedTrackFormat implements TrackExportFormat {
       buf.append('\t');
       buf.append(Boolean.toString(reg.isPrivateTrack()));
       buf.append('\t');
-      buf.append(Boolean.toString(reg.isOwnTitle()));
+      buf.append(Boolean.toString(reg.isOwnTrack()));
       buf.append('\t');
 
       str = buf.toString();

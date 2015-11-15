@@ -732,7 +732,7 @@ public class MP3Explorer extends JFrame {
           if (selected) {
             playlist.addTrack(model.getTitle());
           } else {
-            playlist.removeTitle(model.getTitle().getId());
+            playlist.removeTrack(model.getTitle().getId());
           }
         }
       }

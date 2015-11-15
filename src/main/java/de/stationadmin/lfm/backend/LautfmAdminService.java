@@ -299,7 +299,7 @@ public class LautfmAdminService {
   public Track getTrack(int stationId, int trackId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/tracks/" + trackId);
     TrackList list = this.getTracks(response);
-    return list.getTracks().length > 0 ? list.getTracks()[0] : null;
+    return list != null && list.getTracks() != null && list.getTracks().length > 0 ? list.getTracks()[0] : null;
   }
 
   public String getTrackPrelistenUrl(int stationId, int trackId) throws IOException {
@@ -334,6 +334,17 @@ public class LautfmAdminService {
 
   public void deletePlaylist(int stationId, int playlistId) throws IOException {
     CloseableHttpResponse response = this.doDelete("/stations/" + stationId + "/playlists/" + playlistId);
+    try {
+      if (response.getStatusLine().getStatusCode() != 204) {
+        throw new AdminServiceException(this.getErrorMessage(response));
+      }
+    } finally {
+      response.close();
+    }
+  }
+
+  public void deleteTrack(int stationId, int trackId) throws IOException {
+    CloseableHttpResponse response = this.doDelete("/stations/" + stationId + "/tracks/" + trackId);
     try {
       if (response.getStatusLine().getStatusCode() != 204) {
         throw new AdminServiceException(this.getErrorMessage(response));

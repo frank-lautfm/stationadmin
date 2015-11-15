@@ -417,7 +417,7 @@ public class PlaylistViewer extends JPanel {
             Title title = tableModel.getTitleAt(row);
             if (title != null) {
               Set<Integer> playlistIds = (title instanceof RegisteredTrack) ? ((RegisteredTrack) title).getPlaylistIds() : new HashSet<Integer>();
-              if (!(title instanceof RegisteredTrack) || !((RegisteredTrack) title).isOwnTitle()) {
+              if (!(title instanceof RegisteredTrack) || !((RegisteredTrack) title).isOwnTrack()) {
                 // load full data from server
                 try {
                   title = ctx.getAdminClient().getTrackService().getTrack(title.getId());

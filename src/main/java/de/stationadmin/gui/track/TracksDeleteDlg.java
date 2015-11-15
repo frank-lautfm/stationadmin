@@ -144,7 +144,7 @@ public class TracksDeleteDlg extends JDialog {
      * @return the deletable
      */
     protected boolean isDeletable() {
-      return this.title.isOwnTitle() && deletable;
+      return this.title.isOwnTrack() && deletable;
     }
 
     /**

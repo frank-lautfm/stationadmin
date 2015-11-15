@@ -439,10 +439,10 @@ public class RegisteredTracksViewer extends JPanel {
         int row = table.convertRowIndexToModel(adapter.row);
         int col = table.convertColumnIndexToModel(adapter.column);
         if (col == 0) {
-          RegisteredTrack title = ((RegisteredTracksTableModel) table.getModel()).getTitleAt(row);
+          RegisteredTrack title = ((RegisteredTracksTableModel) table.getModel()).getTrackAt(row);
           if (title.isPrivateTrack()) {
             component.setBackground(OWN_PRIVATE);
-          } else if (title.isOwnTitle()) {
+          } else if (title.isOwnTrack()) {
             component.setBackground(OWN_PUBLIC);
           }
         }
@@ -458,7 +458,7 @@ public class RegisteredTracksViewer extends JPanel {
     final DistributeTracksAction distributeAction = new DistributeTracksAction(this.ctx);
     final FollowArtistsAction followAction = new FollowArtistsAction(this.ctx);
     final RemoveTracksFromPlaylistsAction removeTitlesAction = new RemoveTracksFromPlaylistsAction(this.ctx);
-    final TracksDeleteAction deleteAction = new TracksDeleteAction(this.textProvider, titleService);
+    final TracksDeleteAction deleteAction = new TracksDeleteAction(ctx);
     final TrackViewAction viewAction = new TrackViewAction(ctx);
     popup.add(new ClipboardAction(ctx, table, this.entryHolder, TransferHandler.getCopyAction()));
     popup.addSeparator();
@@ -497,7 +497,7 @@ public class RegisteredTracksViewer extends JPanel {
           StringBuffer buf = new StringBuffer();
           for (int i = 0; i < rows.length; i++) {
             int row = table.convertRowIndexToModel(rows[i]);
-            Title title = tableModel.getTitleAt(row);
+            Title title = tableModel.getTrackAt(row);
             if (title != null) {
               buf.append(title.toTabSeparatedValues());
               buf.append('\n');
@@ -549,10 +549,10 @@ public class RegisteredTracksViewer extends JPanel {
           int row = table.rowAtPoint(e.getPoint());
           row = table.convertRowIndexToModel(row);
           if (row > -1) {
-            RegisteredTrack title = tableModel.getTitleAt(row);
+            RegisteredTrack title = tableModel.getTrackAt(row);
             if (title != null) {
               DetailedTrack dtitle = title;
-              if (!title.isOwnTitle()) {
+              if (!title.isOwnTrack()) {
                 try {
                   dtitle = ctx.getAdminClient().getTrackService().getTrack(title.getId());
                 } catch (Exception ex) {
@@ -590,20 +590,20 @@ public class RegisteredTracksViewer extends JPanel {
       public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
           int[] rows = table.getSelectedRows();
-          int[] titleIds = new int[rows.length];
+          int[] trackIds = new int[rows.length];
           List<Title> entries = new ArrayList<Title>();
           for (int i = 0; i < rows.length; i++) {
             int row = table.convertRowIndexToModel(rows[i]);
-            entries.add(tableModel.getTitleAt(row));
-            titleIds[i] = tableModel.getTitleAt(row).getId();
+            entries.add(tableModel.getTrackAt(row));
+            trackIds[i] = tableModel.getTrackAt(row).getId();
           }
           entryHolder.setValue(entries);
-          tagMenu.setTitleIds(titleIds);
-          untagMenu.setTitleIds(titleIds);
+          tagMenu.setTitleIds(trackIds);
+          untagMenu.setTitleIds(trackIds);
           copyAction.setTitles(entries);
           distributeAction.setTitles(entries);
           removeTitlesAction.setTitles(entries);
-          deleteAction.setTitleIds(titleIds);
+          deleteAction.setTracks(entries);
           viewAction.setTitles(entries);
           followAction.setTitles(entries);
         }
@@ -738,7 +738,7 @@ public class RegisteredTracksViewer extends JPanel {
 
       if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
         try {
-          exporter.toFile(tableModel.getTitles(), fileChooser.getSelectedFile(), allColumnsDisplayed);
+          exporter.toFile(tableModel.getTracks(), fileChooser.getSelectedFile(), allColumnsDisplayed);
         } catch (Exception ex) {
           JXErrorPane.showDialog(ctx.getRootWindow(), ctx.createErrorInfo(ex, "titles.action.export.msg.failed"));
         }

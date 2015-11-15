@@ -282,19 +282,21 @@ public class TagFile {
       System.arraycopy(newArray, 0, tmp, 0, newIdx);
       newArray = tmp;
     }
-    
-    if(rIdx < removedIds.length) {
+
+    if (rIdx < removedIds.length) {
       int[] tmp = new int[rIdx];
       System.arraycopy(removedIds, 0, tmp, 0, rIdx);
       removedIds = tmp;
-      
+
     }
 
     this.ids = newArray;
 
-    RandomAccessFile file = this.getFile();
-    this.writeIds(file, this.ids);
-    file.close();
+    if (removedIds.length > 0) {
+      RandomAccessFile file = this.getFile();
+      this.writeIds(file, this.ids);
+      file.close();
+    }
 
     return removedIds;
   }

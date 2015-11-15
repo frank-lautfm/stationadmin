@@ -65,8 +65,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
   private Schedule schedule;
   private PlaylistRegistry playlistRegistry;
 
-  public TagManager(SessionCtx ctx, TrackService titleService, PlaylistRegistry playlistRegistry, LogAnalyzerService logAnalyzer,
-      Schedule schedule) {
+  public TagManager(SessionCtx ctx, TrackService titleService, PlaylistRegistry playlistRegistry, LogAnalyzerService logAnalyzer, Schedule schedule) {
     this.trackRegistry = titleService.getTrackRegistry();
     this.trackService = titleService;
     this.logAnalyzer = logAnalyzer;
@@ -112,22 +111,22 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
       tagFile.delete();
       this.staticTags.remove(tag.toLowerCase());
       this.firePropertyChange("tags", new ArrayList<String>(0), this.getTags());
-      
-      for(int id : ids) {
+
+      for (int id : ids) {
         RegisteredTrack track = this.trackRegistry.getTrack(id);
-        if(track != null) {
+        if (track != null) {
           track.tagCountDec();
-          if(track.getTagCnt() == 0 && track.isUnused()) {
+          if (track.getTagCnt() == 0 && track.isUnused()) {
             this.trackRegistry.remove(track.getId());
             tracksDirty = true;
           }
         }
       }
-      
-      if(tracksDirty) {
+
+      if (tracksDirty) {
         this.trackService.saveTracks();
       }
-      
+
     } else if (this.dynamicTags.containsKey(tag.toLowerCase())) {
       DynamicTag dtag = this.dynamicTags.get(tag.toLowerCase());
       dtag.delete();
@@ -438,8 +437,9 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
       if (dtag != null) {
         boolean match = dtag.contains(this.trackRegistry.getTrack(titleId));
         if (match && dtag.getPlayedWithin() > 0) {
-          match = this.getPlaysWithin(dtag.getPlayedWithin(), dtag.getPlayedWithinMinHour(), dtag.getPlayedWithinMaxHour(),
-              dtag.getPlayedWithinPlaylist()).contains(titleId);
+          match = this
+              .getPlaysWithin(dtag.getPlayedWithin(), dtag.getPlayedWithinMinHour(), dtag.getPlayedWithinMaxHour(), dtag.getPlayedWithinPlaylist())
+              .contains(titleId);
         }
         if (match && dtag.getPlaylistIds() != null) {
           match = this.getTracksOfPlaylists(dtag.getPlaylistIds()).contains(titleId);
@@ -591,7 +591,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
         sTag = (StaticTag) tagObj;
       }
       if (sTag != null) {
-        
+
         // unregister tag in all old tags
         for (int id : getTagFile(tag, true).getIds()) {
           RegisteredTrack t = this.trackRegistry.getTrack(id);
@@ -608,8 +608,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
           if (t != null) {
             // register tag
             t.tagCountInc();
-          }
-          else {
+          } else {
             // mark as missing - will be loaded below
             missing[missingIdx++] = id;
           }
@@ -679,15 +678,42 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
         RegisteredTrack t = this.trackRegistry.getTrack(id);
         if (t != null) {
           t.tagCountDec();
-          if(t.getTagCnt() == 0 && t.isUnused()) {
+          if (t.getTagCnt() == 0 && t.isUnused()) {
             this.trackRegistry.remove(t.getId());
             tracksDirtry = true;
           }
         }
       }
     }
-    if(tracksDirtry) {
+    if (tracksDirtry) {
       this.trackService.saveTracks();
+    }
+
+  }
+
+  /**
+   * Should be called if tracks are deleted - removes the tracks from the static tag file
+   * @param trackIds
+   * @throws IOException
+   */
+  public void onTracksDelete(int... trackIds) throws IOException {
+    for (StaticTag tag : this.staticTags.values()) {
+      TagFile file = tag.getTagFile();
+
+      // pre-check if tag really contains any of the track ids to avoid
+      // unnecessary untag operation
+      boolean modify = false;
+      for (int i = 0; i < trackIds.length && !modify; i++) {
+        if (file.isTagged(trackIds[i])) {
+          modify = true;
+        }
+      }
+
+      if (modify) {
+        // at least one id contained - do untag in file
+        file.untag(trackIds);
+      }
+
     }
 
   }

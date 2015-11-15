@@ -19,7 +19,7 @@ public class DetailedTrack extends Title {
   private int year;
   private boolean privateTrack;
   private Date uploadDate;
-  private boolean ownTitle = false;
+  private boolean ownTrack = false;
 
   public DetailedTrack() {
     super();
@@ -34,7 +34,7 @@ public class DetailedTrack extends Title {
       this.year = t.getYear();
       this.privateTrack = t.isPrivateTrack();
       this.uploadDate = t.getUploadDate();
-      this.ownTitle = t.isOwnTitle();
+      this.ownTrack = t.isOwnTrack();
     }
   }
 
@@ -50,7 +50,7 @@ public class DetailedTrack extends Title {
     this.year = track.getReleaseYear();
     this.privateTrack = track.isPrivateTrack();
     this.uploadDate = track.getCreatedAt(); 
-    this.ownTitle = track.isOwn();
+    this.ownTrack = track.isOwn();
   }
 
 
@@ -63,7 +63,7 @@ public class DetailedTrack extends Title {
     track.setGenre(this.getGenre());
     track.setPrivateTrack(this.isPrivateTrack());
     track.setReleaseYear(this.getYear());
-    track.setOwn(this.ownTitle);
+    track.setOwn(this.ownTrack);
     switch (this.getType()) {
     case TYPE_JINGLE:
       track.setType("jingle");
@@ -162,12 +162,12 @@ public class DetailedTrack extends Title {
     this.uploadDate = uploadDate;
   }
 
-  public boolean isOwnTitle() {
-    return ownTitle;
+  public boolean isOwnTrack() {
+    return ownTrack;
   }
 
-  public void setOwnTitle(boolean ownTitle) {
-    this.ownTitle = ownTitle;
+  public void setOwnTrack(boolean ownTitle) {
+    this.ownTrack = ownTitle;
   }
 
 }

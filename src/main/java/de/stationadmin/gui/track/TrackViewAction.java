@@ -31,7 +31,7 @@ public class TrackViewAction extends AbstractAction {
       Title title = titles.get(0);
       
       DetailedTrack dtitle = title instanceof DetailedTrack ? (DetailedTrack)title : null;
-      if (!(dtitle instanceof RegisteredTrack) || !((RegisteredTrack)title).isOwnTitle()) {
+      if (!(dtitle instanceof RegisteredTrack) || !((RegisteredTrack)title).isOwnTrack()) {
         try {
           dtitle = ctx.getAdminClient().getTrackService().getTrack(title.getId());
         } catch (Exception ex) {

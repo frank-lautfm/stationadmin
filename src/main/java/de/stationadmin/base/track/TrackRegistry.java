@@ -41,7 +41,7 @@ public class TrackRegistry extends AbstractBean {
     int oldNum = this.tracks.size();
     Set<Integer> remove = new HashSet<Integer>();
     for (RegisteredTrack title : this.tracks.values()) {
-      if (title.getTagCnt() == 0 && title.getPlaylistIds().size() == 0 && !title.isOwnTitle()) {
+      if (title.getTagCnt() == 0 && title.getPlaylistIds().size() == 0 && !title.isOwnTrack()) {
         remove.add(title.getId());
       }
     }
@@ -108,7 +108,7 @@ public class TrackRegistry extends AbstractBean {
   public void registerOwnTrack(DetailedTrack title) {
     if (!this.tracks.containsKey(title.getId())) {
       RegisteredTrack regTitle = this.assignSharedStrings(new RegisteredTrack(title));
-      regTitle.setOwnTitle(true);
+      regTitle.setOwnTrack(true);
       int oldNum = this.tracks.size();
       this.tracks.put(title.getId(), regTitle);
       if (!this.blockChangsEvts) {
@@ -116,7 +116,7 @@ public class TrackRegistry extends AbstractBean {
       }
     } else {
       RegisteredTrack regTitle = this.tracks.get(title.getId());
-      regTitle.setOwnTitle(true);
+      regTitle.setOwnTrack(true);
       regTitle.setUploadDate(title.getUploadDate());
       regTitle.setArtist(title.getArtist());
       regTitle.setTitle(title.getTitle());
@@ -141,7 +141,7 @@ public class TrackRegistry extends AbstractBean {
   }
 
   public boolean isRegisteredAsOwnTrack(int titleId) {
-    return this.tracks.containsKey(titleId) && this.tracks.get(titleId).isOwnTitle();
+    return this.tracks.containsKey(titleId) && this.tracks.get(titleId).isOwnTrack();
   }
 
   /**
@@ -151,8 +151,8 @@ public class TrackRegistry extends AbstractBean {
   public void resetOwnTitles() {
     Collection<RegisteredTrack> titles = new ArrayList<RegisteredTrack>(this.tracks.values());
     for (RegisteredTrack title : titles) {
-      if (title.isOwnTitle()) {
-        title.setOwnTitle(false);
+      if (title.isOwnTrack()) {
+        title.setOwnTrack(false);
         if (title.isUnused()) {
           this.tracks.remove(title.getId());
         }

@@ -55,7 +55,7 @@ public class RemoveTracksFromPlaylistsAction extends AbstractAction {
       for(int playlistId : regTitle.getPlaylistIds()) {
         Playlist playlist =  this.ctx.getAdminClient().getPlaylistRegistry().getPlaylist(playlistId);
         if(playlist != null) {
-          playlist.removeTitle(regTitle.getId());
+          playlist.removeTrack(regTitle.getId());
         }
       }
     }

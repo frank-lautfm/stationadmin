@@ -51,7 +51,7 @@ public class TestExtendedTitleFormat {
     t.setType(Title.TYPE_MUSIC);
     t.setAlbum("Foobar");
     t.setGenre("FooMucke");
-    t.setOwnTitle(true);
+    t.setOwnTrack(true);
     t.setPrivateTrack(false);
     t.setYear(2011);
     t.setUploadDate(new Date(System.currentTimeMillis()));
@@ -92,7 +92,7 @@ public class TestExtendedTitleFormat {
     Assert.assertEquals("genre", t.getGenre(), t2.getGenre());
     Assert.assertEquals("year", t.getYear(), t2.getYear());
     Assert.assertEquals("upload date", t.getUploadDate(), t2.getUploadDate());
-    Assert.assertEquals("own", t.isOwnTitle(), t2.isOwnTitle());
+    Assert.assertEquals("own", t.isOwnTrack(), t2.isOwnTrack());
     Assert.assertEquals("private", t.isPrivateTrack(), t2.isPrivateTrack());
 
   }

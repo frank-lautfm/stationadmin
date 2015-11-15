@@ -79,24 +79,31 @@ public class TrackService implements Service {
     }
   }
 
-  public boolean deleteTrack(int titleId) throws IOException {
-    // FIXME
-    // if (this.ctx.getServer().deleteTitle(titleId)) {
-    // this.titleRegistry.removeTitle(titleId);
-    // this.saveOwnTitles();
-    // return true;
-    // }
-    return false;
+  public boolean deleteTrack(int trackId) throws IOException {
+    RegisteredTrack track = this.trackRegistry.getTrack(trackId);
+    if (track != null && track.isOwnTrack()) {
+      this.ctx.getServer().deleteTrack(ctx.getStationId(), trackId);
+      this.trackRegistry.remove(trackId);
+      this.saveTracks();
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  public void deleteTracks(int[] titleIds) throws IOException {
-    // FIXME
-    // for (int titleId : titleIds) {
-    // if (this.ctx.getServer().deleteTitle(titleId)) {
-    // this.titleRegistry.removeTitle(titleId);
-    // }
-    // }
-    // this.saveOwnTitles();
+  public void deleteTracks(int[] trackIds) throws IOException {
+    boolean modified = false;
+    for (int trackId : trackIds) {
+      RegisteredTrack track = this.trackRegistry.getTrack(trackId);
+      if (track != null && track.isOwnTrack()) {
+        this.ctx.getServer().deleteTrack(ctx.getStationId(), trackId);
+        modified = true;
+        this.trackRegistry.remove(trackId);
+      }
+    }
+    if (modified) {
+      this.saveTracks();
+    }
   }
 
   /**
@@ -125,8 +132,8 @@ public class TrackService implements Service {
   }
 
   public SearchResultSet find(TrackQuery query) throws IOException, JSONException {
-    TrackList list = ctx.getServer()
-        .getTracks(ctx.getStationId(), query.getPage(), query.asFilterMap(), query.getOrderBy(), query.isOrderAscending());
+    TrackList list = ctx.getServer().getTracks(ctx.getStationId(), query.getPage(), query.asFilterMap(), query.getOrderBy(),
+        query.isOrderAscending());
     ArrayList<DetailedTrack> titles = new ArrayList<DetailedTrack>();
     for (Track track : list.getTracks()) {
       titles.add(new DetailedTrack(track));
@@ -318,7 +325,7 @@ public class TrackService implements Service {
     log.info("reload own titles");
 
     for (RegisteredTrack title : this.trackRegistry.getAllTracks()) {
-      if (title.isOwnTitle() && title.getPlaylistIds().size() == 0) {
+      if (title.isOwnTrack() && title.getPlaylistIds().size() == 0) {
         this.trackRegistry.remove(title.getId());
       }
     }

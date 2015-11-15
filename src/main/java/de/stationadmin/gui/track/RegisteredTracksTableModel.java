@@ -36,9 +36,9 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
   public static final String UNUSED_TITLES = "#UNUSED#";
   public static final String TAGGED_TITLES = "#TAGGED#";
   private TextProvider textProvider;
-  private TrackRegistry titleRegistry;
+  private TrackRegistry trackRegistry;
   private TagManager tagManager;
-  private List<RegisteredTrack> titles;
+  private List<RegisteredTrack> tracks;
   private ValueModel tagSet;
   private ValueModel tag;
   private ValueModel uploadedBy;
@@ -50,34 +50,34 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
       TagManager titleTagService, ValueModel tagSet, ValueModel tag, ValueModel invertTag, ValueModel updloadedBy) {
     super();
     this.textProvider = textProvidder;
-    this.titleRegistry = titleRegistry;
+    this.trackRegistry = titleRegistry;
     this.tagManager = titleTagService;
     this.tagSet = tagSet;
     this.tag = tag;
     this.invertTag = invertTag;
     this.uploadedBy = updloadedBy;
 
-    this.titles = this.filterTitles(this.titleRegistry.getAllTracks());
-    Collections.sort(titles, new TrackComparator());
+    this.tracks = this.filterTitles(this.trackRegistry.getAllTracks());
+    Collections.sort(tracks, new TrackComparator());
 
     // update model if number of titles changes
     PropertyChangeListener changeListener = new PropertyChangeListener() {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        titles = filterTitles(RegisteredTracksTableModel.this.titleRegistry.getAllTracks());
-        Collections.sort(titles, new TrackComparator());
+        tracks = filterTitles(RegisteredTracksTableModel.this.trackRegistry.getAllTracks());
+        Collections.sort(tracks, new TrackComparator());
         int length = 0;
-        for (RegisteredTrack title : titles) {
+        for (RegisteredTrack title : tracks) {
           length += title.getLength();
         }
         fireTableDataChanged();
-        numTitles.setValue(titles.size());
+        numTitles.setValue(tracks.size());
         RegisteredTracksTableModel.this.length.setValue(length);
       }
 
     };
-    this.titleRegistry.addPropertyChangeListener("numTracks", changeListener);
+    this.trackRegistry.addPropertyChangeListener("numTracks", changeListener);
     this.tagSet.addValueChangeListener(changeListener);
     this.tag.addValueChangeListener(changeListener);
     this.invertTag.addValueChangeListener(changeListener);
@@ -121,16 +121,16 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
         if (accepted && uploadFilter != null && uploadFilter != UploadFilter.ANYBODY) {
           switch (uploadFilter) {
             case FOREIGN :
-              accepted = accepted && !title.isOwnTitle();
+              accepted = accepted && !title.isOwnTrack();
               break;
             case USER_ALL :
-              accepted = accepted && title.isOwnTitle();
+              accepted = accepted && title.isOwnTrack();
               break;
             case USER_PRIVATE :
-              accepted = accepted && title.isOwnTitle() && title.isPrivateTrack();
+              accepted = accepted && title.isOwnTrack() && title.isPrivateTrack();
               break;
             case USER_PUBLIC :
-              accepted = accepted && title.isOwnTitle() && !title.isPrivateTrack();
+              accepted = accepted && title.isOwnTrack() && !title.isPrivateTrack();
               break;
           }
 
@@ -154,14 +154,14 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
 
     int[] ids = null;
     if (tag.equals(USED_TITLES)) {
-      for (RegisteredTrack title : this.titleRegistry.getAllTracks()) {
+      for (RegisteredTrack title : this.trackRegistry.getAllTracks()) {
         if (title.getPlaylistIds().size() > 0) {
           bits.set(title.getId());
         }
       }
       return bits;
     } else if (tag.equals(UNUSED_TITLES)) {
-      for (RegisteredTrack title : this.titleRegistry.getAllTracks()) {
+      for (RegisteredTrack title : this.trackRegistry.getAllTracks()) {
         if (title.getPlaylistIds().size() == 0) {
           bits.set(title.getId());
         }
@@ -210,19 +210,19 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
    */
   @Override
   public int getRowCount() {
-    return this.titles.size();
+    return this.tracks.size();
   }
 
-  public RegisteredTrack getTitleAt(int row) {
-    if (row > -1 && row < this.titles.size()) {
-      return titles.get(row);
+  public RegisteredTrack getTrackAt(int row) {
+    if (row > -1 && row < this.tracks.size()) {
+      return tracks.get(row);
     } else {
       return null;
     }
   }
   
-  public List<RegisteredTrack> getTitles() {
-    return new ArrayList<RegisteredTrack>(this.titles);
+  public List<RegisteredTrack> getTracks() {
+    return new ArrayList<RegisteredTrack>(this.tracks);
   }
 
   /**
@@ -230,7 +230,7 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
    */
   @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
-    RegisteredTrack title = this.titles.get(rowIndex);
+    RegisteredTrack title = this.tracks.get(rowIndex);
     Column col = Column.values()[columnIndex];
 
     switch (col) {

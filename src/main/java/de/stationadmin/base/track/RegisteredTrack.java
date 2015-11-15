@@ -133,7 +133,7 @@ public class RegisteredTrack extends DetailedTrack {
    */
   public boolean isUnused() {
     return this.tagCnt == 0 && this.playlistIds.size() == 0 && (this.added == null || this.added.size() == 0)
-        && (this.removed == null || this.removed.size() == 0) && this.isOwnTitle() == false;
+        && (this.removed == null || this.removed.size() == 0) && this.isOwnTrack() == false;
   }
 
   public void removeAlias(TrackAlias alias) {
