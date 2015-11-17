@@ -28,7 +28,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.Playlist;
-import de.stationadmin.base.playlist.util.TitleDistributor;
+import de.stationadmin.base.playlist.util.TrackDistributor;
 import de.stationadmin.base.track.Title;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
@@ -93,7 +93,7 @@ public class DistributeTracksDlg extends JDialog {
     @Override
     public void actionPerformed(ActionEvent e) {
       ArrayList<Title> failedTitles = new ArrayList<Title>();
-      TitleDistributor dist = new TitleDistributor();
+      TrackDistributor dist = new TrackDistributor();
       if(dist.distributeTitles(getSelectedPlaylists(), titles, failedTitles)) {
         dispose();
       }

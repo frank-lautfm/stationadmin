@@ -16,20 +16,20 @@ import de.stationadmin.base.track.TrackRegistry;
  * @author Frank Korf
  * 
  */
-public class PlaylistTitleSearch {
+public class PlaylistTrackSearch {
 
-  private TrackRegistry titleRegistry;
+  private TrackRegistry trackRegistry;
   private PlaylistRegistry playlistRegistry;
 
-  public PlaylistTitleSearch(TrackRegistry titleRegistry, PlaylistRegistry playlistRegistry) {
+  public PlaylistTrackSearch(TrackRegistry trackRegistry, PlaylistRegistry playlistRegistry) {
     super();
-    this.titleRegistry = titleRegistry;
+    this.trackRegistry = trackRegistry;
     this.playlistRegistry = playlistRegistry;
   }
 
   public List<PlaylistEntry> search(String query) {
     ArrayList<PlaylistEntry> entries = new ArrayList<PlaylistEntry>();
-    List<RegisteredTrack> titles = this.titleRegistry.search(query);
+    List<RegisteredTrack> titles = this.trackRegistry.search(query);
     for (RegisteredTrack title : titles) {
       for (int playlistId : title.getPlaylistIds()) {
         Playlist playlist = this.playlistRegistry.getPlaylist(playlistId);

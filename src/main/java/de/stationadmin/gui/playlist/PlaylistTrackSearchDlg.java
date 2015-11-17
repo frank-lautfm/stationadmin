@@ -23,7 +23,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.util.PlaylistEntry;
-import de.stationadmin.base.playlist.util.PlaylistTitleSearch;
+import de.stationadmin.base.playlist.util.PlaylistTrackSearch;
 import de.stationadmin.gui.ClientContext;
 
 /**
@@ -31,21 +31,21 @@ import de.stationadmin.gui.ClientContext;
  * 
  * @author Frank Korf
  */
-public class PlaylistTitleSearchDlg extends JFrame {
+public class PlaylistTrackSearchDlg extends JFrame {
   private static final long serialVersionUID = -3492478658440815088L;
   private ClientContext ctx;
   private ValueModel playlistHolder = new ValueHolder(null, true);
   private ValueModel entryHolder = new ValueHolder(null, true);
   private ValueModel query = new ValueHolder();
 
-  private PlaylistTitleSearch searcher;
+  private PlaylistTrackSearch searcher;
   private PlaylistEntryTableModel entryModel;
 
-  public PlaylistTitleSearchDlg(ClientContext ctx) throws HeadlessException {
+  public PlaylistTrackSearchDlg(ClientContext ctx) throws HeadlessException {
     super();
     this.ctx = ctx;
     this.entryModel = new PlaylistEntryTableModel(ctx);
-    searcher = new PlaylistTitleSearch(ctx.getAdminClient().getTitleRegistry(), ctx.getAdminClient().getPlaylistRegistry());
+    searcher = new PlaylistTrackSearch(ctx.getAdminClient().getTrackService().getTrackRegistry(), ctx.getAdminClient().getPlaylistService().getPlaylistRegistry());
     this.init();
   }
 
@@ -95,7 +95,7 @@ public class PlaylistTitleSearchDlg extends JFrame {
         entryModel.setEntries(result);
         playlistHolder.setValue(null);
         if(result.size() == 0) {
-          JOptionPane.showMessageDialog(PlaylistTitleSearchDlg.this, ctx.getString("playlistsearch.msg.nomatch"), null, JOptionPane.INFORMATION_MESSAGE);
+          JOptionPane.showMessageDialog(PlaylistTrackSearchDlg.this, ctx.getString("playlistsearch.msg.nomatch"), null, JOptionPane.INFORMATION_MESSAGE);
         }
       }
     }

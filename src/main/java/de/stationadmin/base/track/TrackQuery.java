@@ -24,7 +24,7 @@ public class TrackQuery {
   private String[] tags;
 
   private int page = 1;
-  private String orderBy;
+  private String orderBy = "artist";
   private boolean orderAscending = true;
 
   public String getArtist() {

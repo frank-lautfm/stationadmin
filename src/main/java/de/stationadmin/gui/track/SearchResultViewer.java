@@ -105,7 +105,6 @@ public class SearchResultViewer extends JPanel {
 
         if (key != null) {
           String rawName = Column.values()[key.getColumn()].getRawName();
-          System.out.println("sort by " + key.getColumn() + "/" + key.getSortOrder());
           query.setOrderBy(rawName);
           query.setOrderAscending(!key.getSortOrder().equals(SortOrder.DESCENDING));
         } else {

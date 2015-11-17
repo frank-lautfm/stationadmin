@@ -11,15 +11,15 @@ import javax.swing.Action;
 import de.stationadmin.gui.ClientContext;
 
 /**
- * Action for opening the {@link PlaylistTitleSearchDlg}
+ * Action for opening the {@link PlaylistTrackSearchDlg}
  *
  * @author Frank Korf
  */
-public class PlaylistTitleSearchOpenAction extends AbstractAction {
+public class PlaylistTrackSearchOpenAction extends AbstractAction {
   private static final long serialVersionUID = 8481902647321186951L;
   private ClientContext ctx;
 
-  public PlaylistTitleSearchOpenAction(ClientContext ctx) {
+  public PlaylistTrackSearchOpenAction(ClientContext ctx) {
     super();
     this.putValue(Action.NAME, ctx.getString("action.playlisttitlesearch"));
     this.ctx = ctx;
@@ -30,7 +30,7 @@ public class PlaylistTitleSearchOpenAction extends AbstractAction {
    */
   @Override
   public void actionPerformed(ActionEvent e) {
-    PlaylistTitleSearchDlg viewer = new PlaylistTitleSearchDlg(ctx);
+    PlaylistTrackSearchDlg viewer = new PlaylistTrackSearchDlg(ctx);
     viewer.setVisible(true);
   }
 

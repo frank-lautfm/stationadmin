@@ -70,7 +70,7 @@ import de.stationadmin.gui.util.SwingTools;
  * 
  * @author Frank Korf
  */
-public class TitleImportDlg extends JDialog {
+public class TrackImportDlg extends JDialog {
   private static final long serialVersionUID = 7169645093666157021L;
   private StationAdminClient client;
   private TextProvider textProvider;
@@ -83,7 +83,7 @@ public class TitleImportDlg extends JDialog {
 
   private JPopupMenu activeActionPopup;
 
-  public TitleImportDlg(ClientContext ctx, TrackImportHandler handler) {
+  public TrackImportDlg(ClientContext ctx, TrackImportHandler handler) {
     super();
     this.ctx = ctx;
     this.client = ctx.getAdminClient();
@@ -435,8 +435,8 @@ public class TitleImportDlg extends JDialog {
           this.setResolved(cmb);
           break;
       }
-      TitleImportDlg.this.validate();
-      TitleImportDlg.this.repaint();
+      TrackImportDlg.this.validate();
+      TrackImportDlg.this.repaint();
     }
 
     private void setResolved(JComponent comp) {

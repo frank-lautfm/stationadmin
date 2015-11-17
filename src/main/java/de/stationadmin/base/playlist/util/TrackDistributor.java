@@ -25,7 +25,7 @@ import de.stationadmin.base.track.Title;
  * @author Frank Korf
  * 
  */
-public class TitleDistributor {
+public class TrackDistributor {
 
   public boolean distributeTitles(List<Playlist> playlists, List<Title> titles, List<Title> failedTitles) {
     PlaylistCtx[] playlistCtxs = new PlaylistCtx[playlists.size()];

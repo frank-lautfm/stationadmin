@@ -668,7 +668,7 @@ public class PlaylistViewer extends JPanel {
           // silently
           handler.addTracksToPlaylist();
         } else {
-          TitleImportDlg dlg = new TitleImportDlg(ctx, handler);
+          TrackImportDlg dlg = new TrackImportDlg(ctx, handler);
           dlg.setVisible(true);
           dlg.startTitleResolve();
         }
