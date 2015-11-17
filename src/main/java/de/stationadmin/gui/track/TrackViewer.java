@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -33,7 +31,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -70,7 +67,6 @@ import de.stationadmin.gui.util.SwingTools;
  */
 public class TrackViewer extends JDialog {
   private static final long serialVersionUID = 6053311643511061488L;
-  private static ExecutorService executor = Executors.newCachedThreadPool();
   private ClientContext ctx;
   private Title title;
   private Set<Integer> playlistIds;
@@ -222,27 +218,27 @@ public class TrackViewer extends JDialog {
 
     JToolBar toolbar = new JToolBar();
     toolbar.setFloatable(false);
-    toolbar.add(new TitleSaveAction(model));
-    toolbar.add(new TitleResetAction(model));
+    toolbar.add(new SaveAction(model));
+    toolbar.add(new ResetAction(model));
     panel.add(toolbar, cc.xywh(1, 1, 4, 1));
 
     int row = 3;
 
-    JTextField artistTf = BasicComponentFactory.createTextField(model.getBufferedModel("artist"));
+    JTextField artistTf = BasicComponentFactory.createTextField(model.getBufferedModel("artist"), false);
     artistTf.setColumns(20);
     textFields.add(artistTf);
     panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.artist")), cc.xy(2, row));
     panel.add(artistTf, cc.xy(4, row));
     row += 2;
 
-    JTextField titleTf = BasicComponentFactory.createTextField(model.getBufferedModel("title"));
+    JTextField titleTf = BasicComponentFactory.createTextField(model.getBufferedModel("title"), false);
     titleTf.setColumns(20);
     textFields.add(titleTf);
     panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.title")), cc.xy(2, row));
     panel.add(titleTf, cc.xy(4, row));
     row += 2;
 
-    JTextField albumTf = BasicComponentFactory.createTextField(model.getBufferedModel("album"));
+    JTextField albumTf = BasicComponentFactory.createTextField(model.getBufferedModel("album"), false);
     albumTf.setColumns(20);
     textFields.add(albumTf);
     panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.album")), cc.xy(2, row));
@@ -255,14 +251,14 @@ public class TrackViewer extends JDialog {
 
     NumberFormat fmt = NumberFormat.getIntegerInstance();
     fmt.setGroupingUsed(false);
-    JTextField yearTf = BasicComponentFactory.createIntegerField(model.getBufferedModel("year"), fmt);
+    JTextField yearTf = BasicComponentFactory.createIntegerField(model.getBufferedModel("year"), fmt, 0);
     yearTf.setColumns(4);
     textFields.add(yearTf);
     panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.year")), cc.xy(2, row));
     panel.add(yearTf, cc.xy(4, row));
     row += 2;
 
-    JTextField genreTf = BasicComponentFactory.createTextField(model.getBufferedModel("genre"));
+    JTextField genreTf = BasicComponentFactory.createTextField(model.getBufferedModel("genre"), false);
     genreTf.setColumns(20);
     textFields.add(genreTf);
     panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.genre")), cc.xy(2, row));
@@ -282,42 +278,24 @@ public class TrackViewer extends JDialog {
     panel.add(privateTrack, cc.xy(4, row));
     row += 2;
 
-    final JButton updateBtn = new JButton(ctx.getIcon("save.png"));
-    updateBtn.setEnabled(false);
-    updateBtn.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent evt) {
-      }
-    });
-
-    final JButton resetBtn = new JButton(ctx.getIcon("save.png"));
-    resetBtn.setEnabled(false);
-    resetBtn.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent evt) {
-        model.triggerFlush();
-      }
-    });
-
     return new JScrollPane(panel);
   }
 
+  @SuppressWarnings("unchecked")
   private JComponent createPlaylistsPanel() {
     if (this.playlistIds != null) {
       JPanel panel = new JPanel(new BorderLayout());
 
       ArrayList<Playlist> playlists = new ArrayList<Playlist>();
       for (int id : this.playlistIds) {
-        Playlist playlist = ctx.getAdminClient().getPlaylistRegistry().getPlaylist(id);
+        Playlist playlist = ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylist(id);
         if (playlist != null) {
           playlists.add(playlist);
         }
       }
       Collections.sort(playlists, new PlaylistNameCompator());
 
-      final JList list = new JList(new IndirectListModel<Playlist>(playlists));
+      final JList<Playlist> list = new JList<Playlist>(new IndirectListModel<Playlist>(playlists));
       list.setCellRenderer(new SimplePlaylistListCellRender());
       panel.add(new JScrollPane(list), BorderLayout.CENTER);
 
@@ -394,11 +372,11 @@ public class TrackViewer extends JDialog {
     }
   }
 
-  private class TitleSaveAction extends AbstractAction {
+  private class SaveAction extends AbstractAction {
     private static final long serialVersionUID = -622220638358501757L;
     private PresentationModel<DetailedTrack> model;
 
-    TitleSaveAction(final PresentationModel<DetailedTrack> model) {
+    SaveAction(final PresentationModel<DetailedTrack> model) {
       this.model = model;
       this.putValue(Action.SMALL_ICON, ctx.getIcon("save.png"));
       setEnabled(false);
@@ -419,21 +397,21 @@ public class TrackViewer extends JDialog {
     public void actionPerformed(ActionEvent evt) {
       try {
         model.triggerCommit();
-        ctx.getAdminClient().getTrackService().updateTrack(model.getBean());
+        DetailedTrack track = model.getBean();
+        ctx.getAdminClient().getTrackService().updateTrack(track);
       } catch (Exception e) {
-        JXErrorPane.showDialog(AppUtils.getRootFrame(),
-            ctx.getTextProvider().createErrorInfo(e, "titleviever.update.msg.failed"));
+        JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.getTextProvider().createErrorInfo(e, "titleviever.update.msg.failed"));
 
       }
 
     }
   }
 
-  private class TitleResetAction extends AbstractAction {
+  private class ResetAction extends AbstractAction {
     private static final long serialVersionUID = -1353861266947243104L;
     private PresentationModel<DetailedTrack> model;
 
-    TitleResetAction(final PresentationModel<DetailedTrack> model) {
+    ResetAction(final PresentationModel<DetailedTrack> model) {
       this.model = model;
       this.putValue(Action.SMALL_ICON, ctx.getIcon("undo.png"));
       setEnabled(false);
