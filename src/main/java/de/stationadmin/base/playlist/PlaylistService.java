@@ -461,6 +461,7 @@ public class PlaylistService implements Service {
         de.stationadmin.lfm.backend.Playlist pl = ctx.getServer().getPlaylist(ctx.getStationId(), playlistInfo.getId());
 
         this.loadPlaylistTracks(playlist, pl.getEntries());
+        updateMetaData(pl, playlist);
       } catch (Exception e) {
         log.error("error while loading titles for playlist " + playlistInfo.getTitle(), e);
       }
@@ -537,6 +538,7 @@ public class PlaylistService implements Service {
 
         de.stationadmin.lfm.backend.Playlist pl = ctx.getServer().getPlaylist(ctx.getStationId(), playlist.getId());
         this.loadPlaylistTracks(playlist, pl.getEntries());
+        updateMetaData(pl, playlist);
         this.savePlaylistAs(playlist, Integer.toString(playlist.getId()));
 
       }
@@ -544,6 +546,14 @@ public class PlaylistService implements Service {
     this.playlistModificationDetector.markClean();
     this.titleRegistry.removeUnused();
 
+  }
+  
+  private static void updateMetaData(PlaylistHead head, Playlist playlist) {
+    playlist.setColor(head.getColor());
+    playlist.setCreatedAt(head.getCreatedAt());
+    playlist.setDescription(head.getDescription());
+    playlist.setName(head.getTitle());
+    playlist.setUpdatedAt(head.getUpdatedAt());
   }
 
   private void initOnlinePlaylist(Playlist playlist, PlaylistHead playlistInfo) {
