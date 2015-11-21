@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -31,8 +32,8 @@ import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.exporter.PlaylistBackupExporter;
 import de.stationadmin.base.playlist.validation.PlaylistValidationException;
-import de.stationadmin.base.playlist.validation.PlaylistValidator;
 import de.stationadmin.base.playlist.validation.PlaylistValidationException.Reason;
+import de.stationadmin.base.playlist.validation.PlaylistValidator;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.Title;
@@ -50,7 +51,7 @@ import de.stationadmin.lfm.backend.TrackRef;
 public class PlaylistService implements Service {
   private static final Logger log = Logger.getLogger(PlaylistService.class);
   private SessionCtx ctx;
-  private TrackRegistry titleRegistry;
+  private TrackRegistry trackRegistry;
   private PlaylistRegistry playlistRegistry;
   private String dir;
   private String dirArchive;
@@ -65,7 +66,7 @@ public class PlaylistService implements Service {
   public PlaylistService(SessionCtx ctx, TrackRegistry titleRegistry, PlaylistRegistry playlistRegistry) {
     super();
     this.ctx = ctx;
-    this.titleRegistry = titleRegistry;
+    this.trackRegistry = titleRegistry;
     this.playlistRegistry = playlistRegistry;
     this.dir = ctx.getStationDirectory() + "playlists" + File.separatorChar;
     this.dirArchive = dir + "archive" + File.separatorChar;
@@ -171,7 +172,7 @@ public class PlaylistService implements Service {
       }
     }
 
-    Playlist playlist = new Playlist(this.titleRegistry, type);
+    Playlist playlist = new Playlist(this.trackRegistry, type);
     playlist.setProperties(properties);
     playlist.setTimestampMap(timestampMap);
 
@@ -187,7 +188,7 @@ public class PlaylistService implements Service {
       this.playlistRegistry.unregister(previous);
     }
 
-    this.titleRegistry.setBlockChangsEvts(true);
+    this.trackRegistry.setBlockChangsEvts(true);
     try {
       ExtendedTrackFormat format = new ExtendedTrackFormat();
       // read titles
@@ -196,6 +197,7 @@ public class PlaylistService implements Service {
         if (line.length() > 0) {
           DetailedTrack track = format.fromString(line);
           if (track != null) {
+            // TODO check track availability for archived playlists?
             playlist.addTrack(track);
           }
         }
@@ -203,7 +205,7 @@ public class PlaylistService implements Service {
       }
       playlist.commit(); // marks playlist as clean
     } finally {
-      this.titleRegistry.setBlockChangsEvts(false);
+      this.trackRegistry.setBlockChangsEvts(false);
     }
 
     // restore timestamps
@@ -252,7 +254,7 @@ public class PlaylistService implements Service {
     }
     try {
       if (ctx.isLiveEnabled()) {
-        Playlist live = new Playlist(this.titleRegistry, PlaylistType.TEMPORARY);
+        Playlist live = new Playlist(this.trackRegistry, PlaylistType.TEMPORARY);
         live.setColor("#FF0000");
         live.setName("Live");
         live.setId(PlaylistRegistry.LIVE_PLAYLIST_ID);
@@ -276,7 +278,7 @@ public class PlaylistService implements Service {
       playlistStream.close();
 
       for (Playlist playlist : playlists) {
-        playlist.setTrackRegistry(this.titleRegistry);
+        playlist.setTrackRegistry(this.trackRegistry);
         playlist.reset(); // marks playlist as clean
         playlist.resolveTitles();
         this.playlistRegistry.register(playlist);
@@ -447,20 +449,21 @@ public class PlaylistService implements Service {
     this.ctx.updateStatus("getAllPlaylists");
     List<PlaylistHead> playlistInfos = this.ctx.getServer().getPlaylists(this.ctx.getStationId());
 
+    Set<Integer> refreshed = new HashSet<Integer>(); // ids of tracks that have been updated in track registry
     for (PlaylistHead playlistInfo : playlistInfos) {
 
       // prepare basic information
-      Playlist playlist = new Playlist(this.titleRegistry, PlaylistType.ONLINE);
+      Playlist playlist = new Playlist(this.trackRegistry, PlaylistType.ONLINE);
       this.initOnlinePlaylist(playlist, playlistInfo);
       playlist.setTimestampMap(timestampMaps.get(playlist.getId()));
       this.playlistRegistry.register(playlist);
 
-      // add titles to playlist
+      // add tracks to playlist
       try {
         this.ctx.updateStatus("getPlaylist", playlist.getDisplayName());
         de.stationadmin.lfm.backend.Playlist pl = ctx.getServer().getPlaylist(ctx.getStationId(), playlistInfo.getId());
 
-        this.loadPlaylistTracks(playlist, pl.getEntries());
+        this.loadPlaylistTracks(playlist, pl.getEntries(), refreshed);
         updateMetaData(pl, playlist);
       } catch (Exception e) {
         log.error("error while loading titles for playlist " + playlistInfo.getTitle(), e);
@@ -474,32 +477,38 @@ public class PlaylistService implements Service {
     this.playlistModificationDetector.markClean();
   }
 
-  private void loadPlaylistTracks(Playlist playlist, TrackRef[] tracks) throws IOException {
-    if (tracks != null) {
-      Title[] titles = new Title[tracks.length];
-      int[] missing = new int[tracks.length];
+  private void loadPlaylistTracks(Playlist playlist, TrackRef[] trackRefs, Set<Integer> refreshed) throws IOException {
+    if (trackRefs != null) {
+      Title[] tracks = new Title[trackRefs.length];
+      int[] missing = new int[trackRefs.length];
       int missingIdx = 0;
-      for (int i = 0; i < tracks.length; i++) {
-        titles[i] = this.titleRegistry.getTrack(tracks[i].getTrackId());
-        if (titles[i] == null) {
-          missing[missingIdx++] = tracks[i].getTrackId();
+      for (int i = 0; i < trackRefs.length; i++) {
+        tracks[i] = this.trackRegistry.getTrack(trackRefs[i].getTrackId());
+        if (tracks[i] == null) {
+          missing[missingIdx++] = trackRefs[i].getTrackId();
         }
       }
 
       if (missingIdx > 0) {
         for (Track track : ctx.getServer().getTracks(ctx.getStationId(), missing)) {
-          if (titleRegistry.getTrack(track.getId()) == null) {
-            this.titleRegistry.add(new RegisteredTrack(track));
+          RegisteredTrack regTrack = this.trackRegistry.getTrack(track.getId());
+          if (regTrack == null) {
+            this.trackRegistry.add(new RegisteredTrack(track));
+            refreshed.add(track.getId());
+          }
+          else if(!refreshed.contains(track.getId())){
+            regTrack.update(track);
+            refreshed.add(track.getId());
           }
         }
       }
 
-      for (int i = 0; i < tracks.length; i++) {
-        if (titles[i] == null) {
-          titles[i] = this.titleRegistry.getTrack(tracks[i].getTrackId());
+      for (int i = 0; i < trackRefs.length; i++) {
+        if (tracks[i] == null) {
+          tracks[i] = this.trackRegistry.getTrack(trackRefs[i].getTrackId());
         }
-        if (titles[i] != null) {
-          playlist.addTrack(titles[i], tracks[i].getAddedAt());
+        if (tracks[i] != null) {
+          playlist.addTrack(tracks[i], trackRefs[i].getAddedAt());
         }
       }
 
@@ -519,13 +528,14 @@ public class PlaylistService implements Service {
     this.ctx.updateStatus("getAllPlaylists");
     List<PlaylistHead> playlistInfos = this.ctx.getServer().getPlaylists(ctx.getStationId());
 
+    Set<Integer> refreshed = new HashSet<Integer>(); // tracks that have been updated in track registry
     for (PlaylistHead playlistInfo : playlistInfos) {
       if (ids.contains(playlistInfo.getId())) {
 
         // prepare basic information
         Playlist playlist = this.playlistRegistry.getPlaylist(playlistInfo.getId());
         if (playlist == null) {
-          playlist = new Playlist(this.titleRegistry, PlaylistType.ONLINE);
+          playlist = new Playlist(this.trackRegistry, PlaylistType.ONLINE);
         } else {
           // remove all old titles - will be filled with new ones
           playlist.removeEntries(new ArrayList<Playlist.Entry>(playlist.getEntries()));
@@ -537,14 +547,14 @@ public class PlaylistService implements Service {
         this.ctx.updateStatus("getPlaylist", playlist.getDisplayName());
 
         de.stationadmin.lfm.backend.Playlist pl = ctx.getServer().getPlaylist(ctx.getStationId(), playlist.getId());
-        this.loadPlaylistTracks(playlist, pl.getEntries());
+        this.loadPlaylistTracks(playlist, pl.getEntries(), refreshed);
         updateMetaData(pl, playlist);
         this.savePlaylistAs(playlist, Integer.toString(playlist.getId()));
 
       }
     }
     this.playlistModificationDetector.markClean();
-    this.titleRegistry.removeUnused();
+    this.trackRegistry.removeUnused();
 
   }
   

@@ -22,7 +22,7 @@ public class Paging {
   private int nextPage;
   @JsonProperty("prev_page")
   private int prevPage;
-
+  
   public int getTotalPages() {
     return totalPages;
   }

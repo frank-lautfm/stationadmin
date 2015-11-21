@@ -48,9 +48,7 @@ public class SearchPanel extends JPanel {
   private ValueModel searchResultHolder = new ValueHolder(null, true);
   private ValueModel selectionHolder = new ValueHolder(new ArrayList<Title>(0), true);
 
-  private ValueHolder hitCount = new ValueHolder(0);
   private ValueHolder pageNum = new ValueHolder(1);
-  private ValueHolder pageCount = new ValueHolder(1);
 
   public SearchPanel(ClientContext ctx) {
     this(ctx, true);
@@ -71,32 +69,17 @@ public class SearchPanel extends JPanel {
   }
 
   private JPanel createBottomPanel() {
-    JPanel panel = new JPanel(new FormLayout("pref,5dlu,pref,5dlu,pref,5dlu:grow,pref", "pref"));
+    JPanel panel = new JPanel(new FormLayout("pref,5dlu,pref,5dlu:grow,pref", "pref"));
     CellConstraints cc = new CellConstraints();
 
     {
       JPanel box = new JPanel(new FlowLayout(FlowLayout.LEADING, 2, 0));
       NumberFormat intFmt = NumberFormat.getIntegerInstance();
       intFmt.setGroupingUsed(false);
-      JLabel label = BasicComponentFactory.createLabel(this.hitCount, intFmt);
-      box.add(label);
-      box.add(new JLabel("Treffer"));
-      panel.add(box, cc.xy(1, 1));
-    }
-
-    panel.add(new JLabel("|"), cc.xy(2, 1));
-
-    {
-      JPanel box = new JPanel(new FlowLayout(FlowLayout.LEADING, 2, 0));
-      NumberFormat intFmt = NumberFormat.getIntegerInstance();
-      intFmt.setGroupingUsed(false);
       JLabel pageNum = BasicComponentFactory.createLabel(this.pageNum, intFmt);
-      JLabel pageCount = BasicComponentFactory.createLabel(this.pageCount, intFmt);
       box.add(new JLabel("Seite"));
       box.add(pageNum);
-      box.add(new JLabel("von"));
-      box.add(pageCount);
-      panel.add(box, cc.xy(3, 1));
+      panel.add(box, cc.xy(1, 1));
 
       JToolBar toolbar = new JToolBar();
       toolbar.setFloatable(false);
@@ -105,7 +88,7 @@ public class SearchPanel extends JPanel {
       box.add(toolbar);
 
     }
-    panel.add(new JLabel("|"), cc.xy(4, 1));
+    panel.add(new JLabel("|"), cc.xy(2, 1));
     
     {
       JPanel box = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 0));
@@ -133,7 +116,7 @@ public class SearchPanel extends JPanel {
       });
       JCheckBox privateCb = BasicComponentFactory.createCheckBox(privateTracksModel, "private Titel");
       box.add(privateCb);
-      panel.add(box, cc.xy(5, 1));
+      panel.add(box, cc.xy(3, 1));
       
     }
 
@@ -142,7 +125,7 @@ public class SearchPanel extends JPanel {
       JToolBar toolbar = new JToolBar();
       toolbar.setFloatable(false);
       toolbar.add(new JButton(searchAction));
-      panel.add(toolbar, cc.xy(7, 1));
+      panel.add(toolbar, cc.xy(5, 1));
       
       
     }
@@ -153,12 +136,8 @@ public class SearchPanel extends JPanel {
       public void propertyChange(PropertyChangeEvent evt) {
         SearchResultSet resultSet = (SearchResultSet) evt.getNewValue();
         if (resultSet != null) {
-          hitCount.setValue(resultSet.getTotalEntries());
-          pageCount.setValue(resultSet.getTotalPages());
           pageNum.setValue(resultSet.getCurrentPage());
         } else {
-          hitCount.setValue(0);
-          pageCount.setValue(1);
           pageNum.setValue(1);
         }
       }
@@ -280,7 +259,7 @@ public class SearchPanel extends JPanel {
     public void propertyChange(PropertyChangeEvent evt) {
       SearchResultSet resultSet = (SearchResultSet) evt.getNewValue();
       if (resultSet != null) {
-        setEnabled(resultSet.getCurrentPage() < resultSet.getTotalPages());
+        setEnabled(resultSet.getHasMoreResults());
       } else {
         setEnabled(false);
       }

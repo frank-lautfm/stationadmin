@@ -41,7 +41,7 @@ public class ReloadOwnTitlesAction extends ThreadedAction {
    */
   @Override
   protected void performAction() throws Exception {
-    this.titleService.reloadOwnTitles();
+    this.titleService.reloadOwnTracks();
 
   }
 

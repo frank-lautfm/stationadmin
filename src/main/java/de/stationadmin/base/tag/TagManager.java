@@ -578,6 +578,9 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
     Set<String> oldTags = new HashSet<String>(this.staticTags.keySet());
 
     for (String tag : ctx.getServer().getTags(ctx.getStationId())) {
+      this.ctx.updateStatus("getTag", tag);
+      
+      
       oldTags.remove(tag.toLowerCase());
 
       int[] ids = this.ctx.getServer().getTaggedTracks(ctx.getStationId(), tag);

@@ -145,6 +145,7 @@ public class LautfmAdminService {
   private void checkResponse(CloseableHttpResponse response) throws IOException {
     switch (response.getStatusLine().getStatusCode()) {
     case 400:
+    case 500:
       throw new AdminServiceException(getErrorMessage(response));
     case 401:
       throw new AuthenticationException();
@@ -289,8 +290,28 @@ public class LautfmAdminService {
     }
 
     if (idLIst.length() > 0) {
-      TrackList trackList = this.getTracks(this.doGet(basePath + idLIst.toString()));
-      list.addAll(Arrays.asList(trackList.getTracks()));
+      try {
+        TrackList trackList = this.getTracks(this.doGet(basePath + idLIst.toString()));
+        list.addAll(Arrays.asList(trackList.getTracks()));
+      } catch (Exception e) {
+        // try one-by-one
+        list = new ArrayList<Track>();
+        for (int trackId : trackIds) {
+          if (trackId > 0) {
+            try {
+              Track t = this.getTrack(stationId, trackId);
+              if (t != null) {
+                list.add(t);
+              }
+            } catch (ResourceNotFoundException ex) {
+              // track not longer available
+            } catch (Exception ex) {
+              // TODO temporary solution until 500 is fixed
+            }
+          }
+        }
+
+      }
     }
 
     return list;
@@ -366,6 +387,10 @@ public class LautfmAdminService {
   }
 
   public Track updateTrack(int stationId, Track track) throws IOException {
+    if (track.getArtist() == null || track.getTitle() == null) {
+      throw new NullPointerException(); // FIXME remove if reason for occasional
+                                        // null values found
+    }
     CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/tracks/" + track.getId(), track);
     try {
       ObjectMapper mapper = new ObjectMapper();

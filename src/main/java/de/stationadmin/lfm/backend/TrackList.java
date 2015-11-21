@@ -3,7 +3,6 @@
  */
 package de.stationadmin.lfm.backend;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -17,6 +16,7 @@ public class TrackList {
   private Track[] tracks;
   @JsonProperty("_paging")
   private Paging paging;
+  
 
   public Track[] getTracks() {
     return tracks;
@@ -34,9 +34,7 @@ public class TrackList {
     this.paging = paging;
   }
 
-  @Override
-  public String toString() {
-    return "page " + paging.getCurrentPage() + " of " + paging.getTotalPages() + " - " + ArrayUtils.toString(tracks);
+  public boolean hasNextPage() {
+    return this.paging.getNextPage() > 0;
   }
-
 }

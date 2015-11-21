@@ -12,37 +12,37 @@ import java.util.List;
  * @author Frank Korf
  */
 public class SearchResultSet {
-  private int totalEntries;
+  private List<DetailedTrack> tracks;
   private int currentPage;
-  private int totalPages;
-  private List<DetailedTrack> titles;
+  private boolean hasMoreResults;
   
-  public SearchResultSet(int totalEntries, int currentPage, int totalPages, List<DetailedTrack> titles) {
+  public SearchResultSet(List<DetailedTrack> tracks, int currentPage, boolean hasMore) {
     super();
-    this.totalEntries = totalEntries;
-    this.totalPages = totalPages;
+    this.tracks = tracks;
     this.currentPage = currentPage;
-    this.titles = titles;
+    this.hasMoreResults = hasMore;
   }
 
   /**
    * Gets the titles
    * @return the titles
    */
-  public List<DetailedTrack> getTitles() {
-    return titles;
+  public List<DetailedTrack> getTracks() {
+    return tracks;
   }
 
-  public int getTotalEntries() {
-    return totalEntries;
+  /**
+   * @return the hasMoreResults
+   */
+  public boolean getHasMoreResults() {
+    return hasMoreResults;
   }
 
+  /**
+   * @return the currentPage
+   */
   public int getCurrentPage() {
     return currentPage;
-  }
-
-  public int getTotalPages() {
-    return totalPages;
   }
   
 

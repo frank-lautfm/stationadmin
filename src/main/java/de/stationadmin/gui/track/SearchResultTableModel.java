@@ -104,7 +104,7 @@ public class SearchResultTableModel extends AbstractTableModel {
    */
   @Override
   public int getRowCount() {
-    return this.resultSet != null ? this.resultSet.getTitles().size() + 1 : 1;
+    return this.resultSet != null ? this.resultSet.getTracks().size() + 1 : 1;
   }
 
   /**
@@ -128,7 +128,7 @@ public class SearchResultTableModel extends AbstractTableModel {
       }
 
     } else {
-      DetailedTrack title = this.resultSet.getTitles().get(rowIndex - 1);
+      DetailedTrack title = this.resultSet.getTracks().get(rowIndex - 1);
 
       switch (col) {
       case ARTIST:
@@ -158,7 +158,7 @@ public class SearchResultTableModel extends AbstractTableModel {
 
   public DetailedTrack getTitle(int row) {
     if (row > 0) {
-      return this.resultSet.getTitles().get(row - 1);
+      return this.resultSet.getTracks().get(row - 1);
     }
     return null;
   }

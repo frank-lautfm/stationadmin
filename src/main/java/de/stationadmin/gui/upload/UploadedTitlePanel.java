@@ -269,7 +269,7 @@ public class UploadedTitlePanel extends JPanel {
           ic.afterSave(titles);
         }
 
-        ctx.getAdminClient().getTrackService().updateOwnTitles();
+        ctx.getAdminClient().getTrackService().updateOwnTracks();
 
         if (targetPlaylist.getValue() != null) {
           List<Title> addedTitles = new ArrayList<Title>();

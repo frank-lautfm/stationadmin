@@ -12,10 +12,16 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,6 +43,7 @@ import de.stationadmin.lfmapi.Song;
  */
 public class TrackService implements Service {
   private static final Logger log = Logger.getLogger(TrackService.class);
+  private static final String PROP_SYNCTILL = "synchronizedOwnTill";
   public static final String FILENAME_TITLES = "tracks.tsv";
   public static final String FILENAME_ALIASES = "aliases.tsv";
   private ExtendedTrackFormat fmt = new ExtendedTrackFormat(true);
@@ -44,6 +51,7 @@ public class TrackService implements Service {
   private TrackRegistry trackRegistry;
   private PlaylistRecorder playlistRecorder;
   private TrackHistory trackHistory;
+  private Date synchronizedOwnTill = null;
 
   /**
    * @param ctx
@@ -138,7 +146,7 @@ public class TrackService implements Service {
     for (Track track : list.getTracks()) {
       titles.add(new DetailedTrack(track));
     }
-    return new SearchResultSet(list.getPaging().getTotalEntries(), list.getPaging().getCurrentPage(), list.getPaging().getTotalPages(), titles);
+    return new SearchResultSet(titles, query.getPage(), list.hasNextPage());
 
   }
 
@@ -298,16 +306,36 @@ public class TrackService implements Service {
     log.info("load titles");
     File file = new File(this.ctx.getStationDirectory() + FILENAME_TITLES);
     if (file.exists()) {
+      HashMap<String, String> props = new HashMap<String, String>();
+      Pattern pattern = Pattern.compile("#.*?(\\w+)\\s*=\\s*(.*?)\\s*");
       FileInputStream in = new FileInputStream(file);
       try {
         List<String> lines = (List<String>) IOUtils.readLines(in, "UTF-8");
         for (String line : lines) {
-          Title t = fmt.fromString(line);
-          if (t instanceof DetailedTrack) {
-            this.trackRegistry.add((DetailedTrack) t);
+          if (line.startsWith("#")) {
+            Matcher m = pattern.matcher(line);
+            if (m.matches()) {
+              props.put(m.group(1), m.group(2));
+            }
+
+          } else {
+            Title t = fmt.fromString(line);
+            if (t instanceof DetailedTrack) {
+              this.trackRegistry.add((DetailedTrack) t);
+            }
           }
         }
         this.trackRegistry.fireNumTracksEvent();
+
+        String syncTill = props.get(PROP_SYNCTILL);
+        if (syncTill != null) {
+          try {
+            this.synchronizedOwnTill = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(syncTill);
+          } catch (Exception e) {
+            e.printStackTrace(); // TODO
+          }
+        }
+
       } finally {
         IOUtils.closeQuietly(in);
       }
@@ -321,12 +349,15 @@ public class TrackService implements Service {
    * @throws IOException
    * @throws JSONException
    */
-  public void reloadOwnTitles() throws IOException, JSONException {
-    log.info("reload own titles");
+  public void reloadOwnTracks() throws IOException, JSONException {
+    log.info("reload own tracks");
 
-    for (RegisteredTrack title : this.trackRegistry.getAllTracks()) {
-      if (title.isOwnTrack() && title.getPlaylistIds().size() == 0) {
-        this.trackRegistry.remove(title.getId());
+    Set<Integer> markForeign = new HashSet<Integer>();
+    for (RegisteredTrack track : this.trackRegistry.getAllTracks()) {
+      if (track.isOwnTrack() && track.getPlaylistIds().size() == 0) {
+        this.trackRegistry.remove(track.getId());
+      } else {
+        markForeign.add(track.getId());
       }
     }
 
@@ -338,13 +369,23 @@ public class TrackService implements Service {
     do {
       TrackList list = this.ctx.getServer().getTracks(ctx.getStationId(), page, filter, "created_at", false);
       for (Track track : list.getTracks()) {
+        markForeign.remove(track.getId());
         if (this.trackRegistry.getTrack(track.getId()) == null) {
           this.trackRegistry.registerOwnTrack(new DetailedTrack(track));
         }
       }
-      requestMore = list.getPaging().getCurrentPage() < list.getPaging().getTotalPages();
+      requestMore = list.hasNextPage();
       page++;
     } while (requestMore);
+
+    for (int trackId : markForeign) {
+      RegisteredTrack track = this.trackRegistry.getByLegacyId(trackId);
+      if (track != null) {
+        // track was not longer returned as own track - may have been unlinked
+        // and used again later
+        track.setOwnTrack(false);
+      }
+    }
 
     this.saveTracks();
   }
@@ -386,6 +427,10 @@ public class TrackService implements Service {
     OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
 
     try {
+      if (this.synchronizedOwnTill != null) {
+        writer.write("# " + PROP_SYNCTILL + " = " + new SimpleDateFormat("yyyy-MM-dd HH:mm").format(this.synchronizedOwnTill) + "\n");
+      }
+
       for (RegisteredTrack title : this.trackRegistry.getAllTracks()) {
         writer.write(fmt.toString(title) + "\n");
       }
@@ -411,7 +456,7 @@ public class TrackService implements Service {
           }
         }
       }
-    } while (list.getPaging().getCurrentPage() < list.getPaging().getTotalPages() && (!onlyFirst || titles.size() == 0));
+    } while (list.hasNextPage() && (!onlyFirst || titles.size() == 0));
     return titles;
   }
 
@@ -454,7 +499,7 @@ public class TrackService implements Service {
   public void synchronize() throws IOException {
     this.ctx.updateStatus("updateOwnTitles");
     try {
-      this.updateOwnTitles();
+      this.updateOwnTracks();
     } catch (JSONException e) {
       log.error("unable to update own titles", e);
     }
@@ -462,26 +507,35 @@ public class TrackService implements Service {
     this.saveAliases();
   }
 
-  public void updateOwnTitles() throws IOException, JSONException {
+  public void updateOwnTracks() throws IOException, JSONException {
 
     Map<String, String> filter = new HashMap<String, String>();
     filter.put("own", "true");
     int page = 1;
 
     boolean requestMore = true;
+    Date newest = null;
     do {
       TrackList list = this.ctx.getServer().getTracks(ctx.getStationId(), page, filter, "created_at", false);
-      boolean hasUnknown = false;
       for (Track track : list.getTracks()) {
         if (this.trackRegistry.getTrack(track.getId()) == null) {
-          hasUnknown = true;
           this.trackRegistry.registerOwnTrack(new DetailedTrack(track));
+        } else {
+          this.trackRegistry.getTrack(track.getId()).update(track);
         }
+        if (newest == null) {
+          newest = track.getCreatedAt(); // sorted by created_at desc, so first
+                                         // one is newest one
+        }
+        if (requestMore && this.synchronizedOwnTill != null && track.getCreatedAt().getTime() < this.synchronizedOwnTill.getTime()) {
+          requestMore = false;
+        }
+        requestMore = requestMore && list.hasNextPage();
       }
-      requestMore = hasUnknown && list.getPaging().getCurrentPage() <= list.getPaging().getTotalPages();
       page++;
     } while (requestMore);
 
+    this.synchronizedOwnTill = newest;
   }
 
   /**
@@ -499,7 +553,7 @@ public class TrackService implements Service {
   }
 
   /**
-   * Updates a title on the server
+   * Updates a track on the server
    * 
    * @param title
    * @return
