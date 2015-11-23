@@ -64,7 +64,9 @@ public class StationAdminClient {
       System.setProperty("http.proxyPort", props.getProperty("proxy.port"));
     }
 
-    String dataDirectory = props.getProperty("data.dir", System.getProperty("user.home") + File.separatorChar + "laut.fm/beta/" + File.separatorChar);
+    String sAdminDefaultDir = System.getProperty("defaultDir", "laut.fm/beta/");
+    
+    String dataDirectory = props.getProperty("data.dir", System.getProperty("user.home") + File.separatorChar + sAdminDefaultDir);
     String settingsDirectory = props.getProperty("settings.dir", dataDirectory + station.getName().toLowerCase());
 
     this.sessionCtx = new SessionCtx(service, new LautfmService(), station.getId(), station.getName().toLowerCase(), dataDirectory, settingsDirectory);

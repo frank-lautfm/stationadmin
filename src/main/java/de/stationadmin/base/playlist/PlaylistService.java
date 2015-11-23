@@ -125,7 +125,7 @@ public class PlaylistService implements Service {
   }
 
   public void initPlaylistModificationDetection() {
-    this.ctx.getTimer().schedule(this.playlistModificationDetector.getCheckTask(), 1000, 1000 * 60 * 30);
+    this.ctx.getTimer().schedule(this.playlistModificationDetector.getCheckTask(), 1000, 1000 * 60 * 30); 
   }
 
   protected void loadPlaylist(File file, PlaylistType type) throws IOException {
@@ -413,16 +413,13 @@ public class PlaylistService implements Service {
       if (playlist.getLength() < 60 * 60) {
         // FIXME throw new PlaylistValidationException(Reason.MIN_LENGTH);
       }
-      if (this.playlistValidator != null && !this.playlistValidator.validate(playlist, null)) {
-        // FIXME throw new
-        // PlaylistValidationException(Reason.LAUT_RULE_VIOLATION);
-      }
       List<Entry> entries = playlist.getEntries();
       int[] ids = new int[entries.size()];
       for (int i = 0; i < entries.size(); i++) {
         ids[i] = entries.get(i).getTrackId();
       }
-      this.ctx.getServer().setPlaylistTracks(ctx.getStationId(), playlist.getId(), ids);
+      de.stationadmin.lfm.backend.Playlist rawPlaylist = this.ctx.getServer().setPlaylistTracks(ctx.getStationId(), playlist.getId(), ids);
+      playlist.setUpdatedAt(rawPlaylist.getUpdatedAt());
     }
     playlist.commit();
 

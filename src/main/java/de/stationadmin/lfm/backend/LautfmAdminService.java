@@ -22,6 +22,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -76,8 +77,17 @@ public class LautfmAdminService {
       hcBuilder.setSSLSocketFactory(sslsf).build();
       hcBuilder.setRoutePlanner(new DefaultProxyRoutePlanner(new HttpHost("localhost", 8888)));
       hcBuilder.setUserAgent("Mozilla/4.0 (compatible; Station Admin " + Version.VERSION + "; " + System.getProperty("os.name") + ")");
-
+      
+      RequestConfig config = RequestConfig.custom()
+          .setSocketTimeout(90 * 1000)
+          .setConnectTimeout(20 * 1000)
+          .build();
+      HttpClients.custom()
+      .setDefaultRequestConfig(config);   
+      
       return hcBuilder.build();
+
+      
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -332,11 +342,14 @@ public class LautfmAdminService {
     }
   }
 
-  public void setPlaylistTracks(int stationId, int playlistId, int[] trackIds) throws IOException {
+  public Playlist setPlaylistTracks(int stationId, int playlistId, int[] trackIds) throws IOException {
     Map<String, Object> map = new HashMap<String, Object>();
     map.put("entries", trackIds);
     CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/playlists/" + playlistId, map);
+    ObjectMapper mapper = new ObjectMapper();
+    Playlist playlist = mapper.readValue(response.getEntity().getContent(), Playlist.class);
     response.close();
+    return playlist;
   }
 
   public PlaylistHead createPlaylist(int stationId, PlaylistHead playlist) throws IOException {

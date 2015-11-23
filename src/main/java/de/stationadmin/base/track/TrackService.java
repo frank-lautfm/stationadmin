@@ -356,7 +356,7 @@ public class TrackService implements Service {
     for (RegisteredTrack track : this.trackRegistry.getAllTracks()) {
       if (track.isOwnTrack() && track.getPlaylistIds().size() == 0) {
         this.trackRegistry.remove(track.getId());
-      } else {
+      } else if(track.isOwnTrack()) {
         markForeign.add(track.getId());
       }
     }
@@ -379,11 +379,12 @@ public class TrackService implements Service {
     } while (requestMore);
 
     for (int trackId : markForeign) {
-      RegisteredTrack track = this.trackRegistry.getByLegacyId(trackId);
+      RegisteredTrack track = this.trackRegistry.getTrack(trackId);
       if (track != null) {
         // track was not longer returned as own track - may have been unlinked
         // and used again later
         track.setOwnTrack(false);
+        track.setPrivateTrack(false); // TODO temporary, combination should be impossible
       }
     }
 
