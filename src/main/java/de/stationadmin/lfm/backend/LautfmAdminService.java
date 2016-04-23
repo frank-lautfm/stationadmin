@@ -384,6 +384,18 @@ public class LautfmAdminService {
       response.close();
     }
   }
+  
+  public void deleteTag(int stationId, String tag) throws IOException {
+    // /stations/:station_id/tracks/tags/:tagname    
+    CloseableHttpResponse response = this.doDelete("/stations/" + stationId + "/tracks/tags/" + URLEncoder.encode(tag, "UTF-8"));
+    try {
+      if (response.getStatusLine().getStatusCode() != 204 && response.getStatusLine().getStatusCode() != 200) {
+        throw new AdminServiceException(this.getErrorMessage(response));
+      }
+    } finally {
+      response.close();
+    }
+  }
 
   public Playlist updatePlaylist(int stationId, PlaylistHead playlist) throws IOException {
     CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/playlists/" + playlist.getId(), playlist);

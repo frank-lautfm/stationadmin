@@ -107,7 +107,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
     boolean tracksDirty = false;
     if (tagFile != null) {
       int[] ids = tagFile.getIds();
-      this.ctx.getServer().untagTracks(ctx.getStationId(), tag, ids);
+      this.ctx.getServer().deleteTag(ctx.getStationId(), tag);
       tagFile.delete();
       this.staticTags.remove(tag.toLowerCase());
       this.firePropertyChange("tags", new ArrayList<String>(0), this.getTags());
