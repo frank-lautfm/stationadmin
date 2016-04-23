@@ -51,6 +51,7 @@ public class MigrationUtil {
   private Map<Integer, Integer> trackIdMap = new HashMap<Integer, Integer>();
   
   private MessageReceiver messageReceiver;
+  private boolean reloadTrackmapping = false;
 
   /**
    * @param station
@@ -76,41 +77,8 @@ public class MigrationUtil {
     log.info(this.clientV3.getTitleService().getTitleRegistry().getNumTitles() + " tracks");
     log.info(this.clientV3.getPlaylistService().getPlaylistRegistry().getAllPlaylists().size() + " playlists");
 
-    // Map<String, Integer> v4Ids = new HashMap<String, Integer>();
-    // SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMddmmss");
-    // for (RegisteredTrack track :
-    // clientV4.getTitleService().getTrackRegistry().getAllTracks()) {
-    // if (track.isOwnTitle()) {
-    // String key = track.getArtist() + ":" + track.getTitle() + ":" +
-    // track.getLength() + ":" + fmt.format(track.getUploadDate());
-    // v4Ids.put(key, track.getId());
-    // } else {
-    // String key = track.getArtist() + ":" + track.getTitle() + ":" +
-    // track.getLength();
-    // v4Ids.put(key, track.getId());
-    // }
-    // }
-    //
-    // for (RegisteredTitle track :
-    // clientV3.getTitleService().getTitleRegistry().getAllTitles()) {
-    // String key = null;
-    // if (track.isOwnTitle()) {
-    // key = track.getArtist() + ":" + track.getTitle() + ":" +
-    // track.getLength() + ":" + fmt.format(track.getUploadDate());
-    // } else {
-    // key = track.getArtist() + ":" + track.getTitle() + ":" +
-    // track.getLength();
-    // }
-    // Integer id = v4Ids.get(key);
-    // if (id != null) {
-    // this.trackIdMap.put(track.getId(), id);
-    // } else {
-    // log.info("no id for " + key);
-    // }
-    // }
-
     String file = this.clientV4.getSessionCtx().getDataDirectory() + "/trackmapping";
-    if (new File(file).exists()) {
+    if (new File(file).exists() && !reloadTrackmapping) {
       log.info("read track mapping");
       this.trackIdMap = this.readTrackMapping(file);
     } else {
@@ -118,6 +86,11 @@ public class MigrationUtil {
     }
     this.writeStationTrackMapping();
 
+  }
+  
+  public boolean isTrackmappingDownloaded() {
+    String file = this.clientV4.getSessionCtx().getDataDirectory() + "/trackmapping";
+    return new File(file).exists();
   }
 
   private Map<Integer, Integer> readTrackMapping(String file) throws IOException {
@@ -362,6 +335,20 @@ public class MigrationUtil {
    */
   public void setMessageReceiver(MessageReceiver messageReceiver) {
     this.messageReceiver = messageReceiver;
+  }
+
+  /**
+   * @return the reloadTrackmapping
+   */
+  public boolean isReloadTrackmapping() {
+    return reloadTrackmapping;
+  }
+
+  /**
+   * @param reloadTrackmapping the reloadTrackmapping to set
+   */
+  public void setReloadTrackmapping(boolean reloadTrackmapping) {
+    this.reloadTrackmapping = reloadTrackmapping;
   }
 
 }

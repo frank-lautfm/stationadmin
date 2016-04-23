@@ -738,7 +738,8 @@ public class PlaylistViewer extends JPanel {
     public void actionPerformed(ActionEvent evt) {
       Playlist playlist = (Playlist) playlistHolder.getValue();
       if (playlist != null) {
-        if (JOptionPane.showConfirmDialog(AppUtils.getRootFrame(), textProvider.getString("action.playlist.delete.msg.confirm", playlist.getName()),
+        String key = playlist.getType() == PlaylistType.ARCHIVED ? "action.playlist.delete.msg.confirm.archived" : "action.playlist.delete.msg.confirm";
+        if (JOptionPane.showConfirmDialog(AppUtils.getRootFrame(), textProvider.getString(key, playlist.getName()),
             null, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
           try {
             ctx.getAdminClient().getPlaylistService().deletePlaylist(playlist);
@@ -953,10 +954,12 @@ public class PlaylistViewer extends JPanel {
 
   }
   
-  protected class NewPlaylistAction extends AbstractAction {
+  protected class NewPlaylistAction extends PlaylistNewAction {
     private static final long serialVersionUID = -1127269220503072051L;
 
     public NewPlaylistAction() {
+      super(ctx, playlistHolder);
+      this.putValue(Action.NAME, null);
       this.putValue(Action.SMALL_ICON, AppUtils.getIcon("filenew.png"));
       this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.new.tooltip"));
       setEnabled(true);

@@ -3,16 +3,12 @@
  */
 package de.stationadmin.gui.track;
 
-import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
-import java.util.Random;
 
 import javax.swing.Action;
 import javax.swing.table.AbstractTableModel;
-
-import org.apache.commons.lang.ObjectUtils;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.value.ValueModel;
@@ -64,7 +60,7 @@ public class SearchResultTableModel extends AbstractTableModel {
 
   private PresentationModel<TrackQuery> queryModel;
   private SearchResultSet resultSet;
-  
+
   private Action searchAction;
 
   public SearchResultTableModel(ClientContext ctx, PresentationModel<TrackQuery> queryModel, ValueModel resultSetHolder) {
@@ -203,14 +199,14 @@ public class SearchResultTableModel extends AbstractTableModel {
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     if (rowIndex == 0) {
       Column col = Column.values()[columnIndex];
-      if(aValue == null && col == Column.YEAR) {
+      if (aValue == null && col == Column.YEAR) {
         aValue = 0;
       }
-      Object old = queryModel.getModel(col.getModelName()).getValue();
+      // Object old = queryModel.getModel(col.getModelName()).getValue();
       queryModel.getModel(col.getModelName()).setValue(aValue);
-      if(searchAction != null && !ObjectUtils.equals(old, aValue)) {
-        searchAction.actionPerformed(new ActionEvent(this, new Random().nextInt(), "search"));
-      }
+      // if(searchAction != null && !ObjectUtils.equals(old, aValue)) {
+      // searchAction.actionPerformed(new ActionEvent(this, new Random().nextInt(), "search"));
+      // }
     }
   }
 

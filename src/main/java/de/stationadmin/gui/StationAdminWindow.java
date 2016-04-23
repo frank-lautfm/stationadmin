@@ -66,6 +66,7 @@ import de.stationadmin.gui.migration.MigrationDlgDisplayAction;
 import de.stationadmin.gui.mp3explorer.MP3ExplorerDisplayAction;
 import de.stationadmin.gui.playlist.PlaylistContainer;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
+import de.stationadmin.gui.playlist.PlaylistNewAction;
 import de.stationadmin.gui.playlist.PlaylistTrackSearchOpenAction;
 import de.stationadmin.gui.playlist.ResetModifiedPlaylistsAction;
 import de.stationadmin.gui.playlist.SaveModifiedPlaylistsAction;
@@ -418,6 +419,7 @@ public class StationAdminWindow extends StationAdminFrame {
 
     {
       JMenu menuPlaylists = new JMenu(this.ctx.getTextProvider().getString("menu.playlist"));
+      menuPlaylists.add(new PlaylistNewAction(this.ctx, null));
       menuPlaylists.add(new TempPlaylistDisplayAction(this.ctx));
       menuPlaylists.add(new MultiPlaylistShuffleDisplayAction(this.ctx));
       menuPlaylists.add(new PlaylistTrackSearchOpenAction(this.ctx));

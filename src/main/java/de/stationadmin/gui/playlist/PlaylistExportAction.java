@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import javax.swing.Action;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -18,6 +19,7 @@ import de.stationadmin.base.playlist.exporter.PlaylistExporter;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.util.AbstractFileDialogAction;
+import de.stationadmin.gui.util.AppUtils;
 
 public class PlaylistExportAction extends AbstractFileDialogAction {
   private static final long serialVersionUID = -7107367385022205566L;
@@ -63,10 +65,14 @@ public class PlaylistExportAction extends AbstractFileDialogAction {
       extension = ((FileNameExtensionFilter) fileChooser.getFileFilter()).getExtensions()[0];
       name = name + "." + extension;
     }
-    try {
-      exporter.toFile(playlist, new File(name));
-    } catch (IOException e) {
-      JXErrorPane.showDialog(null, this.textProvider.createErrorInfo(e, "action.playlistexport.error"));
+    File exportFile = new File(name);
+    if (!exportFile.exists()
+        || JOptionPane.showConfirmDialog(AppUtils.getRootFrame(), textProvider.getString("action.playlistexport.confirm.msg"), textProvider.getString("action.playlistexport.confirm.title"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+      try {
+        exporter.toFile(playlist, exportFile);
+      } catch (IOException e) {
+        JXErrorPane.showDialog(null, this.textProvider.createErrorInfo(e, "action.playlistexport.error"));
+      }
     }
   }
 

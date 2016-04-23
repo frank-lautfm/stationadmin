@@ -32,7 +32,7 @@ public class TrackQuery {
   }
 
   public void setArtist(String artist) {
-    this.artist = artist;
+    this.artist = StringUtils.trimToNull(artist);
   }
 
   public String getTitle() {
@@ -40,7 +40,7 @@ public class TrackQuery {
   }
 
   public void setTitle(String title) {
-    this.title = title;
+    this.title = StringUtils.trimToNull(title);
   }
 
   public String getAlbum() {
@@ -48,7 +48,7 @@ public class TrackQuery {
   }
 
   public void setAlbum(String album) {
-    this.album = album;
+    this.album = StringUtils.trimToNull(album);
   }
 
   public String getGenre() {
@@ -56,7 +56,7 @@ public class TrackQuery {
   }
 
   public void setGenre(String genre) {
-    this.genre = genre;
+    this.genre = StringUtils.trimToNull(genre);
   }
 
   public Boolean getOwnTracks() {
@@ -88,7 +88,7 @@ public class TrackQuery {
   }
 
   public void setType(String type) {
-    this.type = type;
+    this.type = StringUtils.trimToNull(type);
   }
 
   public int getPage() {
@@ -158,6 +158,10 @@ public class TrackQuery {
 
   public void setTags(String[] tags) {
     this.tags = tags;
+  }
+  
+  public boolean isEmpty() {
+    return (this.ownTracks == null || !this.ownTracks.booleanValue()) && (this.privateTracks == null || !this.privateTracks.booleanValue()) && artist == null && title == null  && album == null && genre == null && tags == null;
   }
 
 }

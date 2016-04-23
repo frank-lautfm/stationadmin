@@ -82,6 +82,10 @@ public class PlaylistService implements Service {
     }
     
     if(playlist.getType() == PlaylistType.ONLINE && playlist.getId() > -1) {
+      File file = new File(this.dir + File.separatorChar + playlist.getId() + ".lfm");
+      if (!file.delete()) {
+        throw new IOException("Unable to delete " + file);
+      }
       this.ctx.getServer().deletePlaylist(ctx.getStationId(), playlist.getId());
     }
 

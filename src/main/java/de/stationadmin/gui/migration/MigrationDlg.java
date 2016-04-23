@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -33,6 +34,7 @@ public class MigrationDlg extends StationAdminFrame {
 
   private JTextArea logTf = new JTextArea(10, 40);
   private MigrateAction action = new MigrateAction();
+  private JCheckBox reloadTrackMapping = new JCheckBox("Track-Mapping neu laden");
 
   /**
    * @param ctx
@@ -49,9 +51,12 @@ public class MigrationDlg extends StationAdminFrame {
     this.setSize(500, 400);
     this.getContentPane().setLayout(new BorderLayout());
     this.getContentPane().add(new JScrollPane(this.logTf), BorderLayout.CENTER);
+    
+    this.reloadTrackMapping.setSelected(new MigrationUtil(ctx.getAdminClient()).isReloadTrackmapping());
 
-    JPanel bottom = new JPanel(new FlowLayout());
+    JPanel bottom = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
     bottom.add(new JButton(this.action));
+    bottom.add(this.reloadTrackMapping);
     this.getContentPane().add(bottom, BorderLayout.SOUTH);
   }
 
@@ -79,6 +84,7 @@ public class MigrationDlg extends StationAdminFrame {
       Thread t = new Thread() {
         public void run() {
           MigrationUtil util = new MigrationUtil(ctx.getAdminClient());
+          util.setReloadTrackmapping(reloadTrackMapping.isSelected());
 
           util.setMessageReceiver(new MessageReceiver() {
 

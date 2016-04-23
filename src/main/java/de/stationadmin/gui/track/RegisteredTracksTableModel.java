@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -279,6 +280,29 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
 
   public enum Column {
     TYPE, ARTIST, TITLE, ALBUM, LENGTH, GENRE, YEAR, UPLOAD, NUM_PLAYLISTS
+  }
+
+  /* (non-Javadoc)
+   * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
+   */
+  @Override
+  public Class<?> getColumnClass(int columnIndex) {
+    Column col = Column.values()[columnIndex];
+    switch(col) {
+    case ARTIST:
+    case TITLE:
+    case ALBUM:
+    case GENRE:
+      return String.class;
+    case TYPE:
+    case LENGTH:
+    case YEAR:
+    case NUM_PLAYLISTS:
+      return Integer.class;
+    case UPLOAD:
+      return Date.class;
+    }
+    return super.getColumnClass(columnIndex);
   }
 
 }

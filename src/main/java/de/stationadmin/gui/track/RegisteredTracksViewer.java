@@ -49,7 +49,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXStatusBar;
@@ -57,7 +56,6 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.AbstractHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.table.TableColumnExt;
-import org.jdesktop.swingx.table.TableColumnModelExt;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.list.SelectionInList;
@@ -70,9 +68,9 @@ import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.tag.TagSet;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
+import de.stationadmin.base.track.RegisteredTrack.PlaylistStatistics;
 import de.stationadmin.base.track.Title;
 import de.stationadmin.base.track.TrackService;
-import de.stationadmin.base.track.RegisteredTrack.PlaylistStatistics;
 import de.stationadmin.base.track.exporter.TitleListCSVExporter;
 import de.stationadmin.base.track.exporter.TitleListExcelExporter;
 import de.stationadmin.base.track.exporter.TitleListExporter;
@@ -112,7 +110,7 @@ public class RegisteredTracksViewer extends JPanel {
   private ValueModel length = new ValueHolder(0);
 
   private RegisteredTracksTableModel tableModel;
-  private boolean allColumnsDisplayed = false;
+  // private boolean allColumnsDisplayed = false;
 
   public RegisteredTracksViewer(ClientContext ctx) {
     super();
@@ -359,17 +357,6 @@ public class RegisteredTracksViewer extends JPanel {
   }
 
 
-  private void displayAllColumns(JXTable table, boolean display) {
-    List<TableColumn> cols = ((TableColumnModelExt) table.getColumnModel()).getColumns(true);
-
-    ((TableColumnExt) cols.get(Column.ALBUM.ordinal())).setVisible(display);
-    ((TableColumnExt) cols.get(Column.YEAR.ordinal())).setVisible(display);
-    ((TableColumnExt) cols.get(Column.GENRE.ordinal())).setVisible(display);
-    ((TableColumnExt) cols.get(Column.UPLOAD.ordinal())).setVisible(display);
-
-    this.allColumnsDisplayed = display;
-  }
-
   private JComponent createTablePanel() {
     this.tableModel = new RegisteredTracksTableModel(this.textProvider, this.titleService.getTrackRegistry(),
         this.titleTagService, this.tagSetHolder, this.tagHolder, this.invertTagHolder, this.uploadFilterHolder);
@@ -415,22 +402,9 @@ public class RegisteredTracksViewer extends JPanel {
     table.getColumnModel().getColumn(Column.UPLOAD.ordinal()).setMaxWidth(110);
     table.getColumnModel().getColumn(Column.YEAR.ordinal()).setPreferredWidth(60);
     table.getColumnModel().getColumn(Column.YEAR.ordinal()).setMaxWidth(60);
-
-    displayAllColumns(table, false);
-    this.uploadFilterHolder.addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        boolean display = false;
-        if (evt.getNewValue() instanceof UploadFilter) {
-          UploadFilter filter = (UploadFilter) evt.getNewValue();
-          display = filter == UploadFilter.USER_ALL || filter == UploadFilter.USER_PRIVATE
-              || filter == UploadFilter.USER_PUBLIC;
-        }
-        displayAllColumns(table, display);
-      }
-
-    });
+    
+    ((TableColumnExt) table.getColumnModel().getColumn(Column.GENRE.ordinal())).setVisible(false);
+    table.setColumnControlVisible(true);
 
     table.addHighlighter(new AbstractHighlighter() {
 
@@ -738,7 +712,7 @@ public class RegisteredTracksViewer extends JPanel {
 
       if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
         try {
-          exporter.toFile(tableModel.getTracks(), fileChooser.getSelectedFile(), allColumnsDisplayed);
+          exporter.toFile(tableModel.getTracks(), fileChooser.getSelectedFile(), true);
         } catch (Exception ex) {
           JXErrorPane.showDialog(ctx.getRootWindow(), ctx.createErrorInfo(ex, "titles.action.export.msg.failed"));
         }

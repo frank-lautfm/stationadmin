@@ -12,10 +12,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Paging {
-  @JsonProperty("total_pages")
-  private int totalPages;
-  @JsonProperty("total_entries")
-  private int totalEntries;
   @JsonProperty("current_page")
   private int currentPage;
   @JsonProperty("next_page")
@@ -23,22 +19,6 @@ public class Paging {
   @JsonProperty("prev_page")
   private int prevPage;
   
-  public int getTotalPages() {
-    return totalPages;
-  }
-
-  public void setTotalPages(int totalPages) {
-    this.totalPages = totalPages;
-  }
-
-  public int getTotalEntries() {
-    return totalEntries;
-  }
-
-  public void setTotalEntries(int totalEntries) {
-    this.totalEntries = totalEntries;
-  }
-
   public int getCurrentPage() {
     return currentPage;
   }

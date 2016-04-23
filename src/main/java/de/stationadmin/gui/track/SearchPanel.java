@@ -5,6 +5,7 @@ package de.stationadmin.gui.track;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -16,6 +17,7 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
@@ -62,7 +64,7 @@ public class SearchPanel extends JPanel {
 
   private void init(boolean multiSelection) {
     this.setLayout(new BorderLayout());
-    SearchResultViewer viewer =new SearchResultViewer(ctx, model, this.searchResultHolder, this.selectionHolder, multiSelection);
+    SearchResultViewer viewer = new SearchResultViewer(ctx, model, this.searchResultHolder, this.selectionHolder, multiSelection);
     viewer.setSearchAction(new Search());
     this.add(viewer, BorderLayout.CENTER);
     this.add(this.createBottomPanel(), BorderLayout.SOUTH);
@@ -89,10 +91,10 @@ public class SearchPanel extends JPanel {
 
     }
     panel.add(new JLabel("|"), cc.xy(2, 1));
-    
+
     {
       JPanel box = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 0));
-      
+
       ValueModel ownTracksModel = new ValueHolder(false);
       ownTracksModel.addValueChangeListener(new PropertyChangeListener() {
 
@@ -117,7 +119,7 @@ public class SearchPanel extends JPanel {
       JCheckBox privateCb = BasicComponentFactory.createCheckBox(privateTracksModel, "private Titel");
       box.add(privateCb);
       panel.add(box, cc.xy(3, 1));
-      
+
     }
 
     {
@@ -126,8 +128,7 @@ public class SearchPanel extends JPanel {
       toolbar.setFloatable(false);
       toolbar.add(new JButton(searchAction));
       panel.add(toolbar, cc.xy(5, 1));
-      
-      
+
     }
 
     searchResultHolder.addValueChangeListener(new PropertyChangeListener() {
@@ -202,10 +203,9 @@ public class SearchPanel extends JPanel {
 
     NumberFormat fmt = NumberFormat.getIntegerInstance();
     fmt.setGroupingUsed(false);
-    JTextField tf = number ? BasicComponentFactory.createIntegerField(this.model.getModel(property), fmt, 0) : BasicComponentFactory.createTextField(
-        this.model.getModel(property), false);
+    JTextField tf = number ? BasicComponentFactory.createIntegerField(this.model.getModel(property), fmt, 0) : BasicComponentFactory.createTextField(this.model.getModel(property), false);
     tf.setColumns(cols);
-    tf.addActionListener(searchAction);
+    // tf.addActionListener(searchAction); // disabled - risk of expensive queries
     panel.add(tf, new CellConstraints(3, 1));
 
     return panel;
@@ -215,10 +215,16 @@ public class SearchPanel extends JPanel {
     private static final long serialVersionUID = 7983662248044194876L;
 
     protected void doSearch() {
-      try {
-        searchResultHolder.setValue(ctx.getAdminClient().getTrackService().find(model.getBean()));
-      } catch (Exception e) {
-        JXErrorPane.showDialog(null, ctx.getTextProvider().createErrorInfo(e, "action.search.error"));
+      TrackQuery query = model.getBean();
+      if (!query.isEmpty()) {
+        try {
+          searchResultHolder.setValue(ctx.getAdminClient().getTrackService().find(model.getBean()));
+        } catch (Exception e) {
+          JXErrorPane.showDialog(null, ctx.getTextProvider().createErrorInfo(e, "action.search.error"));
+        }
+      }
+      else {
+        JXErrorPane.showDialog(null, ctx.getTextProvider().createErrorInfo(null, "action.search.empty"));
       }
     }
 

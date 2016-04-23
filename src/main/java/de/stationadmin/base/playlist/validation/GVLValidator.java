@@ -120,7 +120,7 @@ public class GVLValidator implements PlaylistValidator {
     for (Playlist playlist : playlists) {
       for (Entry entry : playlist.getEntries()) {
         TitleEntry titleEntry = new TitleEntry(playlist, entry, startTime);
-        if (titleEntry.getTitle() != null && titleEntry.getTitle().getType() == 1) {
+        if (titleEntry.getTitle() != null && titleEntry.getTitle().getType() == 1 && titleEntry.getTitle().getArtist() != null) {
           String artist = titleEntry.getTitle().getArtist().toLowerCase().trim();
           int featPos = artist.indexOf(" feat");
           if (featPos > 0) {

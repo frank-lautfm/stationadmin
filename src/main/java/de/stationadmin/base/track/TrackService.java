@@ -531,8 +531,10 @@ public class TrackService implements Service {
         if (requestMore && this.synchronizedOwnTill != null && track.getCreatedAt().getTime() < this.synchronizedOwnTill.getTime()) {
           requestMore = false;
         }
-        requestMore = requestMore && list.hasNextPage();
+        
+        
       }
+      requestMore = requestMore && list.hasNextPage();
       page++;
     } while (requestMore);
 

@@ -59,15 +59,14 @@ public class SearchResultViewer extends JPanel {
   private PlaySnippetAction playSnippetAction;
   private SearchResultTableModel tableModel;
 
-  public SearchResultViewer(ClientContext ctx, PresentationModel<TrackQuery> queryModel, ValueModel searchResultHolder, ValueModel selectionHolder,
-      boolean multiSelection) {
+  public SearchResultViewer(ClientContext ctx, PresentationModel<TrackQuery> queryModel, ValueModel searchResultHolder, ValueModel selectionHolder, boolean multiSelection) {
     this.ctx = ctx;
     this.queryModel = queryModel;
     this.searchResultHolder = searchResultHolder;
     this.selectionHolder = selectionHolder;
     this.init(multiSelection);
   }
-  
+
   public void setSearchAction(Action action) {
     this.tableModel.setSearchAction(action);
   }
@@ -113,20 +112,22 @@ public class SearchResultViewer extends JPanel {
         }
 
         if (oldAsc != query.isOrderAscending() || !StringUtils.equals(oldOrder, query.getOrderBy())) {
-          SwingUtilities.invokeLater(new Runnable() {
+          if (!query.isEmpty()) {
+            SwingUtilities.invokeLater(new Runnable() {
 
-            @Override
-            public void run() {
-              try {
-                TrackQuery query = queryModel.getBean();
-                query.setPage(1);
-                searchResultHolder.setValue(ctx.getAdminClient().getTrackService().find(query));
-              } catch (Exception e) {
-                JXErrorPane.showDialog(null, ctx.getTextProvider().createErrorInfo(e, "action.search.error"));
+              @Override
+              public void run() {
+                try {
+                  TrackQuery query = queryModel.getBean();
+                  query.setPage(1);
+                  searchResultHolder.setValue(ctx.getAdminClient().getTrackService().find(query));
+                } catch (Exception e) {
+                  JXErrorPane.showDialog(null, ctx.getTextProvider().createErrorInfo(e, "action.search.error"));
+                }
               }
-            }
 
-          });
+            });
+          }
         }
 
       }

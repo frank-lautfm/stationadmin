@@ -75,19 +75,16 @@ public class LautfmAdminService {
 
       HttpClientBuilder hcBuilder = HttpClients.custom();
       hcBuilder.setSSLSocketFactory(sslsf).build();
-      hcBuilder.setRoutePlanner(new DefaultProxyRoutePlanner(new HttpHost("localhost", 8888)));
+      if (System.getProperty("stationadmin.proxy", "false").equals("true")) {
+        hcBuilder.setRoutePlanner(new DefaultProxyRoutePlanner(new HttpHost("localhost", 8888)));
+      }
       hcBuilder.setUserAgent("Mozilla/4.0 (compatible; Station Admin " + Version.VERSION + "; " + System.getProperty("os.name") + ")");
-      
-      RequestConfig config = RequestConfig.custom()
-          .setSocketTimeout(90 * 1000)
-          .setConnectTimeout(20 * 1000)
-          .build();
-      HttpClients.custom()
-      .setDefaultRequestConfig(config);   
-      
+
+      RequestConfig config = RequestConfig.custom().setSocketTimeout(90 * 1000).setConnectTimeout(20 * 1000).build();
+      HttpClients.custom().setDefaultRequestConfig(config);
+
       return hcBuilder.build();
 
-      
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

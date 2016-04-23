@@ -62,9 +62,9 @@
     Target: compile
   ==============================================================================
   -->
-	<target name="compile" description="Compiles it">
+	<target name="compile">
 		<mkdir dir="${build.dir}" />
-		<javac srcdir="${src.dir.java}" destdir="${build.dir}" debug="${debug}" optimize="${optimize}" deprecation="${deprecation}" excludes="**/Test*.java" source="1.6" target="1.6">
+		<javac srcdir="${src.dir.java}" destdir="${build.dir}" debug="${debug}" optimize="${optimize}" deprecation="${deprecation}" excludes="**/Test*.java" source="1.6" target="1.6" encoding="iso-8859-15">
 			<classpath refid="classpath" />
 		</javac>
 
@@ -109,7 +109,7 @@
 				<include name="**/*" />
 			</fileset>
 			<manifest>
-				<attribute name="Main-Class" value="de.emjoy.stationadmin.gui.Start" />
+				<attribute name="Main-Class" value="de.stationadmin.gui.Start" />
 				<attribute name="Class-Path" value="${jar.classpath}" />
 			</manifest>
 		</jar>

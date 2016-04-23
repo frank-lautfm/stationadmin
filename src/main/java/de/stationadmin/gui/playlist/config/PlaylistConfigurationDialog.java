@@ -29,6 +29,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
+import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.SwingTools;
 
@@ -163,6 +164,9 @@ public class PlaylistConfigurationDialog extends JDialog {
           try {
             playlistService.savePlaylist(model.getBean());
             dispose();
+            
+            ctx.getJumpHandler().jumpTo(new PlaylistEntryJumpTarget(model.getBean(), null));
+            
           } catch (Exception e) {
             JXErrorPane.showFrame(PlaylistConfigurationDialog.this,
                 textProvider.createErrorInfo(e, "playlistcfg.msg.savefailed"));
