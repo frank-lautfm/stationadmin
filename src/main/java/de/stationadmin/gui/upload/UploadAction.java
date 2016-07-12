@@ -26,7 +26,7 @@ public class UploadAction extends AbstractAction {
   public UploadAction(ClientContext ctx) {
     super();
     this.ctx = ctx;
-    this.setEnabled(false);
+    // this.setEnabled(false);
     this.putValue(Action.NAME, ctx.getTextProvider().getString("action.upload.name"));
   }
 

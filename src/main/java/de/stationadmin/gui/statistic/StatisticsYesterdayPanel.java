@@ -74,8 +74,7 @@ public class StatisticsYesterdayPanel extends JPanel {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("durationYesterday")) {
-          int minutes = model.getBean().getDurationYesterday();
-          int hours = minutes / 60;
+          int hours = model.getBean().getDurationYesterday();
           tlhY.setValue(hours);
         }
       }

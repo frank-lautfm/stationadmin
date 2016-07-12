@@ -16,6 +16,7 @@ import de.stationadmin.gui.ClientContext;
  *
  */
 public class TitleTypeListCellRenderer extends DefaultListCellRenderer {
+  private static final long serialVersionUID = 4093668181778307255L;
   private ClientContext ctx;
   
   public TitleTypeListCellRenderer(ClientContext ctx) {
@@ -29,7 +30,7 @@ public class TitleTypeListCellRenderer extends DefaultListCellRenderer {
    *      java.lang.Object, int, boolean, boolean)
    */
   @Override
-  public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+  public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
     Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
     this.setText(ctx.getString("title.type." + value));
     return comp;

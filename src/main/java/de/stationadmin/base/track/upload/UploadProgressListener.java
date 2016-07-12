@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.stationadmin.gui.upload;
+package de.stationadmin.base.track.upload;
 
 import java.io.File;
 
@@ -80,7 +80,7 @@ public class UploadProgressListener implements ProgressListener {
   /**
    * @return the totalUploaded
    */
-  protected int getTotalUploaded() {
+  public int getTotalUploaded() {
     return totalUploaded + this.currentFileUploaded;
   }
 

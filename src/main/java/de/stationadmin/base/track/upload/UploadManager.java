@@ -1,0 +1,267 @@
+/**
+ * 
+ */
+package de.stationadmin.base.track.upload;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import de.stationadmin.base.SessionCtx;
+import de.stationadmin.base.track.DetailedTrack;
+import de.stationadmin.base.track.TrackService;
+import de.stationadmin.base.util.AbstractBean;
+
+/**
+ * 
+ * @author Frank Korf
+ * 
+ */
+public class UploadManager extends AbstractBean {
+  private static final Logger log = Logger.getLogger(UploadManager.class);
+  private UploadProgressListener progressListener = new UploadProgressListener();
+  private List<QueuedTrack> queue = Collections.synchronizedList(new ArrayList<QueuedTrack>());
+  private List<QueuedTrack> processedTracks = Collections.synchronizedList(new ArrayList<QueuedTrack>());
+  private volatile int currentIndex = 0;
+  private volatile boolean running = false;
+  private volatile boolean stop = false;
+
+  private TrackService trackService;
+  private SessionCtx sessionCtx;
+  private TrackProcessingMonitor processingMonitor;
+
+  public UploadManager(TrackService trackService, SessionCtx ctx) {
+    super();
+    this.trackService = trackService;
+    this.sessionCtx = ctx;
+    this.loadQueue();
+  }
+
+  public boolean add(File file) {
+    if (file.exists() && !file.isDirectory() && file.getName().toLowerCase().endsWith("mp3") && file.length() < 1024 * 1024 * 25) {
+      int oldRemaining = this.getNumberOfRemainingFiles();
+      this.queue.add(new QueuedTrack(file));
+      this.progressListener.add(file);
+      this.firePropertyChange("numberOfRemainingFiles", oldRemaining, this.getNumberOfRemainingFiles());
+      this.saveQueue();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public boolean removeFile(File file) {
+    if (this.currentIndex < this.queue.size() && this.queue.get(currentIndex).getFile().getFile().getAbsolutePath().equals(file.getAbsolutePath())) {
+      this.progressListener.setAbortCurrent(true);
+    }
+    int oldRemaining = this.getNumberOfRemainingFiles();
+    int startIndex = this.running ? this.currentIndex + 1 : this.currentIndex;
+    for (int i = startIndex; i < this.queue.size(); i++) {
+      if (this.queue.get(i).getFile().getFile().getAbsolutePath().equals(file.getAbsolutePath())) {
+        this.queue.remove(i);
+        this.progressListener.remove(file);
+        this.firePropertyChange("numberOfRemainingFiles", oldRemaining, this.getNumberOfRemainingFiles());
+        this.saveQueue();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public int getNumberOfRemainingFiles() {
+    return this.queue.size() - this.currentIndex;
+  }
+
+  public void run() throws IOException {
+    this.setRunning(true);
+    this.stop = false;
+    if (this.processingMonitor == null || !this.processingMonitor.isAlive()) {
+      this.processingMonitor = new TrackProcessingMonitor();
+      this.processingMonitor.start();
+    }
+    try {
+      while (this.currentIndex < this.queue.size() && !stop) {
+        try {
+          this.progressListener.setAbortCurrent(false);
+          QueuedTrack entry = this.queue.get(this.currentIndex);
+          entry.setResponse(this.trackService.upload(entry.getFile(), progressListener));
+        } catch (InterruptedIOException e) {
+          log.info("upload interrupted");
+        }
+        this.progressListener.currentUploadCompleted();
+        int oldRemaining = this.getNumberOfRemainingFiles();
+        this.currentIndex++;
+        this.firePropertyChange("numberOfRemainingFiles", oldRemaining, this.getNumberOfRemainingFiles());
+        this.saveQueue();
+      }
+      this.processingMonitor.abort();
+      this.progressListener.reset();
+    } finally {
+      this.setRunning(false);
+    }
+  }
+
+  private void saveQueue() {
+    List<String> list = new ArrayList<String>();
+    for (int i = this.currentIndex; i < this.queue.size(); i++) {
+      QueuedTrack entry = queue.get(i);
+      list.add(entry.getFile().getFile().getAbsolutePath() + "\t" + (entry.getFile().isPrivateTrack() ? "1" : "0"));
+    }
+    String filename = this.sessionCtx.getStationDirectory() + "uploadqueue.txt";
+    try {
+      FileOutputStream out = new FileOutputStream(new File(filename));
+      IOUtils.writeLines(list, null, out, "UTF-8");
+      IOUtils.closeQuietly(out);
+    } catch (IOException e) {
+      log.error("unable to write upload queue file", e);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private void loadQueue() {
+    String filename = this.sessionCtx.getStationDirectory() + "uploadqueue.txt";
+    if (new File(filename).exists()) {
+      try {
+        FileInputStream in = new FileInputStream(filename);
+        List<String> lines = (List<String>) IOUtils.readLines(in, "UTF-8");
+        IOUtils.closeQuietly(in);
+        int old = this.queue.size();
+        for (String line : lines) {
+          String[] parts = StringUtils.split(line, "\t");
+          File file = new File(parts[0]);
+          ;
+          if (file.exists()) {
+            QueuedTrack track = new QueuedTrack(file);
+            if (parts.length > 1 && parts[1].equals("1")) {
+              track.getFile().setPrivateTrack(true);
+            }
+            this.queue.add(track);
+            this.progressListener.add(file);
+          }
+        }
+        this.firePropertyChange("numberOfRemainingFiles", old, this.queue.size());
+      } catch (IOException e) {
+        log.error("unable to write upload queue file", e);
+      }
+
+    }
+
+  }
+
+  private void setRunning(boolean running) {
+    boolean old = this.running;
+    this.running = running;
+    this.firePropertyChange("running", old, running);
+  }
+
+  public void stop() {
+    this.stop = true;
+  }
+
+  /**
+   * @return the progressListener
+   */
+  public UploadProgressListener getProgressListener() {
+    return progressListener;
+  }
+
+  /**
+   * @return the files
+   */
+  public List<QueuedTrack> getQueue() {
+    return Collections.unmodifiableList(queue);
+  }
+
+  /**
+   * @return the files
+   */
+  public List<QueuedTrack> getProcessedTracks() {
+    return this.processedTracks;
+  }
+
+  /**
+   * @return the currentIndex
+   */
+  public int getCurrentIndex() {
+    return currentIndex;
+  }
+
+  /**
+   * @return the running
+   */
+  public boolean isRunning() {
+    return running;
+  }
+
+  /**
+   * @return the trackService
+   */
+  public TrackService getTrackService() {
+    return trackService;
+  }
+
+  protected int checkUploadedTracks() {
+    int remaining = 0;
+    for (QueuedTrack entry : queue) {
+      if (entry.getTrack() == null) {
+        remaining++;
+        if (entry.getResponse() != null) {
+          try {
+            DetailedTrack track = trackService.getTrack(entry.getResponse().getId());
+            if(track.getId() > 0) {
+              remaining--;
+              entry.setTrack(track);
+              processedTracks.add(entry); // TODO fire event?
+            }
+          } catch (IOException e) {
+
+          }
+        }
+
+      }
+    }
+    return remaining;
+  }
+
+  private void clearQueue() {
+    queue.clear();
+    currentIndex = 0;
+    progressListener.setCurrentValue(0);
+    progressListener.setMaxValue(0);
+  }
+
+  private class TrackProcessingMonitor extends Thread {
+    private boolean abort = false;
+
+    public void run() {
+      int remaining = 0;
+      do {
+        try {
+          Thread.sleep(1000 * 10);
+        } catch (Exception e) {
+        }
+        remaining = checkUploadedTracks();
+
+      } while (!abort || remaining > 0);
+
+      // if everything is uploaded we can clear the queue
+      if (currentIndex == queue.size()) {
+        clearQueue();
+      }
+    }
+
+    public void abort() {
+      this.abort = true;
+    }
+  }
+
+}

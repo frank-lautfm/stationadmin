@@ -6,6 +6,9 @@ package de.stationadmin.base.statistics;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.TimerTask;
 
 import org.apache.commons.lang.StringUtils;
@@ -14,6 +17,8 @@ import org.apache.log4j.Logger;
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.Settings;
+import de.stationadmin.base.StationStatus;
+import de.stationadmin.lfm.backend.Statistics;
 
 /**
  * @author Frank
@@ -76,8 +81,7 @@ public class StatisticsService implements Service {
     if (this.settings.getStatisticsRefreshInterval() > 0) {
       log.info("configure statistics refresher task");
       this.statsRefresherTask = new StatsRefresher();
-      this.sessionCtx.getTimer().schedule(this.statsRefresherTask, 0,
-          this.settings.getStatisticsRefreshInterval() * 1000 * 60);
+      this.sessionCtx.getTimer().schedule(this.statsRefresherTask, 0, this.settings.getStatisticsRefreshInterval() * 1000 * 60);
       this.sessionCtx.getStationStatus().removePropertyChangeListener("currentTitleId", this.onTitleChangeRefresher);
     }
     if (this.settings.getStatisticsRefreshInterval() < 0) {
@@ -136,30 +140,44 @@ public class StatisticsService implements Service {
   }
 
   /**
-   * Retrieves the latest stastitics from the laut.fm server (including current
-   * listeners)
+   * Retrieves the latest stastitics from the laut.fm server (including current listeners)
    * 
    * @throws IOException
    */
   public void refreshStatistics() throws IOException {
     // log.debug("refresh statistics");
-    // Statistics stats = new Statistics(); // FIXME
-    // this.sessionCtx.getServer().getStatistics();
-    // StationStatus stationStatus = this.sessionCtx.getStationStatus();
-    // stationStatus.setCurrentListeners(stats.getCurrentListeners());
-    // stationStatus.setRank(stats.getRank());
-    // stationStatus.setAvgListeningTimeYesterday(stats.getAvgListeningTimeYesterday());
-    // stationStatus.setListenersYesterday(stats.getListenersYesterday());
-    // stationStatus.setAvgListeningTimeToday(stats.getAvgListeningTimeToday());
-    // stationStatus.setListenersToday(stats.getListenersToday());
-    // stationStatus.setDurationToday(stats.getDurationToday());
-    // stationStatus.setDurationYesterday(stats.getDurationYesterday());
+    Statistics stats = sessionCtx.getServer().getStatistics(sessionCtx.getStationId());
+    StationStatus stationStatus = this.sessionCtx.getStationStatus();
+    stationStatus.setCurrentListeners(stats.getListenersNow());
+    stationStatus.setRank(stats.getPositionNow());
+
+    DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+    Calendar cal = Calendar.getInstance();
+    cal.setTimeInMillis(System.currentTimeMillis());
+    String today = fmt.format(cal.getTime());
+    cal.add(Calendar.DAY_OF_MONTH, -1);
+    String yesterday = fmt.format(cal.getTime());
+
+    int listenersToday = stats.getSwitchonsLog().containsKey(today) ? stats.getSwitchonsLog().get(today) : 0;
+    int tlhToday = stats.getTlhLog().containsKey(today) ? stats.getTlhLog().get(today) : 0;
+
+    int listenersYesterday = stats.getSwitchonsLog().containsKey(yesterday) ? stats.getSwitchonsLog().get(yesterday) : 0;
+    int tlhYesterday = stats.getTlhLog().containsKey(yesterday) ? stats.getTlhLog().get(yesterday) : 0;
+
+    stationStatus.setAvgListeningTimeYesterday(listenersYesterday > 0 ? tlhYesterday * 60 / listenersYesterday : 0);
+    stationStatus.setListenersYesterday(listenersYesterday);
+    stationStatus.setAvgListeningTimeToday(listenersToday > 0 ? tlhToday * 60 / listenersToday : 0);
+    stationStatus.setListenersToday(listenersToday);
+    stationStatus.setDurationToday(tlhToday);
+    stationStatus.setDurationYesterday(tlhYesterday);
 
     // add current listeners to history
-    // this.listenerStatsHistory.add(stats.getCurrentListeners(), stats.getRank());
+    this.listenerStatsHistory.add(stats.getListenersNow(), stats.getPositionNow());
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.emjoy.stationadmin.base.Service#startBackgrounTasks()
    */
   @Override

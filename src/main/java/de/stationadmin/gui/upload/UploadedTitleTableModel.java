@@ -31,7 +31,6 @@ public class UploadedTitleTableModel extends AbstractTableModel {
   @Override
   public Class<?> getColumnClass(int columnIndex) {
     switch (Column.values()[columnIndex]) {
-    case SAVE:
     case PRIVATE:
       return Boolean.class;
     case TYPE:
@@ -153,7 +152,7 @@ public class UploadedTitleTableModel extends AbstractTableModel {
   }
 
   public enum Column {
-    SAVE, ARTIST, TITLE, ALBUM, GENRE, YEAR, TYPE, PRIVATE
+    ARTIST, TITLE, ALBUM, GENRE, YEAR, TYPE, PRIVATE
 
   }
 

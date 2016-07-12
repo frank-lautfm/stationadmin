@@ -60,6 +60,7 @@ import de.stationadmin.gui.util.Option;
  * @author Frank Korf
  * 
  */
+@SuppressWarnings("rawtypes")
 public class UploadedTitlePanel extends JPanel {
   private static final long serialVersionUID = 7104176809260469070L;
   private ClientContext ctx;
@@ -84,8 +85,6 @@ public class UploadedTitlePanel extends JPanel {
     this.setLayout(new FormLayout("100dlu:grow,5dlu,pref", "50dlu:grow,5dlu,pref"));
     CellConstraints cc = new CellConstraints();
     final JXTable table = new JXTable(this.model);
-    table.getColumn(Column.SAVE.ordinal()).setPreferredWidth(50);
-    table.getColumn(Column.SAVE.ordinal()).setMaxWidth(50);
     table.getColumn(Column.PRIVATE.ordinal()).setPreferredWidth(50);
     table.getColumn(Column.PRIVATE.ordinal()).setMaxWidth(50);
     table.getColumn(Column.GENRE.ordinal()).setPreferredWidth(80);
@@ -111,7 +110,7 @@ public class UploadedTitlePanel extends JPanel {
 
     TableColumn typeCol = table.getColumnModel().getColumn(Column.TYPE.ordinal());
     typeCol.setCellRenderer(new TypeRenderer());
-    JComboBox typeCmb = new JComboBox(new Integer[]{1, 2, 3});
+    JComboBox<Integer> typeCmb = new JComboBox<Integer>(new Integer[]{1, 2, 3});
     typeCmb.setRenderer(new TitleTypeListCellRenderer(ctx));
     typeCol.setCellEditor(new DefaultCellEditor(typeCmb));
 
@@ -174,7 +173,7 @@ public class UploadedTitlePanel extends JPanel {
         private static final long serialVersionUID = 6168519270635870257L;
 
         @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
             boolean cellHasFocus) {
           Component cmp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
           if (value.equals(Boolean.FALSE)) {

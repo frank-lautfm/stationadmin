@@ -259,7 +259,7 @@ public class StationAdminClient {
   }
 
   public boolean isUploadAvailable() throws IOException {
-    return false; // FIXME this.sessionCtx.getServer().isUploadAvailable();
+    return true; // FIXME this.sessionCtx.getServer().isUploadAvailable();
   }
 
   /**

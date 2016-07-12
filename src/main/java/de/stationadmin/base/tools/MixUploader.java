@@ -17,6 +17,7 @@ import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackMatcher;
 import de.stationadmin.lfm.backend.ProgressListener;
+import de.stationadmin.lfm.backend.TrackUpload;
 
 /**
  * Toll class for uploading DJ mixes
@@ -99,7 +100,7 @@ public class MixUploader {
 
       for (File track : this.tracks) {
         log.info("upload " + track.getName() + " / " + (track.length() / 1024) + " kb");
-        this.client.getTrackService().upload(track, new ProgressListener() {
+        this.client.getTrackService().upload(new TrackUpload(track), new ProgressListener() {
 
           @Override
           public void setMaxValue(int max) {

@@ -35,6 +35,8 @@ import de.stationadmin.base.track.format.ExtendedTrackFormat;
 import de.stationadmin.lfm.backend.ProgressListener;
 import de.stationadmin.lfm.backend.Track;
 import de.stationadmin.lfm.backend.TrackList;
+import de.stationadmin.lfm.backend.TrackUpload;
+import de.stationadmin.lfm.backend.UploadResponse;
 import de.stationadmin.lfmapi.Song;
 
 /**
@@ -551,8 +553,8 @@ public class TrackService implements Service {
    * @return <code>true</code> on success
    * @throws IOException
    */
-  public boolean upload(File file, ProgressListener progressListener) throws IOException {
-    return false; // this.ctx.getServer().upload(file, progressListener);
+  public UploadResponse upload(TrackUpload track, ProgressListener progressListener) throws IOException {
+    return this.ctx.getServer().uploadTrack(ctx.getStationId(), track, progressListener);
   }
 
   /**

@@ -10,7 +10,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -30,6 +29,8 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
+import de.stationadmin.base.track.upload.QueuedTrack;
+import de.stationadmin.base.track.upload.UploadManager;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.util.ComponentFactory;
 
@@ -42,7 +43,7 @@ public class UploadProgressPanel extends JPanel {
   private static final long serialVersionUID = 9192902816894066612L;
   private ClientContext ctx;
   private UploadManager uploadManager;
-  private DefaultListModel remainingFilesModel;
+  private DefaultListModel<QueuedTrack> remainingFilesModel;
   private JXList remainingFilesList;
   private JProgressBar currentFileProgress;
   private JProgressBar totalProgress;
@@ -59,7 +60,7 @@ public class UploadProgressPanel extends JPanel {
   }
 
   private void init() {
-    this.remainingFilesModel = new DefaultListModel();
+    this.remainingFilesModel = new DefaultListModel<QueuedTrack>();
     this.remainingFilesList = new JXList(this.remainingFilesModel);
     this.remainingFilesList.setCellRenderer(new FilenameListCellRenderer());
     this.remainingFilesList.addHighlighter(new AbstractHighlighter() {
@@ -84,7 +85,7 @@ public class UploadProgressPanel extends JPanel {
         Object[] values = remainingFilesList.getSelectedValues();
         if(values != null) {
           for(Object value : values) {
-            uploadManager.removeFile((File)value);
+            uploadManager.removeFile(((QueuedTrack)value).getFile().getFile());
           }
         }
       }
@@ -133,7 +134,7 @@ public class UploadProgressPanel extends JPanel {
           totalProgress.setValue(uploadManager.getProgressListener().getTotalUploaded());
           int maxKb = uploadManager.getProgressListener().getTotalMax() / 1024;
           int uploadedKb = uploadManager.getProgressListener().getTotalUploaded() / 1024;
-          totalProgress.setToolTipText((uploadManager.getCurrentIndex() + 1) + " / " + uploadManager.getFiles().size() + " Dateien, " + uploadedKb
+          totalProgress.setToolTipText((uploadManager.getCurrentIndex() + 1) + " / " + uploadManager.getQueue().size() + " Dateien, " + uploadedKb
               + " / " + maxKb + " kb");
 
         }
@@ -168,11 +169,11 @@ public class UploadProgressPanel extends JPanel {
 
   protected void rebuildListModel() {
     this.remainingFilesModel.removeAllElements();
-    List<File> files = this.uploadManager.getFiles();
+    List<QueuedTrack> queue = this.uploadManager.getQueue();
     int start = this.uploadManager.getCurrentIndex();
-    for (int i = start; i < files.size(); i++) {
-      File file = files.get(i);
-      this.remainingFilesModel.addElement(file);
+    for (int i = start; i < queue.size(); i++) {
+      QueuedTrack entry = queue.get(i);
+      this.remainingFilesModel.addElement(entry);
     }
   }
 

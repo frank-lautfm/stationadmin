@@ -29,6 +29,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.playlist.trackimport.MP3TrackImportTask;
 import de.stationadmin.base.playlist.trackimport.TrackImportTask.Status;
 import de.stationadmin.base.track.RegisteredTrack;
+import de.stationadmin.base.track.upload.UploadManager;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.upload.mix.MixUploadWizard;
 import de.stationadmin.gui.util.SwingTools;
@@ -49,7 +50,7 @@ public class UploadPanel extends JPanel {
     super();
     this.ctx = ctx;
     this.confirmationInterceptors = confirmationInterceptors;
-    this.uploadManager = new UploadManager(this.ctx.getAdminClient());
+    this.uploadManager = new UploadManager(this.ctx.getAdminClient().getTrackService(), this.ctx.getAdminClient().getSessionCtx());
     this.uploadManager.addPropertyChangeListener("numberOfRemainingFiles", new PropertyChangeListener() {
 
       /**

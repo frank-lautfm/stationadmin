@@ -73,8 +73,7 @@ public class StatisticsTodayPanel extends JPanel {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("durationToday")) {
-          int minutes = model.getBean().getDurationToday();
-          int hours = minutes / 60;
+          int hours = model.getBean().getDurationToday();
           tlhT.setValue(hours);
         }
       }

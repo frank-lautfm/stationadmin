@@ -3,7 +3,6 @@
  */
 package de.stationadmin.lfm.backend;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLEncoder;
@@ -21,6 +20,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -32,8 +32,9 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.FileEntity;
+import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -384,9 +385,9 @@ public class LautfmAdminService {
       response.close();
     }
   }
-  
+
   public void deleteTag(int stationId, String tag) throws IOException {
-    // /stations/:station_id/tracks/tags/:tagname    
+    // /stations/:station_id/tracks/tags/:tagname
     CloseableHttpResponse response = this.doDelete("/stations/" + stationId + "/tracks/tags/" + URLEncoder.encode(tag, "UTF-8"));
     try {
       if (response.getStatusLine().getStatusCode() != 204 && response.getStatusLine().getStatusCode() != 200) {
@@ -410,7 +411,7 @@ public class LautfmAdminService {
 
   public Track updateTrack(int stationId, Track track) throws IOException {
     if (track.getArtist() == null || track.getTitle() == null) {
-      throw new NullPointerException(); // FIXME remove if reason for occasional
+      // throw new NullPointerException(); // FIXME remove if reason for occasional
                                         // null values found
     }
     CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/tracks/" + track.getId(), track);
@@ -541,15 +542,16 @@ public class LautfmAdminService {
     return map;
   }
 
-  public Track uploadTrack(int stationId, File file, final ProgressListener progressListener) throws IOException {
+  public UploadResponse uploadTrack(int stationId, TrackUpload track, final ProgressListener progressListener) throws IOException {
     final HttpPost filePost = new HttpPost(BASE_URL + "/stations/" + stationId + "/tracks");
     if (progressListener != null) {
-      progressListener.setMaxValue((int) file.length());
+      progressListener.setMaxValue((int) track.getFile().length());
     }
     this.addAuthHeaders(filePost);
 
-    FileEntity fileEntity = new FileEntity(file, ContentType.create("audio/mp3")) {
+    HttpEntity entity = MultipartEntityBuilder.create().addBinaryBody("track", track.getFile(), ContentType.create("audio/mp3"), track.getFile().getName()).build();
 
+    HttpEntityWrapper entityWrapper = new HttpEntityWrapper(entity) {
       @Override
       public void writeTo(OutputStream out) throws IOException {
         if (progressListener != null) {
@@ -558,8 +560,10 @@ public class LautfmAdminService {
           super.writeTo(out);
         }
       }
+
     };
-    filePost.setEntity(fileEntity);
+
+    filePost.setEntity(entityWrapper);
 
     CloseableHttpClient uploadClient = createClient();
 
@@ -570,7 +574,22 @@ public class LautfmAdminService {
       this.checkResponse(response);
       if (response.getStatusLine().getStatusCode() == 201) {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(response.getEntity().getContent(), Track.class);
+        UploadResponse uploadResponse = mapper.readValue(response.getEntity().getContent(), UploadResponse.class);
+        if (track.isPrivateTrack()) {
+          /*
+          Track t = new Track();
+          t.setId(uploadResponse.getId());
+          t.setPrivateTrack(true);
+          this.updateTrack(stationId, t);
+          */
+          MarkTrackPrivateRequest privateRequest = new MarkTrackPrivateRequest();
+          privateRequest.setId(uploadResponse.getId());
+          privateRequest.setPrivateTrack(true);
+          CloseableHttpResponse markPrivateResponse = this.doPatch("/stations/" + stationId + "/tracks/" + privateRequest.getId(), privateRequest);
+          markPrivateResponse.close();
+        }
+
+        return uploadResponse;
       } else {
         throw new AdminServiceException(this.getErrorMessage(response));
       }
@@ -600,6 +619,16 @@ public class LautfmAdminService {
     }
   }
 
+  public Statistics getStatistics(int stationId) throws IOException {
+    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/stats");
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      return mapper.readValue(response.getEntity().getContent(), Statistics.class);
+    } finally {
+      response.close();
+    }
+  }
+  
   public String getToken() {
     return token;
   }
