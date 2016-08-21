@@ -34,6 +34,7 @@ import de.stationadmin.base.util.XStreamFactory;
 import de.stationadmin.lfm.backend.LautfmAdminService;
 import de.stationadmin.lfm.backend.Station;
 import de.stationadmin.lfmapi.LautfmService;
+import de.stationadmin.streamlive.MP3Streamer;
 
 /**
  * Main class for administrative access
@@ -51,6 +52,8 @@ public class StationAdminClient {
   private StatisticsService statisticsService;
   private LogAnalyzerService logAnalyzerService;
   private List<Service> services = new ArrayList<Service>();
+
+  private MP3Streamer mp3Streamer;
 
   private Settings settings = new Settings();
 
@@ -253,6 +256,19 @@ public class StationAdminClient {
   public boolean isRadioStarted() throws IOException {
     return true; // FIXME this.sessionCtx.getServer().isRadioStarted();
   }
+  
+  public LiveAccount getLiveAccount() throws IOException {
+    String password = this.sessionCtx.getServer().getLivePassword(this.sessionCtx.getStationId());
+    if(password != null) {
+      LiveAccount account = new LiveAccount();
+      account.setPort(8080);
+      account.setServer("live.laut.fm");
+      account.setUser("source");
+      account.setPassword(password);
+      return account;
+    }
+    return null;
+  }
 
   public boolean isLiveEnabled() throws IOException {
     return this.sessionCtx.isLiveEnabled();
@@ -393,6 +409,20 @@ public class StationAdminClient {
 
   public LogAnalyzerService getLogAnalyzerService() {
     return logAnalyzerService;
+  }
+
+  /**
+   * @return the mp3Streamer
+   */
+  public MP3Streamer getMp3Streamer() {
+    return mp3Streamer;
+  }
+
+  /**
+   * @param mp3Streamer the mp3Streamer to set
+   */
+  public void setMp3Streamer(MP3Streamer mp3Streamer) {
+    this.mp3Streamer = mp3Streamer;
   }
 
 }

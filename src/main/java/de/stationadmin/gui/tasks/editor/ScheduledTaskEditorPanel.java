@@ -27,6 +27,7 @@ import de.stationadmin.base.schedule.ScheduleImportTask;
 import de.stationadmin.base.tasks.ScheduledTask;
 import de.stationadmin.base.tasks.Task;
 import de.stationadmin.base.tasks.TaskExecutionService;
+import de.stationadmin.base.tools.MP3StreamerTask;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.tasks.ScheduledTaskEditorComponent;
@@ -67,6 +68,7 @@ public class ScheduledTaskEditorPanel extends JPanel {
     this.taskEditorPanels.put(PlaylistExchangeTask.class, new PlaylistExchangeTaskPanel(ctx.getAdminClient().getPlaylistService()
         .getPlaylistRegistry(), ctx.getTextProvider()));
     this.taskEditorPanels.put(ScheduleImportTask.class, new ScheduleImportTaskPanel(ctx.getTextProvider()));
+    this.taskEditorPanels.put(MP3StreamerTask.class, new MP3StreamerTaskPanel(ctx.getTextProvider()));
 
     this.saveAction = new SaveAction(ctx.getAdminClient().getTaskExecutionService());
 

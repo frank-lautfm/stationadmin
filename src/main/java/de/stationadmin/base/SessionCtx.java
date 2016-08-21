@@ -40,12 +40,11 @@ public class SessionCtx {
     this.server = server;
     this.lfmService = lfmAPI;
   }
-  
+
   private String appendFileSeparator(String dir) {
-    if(!(dir.endsWith("/") || dir.endsWith("\\"))) {
+    if (!(dir.endsWith("/") || dir.endsWith("\\"))) {
       return dir + File.separatorChar;
-    }
-    else {
+    } else {
       return dir;
     }
   }
@@ -58,7 +57,8 @@ public class SessionCtx {
   }
 
   /**
-   * @param status the status to set
+   * @param status
+   *          the status to set
    */
   public void setStatus(Status status) {
     this.status = status;
@@ -121,24 +121,23 @@ public class SessionCtx {
   public String getSettingsDirectory() {
     return settingsDirectory;
   }
-  
+
   public void checkSession() throws IOException {
-//    if(!StringUtils.equals(this.station, this.server.getCurrentStation())) {
-//      this.server.logout();
-//      throw new IOException("Ungueltige Session - bitte neu einloggen!");
-//    }
+    // if(!StringUtils.equals(this.station, this.server.getCurrentStation())) {
+    // this.server.logout();
+    // throw new IOException("Ungueltige Session - bitte neu einloggen!");
+    // }
   }
 
   public boolean isLiveEnabled() throws IOException {
-//    if(this.liveEnabled == null) {
-//      this.liveEnabled = this.server.isLiveEnabled();
-//    }
-    return false;
+    if (this.liveEnabled == null) {
+      this.liveEnabled = this.server.getLivePassword(this.stationId) != null;
+    }
+    return liveEnabled;
   }
 
   public int getStationId() {
     return stationId;
   }
-
 
 }

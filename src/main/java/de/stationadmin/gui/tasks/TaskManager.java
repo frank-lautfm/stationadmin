@@ -19,6 +19,7 @@ import de.stationadmin.base.playlist.PlaylistGenerateTask;
 import de.stationadmin.base.playlist.PlaylistShuffleTask;
 import de.stationadmin.base.schedule.PlaylistExchangeTask;
 import de.stationadmin.base.schedule.ScheduleImportTask;
+import de.stationadmin.base.tools.MP3StreamerTask;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.StationAdminFrame;
 import de.stationadmin.gui.tasks.editor.ScheduledTaskEditorPanel;
@@ -64,6 +65,15 @@ public class TaskManager extends StationAdminFrame {
     newTaskPopup.add(new AddTaskAction(ctx.getTextProvider(), PlaylistGenerateTask.class, taskViewer.getTaskHolder()));
     newTaskPopup.add(new AddTaskAction(ctx.getTextProvider(), PlaylistExchangeTask.class, taskViewer.getTaskHolder()));
     newTaskPopup.add(new AddTaskAction(ctx.getTextProvider(), ScheduleImportTask.class, taskViewer.getTaskHolder()));
+    
+    try {
+      if (ctx.getAdminClient().isLiveEnabled()) {
+        newTaskPopup.add(new AddTaskAction(ctx.getTextProvider(), MP3StreamerTask.class, taskViewer.getTaskHolder()));
+      }
+    } catch (Exception e) {
+
+    }
+    
     newBtn.addActionListener(new ActionListener() {
       
       @Override
