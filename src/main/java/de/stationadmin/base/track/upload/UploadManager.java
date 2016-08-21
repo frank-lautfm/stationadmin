@@ -93,7 +93,16 @@ public class UploadManager extends AbstractBean {
         try {
           this.progressListener.setAbortCurrent(false);
           QueuedTrack entry = this.queue.get(this.currentIndex);
+          entry.setStatus(UploadStatus.UPLOADING);
+          fireTrackStatusUpdate();
           entry.setResponse(this.trackService.upload(entry.getFile(), progressListener));
+          if(progressListener.isAbortCurrent()) {
+            entry.setStatus(UploadStatus.ABORTED);
+          }
+          else {
+            entry.setStatus(UploadStatus.PROCESSING);
+          }
+          fireTrackStatusUpdate();
         } catch (InterruptedIOException e) {
           log.info("upload interrupted");
         }
@@ -217,10 +226,13 @@ public class UploadManager extends AbstractBean {
         if (entry.getResponse() != null) {
           try {
             DetailedTrack track = trackService.getTrack(entry.getResponse().getId());
-            if(track.getId() > 0) {
+            if (track.getId() > 0) {
               remaining--;
               entry.setTrack(track);
+              entry.setStatus(UploadStatus.COMPLETED);
+              System.out.println("processing completed " + entry.getFile().getFile().getName());
               processedTracks.add(entry); // TODO fire event?
+              fireTrackCompleted();
             }
           } catch (IOException e) {
 
@@ -230,6 +242,14 @@ public class UploadManager extends AbstractBean {
       }
     }
     return remaining;
+  }
+
+  private void fireTrackStatusUpdate() {
+    this.firePropertyChange("trackStatusUpdate", false, true);
+  }
+
+  private void fireTrackCompleted() {
+    this.firePropertyChange("trackCompleted", false, true);
   }
 
   private void clearQueue() {

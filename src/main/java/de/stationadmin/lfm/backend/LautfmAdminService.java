@@ -5,6 +5,7 @@ package de.stationadmin.lfm.backend;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.SocketException;
 import java.net.URLEncoder;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -570,18 +571,14 @@ public class LautfmAdminService {
     UploadAbortMonitor monitor = new UploadAbortMonitor(filePost, progressListener);
     monitor.start();
     try {
+      System.out.println("start upload of " + track.getFile().getName());
       CloseableHttpResponse response = uploadClient.execute(filePost);
+      System.out.println("upload completed");
       this.checkResponse(response);
       if (response.getStatusLine().getStatusCode() == 201) {
         ObjectMapper mapper = new ObjectMapper();
         UploadResponse uploadResponse = mapper.readValue(response.getEntity().getContent(), UploadResponse.class);
         if (track.isPrivateTrack()) {
-          /*
-          Track t = new Track();
-          t.setId(uploadResponse.getId());
-          t.setPrivateTrack(true);
-          this.updateTrack(stationId, t);
-          */
           MarkTrackPrivateRequest privateRequest = new MarkTrackPrivateRequest();
           privateRequest.setId(uploadResponse.getId());
           privateRequest.setPrivateTrack(true);
@@ -592,6 +589,13 @@ public class LautfmAdminService {
         return uploadResponse;
       } else {
         throw new AdminServiceException(this.getErrorMessage(response));
+      }
+    } catch(SocketException e) {
+      if(!progressListener.isAbortCurrent()) {
+        throw e;
+      }
+      else {
+        return null;
       }
     } finally {
       monitor.requestStop();

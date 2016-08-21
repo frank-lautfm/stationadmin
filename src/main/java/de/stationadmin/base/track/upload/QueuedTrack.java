@@ -17,6 +17,7 @@ public class QueuedTrack {
   private TrackUpload file;
   private UploadResponse response;
   private DetailedTrack track;
+  private UploadStatus status = UploadStatus.QUEUED;
   
   public QueuedTrack(File file) {
     this.file = new TrackUpload(file);
@@ -73,6 +74,20 @@ public class QueuedTrack {
    */
   public void setTrack(DetailedTrack track) {
     this.track = track;
+  }
+
+  /**
+   * @return the status
+   */
+  public UploadStatus getStatus() {
+    return status;
+  }
+
+  /**
+   * @param status the status to set
+   */
+  public void setStatus(UploadStatus status) {
+    this.status = status;
   }
 
 }

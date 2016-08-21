@@ -13,13 +13,16 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import org.jdesktop.swingx.JXList;
@@ -31,7 +34,9 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.track.upload.QueuedTrack;
 import de.stationadmin.base.track.upload.UploadManager;
+import de.stationadmin.base.track.upload.UploadStatus;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.playlist.PopupListener;
 import de.stationadmin.gui.util.ComponentFactory;
 
 /**
@@ -47,7 +52,6 @@ public class UploadProgressPanel extends JPanel {
   private JXList remainingFilesList;
   private JProgressBar currentFileProgress;
   private JProgressBar totalProgress;
-  private JLabel statusLabel;
   private Timer timer;
 
   public UploadProgressPanel(ClientContext ctx, UploadManager uploadManager) {
@@ -65,39 +69,36 @@ public class UploadProgressPanel extends JPanel {
     this.remainingFilesList.setCellRenderer(new FilenameListCellRenderer());
     this.remainingFilesList.addHighlighter(new AbstractHighlighter() {
       Font bigFont = new Font(ComponentFactory.defaultLabelFont.getFamily(), Font.BOLD, ComponentFactory.defaultLabelFont.getSize() + 2);
+      Font italicFont = new Font(ComponentFactory.defaultLabelFont.getFamily(), Font.ITALIC, ComponentFactory.defaultLabelFont.getSize());
 
       @Override
       protected Component doHighlight(Component component, ComponentAdapter adapter) {
-        if (adapter.row == 0) {
-          component.setFont(bigFont);
+        if (adapter.row > -1) {
+          QueuedTrack track = remainingFilesModel.getElementAt(adapter.row);
+          if (track.getStatus() == UploadStatus.UPLOADING) {
+            component.setFont(bigFont);
+          }
+          else if (track.getStatus() == UploadStatus.PROCESSING) {
+            component.setFont(italicFont);
+          }
         }
+
         return component;
       }
 
     });
-    
+
     remainingFilesList.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
-    remainingFilesList.getActionMap().put("delete", new AbstractAction() {
-      private static final long serialVersionUID = 6284472877932977584L;
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        Object[] values = remainingFilesList.getSelectedValues();
-        if(values != null) {
-          for(Object value : values) {
-            uploadManager.removeFile(((QueuedTrack)value).getFile().getFile());
-          }
-        }
-      }
-      
-    });
+    remainingFilesList.getActionMap().put("delete", new DeleteAction());
     
-    remainingFilesList.setTransferHandler(new UploadTransferHandler(this.ctx.getTextProvider(), this.uploadManager));
+    remainingFilesList.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0), "publicPrivate");
+    remainingFilesList.getActionMap().put("publicPrivate", new TogglePrivateAction());
 
+
+    remainingFilesList.setTransferHandler(new UploadTransferHandler(this.ctx.getTextProvider(), this.uploadManager));
 
     this.currentFileProgress = new JProgressBar();
     this.totalProgress = new JProgressBar();
-    this.statusLabel = new JLabel();
 
     this.setLayout(new FormLayout("pref:grow", "3dlu,pref:grow,5dlu,pref,3dlu"));
     CellConstraints cc = new CellConstraints();
@@ -105,8 +106,6 @@ public class UploadProgressPanel extends JPanel {
 
     JPanel progressPanel = new JPanel(new FormLayout("3dlu,pref,5dlu,pref:grow,3dlu", "3dlu,pref,3dlu,pref,3dlu,pref,3dlu"));
 
-    progressPanel.add(new JLabel(ctx.getTextProvider().getString("upload.progress.status")), cc.xy(2, 2));
-    progressPanel.add(this.statusLabel, cc.xy(4, 2, CellConstraints.FILL, CellConstraints.FILL));
     progressPanel.add(new JLabel(ctx.getTextProvider().getString("upload.progress.current")), cc.xy(2, 4));
     progressPanel.add(this.currentFileProgress, cc.xy(4, 4, CellConstraints.FILL, CellConstraints.FILL));
     progressPanel.add(new JLabel(ctx.getTextProvider().getString("upload.progress.total")), cc.xy(2, 6));
@@ -134,23 +133,10 @@ public class UploadProgressPanel extends JPanel {
           totalProgress.setValue(uploadManager.getProgressListener().getTotalUploaded());
           int maxKb = uploadManager.getProgressListener().getTotalMax() / 1024;
           int uploadedKb = uploadManager.getProgressListener().getTotalUploaded() / 1024;
-          totalProgress.setToolTipText((uploadManager.getCurrentIndex() + 1) + " / " + uploadManager.getQueue().size() + " Dateien, " + uploadedKb
-              + " / " + maxKb + " kb");
+          totalProgress.setToolTipText((uploadManager.getCurrentIndex() + 1) + " / " + uploadManager.getQueue().size() + " Dateien, " + uploadedKb + " / " + maxKb + " kb");
 
         }
-        
-        {
-          if(uploadManager.getNumberOfRemainingFiles() == 0 || !uploadManager.isRunning()) {
-            statusLabel.setText("");
-          }
-          else if(uploadManager.getProgressListener().getCurrentFileUploaded() < uploadManager.getProgressListener().getCurrentFileMax()) {
-            statusLabel.setText(ctx.getTextProvider().getString("upload.progress.status.transfer"));
-          }
-          else {
-            statusLabel.setText(ctx.getTextProvider().getString("upload.progress.status.encode"));
-          }
-        }
-        
+
       }
 
     });
@@ -165,15 +151,53 @@ public class UploadProgressPanel extends JPanel {
 
     });
 
+    this.uploadManager.addPropertyChangeListener("trackStatusUpdate", new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+          @Override
+          public void run() {
+            remainingFilesList.invalidate();
+            remainingFilesList.repaint();
+          }
+        });
+      }
+
+    });
+    
+    this.uploadManager.addPropertyChangeListener("trackCompleted", new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+          @Override
+          public void run() {
+            rebuildListModel();
+          }
+        });
+      }
+
+    });
+
+    JPopupMenu popup = new JPopupMenu();
+    popup.add(new DeleteAction());
+    popup.add(new TogglePrivateAction());
+    remainingFilesList.addMouseListener(new PopupListener(remainingFilesList, popup));
+
   }
 
   protected void rebuildListModel() {
     this.remainingFilesModel.removeAllElements();
     List<QueuedTrack> queue = this.uploadManager.getQueue();
-    int start = this.uploadManager.getCurrentIndex();
-    for (int i = start; i < queue.size(); i++) {
+
+    for (int i = 0; i < queue.size(); i++) {
       QueuedTrack entry = queue.get(i);
-      this.remainingFilesModel.addElement(entry);
+      if (entry.getStatus() != UploadStatus.COMPLETED && entry.getStatus() != UploadStatus.ABORTED) {
+        this.remainingFilesModel.addElement(entry);
+      }
     }
   }
 
@@ -187,4 +211,44 @@ public class UploadProgressPanel extends JPanel {
     }
   }
 
+  private class DeleteAction extends AbstractAction {
+    private static final long serialVersionUID = 6284472877932977584L;
+    
+    public DeleteAction() {
+      putValue(Action.NAME, ctx.getTextProvider().getString("upload.progress.action.delete"));
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      Object[] values = remainingFilesList.getSelectedValues();
+      if (values != null) {
+        for (Object value : values) {
+          uploadManager.removeFile(((QueuedTrack) value).getFile().getFile());
+        }
+      }
+    }
+    
+  }
+  
+  private class TogglePrivateAction extends AbstractAction {
+    private static final long serialVersionUID = 1778883352637866442L;
+
+    public TogglePrivateAction() {
+      putValue(Action.NAME, ctx.getTextProvider().getString("upload.progress.action.togglePrivate"));
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      Object[] values = remainingFilesList.getSelectedValues();
+      if (values != null) {
+        for (Object value : values) {
+          QueuedTrack track = (QueuedTrack) value;
+          track.getFile().setPrivateTrack(!track.getFile().isPrivateTrack());
+        }
+        remainingFilesList.invalidate();
+        remainingFilesList.repaint();
+      }
+    }
+    
+  }
 }
