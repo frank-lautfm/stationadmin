@@ -157,15 +157,18 @@ public class LogAnalyzerService implements Service {
       if (cols.length == 2) {
         try {
           Date date = fmt.parse(cols[0]);
-          int titleId = Integer.parseInt(cols[1]);
-          DetailedTrack title = this.titleRegistry.getTrack(titleId);
-          if (title == null) {
-            title = new DetailedTrack();
-            title.setId(titleId);
-            title.setArtist("<unknown>");
-            title.setTitle("<Title " + titleId + ">");
+          int trackId = Integer.parseInt(cols[1]);
+          DetailedTrack track = this.titleRegistry.getTrack(trackId);
+          if(track == null) {
+            track = this.titleRegistry.getByLegacyId(trackId);
           }
-          Play play = new Play(date, title);
+          if (track == null) {
+            track = new DetailedTrack();
+            track.setId(trackId);
+            track.setArtist("<unknown>");
+            track.setTitle("<Track " + trackId + ">");
+          }
+          Play play = new Play(date, track);
           plays.add(play);
 
         } catch (Exception e) {
