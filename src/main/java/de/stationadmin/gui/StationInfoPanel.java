@@ -14,8 +14,7 @@ import de.stationadmin.gui.track.TrackHistoryPanel;
 import de.stationadmin.gui.util.TitledPanel;
 
 /**
- * Container that displays basic station information like recent titles and
- * statistics
+ * Container that displays basic station information like recent titles and statistics
  * 
  * @author Frank Korf
  */
@@ -36,29 +35,31 @@ public class StationInfoPanel extends JPanel {
     TrackHistoryPanel titleHistory = new TrackHistoryPanel(ctx);
     this.add(titleHistory, cc.xy(4, 1, CellConstraints.FILL, CellConstraints.FILL));
 
-    JPanel leftPanel = new JPanel(new FormLayout("pref", "pref:grow"));
-    this.add(leftPanel, cc.xy(2, 1, CellConstraints.FILL, CellConstraints.FILL));
+    if (!ctx.getAdminClient().getSessionCtx().isDJOnly()) {
+      JPanel leftPanel = new JPanel(new FormLayout("pref", "pref:grow"));
+      this.add(leftPanel, cc.xy(2, 1, CellConstraints.FILL, CellConstraints.FILL));
 
-    TitledPanel schedule = new TitledPanel(ctx.getString("schedule.title"), new ScheduleTodayPanel(ctx.getAdminClient()
-        .getSchedule(), ctx.getJumpHandler()));
-    leftPanel.add(schedule, cc.xy(1, 1, CellConstraints.FILL, CellConstraints.FILL));
+      TitledPanel schedule = new TitledPanel(ctx.getString("schedule.title"), new ScheduleTodayPanel(ctx.getAdminClient().getSchedule(), ctx.getJumpHandler()));
+      leftPanel.add(schedule, cc.xy(1, 1, CellConstraints.FILL, CellConstraints.FILL));
+    }
 
-    JPanel rightPanel = new JPanel(
-        new FormLayout("pref", "pref:grow,5dlu,pref:grow,5dlu,pref:grow,5dlu,pref:grow"));
+    JPanel rightPanel = new JPanel(new FormLayout("pref", "pref:grow,5dlu,pref:grow,5dlu,pref:grow,5dlu,pref:grow"));
     this.add(rightPanel, cc.xy(6, 1, CellConstraints.FILL, CellConstraints.FILL));
 
-    TitledPanel stats = new TitledPanel(ctx.getString("statistics.current.title"), new ListenerStatisticsPanel(ctx));
-    rightPanel.add(stats, cc.xy(1, 1, CellConstraints.FILL, CellConstraints.FILL));
+    if (!ctx.getAdminClient().getSessionCtx().isDJOnly()) {
 
-    TitledPanel statsToday = new TitledPanel(ctx.getString("statistics.today.title"), new StatisticsTodayPanel(ctx));
-    rightPanel.add(statsToday, cc.xy(1, 3, CellConstraints.FILL, CellConstraints.FILL));
+      TitledPanel stats = new TitledPanel(ctx.getString("statistics.current.title"), new ListenerStatisticsPanel(ctx));
+      rightPanel.add(stats, cc.xy(1, 1, CellConstraints.FILL, CellConstraints.FILL));
 
-    TitledPanel statsYesterday = new TitledPanel(ctx.getString("statistics.yesterday.title"),
-        new StatisticsYesterdayPanel(ctx));
-    rightPanel.add(statsYesterday, cc.xy(1, 5, CellConstraints.FILL, CellConstraints.FILL));
+      TitledPanel statsToday = new TitledPanel(ctx.getString("statistics.today.title"), new StatisticsTodayPanel(ctx));
+      rightPanel.add(statsToday, cc.xy(1, 3, CellConstraints.FILL, CellConstraints.FILL));
 
-    TitledPanel statsPlaylist = new TitledPanel(ctx.getString("playliststats.title"), new PlaylistStatisticsPanel(ctx));
-    rightPanel.add(statsPlaylist, cc.xy(1, 7, CellConstraints.FILL, CellConstraints.FILL));
+      TitledPanel statsYesterday = new TitledPanel(ctx.getString("statistics.yesterday.title"), new StatisticsYesterdayPanel(ctx));
+      rightPanel.add(statsYesterday, cc.xy(1, 5, CellConstraints.FILL, CellConstraints.FILL));
+
+      TitledPanel statsPlaylist = new TitledPanel(ctx.getString("playliststats.title"), new PlaylistStatisticsPanel(ctx));
+      rightPanel.add(statsPlaylist, cc.xy(1, 7, CellConstraints.FILL, CellConstraints.FILL));
+    }
 
   }
 

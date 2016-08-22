@@ -10,6 +10,7 @@ import javax.swing.Action;
 
 import org.jdesktop.swingx.JXErrorPane;
 
+import de.stationadmin.base.Role;
 import de.stationadmin.gui.ClientContext;
 
 /**
@@ -27,6 +28,7 @@ public class ScheduleEditorDisplayAction extends AbstractAction {
     super();
     this.ctx = ctx;
     this.putValue(Action.NAME, ctx.getTextProvider().getString("action.editschedule"));
+    this.setEnabled(ctx.getAdminClient().getSessionCtx().getRole() != Role.DJ);
   }
 
   /**

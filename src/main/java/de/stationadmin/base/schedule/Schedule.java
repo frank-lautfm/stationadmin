@@ -25,6 +25,8 @@ import org.json.JSONException;
 
 import com.thoughtworks.xstream.XStream;
 
+import de.stationadmin.base.AccessDeniedException;
+import de.stationadmin.base.Role;
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.playlist.Playlist;
@@ -132,8 +134,7 @@ public class Schedule extends AbstractBean implements Service {
   }
 
   /**
-   * Gets the entries of the next hours, starting with the entry after the one
-   * referred by the start date
+   * Gets the entries of the next hours, starting with the entry after the one referred by the start date
    * 
    * @param startDate
    * @param hours
@@ -281,6 +282,9 @@ public class Schedule extends AbstractBean implements Service {
    * @throws IOException
    */
   public void load() throws IOException {
+    if(this.ctx.getRole() == Role.DJ) {
+      return;
+    }
     File file = new File(this.ctx.getStationDirectory() + "schedule.xml");
     if (file.exists()) {
       List<Schedule.Entry> entries = this.load(file);
@@ -348,6 +352,7 @@ public class Schedule extends AbstractBean implements Service {
    * @throws IOException
    */
   public void save() throws IOException {
+    checkAccess();
     log.info("save schedule");
     this.save(new File(this.ctx.getStationDirectory() + "schedule.xml"));
   }
@@ -376,6 +381,7 @@ public class Schedule extends AbstractBean implements Service {
   }
 
   public void save(String file) throws IOException {
+    checkAccess();
     this.save(new File(file));
   }
 
@@ -413,6 +419,7 @@ public class Schedule extends AbstractBean implements Service {
    * @throws JSONException
    */
   public void submitToServer() throws IOException, JSONException {
+    checkAccess();
     int[][] table = new int[7][24];
     for (Schedule.Entry entry : this.entries) {
       int d = entry.getWeekday().ordinal();
@@ -442,7 +449,18 @@ public class Schedule extends AbstractBean implements Service {
     this.ctx.getServer().updateSchedule(ctx.getStationId(), schedule);
   }
 
+  private void checkAccess() {
+    if (this.ctx.isDJOnly()) {
+      throw new AccessDeniedException();
+    }
+
+  }
+
   public void synchronize() throws IOException {
+    if (this.ctx.getRole() == Role.DJ) {
+      return;
+    }
+
     this.ctx.updateStatus("getSchedule");
     de.stationadmin.lfm.backend.Schedule schedule = this.ctx.getServer().getSchedule(ctx.getStationId());
     this.basePlaylist = this.playlistRegistry.getPlaylist(schedule.getBasePlaylistId());
@@ -533,8 +551,7 @@ public class Schedule extends AbstractBean implements Service {
   }
 
   /**
-   * Entry of playlist schedule - contains of a playlist and a time at which it
-   * is played
+   * Entry of playlist schedule - contains of a playlist and a time at which it is played
    */
   public static class Entry implements Comparable<Entry> {
     private int playlistId;

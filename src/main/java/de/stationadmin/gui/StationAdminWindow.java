@@ -232,8 +232,7 @@ public class StationAdminWindow extends StationAdminFrame {
 
           @Override
           protected Object getJumpTarget() {
-            int playlistId = ctx.getAdminClient().getSchedule().getCurrent() != null ? ctx.getAdminClient().getSchedule().getCurrent()
-                .getPlaylistId() : 0;
+            int playlistId = ctx.getAdminClient().getSchedule().getCurrent() != null ? ctx.getAdminClient().getSchedule().getCurrent().getPlaylistId() : 0;
             Playlist playlist = ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylist(playlistId);
 
             int titleId = ctx.getAdminClient().getStationStatus().getCurrentTrackId();
@@ -287,14 +286,19 @@ public class StationAdminWindow extends StationAdminFrame {
   }
 
   private JToolBar initToolbar() {
+
+    boolean djOnly = ctx.getAdminClient().getSessionCtx().isDJOnly();
+
     JToolBar toolbar = new JToolBar();
+
     toolbar.add(asToolbarAction(new SynchronizeAction(ctx.getTextProvider(), ctx.getAdminClient()), "synchronize.png"));
-    toolbar.add(asToolbarAction(new SaveModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService(), ctx
-        .getAdminClient().getSchedule()), "save_all.png"));
+    toolbar.add(asToolbarAction(new SaveModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getSchedule()), "save_all.png"));
     toolbar.add(asToolbarAction(new ResetModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService()), "undo.png"));
     toolbar.add(asToolbarAction(new UploadAction(this.ctx), "upload.png"));
-    toolbar.add(asToolbarAction(new ScheduleEditorDisplayAction(this.ctx), "schedule.png"));
-    toolbar.add(asToolbarAction(new TaskManagerDisplayAction(this.ctx), "tasks.png"));
+    if (!djOnly) {
+      toolbar.add(asToolbarAction(new ScheduleEditorDisplayAction(this.ctx), "schedule.png"));
+      toolbar.add(asToolbarAction(new TaskManagerDisplayAction(this.ctx), "tasks.png"));
+    }
     toolbar.addSeparator();
     toolbar.add(asToolbarAction(new MultiPlaylistShuffleDisplayAction(this.ctx), "shuffle.png"));
     toolbar.addSeparator();
@@ -377,8 +381,7 @@ public class StationAdminWindow extends StationAdminFrame {
   }
 
   private void updateTitle(JumpLabel label) {
-    RegisteredTrack title = ctx.getAdminClient().getTrackService().getTrackRegistry()
-        .getTrack(ctx.getAdminClient().getStationStatus().getCurrentTrackId());
+    RegisteredTrack title = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(ctx.getAdminClient().getStationStatus().getCurrentTrackId());
     if (title != null) {
       label.setText(title.getArtist() + " - " + title.getTitle());
     } else {
@@ -400,21 +403,24 @@ public class StationAdminWindow extends StationAdminFrame {
   private void initMenu() {
     JMenuBar menuBar = new JMenuBar();
 
+    boolean djOnly = ctx.getAdminClient().getSessionCtx().isDJOnly();
+
     {
       JMenu menuServer = new JMenu(this.ctx.getTextProvider().getString("menu.server"));
       menuServer.add(new SynchronizeAction(this.ctx.getTextProvider(), ctx.getAdminClient()));
       menuServer.add(new ReloadOwnTitlesAction(ctx.getTextProvider(), ctx.getAdminClient().getTrackService()));
-      menuServer.add(new SaveModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient()
-          .getSchedule()));
+      menuServer.add(new SaveModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getSchedule()));
       menuServer.add(new ResetModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService()));
       menuServer.addSeparator();
       menuServer.add(new UploadAction(this.ctx));
-      menuServer.add(new ScheduleEditorDisplayAction(this.ctx));
-      menuServer.addSeparator();
-      menuServer.add(new MP3StreamerOpenAction(this.ctx));
-      menuServer.addSeparator();
-      menuServer.add(new StartRadioAction(this.ctx));
-      menuServer.addSeparator();
+      if (!djOnly) {
+        menuServer.add(new ScheduleEditorDisplayAction(this.ctx));
+        menuServer.addSeparator();
+        menuServer.add(new MP3StreamerOpenAction(this.ctx));
+        menuServer.addSeparator();
+        menuServer.add(new StartRadioAction(this.ctx));
+        menuServer.addSeparator();
+      }
       menuServer.add(new ExitAction(this.ctx));
       menuBar.add(menuServer);
     }
@@ -426,7 +432,9 @@ public class StationAdminWindow extends StationAdminFrame {
       menuPlaylists.add(new MultiPlaylistShuffleDisplayAction(this.ctx));
       menuPlaylists.add(new PlaylistTrackSearchOpenAction(this.ctx));
       menuPlaylists.add(new DupeFinderDisplayAction(this.ctx));
-      menuPlaylists.add(new ForecastDisplayAction(this.ctx));
+      if (!djOnly) {
+        menuPlaylists.add(new ForecastDisplayAction(this.ctx));
+      }
       menuBar.add(menuPlaylists);
     }
 
@@ -434,12 +442,12 @@ public class StationAdminWindow extends StationAdminFrame {
       JMenu menuTitles = new JMenu(this.ctx.getTextProvider().getString("menu.title"));
       menuTitles.add(new TagManagerDisplayAction(this.ctx));
       menuTitles.add(new TrackAliasManagerDisplayAction(this.ctx));
-      menuTitles.add(new SubscriptionManagerDisplayAction(ctx));
+      // menuTitles.add(new SubscriptionManagerDisplayAction(ctx));
       menuTitles.add(new MP3ExplorerDisplayAction(this.ctx));
       menuBar.add(menuTitles);
     }
 
-    {
+    if (!djOnly) {
       JMenu menuAnalyze = new JMenu(this.ctx.getTextProvider().getString("menu.analyze"));
       menuAnalyze.add(new PlaysAnalyzerOpenAction(this.ctx));
       menuAnalyze.add(new UnplayedTracksViewerOpenAction(this.ctx));
@@ -451,13 +459,15 @@ public class StationAdminWindow extends StationAdminFrame {
 
     {
       JMenu menuBackup = new JMenu(this.ctx.getTextProvider().getString("menu.backup"));
-      menuBackup.add(new TaskManagerDisplayAction(ctx));
-      menuBackup.addSeparator();
-      menuBackup.add(new BackupCreateAction(ctx.getTextProvider(), ctx.getAdminClient()));
-      menuBackup.add(new BackupRestoreAction(this.ctx));
-      menuBackup.addSeparator();
-      menuBackup.add(new MigrationDlgDisplayAction(ctx));
-      menuBackup.addSeparator();
+      if (!djOnly) {
+        menuBackup.add(new TaskManagerDisplayAction(ctx));
+        menuBackup.addSeparator();
+        menuBackup.add(new BackupCreateAction(ctx.getTextProvider(), ctx.getAdminClient()));
+        menuBackup.add(new BackupRestoreAction(this.ctx));
+        menuBackup.addSeparator();
+        menuBackup.add(new MigrationDlgDisplayAction(ctx));
+        menuBackup.addSeparator();
+      }
       menuBackup.add(new SettingsDisplayAction(this.ctx));
       menuBar.add(menuBackup);
     }

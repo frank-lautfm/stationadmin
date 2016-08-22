@@ -73,6 +73,7 @@ public class StationAdminClient {
     String settingsDirectory = props.getProperty("settings.dir", dataDirectory + station.getName().toLowerCase());
 
     this.sessionCtx = new SessionCtx(service, new LautfmService(), station.getId(), station.getName().toLowerCase(), dataDirectory, settingsDirectory);
+    this.sessionCtx.setRole(Role.valueOf(station.getRole().toUpperCase()));
 
     this.taskExecutionService = new TaskExecutionService(this);
 

@@ -19,6 +19,9 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class Station {
   private int id;
   private String name;
+  
+  private String role;
+  
   @JsonProperty("created_at")
   private Date createdAt;
   @JsonProperty("updated_at")
@@ -69,6 +72,20 @@ public class Station {
   @Override
   public boolean equals(Object obj) {
     return obj instanceof Station && ((Station) obj).id == this.id;
+  }
+
+  /**
+   * @return the role
+   */
+  public String getRole() {
+    return role;
+  }
+
+  /**
+   * @param role the role to set
+   */
+  public void setRole(String role) {
+    this.role = role;
   }
 
 }

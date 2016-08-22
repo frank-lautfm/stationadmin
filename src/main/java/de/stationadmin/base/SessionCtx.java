@@ -26,6 +26,8 @@ public class SessionCtx {
   private Timer timer = new Timer(true);
   private Boolean liveEnabled;
 
+  private Role role = Role.OWNER;
+  
   /**
    * @param station
    * @param dataDirectory
@@ -139,5 +141,25 @@ public class SessionCtx {
   public int getStationId() {
     return stationId;
   }
+
+  /**
+   * @return the role
+   */
+  public Role getRole() {
+    return role;
+  }
+
+  /**
+   * @param role the role to set
+   */
+  public void setRole(Role role) {
+    this.role = role;
+  }
+  
+  public boolean isDJOnly() {
+    return role == Role.DJ;
+
+  }
+
 
 }

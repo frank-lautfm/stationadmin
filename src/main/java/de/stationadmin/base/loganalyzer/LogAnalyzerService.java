@@ -21,6 +21,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 
+import de.stationadmin.base.AccessDeniedException;
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.Settings;
@@ -65,6 +66,9 @@ public class LogAnalyzerService implements Service {
    */
   @Override
   public void load() {
+    if(ctx.isDJOnly()) {
+      return;
+    }
     ctx.updateStatus("loadLogstatistics");
     if (this.settings.isLogDownloadPermitted() && this.settings.isLogAutodownloadPermitted()) {
       Thread t = new Thread() {
@@ -138,6 +142,7 @@ public class LogAnalyzerService implements Service {
   }
 
   public List<Play> getPlaysOf(Date day) throws IOException {
+    checkAccess();
     boolean today = this.isToday(day);
     if (today && this.playsToday != null && this.playsToday.size() > 0) {
       if (this.isToday(playsToday.get(0).getStartTime())) {
@@ -192,6 +197,7 @@ public class LogAnalyzerService implements Service {
    * @throws IOException
    */
   public List<Play> getPlaysBetween(Date from, Date to) throws IOException {
+    checkAccess();
     List<Play> plays = new ArrayList<Play>();
 
     for (long t = from.getTime(); t < to.getTime() + DAY_IN_MS; t += DAY_IN_MS) {
@@ -216,6 +222,7 @@ public class LogAnalyzerService implements Service {
    * @throws IOException
    */
   public List<ListenersEntry> getListenersBetween(Date from, Date to) throws IOException {
+    checkAccess();
     List<ListenersEntry> entries = new ArrayList<ListenersEntry>();
 
     for (long t = from.getTime(); t < to.getTime() + DAY_IN_MS; t += DAY_IN_MS) {
@@ -230,6 +237,7 @@ public class LogAnalyzerService implements Service {
   }
 
   public List<DailySummary> getDailySummaries(Date from, Date to) throws IOException {
+    checkAccess();
     List<DailySummary> entries = new ArrayList<DailySummary>();
 
     for (long t = from.getTime(); t < to.getTime() + DAY_IN_MS; t += DAY_IN_MS) {
@@ -244,6 +252,7 @@ public class LogAnalyzerService implements Service {
   }
 
   public List<ListenersAvgEntry> getAverageListenersInDay(List<ListenersEntry> rawEntries, int weekdays, int granularity) {
+    checkAccess();
     List<ListenersAvgEntry> entries = new ArrayList<ListenersAvgEntry>();
 
     ListenerEntryCollection[] rawEntriesByHour = new ListenerEntryCollection[24];
@@ -278,6 +287,7 @@ public class LogAnalyzerService implements Service {
   }
 
   public DailySummary getDailySummaryOf(Date day) throws IOException {
+    checkAccess();
     if (this.isToday(day) || day.getTime() > System.currentTimeMillis()) {
       return null; // today or future - not available
     }
@@ -339,6 +349,7 @@ public class LogAnalyzerService implements Service {
   }
 
   public List<ListenersEntry> getListenersOf(Date day) throws IOException {
+    checkAccess();
     boolean today = this.isToday(day);
     if (today && this.listenersToday != null && this.listenersToday.size() > 0) {
       if (this.isToday(listenersToday.get(0).getTime())) {
@@ -397,6 +408,14 @@ public class LogAnalyzerService implements Service {
   public void close() {
 
   }
+  
+  private void checkAccess() {
+    if (this.ctx.isDJOnly()) {
+      throw new AccessDeniedException();
+    }
+
+  }
+
 
   /**
    * @see de.stationadmin.base.Service#initBackgroundTasks()
