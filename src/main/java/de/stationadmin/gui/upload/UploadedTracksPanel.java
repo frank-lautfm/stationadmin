@@ -89,7 +89,25 @@ public class UploadedTracksPanel extends JPanel {
   private void init() {
     this.setLayout(new FormLayout("pref,5dlu,100dlu:grow,5dlu,pref", "50dlu:grow,5dlu,pref,2dlu,pref"));
     CellConstraints cc = new CellConstraints();
-    final JXTable table = new JXTable(this.model);
+    final JXTable table = new JXTable(this.model) {
+      private static final long serialVersionUID = 3341281399974883594L;
+
+      public String getToolTipText(MouseEvent e) {
+        // return file name as tool tip
+        String tip = null;
+        java.awt.Point p = e.getPoint();
+        int rowIndex = rowAtPoint(p);
+
+        try {
+          if (rowIndex > -1) {
+            tip = model.getTracks().get(rowIndex).getFile().getFile().getName();
+          }
+        } catch (RuntimeException e1) {
+        }
+
+        return tip;
+      }
+    };
     table.getColumn(Column.PRIVATE.ordinal()).setPreferredWidth(50);
     table.getColumn(Column.PRIVATE.ordinal()).setMaxWidth(50);
     table.getColumn(Column.GENRE.ordinal()).setPreferredWidth(80);
@@ -120,13 +138,13 @@ public class UploadedTracksPanel extends JPanel {
     typeCol.setCellEditor(new DefaultCellEditor(typeCmb));
 
     table.setSortable(false);
-    
+
     uploadManager.addPropertyChangeListener("numProcessedTracks", new PropertyChangeListener() {
-      
+
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         SwingUtilities.invokeLater(new Runnable() {
-          
+
           @Override
           public void run() {
             model.setTracks(uploadManager.getProcessedTracks());
@@ -218,7 +236,7 @@ public class UploadedTracksPanel extends JPanel {
       this.add(new JLabel(ctx.getTextProvider().getString("upload.title.targetPlaylist")), cc.xy(1, 3, CellConstraints.LEFT, CellConstraints.CENTER));
       this.add(p, cc.xy(3, 3, CellConstraints.LEFT, CellConstraints.CENTER));
     }
-    
+
     {
       List<StaticTag> tags = this.ctx.getAdminClient().getTagManager().getStaticTags();
       List<String> names = new ArrayList<String>();
@@ -236,7 +254,6 @@ public class UploadedTracksPanel extends JPanel {
       this.add(p, cc.xy(3, 5, CellConstraints.LEFT, CellConstraints.CENTER));
 
     }
-
 
     {
       JButton saveBtn = new JButton(new SaveAction());
@@ -309,7 +326,7 @@ public class UploadedTracksPanel extends JPanel {
             }
           }
         }
-        
+
         if (targetTag.getValue() != null) {
           String tag = (String) targetTag.getValue();
           int[] ids = new int[addedTracks.size()];
@@ -318,7 +335,7 @@ public class UploadedTracksPanel extends JPanel {
           }
           ctx.getAdminClient().getTagManager().tagTracks(tag, ids);
         }
-        
+
         uploadManager.clearProcessedTracks();
 
       } catch (Exception e) {

@@ -11,6 +11,7 @@ import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
+import de.stationadmin.base.track.upload.UploadManager;
 import de.stationadmin.gui.ClientContext;
 
 /**
@@ -41,6 +42,10 @@ public class UploadWindow extends JFrame {
 
   }
 
+  public UploadManager getUploadManager() {
+    return this.uploadPanel.getUploadManager();
+  }
+  
   public void addFiles(File[] files, boolean forcePrivate) {
     this.uploadPanel.addFiles(files, forcePrivate);
   }

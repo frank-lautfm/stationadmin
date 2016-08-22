@@ -34,11 +34,11 @@ public class UploadManager extends AbstractBean {
   private volatile int currentIndex = 0;
   private volatile boolean running = false;
   private volatile boolean stop = false;
+  private volatile int numberOfTracksProcessing = 0;
 
   private TrackService trackService;
   private SessionCtx sessionCtx;
   private TrackProcessingMonitor processingMonitor;
-  private int numberOfTracksProcessing = 0;
 
   public UploadManager(TrackService trackService, SessionCtx ctx) {
     super();
@@ -117,6 +117,7 @@ public class UploadManager extends AbstractBean {
           else {
             entry.setStatus(UploadStatus.PROCESSING);
           }
+          this.numberOfTracksProcessing++;
           fireTrackStatusUpdate();
         } catch (InterruptedIOException e) {
           log.info("upload interrupted");

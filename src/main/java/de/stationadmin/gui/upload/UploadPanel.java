@@ -210,4 +210,11 @@ public class UploadPanel extends JPanel {
 
   }
 
+  /**
+   * @return the uploadManager
+   */
+  public UploadManager getUploadManager() {
+    return uploadManager;
+  }
+
 }

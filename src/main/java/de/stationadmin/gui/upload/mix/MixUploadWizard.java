@@ -247,9 +247,13 @@ public class MixUploadWizard extends JFrame {
     public void actionPerformed(ActionEvent evt) {
       List<File> files = (List<File>) fileListHolder.getValue();
       if (files != null) {
+        Playlist playlist = (Playlist) playlistHolder.getValue();
         String tag = tagHolder.getValue() != null ? ((StaticTag) tagHolder.getValue()).getName() : null;
         uploadWindow.addFiles(files.toArray(new File[files.size()]), true);
-        // TODO listen to processed files, try to complete
+        
+        MixTrackUploadWatcher watcher = new MixTrackUploadWatcher(uploadWindow.getUploadManager(), ctx.getAdminClient().getTagManager(), files, playlist, tag);
+        watcher.startWatching();
+        
         MixUploadWizard.this.dispose();
       }
     }
