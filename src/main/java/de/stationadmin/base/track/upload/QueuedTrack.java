@@ -18,6 +18,7 @@ public class QueuedTrack {
   private UploadResponse response;
   private DetailedTrack track;
   private UploadStatus status = UploadStatus.QUEUED;
+  private boolean modified = false;
   
   public QueuedTrack(File file) {
     this.file = new TrackUpload(file);
@@ -88,6 +89,20 @@ public class QueuedTrack {
    */
   public void setStatus(UploadStatus status) {
     this.status = status;
+  }
+
+  /**
+   * @return the modified
+   */
+  public boolean isModified() {
+    return modified;
+  }
+
+  /**
+   * @param modified the modified to set
+   */
+  public void setModified(boolean modified) {
+    this.modified = modified;
   }
 
 }

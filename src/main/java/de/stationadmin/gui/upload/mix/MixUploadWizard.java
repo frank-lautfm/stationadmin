@@ -248,8 +248,8 @@ public class MixUploadWizard extends JFrame {
       List<File> files = (List<File>) fileListHolder.getValue();
       if (files != null) {
         String tag = tagHolder.getValue() != null ? ((StaticTag) tagHolder.getValue()).getName() : null;
-        uploadWindow.addFiles(files.toArray(new File[files.size()]));
-        uploadWindow.addConfirmationInterceptor(new MixUploadConfirmationInterceptor(ctx, files, (Playlist) playlistHolder.getValue(), tag));
+        uploadWindow.addFiles(files.toArray(new File[files.size()]), true);
+        // TODO listen to processed files, try to complete
         MixUploadWizard.this.dispose();
       }
     }

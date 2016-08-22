@@ -17,6 +17,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -263,7 +264,7 @@ public class TrackImportDlg extends JDialog {
             win.setVisible(true);
           }
           if (task instanceof MP3TrackImportTask) {
-            win.addFiles(((MP3TrackImportTask) task).getFile());
+            win.addFiles(new File[] { ((MP3TrackImportTask) task).getFile() }, false);
           }
           markedForUpload = true;
           actionPopup.setVisible(false);

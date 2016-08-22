@@ -53,7 +53,7 @@ public class UploadTransferHandler extends TransferHandler {
         if (flavor.equals(DataFlavor.javaFileListFlavor)) {
           ok = true;
           List<File> fileList = (List<File>) support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-          fileList = DupeTitleDlg.removeDupes(textProvider, uploadManager.getTrackService().getTrackRegistry(), fileList);
+          fileList = DupeTrackDlg.removeDupes(textProvider, uploadManager.getTrackService().getTrackRegistry(), fileList);
           for (File file : fileList) {
             if(!this.uploadManager.add(file)) {
               Toolkit.getDefaultToolkit().beep();

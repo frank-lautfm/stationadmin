@@ -34,7 +34,8 @@ import de.stationadmin.gui.util.AppUtils;
  * @author Frank
  *
  */
-public class DupeTitleDlg extends JDialog {
+@SuppressWarnings("rawtypes")
+public class DupeTrackDlg extends JDialog {
   private static final long serialVersionUID = 5193217843149392055L;
   private TextProvider textProvider;
   private JList list;
@@ -43,7 +44,7 @@ public class DupeTitleDlg extends JDialog {
    * @param textProvider
    * @param dupes
    */
-  public DupeTitleDlg(TextProvider textProvider, List<File> dupes) {
+  public DupeTrackDlg(TextProvider textProvider, List<File> dupes) {
     super();
     this.textProvider = textProvider;
 
@@ -52,7 +53,7 @@ public class DupeTitleDlg extends JDialog {
       model.addElement(file);
     }
     list = new JList(model);
-    list.setCellRenderer(new FilenameListCellRenderer());
+    list.setCellRenderer(new FilenameListCellRenderer2());
     list.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     list.getSelectionModel().addSelectionInterval(0, dupes.size() - 1);
 
@@ -112,7 +113,7 @@ public class DupeTitleDlg extends JDialog {
         }
       }
       if (dupes.size() > 0) {
-        DupeTitleDlg dlg = new DupeTitleDlg(textProvider, dupes);
+        DupeTrackDlg dlg = new DupeTrackDlg(textProvider, dupes);
         dlg.setSize(300, 400);
         dlg.setModal(true);
         AppUtils.centerWithinRoot(dlg);

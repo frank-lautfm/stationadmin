@@ -15,11 +15,11 @@ import de.stationadmin.gui.ClientContext;
  * @author Frank Korf
  *
  */
-public class TitleTypeListCellRenderer extends DefaultListCellRenderer {
+public class TrackTypeListCellRenderer extends DefaultListCellRenderer {
   private static final long serialVersionUID = 4093668181778307255L;
   private ClientContext ctx;
   
-  public TitleTypeListCellRenderer(ClientContext ctx) {
+  public TrackTypeListCellRenderer(ClientContext ctx) {
     super();
     this.ctx = ctx;
   }

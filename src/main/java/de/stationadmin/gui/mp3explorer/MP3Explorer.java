@@ -855,7 +855,7 @@ public class MP3Explorer extends JFrame {
       if (!win.isVisible()) {
         win.setVisible(true);
       }
-      win.addFiles(titleModel.getFile().getFile());
+      win.addFiles(new File[] { titleModel.getFile().getFile() }, false);
       titleModel.setStatus(TitleStatus.UPLOAD);
     }
 
@@ -1041,7 +1041,7 @@ public class MP3Explorer extends JFrame {
         if (!win.isVisible()) {
           win.setVisible(true);
         }
-        win.addFiles(files.toArray(new File[files.size()]));
+        win.addFiles(files.toArray(new File[files.size()]), false);
       }
     }
   }

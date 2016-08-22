@@ -11,7 +11,7 @@ import de.stationadmin.base.track.DetailedTrack;
  * @author Frank
  *
  */
-public interface TitleConfirmationInterceptor {
+public interface TrackConfirmationInterceptor {
   
   void beforeDisplay(List<DetailedTrack> titles);
   

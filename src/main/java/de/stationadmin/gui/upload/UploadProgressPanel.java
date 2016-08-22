@@ -52,6 +52,7 @@ public class UploadProgressPanel extends JPanel {
   private JXList remainingFilesList;
   private JProgressBar currentFileProgress;
   private JProgressBar totalProgress;
+  private JLabel statusLabel;
   private Timer timer;
 
   public UploadProgressPanel(ClientContext ctx, UploadManager uploadManager) {
@@ -66,7 +67,7 @@ public class UploadProgressPanel extends JPanel {
   private void init() {
     this.remainingFilesModel = new DefaultListModel<QueuedTrack>();
     this.remainingFilesList = new JXList(this.remainingFilesModel);
-    this.remainingFilesList.setCellRenderer(new FilenameListCellRenderer());
+    this.remainingFilesList.setCellRenderer(new QueuedTrackListCellRenderer());
     this.remainingFilesList.addHighlighter(new AbstractHighlighter() {
       Font bigFont = new Font(ComponentFactory.defaultLabelFont.getFamily(), Font.BOLD, ComponentFactory.defaultLabelFont.getSize() + 2);
       Font italicFont = new Font(ComponentFactory.defaultLabelFont.getFamily(), Font.ITALIC, ComponentFactory.defaultLabelFont.getSize());
@@ -99,6 +100,7 @@ public class UploadProgressPanel extends JPanel {
 
     this.currentFileProgress = new JProgressBar();
     this.totalProgress = new JProgressBar();
+    this.statusLabel = new JLabel();
 
     this.setLayout(new FormLayout("pref:grow", "3dlu,pref:grow,5dlu,pref,3dlu"));
     CellConstraints cc = new CellConstraints();
@@ -106,6 +108,8 @@ public class UploadProgressPanel extends JPanel {
 
     JPanel progressPanel = new JPanel(new FormLayout("3dlu,pref,5dlu,pref:grow,3dlu", "3dlu,pref,3dlu,pref,3dlu,pref,3dlu"));
 
+    progressPanel.add(new JLabel(ctx.getTextProvider().getString("upload.progress.status")), cc.xy(2, 2));
+    progressPanel.add(this.statusLabel, cc.xy(4, 2, CellConstraints.FILL, CellConstraints.FILL));
     progressPanel.add(new JLabel(ctx.getTextProvider().getString("upload.progress.current")), cc.xy(2, 4));
     progressPanel.add(this.currentFileProgress, cc.xy(4, 4, CellConstraints.FILL, CellConstraints.FILL));
     progressPanel.add(new JLabel(ctx.getTextProvider().getString("upload.progress.total")), cc.xy(2, 6));
@@ -135,6 +139,18 @@ public class UploadProgressPanel extends JPanel {
           int uploadedKb = uploadManager.getProgressListener().getTotalUploaded() / 1024;
           totalProgress.setToolTipText((uploadManager.getCurrentIndex() + 1) + " / " + uploadManager.getQueue().size() + " Dateien, " + uploadedKb + " / " + maxKb + " kb");
 
+        }
+
+        {
+          if(uploadManager.getNumberOfRemainingFiles() > 0) {
+            statusLabel.setText(ctx.getTextProvider().getString("upload.progress.status.transfer"));
+          }
+          else if(uploadManager.getNumberOfTracksProcessing() > 0) {
+            statusLabel.setText(ctx.getTextProvider().getString("upload.progress.status.encode"));
+          }
+          else {
+            statusLabel.setText("");
+          }
         }
 
       }

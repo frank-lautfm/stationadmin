@@ -7,9 +7,6 @@ import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -24,11 +21,9 @@ import de.stationadmin.gui.ClientContext;
 public class UploadWindow extends JFrame {
   private static final long serialVersionUID = 8253943750283339802L;
   private UploadPanel uploadPanel;
-  private List<TitleConfirmationInterceptor> confirmationInterceptors = Collections
-      .synchronizedList(new ArrayList<TitleConfirmationInterceptor>());
 
   public UploadWindow(ClientContext ctx) {
-    this.uploadPanel = new UploadPanel(ctx, this.confirmationInterceptors);
+    this.uploadPanel = new UploadPanel(ctx);
 
     this.getContentPane().setLayout(new BorderLayout());
     this.getContentPane().add(uploadPanel, BorderLayout.CENTER);
@@ -46,8 +41,8 @@ public class UploadWindow extends JFrame {
 
   }
 
-  public void addFiles(File... files) {
-    this.uploadPanel.addFiles(files);
+  public void addFiles(File[] files, boolean forcePrivate) {
+    this.uploadPanel.addFiles(files, forcePrivate);
   }
 
   @Override
@@ -56,14 +51,6 @@ public class UploadWindow extends JFrame {
     if (visible) {
       this.uploadPanel.resume();
     }
-  }
-
-  public void addConfirmationInterceptor(TitleConfirmationInterceptor ic) {
-    this.confirmationInterceptors.add(ic);
-  }
-
-  public void removeConfirmationInterceptor(TitleConfirmationInterceptor ic) {
-    this.confirmationInterceptors.remove(ic);
   }
 
 }

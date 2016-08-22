@@ -7,9 +7,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
@@ -26,13 +24,9 @@ import org.jdesktop.swingx.error.ErrorInfo;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-import de.stationadmin.base.playlist.trackimport.MP3TrackImportTask;
-import de.stationadmin.base.playlist.trackimport.TrackImportTask.Status;
-import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.upload.UploadManager;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.upload.mix.MixUploadWizard;
-import de.stationadmin.gui.util.SwingTools;
 
 /**
  * 
@@ -43,13 +37,11 @@ public class UploadPanel extends JPanel {
   private ClientContext ctx;
   private UploadManager uploadManager;
   private UploadProgressPanel progressPanel;
-  private UploadedTitlePanel titlePanel;
-  private List<TitleConfirmationInterceptor> confirmationInterceptors;
+  private UploadedTracksPanel titlePanel;
 
-  public UploadPanel(ClientContext ctx, List<TitleConfirmationInterceptor> confirmationInterceptors) {
+  public UploadPanel(ClientContext ctx) {
     super();
     this.ctx = ctx;
-    this.confirmationInterceptors = confirmationInterceptors;
     this.uploadManager = new UploadManager(this.ctx.getAdminClient().getTrackService(), this.ctx.getAdminClient().getSessionCtx());
     this.uploadManager.addPropertyChangeListener("numberOfRemainingFiles", new PropertyChangeListener() {
 
@@ -81,10 +73,9 @@ public class UploadPanel extends JPanel {
     this.progressPanel = new UploadProgressPanel(ctx, uploadManager);
     this.add(this.progressPanel, cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
 
-    this.titlePanel = new UploadedTitlePanel(ctx, this.confirmationInterceptors);
+    this.titlePanel = new UploadedTracksPanel(ctx, uploadManager);
     this.add(this.titlePanel, cc.xy(2, 6, CellConstraints.FILL, CellConstraints.FILL));
 
-    this.titlePanel.refresh();
   }
 
   public void suspend() {
@@ -93,24 +84,14 @@ public class UploadPanel extends JPanel {
 
   public void resume() {
     this.progressPanel.restart();
-    this.titlePanel.refresh();
+    // this.titlePanel.refresh();
   }
 
-  protected void afterUpload() {
-    SwingUtilities.invokeLater(new Runnable() {
 
-      @Override
-      public void run() {
-        titlePanel.refresh();
-      }
-
-    });
-  }
-
-  public void addFiles(File[] files) {
-    for (File file : DupeTitleDlg.removeDupes(ctx.getTextProvider(), ctx.getAdminClient().getTrackService()
+  public void addFiles(File[] files, boolean forcePrivate) {
+    for (File file : DupeTrackDlg.removeDupes(ctx.getTextProvider(), ctx.getAdminClient().getTrackService()
         .getTrackRegistry(), Arrays.asList(files))) {
-      this.uploadManager.add(file);
+      this.uploadManager.add(file, forcePrivate);
     }
   }
 
@@ -131,9 +112,7 @@ public class UploadPanel extends JPanel {
               }
 
             });
-          } finally {
-            afterUpload();
-          }
+          } 
         }
       });
       t.start();
@@ -202,7 +181,7 @@ public class UploadPanel extends JPanel {
       fileChooser.setMultiSelectionEnabled(true);
       if (fileChooser.showOpenDialog(ctx.getRootWindow()) == JFileChooser.APPROVE_OPTION) {
         if (fileChooser.getSelectedFiles().length > 0) {
-          addFiles(fileChooser.getSelectedFiles());
+          addFiles(fileChooser.getSelectedFiles(), false);
         }
         try {
           Preferences.userRoot().put("upload.last", fileChooser.getCurrentDirectory().getAbsolutePath());

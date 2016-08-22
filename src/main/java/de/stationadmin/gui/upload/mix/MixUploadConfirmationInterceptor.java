@@ -11,12 +11,12 @@ import java.util.Map;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.gui.ClientContext;
-import de.stationadmin.gui.upload.TitleConfirmationInterceptor;
+import de.stationadmin.gui.upload.TrackConfirmationInterceptor;
 
 /**
  * @author Frank
  */
-public class MixUploadConfirmationInterceptor implements TitleConfirmationInterceptor {
+public class MixUploadConfirmationInterceptor implements TrackConfirmationInterceptor {
   private boolean active = true;
   private ClientContext ctx;
   private List<File> files;
@@ -40,7 +40,7 @@ public class MixUploadConfirmationInterceptor implements TitleConfirmationInterc
   }
 
   /**
-   * @see de.stationadmin.gui.upload.TitleConfirmationInterceptor#beforeDisplay(java.util.List)
+   * @see de.stationadmin.gui.upload.TrackConfirmationInterceptor#beforeDisplay(java.util.List)
    */
   @Override
   public void beforeDisplay(List<DetailedTrack> titles) {
@@ -56,14 +56,14 @@ public class MixUploadConfirmationInterceptor implements TitleConfirmationInterc
   }
 
   /**
-   * @see de.stationadmin.gui.upload.TitleConfirmationInterceptor#beforeSave(java.util.List)
+   * @see de.stationadmin.gui.upload.TrackConfirmationInterceptor#beforeSave(java.util.List)
    */
   @Override
   public void beforeSave(List<DetailedTrack> titles) {
   }
 
   /**
-   * @see de.stationadmin.gui.upload.TitleConfirmationInterceptor#afterSave(java.util.List)
+   * @see de.stationadmin.gui.upload.TrackConfirmationInterceptor#afterSave(java.util.List)
    */
   @Override
   public void afterSave(List<DetailedTrack> titles) {

@@ -38,6 +38,7 @@ public class UploadManager extends AbstractBean {
   private TrackService trackService;
   private SessionCtx sessionCtx;
   private TrackProcessingMonitor processingMonitor;
+  private int numberOfTracksProcessing = 0;
 
   public UploadManager(TrackService trackService, SessionCtx ctx) {
     super();
@@ -47,9 +48,18 @@ public class UploadManager extends AbstractBean {
   }
 
   public boolean add(File file) {
+    return add(file, false);
+  }
+  
+  public boolean add(File file, boolean forcePrivate) {
     if (file.exists() && !file.isDirectory() && file.getName().toLowerCase().endsWith("mp3") && file.length() < 1024 * 1024 * 25) {
       int oldRemaining = this.getNumberOfRemainingFiles();
-      this.queue.add(new QueuedTrack(file));
+      QueuedTrack track = new QueuedTrack(file);
+      if(forcePrivate) {
+        track.getFile().setPrivateTrack(true);
+      }
+      this.queue.add(track);
+      
       this.progressListener.add(file);
       this.firePropertyChange("numberOfRemainingFiles", oldRemaining, this.getNumberOfRemainingFiles());
       this.saveQueue();
@@ -58,6 +68,7 @@ public class UploadManager extends AbstractBean {
       return false;
     }
   }
+
 
   public boolean removeFile(File file) {
     if (this.currentIndex < this.queue.size() && this.queue.get(currentIndex).getFile().getFile().getAbsolutePath().equals(file.getAbsolutePath())) {
@@ -77,6 +88,10 @@ public class UploadManager extends AbstractBean {
     return false;
   }
 
+  /**
+   * Number of files that still need to be uploaded
+   * @return
+   */
   public int getNumberOfRemainingFiles() {
     return this.queue.size() - this.currentIndex;
   }
@@ -220,6 +235,7 @@ public class UploadManager extends AbstractBean {
 
   protected int checkUploadedTracks() {
     int remaining = 0;
+    boolean tracksCompleted = false;
     for (QueuedTrack entry : queue) {
       if (entry.getTrack() == null) {
         remaining++;
@@ -231,8 +247,9 @@ public class UploadManager extends AbstractBean {
               entry.setTrack(track);
               entry.setStatus(UploadStatus.COMPLETED);
               System.out.println("processing completed " + entry.getFile().getFile().getName());
-              processedTracks.add(entry); // TODO fire event?
-              fireTrackCompleted();
+              addToProcessed(entry);
+              this.trackService.getTrackRegistry().registerOwnTrack(entry.getTrack());
+              tracksCompleted = true;
             }
           } catch (IOException e) {
 
@@ -241,9 +258,39 @@ public class UploadManager extends AbstractBean {
 
       }
     }
+    
+    if(tracksCompleted) {
+      fireTrackCompleted();
+      if(remaining == 0 && this.getNumberOfRemainingFiles() == 0) {
+        try {
+          trackService.saveTracks();
+        } catch(Exception e) {
+        }
+      }
+    }
+    
+    
+    
+    this.numberOfTracksProcessing = remaining;
     return remaining;
   }
 
+  private void addToProcessed(QueuedTrack track) {
+    int numProcessed = this.processedTracks.size();
+    processedTracks.add(track); 
+    this.firePropertyChange("numProcessedTracks", numProcessed, this.processedTracks.size());
+ 
+  }
+  
+  /**
+   * Clears the list of processed tracks
+   */
+  public void clearProcessedTracks() {
+    int numProcessed = this.processedTracks.size();
+    this.processedTracks.clear();
+    this.firePropertyChange("numProcessedTracks", numProcessed, this.processedTracks.size());
+  }
+  
   private void fireTrackStatusUpdate() {
     this.firePropertyChange("trackStatusUpdate", false, true);
   }
@@ -282,6 +329,15 @@ public class UploadManager extends AbstractBean {
     public void abort() {
       this.abort = true;
     }
+  }
+
+  /**
+   * Number of tracks that are currently processed on the server
+   * 
+   * @return the numTracksProcessing
+   */
+  public int getNumberOfTracksProcessing() {
+    return numberOfTracksProcessing;
   }
 
 }

@@ -26,9 +26,9 @@ import javax.swing.text.JTextComponent;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-import de.stationadmin.base.track.DetailedTrack;
+import de.stationadmin.base.track.upload.QueuedTrack;
 import de.stationadmin.gui.ClientContext;
-import de.stationadmin.gui.upload.UploadedTitleTableModel.Column;
+import de.stationadmin.gui.upload.UploadedTrackTableModel.Column;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.SwingTools;
 
@@ -37,9 +37,11 @@ import de.stationadmin.gui.util.SwingTools;
  * @author Frank Korf
  * 
  */
-class MultiTitleEditDlg extends JDialog {
+@SuppressWarnings("rawtypes")
+class MultiTrackEditDlg extends JDialog {
+  private static final long serialVersionUID = 566574505692346844L;
   private ClientContext ctx;
-  private List<DetailedTrack> titles;
+  private List<QueuedTrack> tracks;
   private TableModel tableModel;
 
   private JCheckBox artistEnabledCb;
@@ -54,13 +56,13 @@ class MultiTitleEditDlg extends JDialog {
   private JTextField yearTf;
   private JCheckBox typeEnabledCb;
   private JComboBox typeCmb;
-  private JCheckBox privateEnabledCb;
-  private JCheckBox privateCb;
+//  private JCheckBox privateEnabledCb;
+//  private JCheckBox privateCb;
 
-  public MultiTitleEditDlg(ClientContext ctx, List<DetailedTrack> titles, TableModel model) {
+  public MultiTrackEditDlg(ClientContext ctx, List<QueuedTrack> tracks, TableModel model) {
     super();
     this.ctx = ctx;
-    this.titles = titles;
+    this.tracks = tracks;
     this.tableModel = model;
     this.init();
   }
@@ -120,18 +122,18 @@ class MultiTitleEditDlg extends JDialog {
 
     {
       this.typeEnabledCb = new JCheckBox();
-      this.typeCmb = new JComboBox(new Integer[] { 1, 2, 3 });
-      this.typeCmb.setRenderer(new TitleTypeListCellRenderer(ctx));
+      this.typeCmb = new JComboBox<Integer>(new Integer[] { 1, 2, 3 });
+      this.typeCmb.setRenderer(new TrackTypeListCellRenderer(ctx));
       this.addRow(Column.TYPE, this.typeEnabledCb, this.typeCmb, row);
       row += 2;
     }
 
-    {
-      this.privateEnabledCb = new JCheckBox();
-      this.privateCb = new JCheckBox();
-      this.addRow(Column.PRIVATE, this.privateEnabledCb, this.privateCb, row);
-      row += 2;
-    }
+//    {
+//      this.privateEnabledCb = new JCheckBox();
+//      this.privateCb = new JCheckBox();
+//      this.addRow(Column.PRIVATE, this.privateEnabledCb, this.privateCb, row);
+//      row += 2;
+//    }
 
     JPanel btnPanel = new JPanel(new GridLayout(1, 2, 10, 10));
     JButton ok = new JButton(new ApplyAction());
@@ -183,33 +185,39 @@ class MultiTitleEditDlg extends JDialog {
   }
 
   private void apply() {
-    for (DetailedTrack title : titles) {
+    for (QueuedTrack track : tracks) {
 
       if (this.artistEnabledCb.isSelected()) {
-        title.setArtist(this.artistTf.getText());
+        track.getTrack().setArtist(this.artistTf.getText());
+        track.setModified(true);
       }
       if (this.titleEnabledCb.isSelected()) {
-        title.setTitle(this.titleTf.getText());
+        track.getTrack().setTitle(this.titleTf.getText());
+        track.setModified(true);
       }
       if (this.albumEnabledCb.isSelected()) {
-        title.setAlbum(this.albumTf.getText());
+        track.getTrack().setAlbum(this.albumTf.getText());
+        track.setModified(true);
       }
       if (this.genreEnabledCb.isSelected()) {
-        title.setGenre(this.genreTf.getText());
+        track.getTrack().setGenre(this.genreTf.getText());
+        track.setModified(true);
       }
       if (this.yearEnabledCb.isSelected()) {
         try {
           int year = Integer.parseInt(this.yearTf.getText());
-          title.setYear(year);
+          track.getTrack().setYear(year);
+          track.setModified(true);
         } catch (NumberFormatException e) {
         }
       }
       if (this.typeEnabledCb.isSelected()) {
-        title.setType((Integer)typeCmb.getSelectedItem());
+        track.getTrack().setType((Integer)typeCmb.getSelectedItem());
+        track.setModified(true);
       }
-      if (this.privateEnabledCb.isSelected()) {
-        title.setPrivateTrack(this.privateCb.isSelected());
-      }
+//      if (this.privateEnabledCb.isSelected()) {
+//        title.setPrivateTrack(this.privateCb.isSelected());
+//      }
 
     }
 

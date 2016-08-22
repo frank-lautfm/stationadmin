@@ -72,7 +72,7 @@ public class DetailedTrack extends Title {
       track.setType("song");
       break;
     case TYPE_WORD:
-      track.setType("word");
+      track.setType("moderation");
       break;
     }
     track.setTitle(this.getTitle());

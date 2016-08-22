@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -45,14 +46,17 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.Playlist;
-import de.stationadmin.base.playlist.PlaylistNameCompator;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
+import de.stationadmin.base.playlist.PlaylistNameCompator;
+import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.upload.QueuedTrack;
+import de.stationadmin.base.track.upload.UploadManager;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.track.DistributeTracksDlg;
-import de.stationadmin.gui.upload.UploadedTitleTableModel.Column;
+import de.stationadmin.gui.upload.UploadedTrackTableModel.Column;
 import de.stationadmin.gui.util.Option;
 
 /**
@@ -61,28 +65,29 @@ import de.stationadmin.gui.util.Option;
  * 
  */
 @SuppressWarnings("rawtypes")
-public class UploadedTitlePanel extends JPanel {
+public class UploadedTracksPanel extends JPanel {
   private static final long serialVersionUID = 7104176809260469070L;
   private ClientContext ctx;
   private TextProvider textProvider;
-  private UploadedTitleTableModel model;
+  private UploadManager uploadManager;
+  private UploadedTrackTableModel model;
   private ValueModel selection = new ValueHolder(new ArrayList<DetailedTrack>(0), true);
   private ValueModel targetPlaylist = new ValueHolder();
+  private ValueModel targetTag = new ValueHolder();
   private ValueModel playlistAppend = new ValueHolder(Boolean.TRUE);
   private JPopupMenu popup;
-  private List<TitleConfirmationInterceptor> confirmationInterceptors;
 
-  public UploadedTitlePanel(ClientContext ctx, List<TitleConfirmationInterceptor> confirmationInterceptors) {
+  public UploadedTracksPanel(ClientContext ctx, UploadManager uploadManager) {
     super();
     this.ctx = ctx;
     this.textProvider = ctx.getTextProvider();
-    this.confirmationInterceptors = confirmationInterceptors;
-    this.model = new UploadedTitleTableModel(this.ctx);
+    this.model = new UploadedTrackTableModel(this.ctx);
+    this.uploadManager = uploadManager;
     this.init();
   }
 
   private void init() {
-    this.setLayout(new FormLayout("100dlu:grow,5dlu,pref", "50dlu:grow,5dlu,pref"));
+    this.setLayout(new FormLayout("pref,5dlu,100dlu:grow,5dlu,pref", "50dlu:grow,5dlu,pref,2dlu,pref"));
     CellConstraints cc = new CellConstraints();
     final JXTable table = new JXTable(this.model);
     table.getColumn(Column.PRIVATE.ordinal()).setPreferredWidth(50);
@@ -97,10 +102,10 @@ public class UploadedTitlePanel extends JPanel {
       @Override
       public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
-          List<DetailedTrack> titles = model.getTitles();
-          ArrayList<DetailedTrack> selected = new ArrayList<DetailedTrack>();
+          List<QueuedTrack> tracks = model.getTracks();
+          ArrayList<QueuedTrack> selected = new ArrayList<QueuedTrack>();
           for (int row : table.getSelectedRows()) {
-            selected.add(titles.get(row));
+            selected.add(tracks.get(row));
           }
           selection.setValue(selected);
         }
@@ -110,11 +115,25 @@ public class UploadedTitlePanel extends JPanel {
 
     TableColumn typeCol = table.getColumnModel().getColumn(Column.TYPE.ordinal());
     typeCol.setCellRenderer(new TypeRenderer());
-    JComboBox<Integer> typeCmb = new JComboBox<Integer>(new Integer[]{1, 2, 3});
-    typeCmb.setRenderer(new TitleTypeListCellRenderer(ctx));
+    JComboBox<Integer> typeCmb = new JComboBox<Integer>(new Integer[] { 1, 2, 3 });
+    typeCmb.setRenderer(new TrackTypeListCellRenderer(ctx));
     typeCol.setCellEditor(new DefaultCellEditor(typeCmb));
 
     table.setSortable(false);
+    
+    uploadManager.addPropertyChangeListener("numProcessedTracks", new PropertyChangeListener() {
+      
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        SwingUtilities.invokeLater(new Runnable() {
+          
+          @Override
+          public void run() {
+            model.setTracks(uploadManager.getProcessedTracks());
+          }
+        });
+      }
+    });
 
     this.popup = new JPopupMenu();
     this.popup.add(new OpenMultiTitleEditor());
@@ -154,11 +173,10 @@ public class UploadedTitlePanel extends JPanel {
 
     });
 
-    this.add(new JScrollPane(table), cc.xywh(1, 1, 3, 1));
+    this.add(new JScrollPane(table), cc.xywh(1, 1, 5, 1));
 
     {
-      List<Playlist> playlists = this.ctx.getAdminClient().getPlaylistService().getPlaylistRegistry()
-          .getPlaylists(PlaylistType.ONLINE);
+      List<Playlist> playlists = this.ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE);
       Collections.sort(playlists, new PlaylistNameCompator());
       List<Object> items = new ArrayList<Object>();
       items.add(null);
@@ -167,14 +185,12 @@ public class UploadedTitlePanel extends JPanel {
       SelectionInList<Object> playlistSelection = new SelectionInList<Object>(items, targetPlaylist);
       JComboBox cmb = BasicComponentFactory.createComboBox(playlistSelection);
 
-      SelectionInList<Boolean> insertModeSelection = new SelectionInList<Boolean>(new Boolean[]{Boolean.FALSE,
-          Boolean.TRUE}, this.playlistAppend);
+      SelectionInList<Boolean> insertModeSelection = new SelectionInList<Boolean>(new Boolean[] { Boolean.FALSE, Boolean.TRUE }, this.playlistAppend);
       final JComboBox cmbAppend = BasicComponentFactory.createComboBox(insertModeSelection, new DefaultListCellRenderer() {
         private static final long serialVersionUID = 6168519270635870257L;
 
         @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
-            boolean cellHasFocus) {
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
           Component cmp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
           if (value.equals(Boolean.FALSE)) {
             this.setText(ctx.getTextProvider().getString("upload.title.targetPlaylist.append.beginning"));
@@ -188,7 +204,7 @@ public class UploadedTitlePanel extends JPanel {
       });
       cmbAppend.setEnabled(false);
       this.targetPlaylist.addValueChangeListener(new PropertyChangeListener() {
-        
+
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
           cmbAppend.setEnabled(evt.getNewValue() instanceof Playlist);
@@ -196,41 +212,44 @@ public class UploadedTitlePanel extends JPanel {
       });
 
       JPanel p = new JPanel(new FlowLayout(FlowLayout.LEADING));
-      p.add(new JLabel(ctx.getTextProvider().getString("upload.title.targetPlaylist")));
       p.add(cmb);
       p.add(cmbAppend);
 
-      this.add(p, cc.xy(1, 3, CellConstraints.LEFT, CellConstraints.CENTER));
+      this.add(new JLabel(ctx.getTextProvider().getString("upload.title.targetPlaylist")), cc.xy(1, 3, CellConstraints.LEFT, CellConstraints.CENTER));
+      this.add(p, cc.xy(3, 3, CellConstraints.LEFT, CellConstraints.CENTER));
+    }
+    
+    {
+      List<StaticTag> tags = this.ctx.getAdminClient().getTagManager().getStaticTags();
+      List<String> names = new ArrayList<String>();
+      for (StaticTag tag : tags) {
+        names.add(tag.getName());
+      }
+      Collections.sort(names);
+      names.add(0, null);
+      SelectionInList<String> tagSelection = new SelectionInList<String>(names, this.targetTag);
+      JPanel p = new JPanel(new FlowLayout(FlowLayout.LEADING));
+      JComboBox cmb = BasicComponentFactory.createComboBox(tagSelection);
+      p.add(cmb);
+
+      this.add(new JLabel(ctx.getTextProvider().getString("upload.title.targetTag")), cc.xy(1, 5, CellConstraints.LEFT, CellConstraints.CENTER));
+      this.add(p, cc.xy(3, 5, CellConstraints.LEFT, CellConstraints.CENTER));
 
     }
+
 
     {
       JButton saveBtn = new JButton(new SaveAction());
-      this.add(saveBtn, cc.xy(3, 3, CellConstraints.RIGHT, CellConstraints.CENTER));
+      this.add(saveBtn, cc.xy(5, 5, CellConstraints.RIGHT, CellConstraints.CENTER));
     }
 
-  }
-
-  public void refresh() {
-    // try {
-    // List<UploadedTitle> titles =
-    // ctx.getAdminClient().getTitleService().getUnconfirmedUploadedTitles();
-    // for (TitleConfirmationInterceptor ic : this.confirmationInterceptors) {
-    // ic.beforeDisplay(titles);
-    // }
-    // model.setTitles(titles);
-    // } catch (Exception e) {
-    // JXErrorPane.showDialog(ctx.getRootWindow(),
-    // textProvider.createErrorInfo(e, "upload.gettitle.error"));
-    // }
   }
 
   public class TypeRenderer extends DefaultTableCellRenderer {
     private static final long serialVersionUID = -7860118177226476360L;
 
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-        int row, int column) {
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
       super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
       this.setText(textProvider.getString("title.type." + value));
 
@@ -243,12 +262,12 @@ public class UploadedTitlePanel extends JPanel {
 
     SaveAction() {
       this.putValue(Action.NAME, textProvider.getString("upload.confirm"));
-      this.setEnabled(model.getTitles().size() > 0);
+      this.setEnabled(model.getTracks().size() > 0);
       model.addTableModelListener(new TableModelListener() {
 
         @Override
         public void tableChanged(TableModelEvent e) {
-          setEnabled(model.getTitles().size() > 0);
+          setEnabled(model.getTracks().size() > 0);
         }
       });
     }
@@ -259,44 +278,49 @@ public class UploadedTitlePanel extends JPanel {
     @Override
     public void actionPerformed(ActionEvent evt) {
       try {
-        List<DetailedTrack> titles = model.getTitles();
-        for (TitleConfirmationInterceptor ic : confirmationInterceptors) {
-          ic.beforeSave(titles);
-        }
-        // FIXME ctx.getAdminClient().getTitleService().confirmUploadedTitles(titles);
-        for (TitleConfirmationInterceptor ic : confirmationInterceptors) {
-          ic.afterSave(titles);
+        for (DetailedTrack track : model.getModifiedTracks()) {
+          ctx.getAdminClient().getTrackService().updateTrack(track);
+          ctx.getAdminClient().getTrackService().getTrackRegistry().registerOwnTrack(track);
         }
 
-        ctx.getAdminClient().getTrackService().updateOwnTracks();
+        List<Title> addedTracks = new ArrayList<Title>();
+        for (QueuedTrack track : model.getTracks()) {
+          Title t = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(track.getTrack().getId());
+          if (t != null) {
+            addedTracks.add(t);
+          }
+        }
 
         if (targetPlaylist.getValue() != null) {
-          List<Title> addedTitles = new ArrayList<Title>();
-          for (DetailedTrack utitle : titles) {
-            Title t = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(utitle.getId());
-            if (t != null) {
-              addedTitles.add(t);
-            }
-          }
           if (targetPlaylist.getValue() instanceof Playlist) {
             Playlist playlist = (Playlist) targetPlaylist.getValue();
             if (playlistAppend.getValue().equals(Boolean.TRUE)) {
-              for (Title t : addedTitles) {
+              for (Title t : addedTracks) {
                 playlist.addTrack(t);
               }
             } else {
-              playlist.insertTracks(0, addedTitles);
+              playlist.insertTracks(0, addedTracks);
             }
           } else if (targetPlaylist.getValue() instanceof Option) {
             Option option = (Option) targetPlaylist.getValue();
             if (option.getKey().equals("multiplaylist")) {
-              DistributeTracksDlg dlg = new DistributeTracksDlg(ctx, addedTitles);
+              DistributeTracksDlg dlg = new DistributeTracksDlg(ctx, addedTracks);
               dlg.setVisible(true);
             }
           }
         }
+        
+        if (targetTag.getValue() != null) {
+          String tag = (String) targetTag.getValue();
+          int[] ids = new int[addedTracks.size()];
+          for (int i = 0; i < addedTracks.size(); i++) {
+            ids[i] = addedTracks.get(i).getId();
+          }
+          ctx.getAdminClient().getTagManager().tagTracks(tag, ids);
+        }
+        
+        uploadManager.clearProcessedTracks();
 
-        refresh();
       } catch (Exception e) {
         JXErrorPane.showDialog(ctx.getRootWindow(), textProvider.createErrorInfo(e, "upload.error.confirm"));
       }
@@ -333,9 +357,9 @@ public class UploadedTitlePanel extends JPanel {
     @Override
     @SuppressWarnings("unchecked")
     public void actionPerformed(ActionEvent e) {
-      List<DetailedTrack> titles = (List<DetailedTrack>) selection.getValue();
-      if (titles.size() > 0) {
-        MultiTitleEditDlg dlg = new MultiTitleEditDlg(ctx, titles, model);
+      List<QueuedTrack> tracks = (List<QueuedTrack>) selection.getValue();
+      if (tracks.size() > 0) {
+        MultiTrackEditDlg dlg = new MultiTrackEditDlg(ctx, tracks, model);
         dlg.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
         dlg.setVisible(true);
       }
