@@ -104,8 +104,9 @@ public class UploadedTrackTableModel extends AbstractTableModel {
    */
   @Override
   public boolean isCellEditable(int rowIndex, int columnIndex) {
-    Column col = Column.values()[columnIndex];
-    return col != Column.PRIVATE;
+    // Column col = Column.values()[columnIndex];
+    // return col != Column.PRIVATE;
+    return true;
   }
 
   /**
@@ -135,7 +136,9 @@ public class UploadedTrackTableModel extends AbstractTableModel {
       title.setGenre((String) value);
       break;
     case PRIVATE:
-      title.setPrivateTrack((Boolean) value);
+      if (((Boolean) value).booleanValue() == false) {
+        title.setPrivateTrack((Boolean) value);
+      }
       break;
     case TITLE:
       title.setTitle((String) value);
@@ -156,14 +159,14 @@ public class UploadedTrackTableModel extends AbstractTableModel {
 
   public List<DetailedTrack> getModifiedTracks() {
     List<DetailedTrack> modifiedTracks = new ArrayList<DetailedTrack>();
-    for(QueuedTrack track : this.tracks) {
-      if(track.isModified()) {
+    for (QueuedTrack track : this.tracks) {
+      if (track.isModified()) {
         modifiedTracks.add(track.getTrack());
       }
     }
     return modifiedTracks;
   }
-  
+
   public enum Column {
     ARTIST, TITLE, ALBUM, GENRE, YEAR, TYPE, PRIVATE
 
