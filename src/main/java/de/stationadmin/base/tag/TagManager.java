@@ -647,8 +647,13 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
    */
   public void tagTracks(String tag, int... trackIds) throws IOException {
     Map<Integer, Track> tracks = this.ctx.getServer().tagTracks(ctx.getStationId(), tag, trackIds);
+    trackIds = this.getTagFile(tag, true).tag(trackIds);
+    this.updateRegisteredTracks(tracks, trackIds);
+  }
+  
+  private void updateRegisteredTracks(Map<Integer, Track> tracks, int[] trackIds) throws IOException {
     boolean trackDirty = false;
-    for (int id : this.getTagFile(tag, true).tag(trackIds)) {
+    for (int id : trackIds) {
       RegisteredTrack t = this.trackRegistry.getTrack(id);
       if (t != null) {
         t.tagCountInc();
@@ -663,6 +668,19 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
     if (trackDirty) {
       this.trackService.saveTracks();
     }
+    
+  }
+  
+  /**
+   * Tags tracks on server based on the content of the local file - used during backup
+   * @param tag
+   * @throws IOException
+   */
+  public void updateTagOnServer(String tag) throws IOException {
+    this.ctx.getServer().deleteTag(ctx.getStationId(), tag);
+    int[] trackIds = this.getTagFile(tag, true).getIds();
+    Map<Integer, Track> tracks = this.ctx.getServer().tagTracks(ctx.getStationId(), tag, trackIds);
+    this.updateRegisteredTracks(tracks, trackIds);
   }
 
   /**

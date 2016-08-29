@@ -413,6 +413,7 @@ public class BackupService implements Service {
       tag = this.titleTagManager.addStaticTag(tagname);
     }
     ((StaticTag) tag).writeRaw(zip.getInputStream(entry));
+    this.titleTagManager.updateTagOnServer(tagname);
     zip.close();
   }
   

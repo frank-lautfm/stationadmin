@@ -16,11 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
@@ -89,33 +84,6 @@ public class LautfmAdminService {
 
     } catch (Exception e) {
       throw new RuntimeException(e);
-    }
-  }
-
-  void disableCertificates() {
-    TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-
-      @Override
-      public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-        return null;
-      }
-
-      @Override
-      public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-      }
-
-      @Override
-      public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-      }
-    } };
-
-    // Install the all-trusting trust manager
-    try {
-      SSLContext sc = SSLContext.getInstance("SSL");
-      sc.init(null, trustAllCerts, new java.security.SecureRandom());
-      HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-    } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 
