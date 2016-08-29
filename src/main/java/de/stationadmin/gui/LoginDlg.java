@@ -31,7 +31,9 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
+import javax.swing.TransferHandler;
 
 import org.apache.commons.lang.StringUtils;
 import org.jdesktop.swingx.JXErrorPane;
@@ -43,6 +45,8 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.StationAdminClient;
+import de.stationadmin.gui.playlist.PopupListener;
+import de.stationadmin.gui.util.ClipboardAction;
 import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.SwingTools;
@@ -120,6 +124,11 @@ public class LoginDlg extends JDialog {
     tokenTf.addFocusListener(focusListener);
     tokenTf.setAction(loginAction);
     panel.add(tokenTf, cc.xy(4, 2));
+    
+    final JPopupMenu popup = new JPopupMenu();
+    popup.add(new ClipboardAction(ctx, tokenTf, this.token, TransferHandler.getPasteAction()));
+    tokenTf.addMouseListener(new PopupListener(tokenTf, popup));
+
 
     JButton requestTokenBtn = new JButton("?");
     requestTokenBtn.addActionListener(new ActionListener() {
