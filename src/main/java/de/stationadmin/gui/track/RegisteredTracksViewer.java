@@ -71,10 +71,10 @@ import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.RegisteredTrack.PlaylistStatistics;
 import de.stationadmin.base.track.Title;
 import de.stationadmin.base.track.TrackService;
-import de.stationadmin.base.track.exporter.TitleListCSVExporter;
-import de.stationadmin.base.track.exporter.TitleListExcelExporter;
-import de.stationadmin.base.track.exporter.TitleListExporter;
-import de.stationadmin.base.track.exporter.TitleListTxtExporter;
+import de.stationadmin.base.track.exporter.TrackListCSVExporter;
+import de.stationadmin.base.track.exporter.TrackListExcelExporter;
+import de.stationadmin.base.track.exporter.TrackListExporter;
+import de.stationadmin.base.track.exporter.TrackListTxtExporter;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
@@ -108,6 +108,7 @@ public class RegisteredTracksViewer extends JPanel {
   private ValueModel uploadFilterHolder = new ValueHolder(UploadFilter.ANYBODY);
   private ValueModel numTitles = new ValueHolder(0);
   private ValueModel length = new ValueHolder(0);
+  private JXTable table;
 
   private RegisteredTracksTableModel tableModel;
   // private boolean allColumnsDisplayed = false;
@@ -125,31 +126,30 @@ public class RegisteredTracksViewer extends JPanel {
     this.setLayout(new BorderLayout());
     this.add(this.createTablePanel(), BorderLayout.CENTER);
     this.add(this.createStatusBar(), BorderLayout.SOUTH);
-    
+
     // store current selection in user preferences
     this.tagSetHolder.addValueChangeListener(new PropertyChangeListener() {
-      
+
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        TagSet set = (TagSet)evt.getNewValue();
-        if(set != null) {
+        TagSet set = (TagSet) evt.getNewValue();
+        if (set != null) {
           Preferences.userRoot().put("titletagset.default." + ctx.getAdminClient().getStation(), set.getName());
           titleTagService.setCurrentTagSetName(set.getName());
-        }
-        else {
+        } else {
           Preferences.userRoot().remove("titletagset.default." + ctx.getAdminClient().getStation());
           titleTagService.setCurrentTagSetName(null);
         }
       }
     });
-        
+
   }
 
   @SuppressWarnings(value = { "rawtypes", "unchecked" })
   private JXStatusBar createStatusBar() {
     JXStatusBar statusBar = new JXStatusBar();
     statusBar.setOpaque(false);
-    
+
     final DefaultComboBoxModel tagSetModel = new DefaultComboBoxModel();
     this.updateTagSetModel(tagSetModel);
     final JComboBox tagSetCmb = new JComboBox(tagSetModel);
@@ -159,12 +159,11 @@ public class RegisteredTracksViewer extends JPanel {
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         updateTagSetModel(tagSetModel);
-        if(tagSetHolder.getValue() != tagSetCmb.getSelectedItem()) {
+        if (tagSetHolder.getValue() != tagSetCmb.getSelectedItem()) {
           tagSetCmb.setSelectedItem(tagSetHolder.getValue());
         }
       }
     });
-
 
     tagSetCmb.addItemListener(new ItemListener() {
 
@@ -174,9 +173,8 @@ public class RegisteredTracksViewer extends JPanel {
       }
     });
     JPanel tspanel = new JPanel(new FormLayout("pref", "pref"));
-    tspanel.add(tagSetCmb, new CellConstraints(1,1));
+    tspanel.add(tagSetCmb, new CellConstraints(1, 1));
     statusBar.add(tspanel, new JXStatusBar.Constraint());
-
 
     final DefaultComboBoxModel tagListModel = new DefaultComboBoxModel();
     this.updateTagModel(tagListModel);
@@ -213,18 +211,15 @@ public class RegisteredTracksViewer extends JPanel {
       }
     });
 
-    SelectionInList<Boolean> invertSelection = new SelectionInList<Boolean>(new Boolean[]{Boolean.FALSE, Boolean.TRUE},
-        this.invertTagHolder);
+    SelectionInList<Boolean> invertSelection = new SelectionInList<Boolean>(new Boolean[] { Boolean.FALSE, Boolean.TRUE }, this.invertTagHolder);
     JComboBox invertCmb = BasicComponentFactory.createComboBox(invertSelection, new DefaultListCellRenderer() {
       private static final long serialVersionUID = -8240631239175188202L;
 
       /**
-       * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList,
-       *      java.lang.Object, int, boolean, boolean)
+       * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
        */
       @Override
-      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
-          boolean cellHasFocus) {
+      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         if (value.equals(Boolean.FALSE)) {
           setText(textProvider.getString("titlelist.show"));
@@ -242,18 +237,15 @@ public class RegisteredTracksViewer extends JPanel {
 
     statusBar.add(panel, new JXStatusBar.Constraint());
 
-    SelectionInList<UploadFilter> uploadedSelection = new SelectionInList<UploadFilter>(UploadFilter.values(),
-        this.uploadFilterHolder);
+    SelectionInList<UploadFilter> uploadedSelection = new SelectionInList<UploadFilter>(UploadFilter.values(), this.uploadFilterHolder);
     JComboBox uploadedCmb = BasicComponentFactory.createComboBox(uploadedSelection, new DefaultListCellRenderer() {
       private static final long serialVersionUID = 9073187826215399831L;
 
       /**
-       * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList,
-       *      java.lang.Object, int, boolean, boolean)
+       * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
        */
       @Override
-      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
-          boolean cellHasFocus) {
+      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         if (value == null || value == UploadFilter.ANYBODY) {
           setText(" ");
@@ -299,9 +291,9 @@ public class RegisteredTracksViewer extends JPanel {
     toolbar.addSeparator();
 
     final JPopupMenu exportPopup = new JPopupMenu();
-    exportPopup.add(new ExportTitlesAction(new FileNameExtensionFilter("CSV", "csv"), "csv", new TitleListCSVExporter()));
-    exportPopup.add(new ExportTitlesAction(new FileNameExtensionFilter("Excel", "xls"), "xls", new TitleListExcelExporter()));
-    exportPopup.add(new ExportTitlesAction(new FileNameExtensionFilter("Text", "txt"), "txt", new TitleListTxtExporter()));
+    exportPopup.add(new ExportTracksAction(new FileNameExtensionFilter("CSV", "csv"), "csv", new TrackListCSVExporter()));
+    exportPopup.add(new ExportTracksAction(new FileNameExtensionFilter("Excel", "xls"), "xls", new TrackListExcelExporter(ctx.getAdminClient().getTrackService().getTrackRegistry())));
+    exportPopup.add(new ExportTracksAction(new FileNameExtensionFilter("Text", "txt"), "txt", new TrackListTxtExporter()));
 
     final JButton exportBtn = new JButton(ctx.getIcon("playlist_export.png"));
     exportBtn.setToolTipText(textProvider.getString("titlelist.action.export.tooltip"));
@@ -319,7 +311,7 @@ public class RegisteredTracksViewer extends JPanel {
     return statusBar;
   }
 
-  @SuppressWarnings(value =  {"unchecked", "rawtypes" })
+  @SuppressWarnings(value = { "unchecked", "rawtypes" })
   private void updateTagModel(DefaultComboBoxModel model) {
     model.removeAllElements();
     model.addElement(null);
@@ -332,8 +324,8 @@ public class RegisteredTracksViewer extends JPanel {
     model.addElement(RegisteredTracksTableModel.TAGGED_TITLES);
 
   }
-  
-  @SuppressWarnings(value =  {"unchecked", "rawtypes" })
+
+  @SuppressWarnings(value = { "unchecked", "rawtypes" })
   private void updateTagSetModel(DefaultComboBoxModel model) {
     boolean firstInit = model.getSize() <= 1;
     model.removeAllElements();
@@ -341,34 +333,32 @@ public class RegisteredTracksViewer extends JPanel {
     Object previous = this.tagSetHolder.getValue();
     String defaultTagSetName = Preferences.userRoot().get("titletagset.default." + ctx.getAdminClient().getStation(), null);
     this.titleTagService.setCurrentTagSetName(defaultTagSetName);
-    TagSet defaultTagSet = null; 
+    TagSet defaultTagSet = null;
     for (TagSet set : this.titleTagService.getTagSets()) {
       model.addElement(set);
-      if(defaultTagSetName != null && set.getName().equals(defaultTagSetName)) {
+      if (defaultTagSetName != null && set.getName().equals(defaultTagSetName)) {
         defaultTagSet = set;
       }
     }
-    if(firstInit) {
+    if (firstInit) {
       previous = defaultTagSet;
     }
-    if(previous != null && model.getIndexOf(previous) > -1) {
+    if (previous != null && model.getIndexOf(previous) > -1) {
       this.tagSetHolder.setValue(previous);
     }
   }
 
-
   private JComponent createTablePanel() {
-    this.tableModel = new RegisteredTracksTableModel(this.textProvider, this.titleService.getTrackRegistry(),
-        this.titleTagService, this.tagSetHolder, this.tagHolder, this.invertTagHolder, this.uploadFilterHolder);
-    tableModel.setNumTitles(numTitles);
+    this.tableModel = new RegisteredTracksTableModel(this.textProvider, this.titleService.getTrackRegistry(), this.titleTagService, this.tagSetHolder, this.tagHolder, this.invertTagHolder,
+        this.uploadFilterHolder);
+    tableModel.setNumTracks(numTitles);
     tableModel.setLength(this.length);
-    final JXTable table = new JXTable(tableModel) {
+    table = new JXTable(tableModel) {
       private static final long serialVersionUID = -4365217830331156493L;
       private TrackTypeRenderer typeRenderer = new TrackTypeRenderer();
       private IntTableCellRenderer yearRenderer = new IntTableCellRenderer(0);
       private PlaylistStatisticsCellRenderer playlistsRenderer = new PlaylistStatisticsCellRenderer();
-      private DateTableCellRenderer uploadDateRenderer = new DateTableCellRenderer(new SimpleDateFormat(
-          textProvider.getString("timeFormat")));
+      private DateTableCellRenderer uploadDateRenderer = new DateTableCellRenderer(new SimpleDateFormat(textProvider.getString("timeFormat")));
 
       /**
        * @see org.jdesktop.swingx.JXTable#getCellRenderer(int, int)
@@ -402,8 +392,17 @@ public class RegisteredTracksViewer extends JPanel {
     table.getColumnModel().getColumn(Column.UPLOAD.ordinal()).setMaxWidth(110);
     table.getColumnModel().getColumn(Column.YEAR.ordinal()).setPreferredWidth(60);
     table.getColumnModel().getColumn(Column.YEAR.ordinal()).setMaxWidth(60);
-    
+
+    table.getColumn(Column.LEGACY_ID.ordinal()).setCellRenderer(new IntTableCellRenderer(null));
+    table.getColumn(Column.ID.ordinal()).setCellRenderer(new IntTableCellRenderer(null));
+    table.getColumnModel().getColumn(Column.LEGACY_ID.ordinal()).setPreferredWidth(80);
+    table.getColumnModel().getColumn(Column.LEGACY_ID.ordinal()).setMaxWidth(80);
+    table.getColumnModel().getColumn(Column.ID.ordinal()).setPreferredWidth(80);
+    table.getColumnModel().getColumn(Column.ID.ordinal()).setMaxWidth(80);
+
     ((TableColumnExt) table.getColumnModel().getColumn(Column.GENRE.ordinal())).setVisible(false);
+    ((TableColumnExt) table.getColumnModel().getColumn(Column.LEGACY_ID.ordinal())).setVisible(false);
+    ((TableColumnExt) table.getColumnModel().getColumn(Column.ID.ordinal())).setVisible(false);
     table.setColumnControlVisible(true);
 
     table.addHighlighter(new AbstractHighlighter() {
@@ -453,8 +452,7 @@ public class RegisteredTracksViewer extends JPanel {
       private static final long serialVersionUID = 8486946874778173755L;
 
       /**
-       * @see javax.swing.TransferHandler#exportToClipboard(javax.swing.JComponent,
-       *      java.awt.datatransfer.Clipboard, int)
+       * @see javax.swing.TransferHandler#exportToClipboard(javax.swing.JComponent, java.awt.datatransfer.Clipboard, int)
        */
       @Override
       public void exportToClipboard(JComponent comp, Clipboard clip, int action) throws IllegalStateException {
@@ -483,7 +481,9 @@ public class RegisteredTracksViewer extends JPanel {
 
       }
 
-      /* (non-Javadoc)
+      /*
+       * (non-Javadoc)
+       * 
        * @see javax.swing.TransferHandler#createTransferable(javax.swing.JComponent)
        */
       @Override
@@ -495,7 +495,7 @@ public class RegisteredTracksViewer extends JPanel {
           return null;
         }
       }
-      
+
       public boolean canImport(TransferSupport support) {
         return false;
       }
@@ -504,7 +504,6 @@ public class RegisteredTracksViewer extends JPanel {
       public int getSourceActions(JComponent c) {
         return COPY;
       }
-
 
     });
     table.setDragEnabled(true);
@@ -661,8 +660,7 @@ public class RegisteredTracksViewer extends JPanel {
   private static class PlaylistStatisticsCellRenderer extends DefaultTableCellRenderer {
     private static final long serialVersionUID = -8156594878657506794L;
 
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-        int row, int column) {
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
       super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
       String text = null;
       if (value instanceof PlaylistStatistics) {
@@ -682,13 +680,13 @@ public class RegisteredTracksViewer extends JPanel {
 
   }
 
-  private class ExportTitlesAction extends AbstractAction {
+  private class ExportTracksAction extends AbstractAction {
     private static final long serialVersionUID = 5960764787462220006L;
     private String format;
     private FileFilter filter;
-    private TitleListExporter exporter;
+    private TrackListExporter exporter;
 
-    ExportTitlesAction(FileFilter filter, String format, TitleListExporter exporter) {
+    ExportTracksAction(FileFilter filter, String format, TrackListExporter exporter) {
       super(textProvider.getString("titlelist.action.export." + format + ".name"));
       this.filter = filter;
       this.format = format;
@@ -707,12 +705,18 @@ public class RegisteredTracksViewer extends JPanel {
         name = "Titel";
       }
 
-      fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory().getAbsolutePath() + File.separatorChar
-          + name + "." + format));
+      fileChooser.setSelectedFile(new File(fileChooser.getCurrentDirectory().getAbsolutePath() + File.separatorChar + name + "." + format));
 
       if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
         try {
-          exporter.toFile(tableModel.getTracks(), fileChooser.getSelectedFile(), true);
+
+          // TODO TEMPORARY for 4.0
+          if (exporter instanceof TrackListExcelExporter) {
+            ((TrackListExcelExporter)exporter).setIncludeIds(table.getColumnModel().getColumnCount() >= 10);
+          }
+          // END TEMPORARY
+
+          exporter.toFile(tableModel.getTracks(), fileChooser.getSelectedFile());
         } catch (Exception ex) {
           JXErrorPane.showDialog(ctx.getRootWindow(), ctx.createErrorInfo(ex, "titles.action.export.msg.failed"));
         }
@@ -722,6 +726,5 @@ public class RegisteredTracksViewer extends JPanel {
     }
 
   }
-
 
 }

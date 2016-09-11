@@ -16,26 +16,26 @@ import de.stationadmin.base.track.RegisteredTrack;
  * @author korf
  *
  */
-public abstract class TitleListStringFileExporter implements TitleListExporter {
+public abstract class TrackListStringFileExporter implements TrackListExporter {
 
-  protected abstract String toString(RegisteredTrack title, boolean full);
+  protected abstract String toString(RegisteredTrack title);
 
-  protected abstract String getHeadLine(boolean full);
+  protected abstract String getHeadLine();
 
   /**
    * Creates a string representation of the playlist
    * @param playlist
    * @return
    */
-  public String toString(List<RegisteredTrack> titles, boolean full) {
+  public String toString(List<RegisteredTrack> titles) {
     StringBuilder buf = new StringBuilder();
-    String head = this.getHeadLine(full);
+    String head = this.getHeadLine();
     if (head != null) {
       buf.append(head);
       buf.append("\n");
     }
     for (RegisteredTrack title : titles) {
-      buf.append(toString(title, full));
+      buf.append(toString(title));
       buf.append("\n");
     }
 
@@ -48,9 +48,9 @@ public abstract class TitleListStringFileExporter implements TitleListExporter {
    * @param file
    * @throws IOException
    */
-  public void toFile(List<RegisteredTrack> titles, File file, boolean full) throws IOException {
+  public void toFile(List<RegisteredTrack> titles, File file) throws IOException {
     FileOutputStream out = new FileOutputStream(file);
-    IOUtils.write(this.toString(titles, full), out);
+    IOUtils.write(this.toString(titles), out);
     out.flush();
     out.close();
   }

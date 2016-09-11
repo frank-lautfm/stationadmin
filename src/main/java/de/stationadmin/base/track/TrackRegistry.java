@@ -27,6 +27,7 @@ public class TrackRegistry extends AbstractBean {
   private int numTracksBeforeBlock = -1;
 
   private Map<Integer, Integer> legacyIdMapping = new HashMap<Integer, Integer>();
+  private Map<Integer, Integer> reverseLegacyIdMapping = new HashMap<Integer, Integer>();
 
   /**
    * Removes all entries
@@ -315,6 +316,11 @@ public class TrackRegistry extends AbstractBean {
 
   public void registerLegacyId(int legacyId, int id) {
     this.legacyIdMapping.put(legacyId, id);
+    this.reverseLegacyIdMapping.put(id, legacyId);
+  }
+  
+  public Integer getLegacyId(int id) {
+    return this.reverseLegacyIdMapping.get(id);
   }
 
   public RegisteredTrack getByLegacyId(int legacyId) {

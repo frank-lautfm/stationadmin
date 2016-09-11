@@ -80,7 +80,18 @@ public class TrackImportHandler {
     if (format != null) {
       for (String line : lines) {
         if (!line.startsWith("#")) {
-          this.add(new StringTrackImportTask(format, line));
+          StringTrackImportTask importTask = new StringTrackImportTask(format, line);
+          // TEMPORARY: Support for mapping tracks with legacy ids
+          if (importTask.getTrackLibraryTitle() != null && importTask.getTrackLibraryTitle().getId() > 0) {
+            int id = importTask.getTrackLibraryTitle().getId();
+            if (trackService.getTrackRegistry().getTrack(id) == null) {
+              DetailedTrack track = trackService.getTrackRegistry().getByLegacyId(id);
+              if(track != null) {
+                importTask.setTrackLibraryTitle(track);
+              }
+            }
+          }
+          this.add(importTask);
         }
       }
       return true;
@@ -243,8 +254,7 @@ public class TrackImportHandler {
   }
 
   /**
-   * Tries to find a track library title for the tasks within the local title
-   * registry
+   * Tries to find a track library title for the tasks within the local title registry
    */
   public void resolveTitlesLocal() {
     try {
@@ -282,7 +292,7 @@ public class TrackImportHandler {
         List<DetailedTrack> titles = this.trackService.search(task.getArtist(), task.getTitle());
         if (accepted != null) {
           for (DetailedTrack title : new ArrayList<DetailedTrack>(titles)) {
-            if(accepted.get(title.getId()) == false && this.trackService.getTrackRegistry().getTrack(title.getId()) != null) {
+            if (accepted.get(title.getId()) == false && this.trackService.getTrackRegistry().getTrack(title.getId()) != null) {
               // reject title
               titles.remove(title);
             }

@@ -9,16 +9,16 @@ import de.stationadmin.base.track.RegisteredTrack;
  * @author Frank
  *
  */
-public class TitleListTxtExporter extends TitleListStringFileExporter {
+public class TrackListTxtExporter extends TrackListStringFileExporter {
 
   /* (non-Javadoc)
    * @see de.emjoy.stationadmin.base.title.exporter.TitleListExporter#toString(de.emjoy.stationadmin.base.title.RegisteredTitle, boolean)
    */
   @Override
-  protected String toString(RegisteredTrack title, boolean full) {
+  protected String toString(RegisteredTrack title) {
     StringBuilder buf = new StringBuilder();
     buf.append(title.getArtist() + " - " + title.getTitle());
-    if(full && title.getAlbum() != null) {
+    if(title.getAlbum() != null) {
       buf.append(" (");
       buf.append(title.getAlbum());
       buf.append(")");
@@ -30,7 +30,7 @@ public class TitleListTxtExporter extends TitleListStringFileExporter {
    * @see de.emjoy.stationadmin.base.title.exporter.TitleListExporter#getHeadLine(boolean)
    */
   @Override
-  protected String getHeadLine(boolean full) {
+  protected String getHeadLine() {
     return null;
   }
 

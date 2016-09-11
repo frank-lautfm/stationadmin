@@ -12,26 +12,22 @@ import de.stationadmin.base.util.TimeFormat;
  * @author Frank
  *
  */
-public class TitleListCSVExporter extends TitleListStringFileExporter {
+public class TrackListCSVExporter extends TrackListStringFileExporter {
 
   @Override
-  protected String toString(RegisteredTrack title, boolean full) {
+  protected String toString(RegisteredTrack title) {
     StringBuilder buf = new StringBuilder();
     buf.append(quote(title.getArtist()));
     buf.append(',');
     buf.append(quote(title.getTitle()));
-    if (full) {
-      buf.append(',');
-      buf.append(quote(title.getAlbum()));
-    }
+    buf.append(',');
+    buf.append(quote(title.getAlbum()));
     buf.append(',');
     buf.append(quote(TimeFormat.format(title.getLength(), false)));
-    if (full) {
-      buf.append(',');
-      buf.append(quote(title.getGenre()));
-      buf.append(',');
-      buf.append(quote(title.getYear() > 0 ? Integer.toString(title.getYear()) : ""));
-    }
+    buf.append(',');
+    buf.append(quote(title.getGenre()));
+    buf.append(',');
+    buf.append(quote(title.getYear() > 0 ? Integer.toString(title.getYear()) : ""));
     return buf.toString();
   }
 
@@ -45,26 +41,22 @@ public class TitleListCSVExporter extends TitleListStringFileExporter {
   }
 
   /**
-   * @see de.stationadmin.base.track.exporter.TitleListStringFileExporter#getHeadLine(boolean)
+   * @see de.stationadmin.base.track.exporter.TrackListStringFileExporter#getHeadLine(boolean)
    */
   @Override
-  protected String getHeadLine(boolean full) {
+  protected String getHeadLine() {
     StringBuilder buf = new StringBuilder();
     buf.append(quote("Artist"));
     buf.append(',');
     buf.append(quote("Titel"));
-    if (full) {
-      buf.append(',');
-      buf.append(quote("Album"));
-    }
+    buf.append(',');
+    buf.append(quote("Album"));
     buf.append(',');
     buf.append(quote("Länge"));
-    if (full) {
-      buf.append(',');
-      buf.append(quote("Genre"));
-      buf.append(',');
-      buf.append(quote("Jahr"));
-    }
+    buf.append(',');
+    buf.append(quote("Genre"));
+    buf.append(',');
+    buf.append(quote("Jahr"));
     return buf.toString();
   }
 

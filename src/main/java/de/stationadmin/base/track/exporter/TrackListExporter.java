@@ -6,7 +6,7 @@ import java.util.List;
 
 import de.stationadmin.base.track.RegisteredTrack;
 
-public interface TitleListExporter {
+public interface TrackListExporter {
 
-  void toFile(List<RegisteredTrack> titles, File file, boolean full) throws IOException;
+  void toFile(List<RegisteredTrack> titles, File file) throws IOException;
 }

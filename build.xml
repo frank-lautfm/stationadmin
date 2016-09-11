@@ -115,6 +115,32 @@
 		</jar>
 	</target>
 
+  <target name="dist.tool.playlistimport" depends="dist">
+
+    <mkdir dir="${build.dir}" />
+     <javac srcdir="${basedir}/src/tools/playlistimport/java" destdir="${build.dir}" debug="${debug}" optimize="${optimize}" deprecation="${deprecation}" excludes="**/Test*.java" source="1.6" target="1.6" encoding="iso-8859-15">
+       <classpath refid="classpath" />
+     </javac>
+
+    <manifestclasspath property="jar.classpath.playlistimport" jarfile="${dist.dir.app}/PlaylistImport.jar">
+      <classpath>
+        <pathelement path="${dist.dir.app}/conf/" />
+        <pathelement path="${dist.dir.app}/userguide/" />
+        <fileset dir="${dist.dir.app}/" includes="**/*.jar" />
+        <fileset dir="${dist.dir.app}/lib/" includes="**/*.jar" />
+      </classpath>
+    </manifestclasspath>
+
+    <jar jarfile="${dist.dir.app}/PlaylistImport.jar" compress="true">
+      <fileset dir="${build.dir}">
+        <include name="**/PlaylistImport*" />
+      </fileset>
+      <manifest>
+        <attribute name="Main-Class" value="de.stationadmin.tools.playlistimport.PlaylistImport" />
+        <attribute name="Class-Path" value="${jar.classpath.playlistimport}" />
+      </manifest>
+    </jar>
+  </target>
 
 	<!--
 	Builds the core library without GUI

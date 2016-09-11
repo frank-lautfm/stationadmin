@@ -44,7 +44,7 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
   private ValueModel tag;
   private ValueModel uploadedBy;
   private ValueModel invertTag;
-  private ValueModel numTitles = new ValueHolder(0);
+  private ValueModel numTracks = new ValueHolder(0);
   private ValueModel length = new ValueHolder(0);
 
   public RegisteredTracksTableModel(TextProvider textProvidder, TrackRegistry titleRegistry,
@@ -73,7 +73,7 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
           length += title.getLength();
         }
         fireTableDataChanged();
-        numTitles.setValue(tracks.size());
+        numTracks.setValue(tracks.size());
         RegisteredTracksTableModel.this.length.setValue(length);
       }
 
@@ -202,8 +202,8 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
     return length;
   }
 
-  public ValueModel getNumTitles() {
-    return this.numTitles;
+  public ValueModel getNumTracks() {
+    return this.numTracks;
   }
 
   /**
@@ -231,28 +231,32 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
    */
   @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
-    RegisteredTrack title = this.tracks.get(rowIndex);
+    RegisteredTrack track = this.tracks.get(rowIndex);
     Column col = Column.values()[columnIndex];
 
     switch (col) {
       case ARTIST :
-        return title.getArtist();
+        return track.getArtist();
+      case ID:
+        return track.getId();
+      case LEGACY_ID:
+        return this.trackRegistry.getLegacyId(track.getId());
       case TITLE :
-        return title.getTitle();
+        return track.getTitle();
       case ALBUM :
-        return title.getAlbum();
+        return track.getAlbum();
       case GENRE :
-        return title.getGenre();
+        return track.getGenre();
       case YEAR :
-        return title.getYear();
+        return track.getYear();
       case LENGTH :
-        return TimeFormat.format(title.getLength(), false);
+        return TimeFormat.format(track.getLength(), false);
       case TYPE :
-        return title.getType();
+        return track.getType();
       case NUM_PLAYLISTS :
-        return title.getPlaylistStatistics();
+        return track.getPlaylistStatistics();
       case UPLOAD :
-        return title.getUploadDate();
+        return track.getUploadDate();
     }
 
     return null;
@@ -270,8 +274,8 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
    * @param numTitles
    *          the numTitles to set
    */
-  protected void setNumTitles(ValueModel numTitles) {
-    this.numTitles = numTitles;
+  protected void setNumTracks(ValueModel numTitles) {
+    this.numTracks = numTitles;
   }
 
   public enum UploadFilter {
@@ -279,7 +283,7 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
   }
 
   public enum Column {
-    TYPE, ARTIST, TITLE, ALBUM, LENGTH, GENRE, YEAR, UPLOAD, NUM_PLAYLISTS
+    TYPE, ID, LEGACY_ID, ARTIST, TITLE, ALBUM, LENGTH, GENRE, YEAR, UPLOAD, NUM_PLAYLISTS
   }
 
   /* (non-Javadoc)
@@ -298,6 +302,8 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
     case LENGTH:
     case YEAR:
     case NUM_PLAYLISTS:
+    case ID:
+    case LEGACY_ID:
       return Integer.class;
     case UPLOAD:
       return Date.class;
