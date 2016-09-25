@@ -77,6 +77,13 @@ import de.stationadmin.gui.playlist.tools.TempPlaylistDisplayAction;
 import de.stationadmin.gui.radioctrl.StartRadioAction;
 import de.stationadmin.gui.schedule.ScheduleEditorDisplayAction;
 import de.stationadmin.gui.settings.SettingsDisplayAction;
+import de.stationadmin.gui.synchronization.SynchronizationDialog;
+import de.stationadmin.gui.synchronization.SynchronizeFullAction;
+import de.stationadmin.gui.synchronization.SynchronizePlaylistsAction;
+import de.stationadmin.gui.synchronization.SynchronizePlaylistsModifiedAction;
+import de.stationadmin.gui.synchronization.SynchronizeScheduleAction;
+import de.stationadmin.gui.synchronization.SynchronizeTagsAction;
+import de.stationadmin.gui.synchronization.SynchronizeTracksAction;
 import de.stationadmin.gui.tag.TagManagerDisplayAction;
 import de.stationadmin.gui.tasks.TaskManagerDisplayAction;
 import de.stationadmin.gui.track.RegisteredTracksViewer;
@@ -290,7 +297,7 @@ public class StationAdminWindow extends StationAdminFrame {
 
     JToolBar toolbar = new JToolBar();
 
-    toolbar.add(asToolbarAction(new SynchronizeAction(ctx.getTextProvider(), ctx.getAdminClient()), "synchronize.png"));
+    toolbar.add(asToolbarAction(new SynchronizeFullAction(ctx.getTextProvider(), ctx.getAdminClient()), "synchronize.png"));
     toolbar.add(asToolbarAction(new SaveModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getSchedule()), "save_all.png"));
     toolbar.add(asToolbarAction(new ResetModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService()), "undo.png"));
     toolbar.add(asToolbarAction(new UploadAction(this.ctx), "upload.png"));
@@ -406,8 +413,21 @@ public class StationAdminWindow extends StationAdminFrame {
 
     {
       JMenu menuServer = new JMenu(this.ctx.getTextProvider().getString("menu.server"));
-      menuServer.add(new SynchronizeAction(this.ctx.getTextProvider(), ctx.getAdminClient()));
-      menuServer.add(new ReloadOwnTitlesAction(ctx.getTextProvider(), ctx.getAdminClient().getTrackService()));
+      
+      JMenu menuSynchronize = new JMenu(this.ctx.getTextProvider().getString("action.synchronize"));
+      menuSynchronize.add(new SynchronizeFullAction(this.ctx.getTextProvider(), ctx.getAdminClient()));
+      menuSynchronize.addSeparator();
+      menuSynchronize.add(new SynchronizePlaylistsModifiedAction(this.ctx.getTextProvider(), ctx.getAdminClient()));
+      menuSynchronize.add(new SynchronizePlaylistsAction(this.ctx.getTextProvider(), ctx.getAdminClient()));
+      menuSynchronize.add(new SynchronizeTagsAction(this.ctx.getTextProvider(), ctx.getAdminClient()));
+      menuSynchronize.add(new SynchronizeScheduleAction(this.ctx.getTextProvider(), ctx.getAdminClient()));
+      menuSynchronize.add(new SynchronizeTracksAction(this.ctx.getTextProvider(), ctx.getAdminClient()));
+      menuSynchronize.addSeparator();
+      menuSynchronize.add(new ReloadOwnTitlesAction(ctx.getTextProvider(), ctx.getAdminClient().getTrackService()));
+      
+      menuServer.add(menuSynchronize);
+
+      
       menuServer.add(new SaveModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getSchedule()));
       menuServer.add(new ResetModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService()));
       menuServer.addSeparator();

@@ -33,7 +33,7 @@ public class PlaylistModificationDetector extends AbstractBean {
     this.playlistRegistry = playlistRegistry;
   }
 
-  public void check() {
+  public int[] detectModifiedPlaylists() {
     try {
       Set<Integer> ids = new HashSet<Integer>();
       Set<Integer> modifiedIds = new HashSet<Integer>();
@@ -47,24 +47,30 @@ public class PlaylistModificationDetector extends AbstractBean {
         }
         ids.remove(head.getId());
       }
-      if(ids.size() > 0) {
+      if (ids.size() > 0) {
         // playlists have been deleted
         modifiedIds.addAll(ids);
       }
-      
-      if(modifiedIds.size() > 0) {
-        this.modifiedPlaylistIds = new int[modifiedIds.size()];
+
+      if (modifiedIds.size() > 0) {
+        int[] modifiedPlaylistIds = new int[modifiedIds.size()];
         int idx = 0;
-        for(Integer id : modifiedIds) {
-          this.modifiedPlaylistIds[idx++] = id;
+        for (Integer id : modifiedIds) {
+          modifiedPlaylistIds[idx++] = id;
         }
+        return modifiedPlaylistIds;
       }
-      setModified(modifiedIds.size() > 0);
-      
+
     } catch (IOException e) {
       log.error("unable to check for modified playlists");
     }
 
+    return null;
+  }
+
+  public void check() {
+    this.modifiedPlaylistIds = this.detectModifiedPlaylists();
+    setModified(this.modifiedPlaylistIds != null && this.modifiedPlaylistIds.length > 0);
   }
 
   public TimerTask getCheckTask() {
@@ -95,7 +101,7 @@ public class PlaylistModificationDetector extends AbstractBean {
     this.modified = modified;
     this.firePropertyChange("modified", old, modified);
   }
-  
+
   public void markClean() {
     setModified(false);
     this.modifiedPlaylistIds = null;

@@ -1,9 +1,8 @@
 /**
  * 
  */
-package de.stationadmin.gui;
+package de.stationadmin.gui.synchronization;
 
-import javax.swing.Action;
 import javax.swing.JOptionPane;
 
 import org.jdesktop.swingx.JXErrorPane;
@@ -11,6 +10,7 @@ import org.jdesktop.swingx.JXErrorPane;
 import de.stationadmin.base.StationAdminClient;
 import de.stationadmin.base.Status;
 import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ThreadedAction;
 
@@ -19,19 +19,18 @@ import de.stationadmin.gui.util.ThreadedAction;
  * 
  * @author korf
  */
-public class SynchronizeAction extends ThreadedAction {
+public abstract class AbstractSynchronizeAction extends ThreadedAction {
   private static final long serialVersionUID = -3225640894960403848L;
-  private TextProvider textProvider;
-  private StationAdminClient adminClient;
+  protected TextProvider textProvider;
+  protected StationAdminClient adminClient;
   
-  public SynchronizeAction(TextProvider textProvider, StationAdminClient adminClient) {
+  public AbstractSynchronizeAction(TextProvider textProvider, StationAdminClient adminClient) {
     super();
     this.textProvider = textProvider;
     this.adminClient = adminClient;
-    this.putValue(Action.NAME, textProvider.getString("action.synchronize"));
   }
 
-  private boolean checkPlaylists() {
+  protected boolean checkPlaylists() {
     boolean hasUnsavedPlaylists = false;
     for (Playlist playlist : this.adminClient.getPlaylistService().getPlaylistRegistry().getAllPlaylists()) {
       if (playlist.isModified()) {
@@ -59,14 +58,6 @@ public class SynchronizeAction extends ThreadedAction {
     }
   }
 
-  /**
-   * @see de.stationadmin.gui.util.ThreadedAction#performAction()
-   */
-  @Override
-  protected void performAction() throws Exception {
-    adminClient.synchronize();
-
-  }
 
   @Override
   protected void showError(Exception e) {
