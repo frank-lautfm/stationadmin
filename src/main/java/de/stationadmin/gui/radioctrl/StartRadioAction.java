@@ -28,6 +28,7 @@ public class StartRadioAction extends AbstractAction implements PropertyChangeLi
     super();
     this.ctx = ctx;
     this.putValue(Action.NAME, ctx.getString("action.radio.start"));
+    this.setEnabled(false);
     // this.setEnabled(!ctx.getRadioStatus().booleanValue());
   }
 
