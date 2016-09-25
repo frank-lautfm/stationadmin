@@ -77,7 +77,6 @@ import de.stationadmin.gui.playlist.tools.TempPlaylistDisplayAction;
 import de.stationadmin.gui.radioctrl.StartRadioAction;
 import de.stationadmin.gui.schedule.ScheduleEditorDisplayAction;
 import de.stationadmin.gui.settings.SettingsDisplayAction;
-import de.stationadmin.gui.subscriptions.SubscriptionManagerDisplayAction;
 import de.stationadmin.gui.tag.TagManagerDisplayAction;
 import de.stationadmin.gui.tasks.TaskManagerDisplayAction;
 import de.stationadmin.gui.track.RegisteredTracksViewer;
@@ -322,7 +321,7 @@ public class StationAdminWindow extends StationAdminFrame {
   }
 
   private void initTray() {
-    if (SystemTray.isSupported() && !SystemUtils.IS_OS_MAC_OSX) {
+    if (SystemTray.isSupported() && !SystemUtils.IS_OS_MAC_OSX && !SystemUtils.IS_OS_LINUX) {
       this.minimizesToTray = true;
       Icon icon = ctx.getIcon("trayicon.png");
       Image img = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_4BYTE_ABGR);
