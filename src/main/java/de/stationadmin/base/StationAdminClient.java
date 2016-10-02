@@ -67,7 +67,13 @@ public class StationAdminClient {
       System.setProperty("http.proxyPort", props.getProperty("proxy.port"));
     }
 
-    String sAdminDefaultDir = System.getProperty("defaultDir", "laut.fm/beta/");
+    String sAdminDefaultDir = System.getProperty("defaultDir", "laut.fm/StationAdmin/");
+
+    if(!(new File(System.getProperty("user.home") + File.separatorChar + sAdminDefaultDir)).exists() && new File(System.getProperty("user.home") + File.separatorChar + "laut.fm/beta").exists()) {
+      File old = new File(System.getProperty("user.home") + File.separatorChar + "laut.fm/beta");
+      old.renameTo(new File(System.getProperty("user.home") + File.separatorChar + sAdminDefaultDir));
+    }
+
     
     String dataDirectory = props.getProperty("data.dir", System.getProperty("user.home") + File.separatorChar + sAdminDefaultDir);
     String settingsDirectory = props.getProperty("settings.dir", dataDirectory + station.getName().toLowerCase());

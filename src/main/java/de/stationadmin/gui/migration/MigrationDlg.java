@@ -103,6 +103,7 @@ public class MigrationDlg extends StationAdminFrame {
             util.migrateTrackAliases();
             util.migrateTags();
             util.migrateTasks();
+            util.migrateLogs();
             
             log("\nFertig!\n");
 

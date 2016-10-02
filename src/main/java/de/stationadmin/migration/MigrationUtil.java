@@ -22,6 +22,8 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.IO;
+
 import de.emjoy.stationadmin.base.Settings;
 import de.emjoy.stationadmin.base.StationAdminClient;
 import de.emjoy.stationadmin.base.playlist.Playlist;
@@ -49,7 +51,7 @@ public class MigrationUtil {
   private de.stationadmin.base.StationAdminClient clientV4;
   private StationAdminClient clientV3;
   private Map<Integer, Integer> trackIdMap = new HashMap<Integer, Integer>();
-  
+
   private MessageReceiver messageReceiver;
   private boolean reloadTrackmapping = false;
 
@@ -63,9 +65,9 @@ public class MigrationUtil {
     this.clientV4 = clientV4;
     this.station = clientV4.getStation();
   }
-  
+
   private void message(String msg) {
-    if(this.messageReceiver != null) {
+    if (this.messageReceiver != null) {
       this.messageReceiver.onMessage(msg);
     }
   }
@@ -73,7 +75,8 @@ public class MigrationUtil {
   public void init() throws Exception {
     this.clientV3 = new StationAdminClient(new LautServerAccess(), this.station, null);
     this.clientV3.load();
-    this.message("Version 3: " + this.clientV3.getTitleService().getTitleRegistry().getNumTitles() + " tracks, " + this.clientV3.getPlaylistService().getPlaylistRegistry().getAllPlaylists().size() + " Playlists");
+    this.message("Version 3: " + this.clientV3.getTitleService().getTitleRegistry().getNumTitles() + " tracks, " + this.clientV3.getPlaylistService().getPlaylistRegistry().getAllPlaylists().size()
+        + " Playlists");
     log.info(this.clientV3.getTitleService().getTitleRegistry().getNumTitles() + " tracks");
     log.info(this.clientV3.getPlaylistService().getPlaylistRegistry().getAllPlaylists().size() + " playlists");
 
@@ -87,7 +90,7 @@ public class MigrationUtil {
     this.writeStationTrackMapping();
 
   }
-  
+
   public boolean isTrackmappingDownloaded() {
     String file = this.clientV4.getSessionCtx().getDataDirectory() + "/trackmapping";
     return new File(file).exists();
@@ -207,8 +210,7 @@ public class MigrationUtil {
   public void migrateOnlinePlaylists() throws Exception {
     this.message("Migriere Playlist-Einstellungen");
     Map<String, de.stationadmin.base.playlist.Playlist> p4ByName = new HashMap<String, de.stationadmin.base.playlist.Playlist>();
-    for (de.stationadmin.base.playlist.Playlist p4 : this.clientV4.getPlaylistService().getPlaylistRegistry()
-        .getPlaylists(de.stationadmin.base.playlist.Playlist.PlaylistType.ONLINE)) {
+    for (de.stationadmin.base.playlist.Playlist p4 : this.clientV4.getPlaylistService().getPlaylistRegistry().getPlaylists(de.stationadmin.base.playlist.Playlist.PlaylistType.ONLINE)) {
       p4ByName.put(p4.getName(), p4);
     }
 
@@ -279,19 +281,18 @@ public class MigrationUtil {
     settings4.setLogDownloadPermitted(settings.isLogDownloadPermitted());
     settings4.setArtistNormalizerAliases(settings.getArtistNormalizerAliases());
     settings4.setArtistNormalizerSeperators(settings.getArtistNormalizerSeperators());
-    
-    if(settings.getGenerateGlobalTagWeights() != null) {
+
+    if (settings.getGenerateGlobalTagWeights() != null) {
       List<de.stationadmin.base.playlist.shuffle.TagWeight> w4 = new ArrayList<de.stationadmin.base.playlist.shuffle.TagWeight>();
-      for(TagWeight tagWeight3 : settings.getGenerateGlobalTagWeights()) {
+      for (TagWeight tagWeight3 : settings.getGenerateGlobalTagWeights()) {
         de.stationadmin.base.playlist.shuffle.TagWeight t4 = new de.stationadmin.base.playlist.shuffle.TagWeight(tagWeight3.getTag(), tagWeight3.getWeight(), tagWeight3.getMaxFraction());
         w4.add(t4);
       }
       settings4.setGenerateGlobalTagWeights(w4);
     }
-    
 
     this.clientV4.saveSettings();
-    
+
   }
 
   public void migrateTasks() throws Exception {
@@ -323,6 +324,31 @@ public class MigrationUtil {
     this.clientV4.getTrackService().saveAliases();
   }
 
+  public void migrateLogs() throws Exception {
+    File logDir3 = new File(this.clientV3.getSessionCtx().getStationDirectory() + "log");
+    File logDir4 = new File(this.clientV4.getSessionCtx().getStationDirectory() + "log");
+    if (logDir3.exists()) {
+      File[] files = logDir3.listFiles();
+      if (files != null) {
+        this.message("Migriere Logs");
+        logDir4.mkdirs();
+
+        for (File file : files) {
+          File fileV4 = new File(logDir4.getAbsolutePath() + File.separatorChar + file.getName());
+          if (!fileV4.exists() || file.length() > fileV4.length()) {
+            try {
+              FileUtils.copyFile(file, fileV4, true);
+            } catch (Exception e) {
+            }
+          }
+        }
+
+      }
+
+    }
+
+  }
+
   /**
    * @return the messageReceiver
    */
@@ -331,7 +357,8 @@ public class MigrationUtil {
   }
 
   /**
-   * @param messageReceiver the messageReceiver to set
+   * @param messageReceiver
+   *          the messageReceiver to set
    */
   public void setMessageReceiver(MessageReceiver messageReceiver) {
     this.messageReceiver = messageReceiver;
@@ -345,7 +372,8 @@ public class MigrationUtil {
   }
 
   /**
-   * @param reloadTrackmapping the reloadTrackmapping to set
+   * @param reloadTrackmapping
+   *          the reloadTrackmapping to set
    */
   public void setReloadTrackmapping(boolean reloadTrackmapping) {
     this.reloadTrackmapping = reloadTrackmapping;

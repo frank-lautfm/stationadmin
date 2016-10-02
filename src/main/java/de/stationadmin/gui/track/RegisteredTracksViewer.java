@@ -357,6 +357,7 @@ public class RegisteredTracksViewer extends JPanel {
       private static final long serialVersionUID = -4365217830331156493L;
       private TrackTypeRenderer typeRenderer = new TrackTypeRenderer();
       private IntTableCellRenderer yearRenderer = new IntTableCellRenderer(0);
+      private IntTableCellRenderer idRenderer = new IntTableCellRenderer(null);
       private PlaylistStatisticsCellRenderer playlistsRenderer = new PlaylistStatisticsCellRenderer();
       private DateTableCellRenderer uploadDateRenderer = new DateTableCellRenderer(new SimpleDateFormat(textProvider.getString("timeFormat")));
 
@@ -365,44 +366,45 @@ public class RegisteredTracksViewer extends JPanel {
        */
       @Override
       public TableCellRenderer getCellRenderer(int row, int column) {
-        column = this.convertColumnIndexToModel(column);
-        if (column == Column.TYPE.ordinal()) {
+        int columnModel = this.convertColumnIndexToModel(column);
+        if (columnModel == Column.TYPE.ordinal()) {
           return typeRenderer;
         }
-        if (column == Column.YEAR.ordinal()) {
+        if (columnModel == Column.YEAR.ordinal()) {
           return yearRenderer;
         }
-        if (column == Column.UPLOAD.ordinal()) {
+        if (columnModel == Column.UPLOAD.ordinal()) {
           return uploadDateRenderer;
         }
-        if (column == Column.NUM_PLAYLISTS.ordinal()) {
+        if (columnModel == Column.NUM_PLAYLISTS.ordinal()) {
           return playlistsRenderer;
+        }
+        if (columnModel == Column.ID.ordinal() || columnModel == Column.LEGACY_ID.ordinal()) {
+          return idRenderer;
         }
         return super.getCellRenderer(row, column);
       }
 
     };
-    table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(70);
-    table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(70);
-    table.getColumnModel().getColumn(Column.NUM_PLAYLISTS.ordinal()).setPreferredWidth(70);
-    table.getColumnModel().getColumn(Column.NUM_PLAYLISTS.ordinal()).setMaxWidth(70);
-    table.getColumnModel().getColumn(Column.TYPE.ordinal()).setPreferredWidth(30);
-    table.getColumnModel().getColumn(Column.TYPE.ordinal()).setMaxWidth(30);
-    table.getColumnModel().getColumn(Column.UPLOAD.ordinal()).setPreferredWidth(110);
-    table.getColumnModel().getColumn(Column.UPLOAD.ordinal()).setMaxWidth(110);
-    table.getColumnModel().getColumn(Column.YEAR.ordinal()).setPreferredWidth(60);
-    table.getColumnModel().getColumn(Column.YEAR.ordinal()).setMaxWidth(60);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LENGTH.ordinal())).setPreferredWidth(70);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LENGTH.ordinal())).setMaxWidth(70);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.NUM_PLAYLISTS.ordinal())).setPreferredWidth(70);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.NUM_PLAYLISTS.ordinal())).setMaxWidth(70);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.TYPE.ordinal())).setPreferredWidth(30);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.TYPE.ordinal())).setMaxWidth(30);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.UPLOAD.ordinal())).setPreferredWidth(110);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.UPLOAD.ordinal())).setMaxWidth(110);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.YEAR.ordinal())).setPreferredWidth(60);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.YEAR.ordinal())).setMaxWidth(60);
 
-    table.getColumn(Column.LEGACY_ID.ordinal()).setCellRenderer(new IntTableCellRenderer(null));
-    table.getColumn(Column.ID.ordinal()).setCellRenderer(new IntTableCellRenderer(null));
-    table.getColumnModel().getColumn(Column.LEGACY_ID.ordinal()).setPreferredWidth(80);
-    table.getColumnModel().getColumn(Column.LEGACY_ID.ordinal()).setMaxWidth(80);
-    table.getColumnModel().getColumn(Column.ID.ordinal()).setPreferredWidth(80);
-    table.getColumnModel().getColumn(Column.ID.ordinal()).setMaxWidth(80);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LEGACY_ID.ordinal())).setPreferredWidth(80);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LEGACY_ID.ordinal())).setMaxWidth(80);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.ID.ordinal())).setPreferredWidth(80);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.ID.ordinal())).setMaxWidth(80);
 
-    ((TableColumnExt) table.getColumnModel().getColumn(Column.GENRE.ordinal())).setVisible(false);
-    ((TableColumnExt) table.getColumnModel().getColumn(Column.LEGACY_ID.ordinal())).setVisible(false);
-    ((TableColumnExt) table.getColumnModel().getColumn(Column.ID.ordinal())).setVisible(false);
+    ((TableColumnExt) table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.GENRE.ordinal()))).setVisible(false);
+    ((TableColumnExt) table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LEGACY_ID.ordinal()))).setVisible(false);
+    ((TableColumnExt) table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.ID.ordinal()))).setVisible(false);
     table.setColumnControlVisible(true);
 
     table.addHighlighter(new AbstractHighlighter() {
@@ -712,7 +714,7 @@ public class RegisteredTracksViewer extends JPanel {
 
           // TODO TEMPORARY for 4.0
           if (exporter instanceof TrackListExcelExporter) {
-            ((TrackListExcelExporter)exporter).setIncludeIds(table.getColumnModel().getColumnCount() >= 10);
+            ((TrackListExcelExporter) exporter).setIncludeIds(table.getColumnModel().getColumnCount() >= 10);
           }
           // END TEMPORARY
 
