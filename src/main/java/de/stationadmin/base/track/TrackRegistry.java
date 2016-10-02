@@ -62,7 +62,7 @@ public class TrackRegistry extends AbstractBean {
    * @param playlist
    * @param title
    */
-  public RegisteredTrack register(Playlist playlist, Title track) {
+  public RegisteredTrack register(Playlist playlist, BasicTrack track) {
     if (!this.tracks.containsKey(track.getId())) {
       RegisteredTrack regTitle = this.assignSharedStrings(new RegisteredTrack(track));
       regTitle.addPlaylist(playlist.getId());
@@ -79,7 +79,7 @@ public class TrackRegistry extends AbstractBean {
     }
   }
 
-  public void register(Title track) {
+  public void register(BasicTrack track) {
     if (!this.tracks.containsKey(track.getId())) {
       RegisteredTrack regTitle = this.assignSharedStrings(new RegisteredTrack(track));
       int oldNum = this.tracks.size();

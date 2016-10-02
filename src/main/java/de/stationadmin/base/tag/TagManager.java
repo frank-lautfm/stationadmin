@@ -31,7 +31,7 @@ import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.PlaylistRegistry;
 import de.stationadmin.base.schedule.Schedule;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.base.util.AbstractBean;
@@ -267,7 +267,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
         }
 
         ArrayList<Integer> ids = new ArrayList<Integer>();
-        for (Title title : this.trackRegistry.getAllTracks()) {
+        for (BasicTrack title : this.trackRegistry.getAllTracks()) {
           if (tag.contains(title) && (plays == null || plays.contains(title.getId())) && (playlists == null || playlists.contains(title.getId()))
               && (tags == null || tags.contains(title.getId()))) {
             ids.add(title.getId());
@@ -320,7 +320,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
         }
       }
     } else {
-      for (Title t : this.trackRegistry.getAllTracks()) {
+      for (BasicTrack t : this.trackRegistry.getAllTracks()) {
         trackIds.set(t.getId());
       }
     }

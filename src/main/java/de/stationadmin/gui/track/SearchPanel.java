@@ -32,7 +32,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.track.SearchResultSet;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackQuery;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.util.NonObservingPresentationModel;
@@ -48,7 +48,7 @@ public class SearchPanel extends JPanel {
   private ClientContext ctx;
   private PresentationModel<TrackQuery> model = new NonObservingPresentationModel<TrackQuery>(new TrackQuery());
   private ValueModel searchResultHolder = new ValueHolder(null, true);
-  private ValueModel selectionHolder = new ValueHolder(new ArrayList<Title>(0), true);
+  private ValueModel selectionHolder = new ValueHolder(new ArrayList<BasicTrack>(0), true);
 
   private ValueHolder pageNum = new ValueHolder(1);
 

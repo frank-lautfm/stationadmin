@@ -5,7 +5,7 @@ package de.stationadmin.base.playlist.trackimport;
 
 import java.util.List;
 
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.AbstractBean;
 
 /**
@@ -17,8 +17,8 @@ public abstract class TrackImportTask extends AbstractBean {
 	private String artist;
 	private String title;
 	private String album;
-	private Title trackLibraryTitle;
-	private List<? extends Title> candidates;
+	private BasicTrack trackLibraryTitle;
+	private List<? extends BasicTrack> candidates;
 	
 	private Status status = Status.OPEN;
 
@@ -44,7 +44,7 @@ public abstract class TrackImportTask extends AbstractBean {
 	 * if multiple titles are available
 	 * @return
 	 */
-	public List<? extends Title> getCandidates() {
+	public List<? extends BasicTrack> getCandidates() {
 		return candidates;
 	}
 
@@ -76,7 +76,7 @@ public abstract class TrackImportTask extends AbstractBean {
 	 * title that will finally be used in the playlist
 	 * @return
 	 */
-	public Title getTrackLibraryTitle() {
+	public BasicTrack getTrackLibraryTitle() {
 		return trackLibraryTitle;
 	}
 
@@ -88,7 +88,7 @@ public abstract class TrackImportTask extends AbstractBean {
 		this.artist = artist;
 	}
 
-	public void setCandidates(List<? extends Title> candidates) {
+	public void setCandidates(List<? extends BasicTrack> candidates) {
 		this.candidates = candidates;
 	}
 
@@ -102,8 +102,8 @@ public abstract class TrackImportTask extends AbstractBean {
 		this.title = title;
 	}
 
-	public void setTrackLibraryTitle(Title trackLibraryTitle) {
-		Title old = this.trackLibraryTitle;
+	public void setTrackLibraryTitle(BasicTrack trackLibraryTitle) {
+		BasicTrack old = this.trackLibraryTitle;
 		this.trackLibraryTitle = trackLibraryTitle;
 		this.firePropertyChange("trackLibraryTitle", old, trackLibraryTitle);
 	}

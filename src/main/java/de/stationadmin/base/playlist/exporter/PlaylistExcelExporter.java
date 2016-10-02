@@ -15,7 +15,7 @@ import org.apache.poi.ss.util.WorkbookUtil;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.TimeFormat;
 
 public class PlaylistExcelExporter extends PlaylistExporter {
@@ -67,7 +67,7 @@ public class PlaylistExcelExporter extends PlaylistExporter {
 
 
   @Override
-  protected String toString(Entry entry, Title title) {
+  protected String toString(Entry entry, BasicTrack title) {
     return null;
   }
 

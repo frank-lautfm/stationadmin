@@ -12,7 +12,7 @@ import java.util.Set;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * Distributes titles to a list of given playlists such that
@@ -27,13 +27,13 @@ import de.stationadmin.base.track.Title;
  */
 public class TrackDistributor {
 
-  public boolean distributeTitles(List<Playlist> playlists, List<Title> titles, List<Title> failedTitles) {
+  public boolean distributeTitles(List<Playlist> playlists, List<BasicTrack> titles, List<BasicTrack> failedTitles) {
     PlaylistCtx[] playlistCtxs = new PlaylistCtx[playlists.size()];
     for (int i = 0; i < playlists.size(); i++) {
       playlistCtxs[i] = new PlaylistCtx(playlists.get(i));
     }
 
-    for (Title title : titles) {
+    for (BasicTrack title : titles) {
       boolean alreadyUsed = false;
       PlaylistCtx best = null;
       for (int i = 0; i < playlistCtxs.length && !alreadyUsed; i++) {
@@ -72,24 +72,24 @@ public class TrackDistributor {
   private static class PlaylistCtx {
     private Playlist playlist;
     private Set<Integer> titleIds = new HashSet<Integer>();
-    private Map<String, List<Title>> titlesByArtist = new HashMap<String, List<Title>>();
-    private List<Title> titlesToAdd = new ArrayList<Title>();
+    private Map<String, List<BasicTrack>> titlesByArtist = new HashMap<String, List<BasicTrack>>();
+    private List<BasicTrack> titlesToAdd = new ArrayList<BasicTrack>();
 
     PlaylistCtx(Playlist playlist) {
       this.playlist = playlist;
       for (Entry entry : playlist.getEntries()) {
-        Title title = playlist.getTrackRegistry().getTrack(entry.getTrackId());
+        BasicTrack title = playlist.getTrackRegistry().getTrack(entry.getTrackId());
         if (title != null) {
           this.registerTitle(title);
         }
       }
     }
 
-    private void registerTitle(Title title) {
+    private void registerTitle(BasicTrack title) {
       titleIds.add(title.getId());
-      List<Title> titles = this.titlesByArtist.get(title.getArtist());
+      List<BasicTrack> titles = this.titlesByArtist.get(title.getArtist());
       if (titles == null) {
-        titles = new ArrayList<Title>();
+        titles = new ArrayList<BasicTrack>();
         this.titlesByArtist.put(title.getArtist(), titles);
       }
       titles.add(title);
@@ -100,7 +100,7 @@ public class TrackDistributor {
     }
 
     int countTitlesOfArtist(String artist) {
-      List<Title> titles = this.titlesByArtist.get(artist);
+      List<BasicTrack> titles = this.titlesByArtist.get(artist);
       return titles != null ? titles.size() : 0;
     }
 
@@ -108,13 +108,13 @@ public class TrackDistributor {
       return this.titleIds.size();
     }
 
-    void addTitle(Title title) {
+    void addTitle(BasicTrack title) {
       this.registerTitle(title);
       this.titlesToAdd.add(title);
     }
 
     void commit() {
-      for (Title title : this.titlesToAdd) {
+      for (BasicTrack title : this.titlesToAdd) {
         this.playlist.addTrack(title);
       }
     }

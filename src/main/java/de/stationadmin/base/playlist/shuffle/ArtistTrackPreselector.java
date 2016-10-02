@@ -5,7 +5,7 @@ package de.stationadmin.base.playlist.shuffle;
 
 import java.util.List;
 
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 
 /**
@@ -20,5 +20,5 @@ public interface ArtistTrackPreselector {
    * @param max maximum number of tracks to select
    * @return preselected list of tracks
    */
-  List<Title> preselect(List<Title> tracks, int max);
+  List<BasicTrack> preselect(List<BasicTrack> tracks, int max);
 }

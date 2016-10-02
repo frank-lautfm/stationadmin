@@ -38,7 +38,7 @@ import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.StationAdminFrame;
@@ -92,8 +92,8 @@ public class SnippetPlayer extends StationAdminFrame {
         if (!e.getValueIsAdjusting()) {
           int idx = list.getSelectedIndex();
           int[] titleIds = null;
-          List<Title> titles = new ArrayList<Title>();
-          Title title = null;
+          List<BasicTrack> titles = new ArrayList<BasicTrack>();
+          BasicTrack title = null;
           if (idx > -1) {
             Snippet snippet = (Snippet) list.getModel().getElementAt(idx);
             play(snippet);

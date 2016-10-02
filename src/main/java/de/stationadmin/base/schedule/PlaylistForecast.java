@@ -17,7 +17,7 @@ import de.stationadmin.base.playlist.shuffle.PlaylistShuffler;
 import de.stationadmin.base.playlist.validation.GVLValidator;
 import de.stationadmin.base.schedule.Schedule.Weekday;
 import de.stationadmin.base.track.DetailedTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
 
 /**
@@ -134,7 +134,7 @@ public class PlaylistForecast {
   }
 
   public void checkGVLRules(List<ScheduledTrack> titles, List<ScheduledTrack> violoations) {
-    ArrayList<Title> titleList = new ArrayList<Title>();
+    ArrayList<BasicTrack> titleList = new ArrayList<BasicTrack>();
 
     for (ScheduledTrack t : titles) {
       titleList.add(t.getTitle());
@@ -171,7 +171,7 @@ public class PlaylistForecast {
 
     }
 
-    Title getNextTitle() {
+    BasicTrack getNextTitle() {
       if (this.playlist.getId() == PlaylistRegistry.LIVE_PLAYLIST_ID || this.playlist.getId() == PlaylistRegistry.LIVE_PLAYLIST_ID2) {
         DetailedTrack track = new DetailedTrack();
         track.setArtist("Live");
@@ -180,7 +180,7 @@ public class PlaylistForecast {
         return track;
       }
       Playlist.Entry plEntry = this.playlistEntries.get(this.plIdx);
-      Title title = this.playlist.getTrackRegistry().getTrack(plEntry.getTrackId());
+      BasicTrack title = this.playlist.getTrackRegistry().getTrack(plEntry.getTrackId());
       this.plIdx++;
       if (this.plIdx == this.playlistEntries.size()) {
         this.plIdx = 0;
@@ -192,9 +192,9 @@ public class PlaylistForecast {
   public static class ScheduledTrack {
     private Date time;
     private Playlist playlist;
-    private Title title;
+    private BasicTrack title;
 
-    public ScheduledTrack(Date time, Playlist playlist, Title title) {
+    public ScheduledTrack(Date time, Playlist playlist, BasicTrack title) {
       super();
       this.time = time;
       this.playlist = playlist;
@@ -218,7 +218,7 @@ public class PlaylistForecast {
     /**
      * @return the title
      */
-    public Title getTitle() {
+    public BasicTrack getTitle() {
       return title;
     }
 

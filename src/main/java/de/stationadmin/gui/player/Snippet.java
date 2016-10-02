@@ -7,7 +7,7 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * @author korf
@@ -16,11 +16,11 @@ import de.stationadmin.base.track.Title;
 public class Snippet {
   private static Pattern pattern = Pattern.compile(".*\\w+\\_([\\w|_|-]+).mp3,\\d+", Pattern.DOTALL);
 
-  private Title title;
+  private BasicTrack title;
   private URL url;
   private String source;
   
-  public Snippet(Title title, URL url) {
+  public Snippet(BasicTrack title, URL url) {
     super();
     this.title = title;
     this.url = url;
@@ -31,7 +31,7 @@ public class Snippet {
     }
   }
 
-  public Title getTitle() {
+  public BasicTrack getTitle() {
     return title;
   }
 

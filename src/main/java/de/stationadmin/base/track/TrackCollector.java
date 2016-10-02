@@ -16,5 +16,5 @@ public interface TrackCollector {
    * Adds a title
    * @param title
    */
-	void add(Title title);
+	void add(BasicTrack title);
 }

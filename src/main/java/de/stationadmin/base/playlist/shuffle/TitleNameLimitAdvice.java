@@ -9,7 +9,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * @author korf
@@ -34,10 +34,10 @@ public class TitleNameLimitAdvice implements Advice {
 
   /**
    * @see de.stationadmin.base.playlist.shuffle.Advice#accept(java.util.List,
-   *      de.stationadmin.base.track.Title)
+   *      de.stationadmin.base.track.BasicTrack)
    */
   @Override
-  public boolean accept(List<Title> titles, Title candidate) {
+  public boolean accept(List<BasicTrack> titles, BasicTrack candidate) {
     HashSet<String> used = new HashSet<String>();
 
     for (int i = titles.size() - 1; i >= 0 && i >= titles.size() - this.numTitles; i--) {

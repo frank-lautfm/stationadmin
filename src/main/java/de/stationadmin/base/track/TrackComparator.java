@@ -12,13 +12,13 @@ import org.apache.commons.lang.StringUtils;
  * 
  * @author korf
  */
-public class TrackComparator implements Comparator<Title> {
+public class TrackComparator implements Comparator<BasicTrack> {
 
 	/**
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public int compare(Title o1, Title o2) {
+	public int compare(BasicTrack o1, BasicTrack o2) {
 		int result = StringUtils.trimToEmpty(o1.getArtist()).compareToIgnoreCase(StringUtils.trimToEmpty(o2.getArtist()));
 		if(result == 0) {
 			result = o1.getTitle().compareToIgnoreCase(o2.getTitle());

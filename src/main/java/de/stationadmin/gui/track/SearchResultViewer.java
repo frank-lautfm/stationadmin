@@ -37,7 +37,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.track.DetailedTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackQuery;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.track.SearchResultTableModel.Column;
@@ -195,11 +195,11 @@ public class SearchResultViewer extends JPanel {
           int[] rows = table.getSelectedRows();
           int[] titleIds = new int[rows.length];
           int tIdx = 0;
-          List<Title> entries = new ArrayList<Title>();
+          List<BasicTrack> entries = new ArrayList<BasicTrack>();
           for (int i = 0; i < rows.length; i++) {
             int row = table.convertRowIndexToModel(rows[i]);
             if (row > 0) {
-              Title title = tableModel.getTitle(row);
+              BasicTrack title = tableModel.getTitle(row);
               entries.add(title);
               titleIds[tIdx++] = title.getId();
             }

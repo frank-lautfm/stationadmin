@@ -32,7 +32,7 @@ import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.subscriptions.SubscriptionResultTableModel.Column;
 import de.stationadmin.gui.track.DistributeTracksAction;
@@ -127,10 +127,10 @@ public class SubscriptionResultViewer extends JPanel {
         if (!e.getValueIsAdjusting()) {
           int[] rows = table.getSelectedRows();
           int[] titleIds = new int[rows.length];
-          List<Title> entries = new ArrayList<Title>();
+          List<BasicTrack> entries = new ArrayList<BasicTrack>();
           for (int i = 0; i < rows.length; i++) {
             int row = table.convertRowIndexToModel(rows[i]);
-            Title title = tableModel.getResults().get(row);
+            BasicTrack title = tableModel.getResults().get(row);
             entries.add(title);
             titleIds[i] = title.getId();
           }

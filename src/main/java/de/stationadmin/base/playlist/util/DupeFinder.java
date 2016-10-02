@@ -10,7 +10,7 @@ import java.util.Map;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * Searches for duplicate titles in a list of playlists
@@ -24,7 +24,7 @@ public class DupeFinder {
    * @param playlists
    * @return
    */
-  public Map<Title, List<PlaylistEntry>> findDupes(List<Playlist> playlists) {
+  public Map<BasicTrack, List<PlaylistEntry>> findDupes(List<Playlist> playlists) {
 
     HashMap<Integer, List<PlaylistEntry>> map = new HashMap<Integer, List<PlaylistEntry>>();
     for (Playlist playlist : playlists) {
@@ -38,11 +38,11 @@ public class DupeFinder {
       }
     }
 
-    Map<Title, List<PlaylistEntry>> dupes = new HashMap<Title, List<PlaylistEntry>>();
+    Map<BasicTrack, List<PlaylistEntry>> dupes = new HashMap<BasicTrack, List<PlaylistEntry>>();
     for (int titleId : map.keySet()) {
       List<PlaylistEntry> list = map.get(titleId);
       if (list.size() > 1) {
-        Title title = list.get(0).getPlaylist().getTrackRegistry().getTrack(titleId);
+        BasicTrack title = list.get(0).getPlaylist().getTrackRegistry().getTrack(titleId);
         if (title != null) {
           dupes.put(title, list);
         }

@@ -18,7 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import com.thoughtworks.xstream.XStream;
 
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.util.AbstractBean;
 import de.stationadmin.base.util.XStreamFactory;
@@ -98,11 +98,11 @@ public class Playlist extends AbstractBean {
    * @param title
    *          title
    */
-  public void addTrack(Title title) {
+  public void addTrack(BasicTrack title) {
     this.addTrack(title, null);
   }
 
-  public void addTrack(Title title, Date addedAt) {
+  public void addTrack(BasicTrack title, Date addedAt) {
     Entry entry = null;
 
     if (this.workingEntries.size() == 0) {
@@ -120,14 +120,14 @@ public class Playlist extends AbstractBean {
     this.setModified(true);
   }
 
-  private Entry createEntry(int start, Title title, long addedAt) {
+  private Entry createEntry(int start, BasicTrack title, long addedAt) {
     RegisteredTrack regTitle = this.trackRegistry.getTrack(title.getId());
     Long timestamp = this.getTimestampMap().get(title.getId());
     return new Entry(start, title.getId(), regTitle != null ? regTitle : title, timestamp != null && timestamp.longValue() < addedAt ? timestamp
         : addedAt);
   }
 
-  private Title register(Title track) {
+  private BasicTrack register(BasicTrack track) {
     if (this.type != PlaylistType.TEMPORARY) {
       return this.trackRegistry.register(this, track);
     }
@@ -294,7 +294,7 @@ public class Playlist extends AbstractBean {
   public int getNumDifferentArtists() {
     HashSet<String> artists = new HashSet<String>();
     for (Entry entry : this.workingEntries) {
-      Title title = this.trackRegistry.getTrack(entry.getTrackId());
+      BasicTrack title = this.trackRegistry.getTrack(entry.getTrackId());
       if (title != null) {
         artists.add(title.getArtist().toLowerCase().trim());
       }
@@ -362,7 +362,7 @@ public class Playlist extends AbstractBean {
    * @param position
    * @param title
    */
-  public void insertTrack(int position, Title track) {
+  public void insertTrack(int position, BasicTrack track) {
     if (position >= this.workingEntries.size()) {
       this.addTrack(track);
       return;
@@ -384,16 +384,16 @@ public class Playlist extends AbstractBean {
     this.setModified(true);
   }
 
-  public void insertTracks(int position, List<Title> tracks) {
+  public void insertTracks(int position, List<BasicTrack> tracks) {
     if (position >= this.workingEntries.size()) {
-      for (Title track : tracks) {
+      for (BasicTrack track : tracks) {
         this.addTrack(track);
       }
       return;
     }
     int titlePos = position;
     int additionalLength = 0;
-    for (Title track : tracks) {
+    for (BasicTrack track : tracks) {
       Entry entry = null;
       if (titlePos == 0) {
         entry = this.createEntry(0, track, System.currentTimeMillis());
@@ -494,7 +494,7 @@ public class Playlist extends AbstractBean {
       if (idx > -1) {
         minIdx = Math.min(idx, minIdx);
         this.workingEntries.remove(idx);
-        Title title = this.trackRegistry.getTrack(entry.getTrackId());
+        BasicTrack title = this.trackRegistry.getTrack(entry.getTrackId());
         length += title.getLength();
         if (!isUsed(entry.getTrackId())) {
           this.unregister(entry.getTrackId());
@@ -513,7 +513,7 @@ public class Playlist extends AbstractBean {
     int idx = this.workingEntries.indexOf(entry);
     if (idx > -1) {
       this.workingEntries.remove(idx);
-      Title title = this.trackRegistry.getTrack(entry.getTrackId());
+      BasicTrack title = this.trackRegistry.getTrack(entry.getTrackId());
       if (!isUsed(entry.getTrackId())) {
         this.unregister(entry.getTrackId());
       }
@@ -779,11 +779,11 @@ public class Playlist extends AbstractBean {
    * @param titles
    *          new titles
    */
-  public void setTracks(List<Title> titles) {
+  public void setTracks(List<BasicTrack> titles) {
     this.unregisterFromTitleRegistry(entries);
     int startTime = 0;
     this.workingEntries.clear();
-    for (Title title : titles) {
+    for (BasicTrack title : titles) {
       Entry entry = this.createEntry(startTime, title, System.currentTimeMillis());
       this.workingEntries.add(entry);
       if (this.type != PlaylistType.TEMPORARY) {
@@ -804,8 +804,8 @@ public class Playlist extends AbstractBean {
 
       @Override
       public int compare(Entry o1, Entry o2) {
-        Title t1 = trackRegistry.getTrack(o1.getTrackId());
-        Title t2 = trackRegistry.getTrack(o2.getTrackId());
+        BasicTrack t1 = trackRegistry.getTrack(o1.getTrackId());
+        BasicTrack t2 = trackRegistry.getTrack(o2.getTrackId());
 
         int result = t1.getArtist().compareToIgnoreCase(t2.getArtist());
         if (result == 0) {
@@ -837,7 +837,7 @@ public class Playlist extends AbstractBean {
     if (this.workingEntries.size() > 0) {
       int len = 0;
       for (Entry entry : this.workingEntries) {
-        Title title = this.trackRegistry.getTrack(entry.getTrackId());
+        BasicTrack title = this.trackRegistry.getTrack(entry.getTrackId());
         if (title != null) {
           len += title.getLength();
         }
@@ -850,13 +850,13 @@ public class Playlist extends AbstractBean {
   void updateStartTimes(int first) {
     if (this.workingEntries.size() > 0) {
       Entry current = null;
-      Title currentTitle = null;
+      BasicTrack currentTitle = null;
 
       if (first >= 0) {
         current = this.workingEntries.get(first);
         currentTitle = this.trackRegistry.getTrack(current.getTrackId());
       } else {
-        current = new Entry(0, 0, new Title());
+        current = new Entry(0, 0, new BasicTrack());
         currentTitle = current.getTrack();
       }
       for (int i = first + 1; i < this.workingEntries.size(); i++) {
@@ -874,14 +874,14 @@ public class Playlist extends AbstractBean {
   public static class Entry {
     private int start;
     private int trackId;
-    private Title track;
+    private BasicTrack track;
     private long timestamp;
 
-    public Entry(int start, int titleId, Title title) {
+    public Entry(int start, int titleId, BasicTrack title) {
       this(start, titleId, title, System.currentTimeMillis());
     }
 
-    public Entry(int start, int titleId, Title title, long added) {
+    public Entry(int start, int titleId, BasicTrack title, long added) {
       this.start = start;
       this.trackId = titleId;
       this.track = title;
@@ -919,7 +919,7 @@ public class Playlist extends AbstractBean {
     /**
      * @return the title
      */
-    public Title getTrack() {
+    public BasicTrack getTrack() {
       return track;
     }
 

@@ -22,7 +22,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.Playlist;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistSelector;
@@ -39,9 +39,9 @@ public class CopyTracksDlg extends JDialog {
   private static final long serialVersionUID = -3958107010200832125L;
   private ClientContext ctx;
   private TextProvider textProvider;
-  private List<Title> titles;
+  private List<BasicTrack> titles;
 
-  public CopyTracksDlg(ClientContext ctx, List<Title> titles) {
+  public CopyTracksDlg(ClientContext ctx, List<BasicTrack> titles) {
     super();
     this.ctx = ctx;
     this.textProvider = ctx.getTextProvider();
@@ -87,7 +87,7 @@ public class CopyTracksDlg extends JDialog {
     @Override
     public void actionPerformed(ActionEvent e) {
       Playlist playlist = (Playlist) this.selectionHolder.getValue();
-      for (Title title : titles) {
+      for (BasicTrack title : titles) {
         playlist.addTrack(title);
       }
       dispose();

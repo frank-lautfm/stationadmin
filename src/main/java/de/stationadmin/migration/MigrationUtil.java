@@ -38,7 +38,7 @@ import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
 import de.stationadmin.base.tag.DynamicTag;
 import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * @author korf
@@ -238,7 +238,7 @@ public class MigrationUtil {
       for (de.emjoy.stationadmin.base.playlist.Playlist.Entry entry : p3.getEntries()) {
         Integer idv4 = this.trackIdMap.get(entry.getTitleId());
         if (idv4 != null) {
-          Title t4 = this.clientV4.getTrackService().getTrack(idv4);
+          BasicTrack t4 = this.clientV4.getTrackService().getTrack(idv4);
           if (t4 != null) {
             p4.addTrack(t4);
           } else {

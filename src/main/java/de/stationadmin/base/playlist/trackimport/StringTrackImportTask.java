@@ -4,7 +4,7 @@
 package de.stationadmin.base.playlist.trackimport;
 
 import de.stationadmin.base.track.DetailedTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.format.TrackExportFormat;
 
 /**
@@ -37,7 +37,7 @@ public class StringTrackImportTask extends TrackImportTask {
    */
   @Override
   public void resolve() {
-    Title title = this.format.fromString(this.source);
+    BasicTrack title = this.format.fromString(this.source);
     if (title != null) {
       this.setArtist(title.getArtist());
       this.setTitle(title.getTitle());

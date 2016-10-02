@@ -36,7 +36,7 @@ import de.stationadmin.base.playlist.validation.PlaylistValidationException.Reas
 import de.stationadmin.base.playlist.validation.PlaylistValidator;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
 import de.stationadmin.base.util.XStreamFactory;
@@ -480,7 +480,7 @@ public class PlaylistService implements Service {
 
   private void loadPlaylistTracks(Playlist playlist, TrackRef[] trackRefs, Set<Integer> refreshed) throws IOException {
     if (trackRefs != null) {
-      Title[] tracks = new Title[trackRefs.length];
+      BasicTrack[] tracks = new BasicTrack[trackRefs.length];
       int[] missing = new int[trackRefs.length];
       int missingIdx = 0;
       for (int i = 0; i < trackRefs.length; i++) {

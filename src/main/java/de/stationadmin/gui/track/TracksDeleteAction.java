@@ -16,7 +16,7 @@ import org.jdesktop.swingx.error.ErrorInfo;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.util.ThreadedAction;
 
@@ -48,7 +48,7 @@ public class TracksDeleteAction extends ThreadedAction {
     return trackIds;
   }
 
-  protected void setTracks(List<Title> tracks) {
+  protected void setTracks(List<BasicTrack> tracks) {
     int[] trackIds = new int[tracks != null ? tracks.size() : 0];
     boolean enabled = trackIds.length > 0;
     this.numUsed = 0;

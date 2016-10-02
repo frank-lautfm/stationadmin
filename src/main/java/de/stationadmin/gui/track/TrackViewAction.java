@@ -9,13 +9,13 @@ import javax.swing.Action;
 
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 
 public class TrackViewAction extends AbstractAction {
   private static final long serialVersionUID = 8839860040116586525L;
   private ClientContext ctx;
-  private List<Title> titles = new ArrayList<Title>();
+  private List<BasicTrack> titles = new ArrayList<BasicTrack>();
   
   public TrackViewAction(ClientContext ctx) {
     super();
@@ -28,7 +28,7 @@ public class TrackViewAction extends AbstractAction {
   @Override
   public void actionPerformed(ActionEvent evt) {
     if(titles.size() > 0) {
-      Title title = titles.get(0);
+      BasicTrack title = titles.get(0);
       
       DetailedTrack dtitle = title instanceof DetailedTrack ? (DetailedTrack)title : null;
       if (!(dtitle instanceof RegisteredTrack) || !((RegisteredTrack)title).isOwnTrack()) {
@@ -43,12 +43,12 @@ public class TrackViewAction extends AbstractAction {
   }
 
 
-  public List<Title> getTitles() {
+  public List<BasicTrack> getTitles() {
     return titles;
   }
 
 
-  public void setTitles(List<Title> titles) {
+  public void setTitles(List<BasicTrack> titles) {
     this.titles = titles;
     this.setEnabled(titles.size() > 0);
   }

@@ -52,7 +52,7 @@ import de.stationadmin.base.Version;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.schedule.Schedule;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.backup.BackupCreateAction;
 import de.stationadmin.gui.backup.BackupRestoreAction;
 import de.stationadmin.gui.help.AboutDisplayAction;
@@ -242,7 +242,7 @@ public class StationAdminWindow extends StationAdminFrame {
             Playlist playlist = ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylist(playlistId);
 
             int titleId = ctx.getAdminClient().getStationStatus().getCurrentTrackId();
-            Title title = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(titleId);
+            BasicTrack title = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(titleId);
 
             return new PlaylistEntryJumpTarget(playlist, title);
           }
@@ -364,7 +364,7 @@ public class StationAdminWindow extends StationAdminFrame {
           @Override
           public void propertyChange(PropertyChangeEvent evt) {
             int titleId = ctx.getAdminClient().getStationStatus().getCurrentTrackId();
-            Title title = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(titleId);
+            BasicTrack title = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(titleId);
             String tooltip = ctx.getAdminClient().getStationStatus().getCurrentListeners() + " Hörer";
             if (title != null) {
               tooltip += " - " + title.getArtist() + ": " + title.getTitle();

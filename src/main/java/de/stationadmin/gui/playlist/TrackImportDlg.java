@@ -52,7 +52,7 @@ import de.stationadmin.base.playlist.trackimport.TrackImportHandler;
 import de.stationadmin.base.playlist.trackimport.TrackImportTask;
 import de.stationadmin.base.playlist.trackimport.TrackImportTask.Status;
 import de.stationadmin.base.track.DetailedTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.track.SearchPanel;
@@ -320,7 +320,7 @@ public class TrackImportDlg extends JDialog {
           @Override
           @SuppressWarnings("unchecked")
           public void actionPerformed(ActionEvent e) {
-            List<Title> titles = (List<Title>) panel.getSelectionHolder().getValue();
+            List<BasicTrack> titles = (List<BasicTrack>) panel.getSelectionHolder().getValue();
             if (titles != null && titles.size() > 0) {
               task.setTrackLibraryTitle(titles.get(0));
               task.setStatus(Status.RESOLVED);
@@ -417,8 +417,8 @@ public class TrackImportDlg extends JDialog {
               if (value instanceof DetailedTrack) {
                 DetailedTrack title = (DetailedTrack) value;
                 this.setText(title.getArtist() + " - " + title.getTitle() + " (" + title.getAlbum() + ")");
-              } else if (value instanceof Title) {
-                this.setText(((Title) value).toString());
+              } else if (value instanceof BasicTrack) {
+                this.setText(((BasicTrack) value).toString());
               }
               return comp;
             }
@@ -428,7 +428,7 @@ public class TrackImportDlg extends JDialog {
 
             @Override
             public void itemStateChanged(ItemEvent e) {
-              Title title = (Title) cmb.getSelectedItem();
+              BasicTrack title = (BasicTrack) cmb.getSelectedItem();
               task.setTrackLibraryTitle(title);
             }
 

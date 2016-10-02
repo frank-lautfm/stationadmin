@@ -11,7 +11,7 @@ import javax.swing.Action;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 
 /**
@@ -22,7 +22,7 @@ import de.stationadmin.gui.ClientContext;
 public class RemoveTracksFromPlaylistsAction extends AbstractAction {
   private static final long serialVersionUID = 4072864315683614234L;
   private ClientContext ctx;
-  private List<Title> titles;
+  private List<BasicTrack> titles;
 
   public RemoveTracksFromPlaylistsAction(ClientContext ctx) {
     this.ctx = ctx;
@@ -37,7 +37,7 @@ public class RemoveTracksFromPlaylistsAction extends AbstractAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     if (titles != null && this.titles.size() > 0) {
-      for (Title title : titles) {
+      for (BasicTrack title : titles) {
         RegisteredTrack regTitle;
         if (title instanceof RegisteredTrack) {
           regTitle = (RegisteredTrack) title;
@@ -65,7 +65,7 @@ public class RemoveTracksFromPlaylistsAction extends AbstractAction {
   /**
    * @return the titles
    */
-  public List<Title> getTitles() {
+  public List<BasicTrack> getTitles() {
     return titles;
   }
 
@@ -73,7 +73,7 @@ public class RemoveTracksFromPlaylistsAction extends AbstractAction {
    * @param titles
    *          the titles to set
    */
-  public void setTitles(List<Title> titles) {
+  public void setTitles(List<BasicTrack> titles) {
     this.titles = titles;
     this.setEnabled(this.titles != null && this.titles.size() > 0);
   }

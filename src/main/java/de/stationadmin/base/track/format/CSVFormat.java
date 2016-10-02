@@ -6,7 +6,7 @@ package de.stationadmin.base.track.format;
 import org.apache.commons.lang.StringUtils;
 
 import de.stationadmin.base.track.DetailedTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * 
@@ -20,8 +20,8 @@ public class CSVFormat implements TrackExportFormat {
    * @see de.stationadmin.base.track.format.TrackExportFormat#fromString(java.lang.String)
    */
   @Override
-  public Title fromString(String str) {
-    Title title = null;
+  public BasicTrack fromString(String str) {
+    BasicTrack title = null;
     for (char separator : separators) {
       title = this.tryParse(str, separator);
       if (title != null) {
@@ -31,7 +31,7 @@ public class CSVFormat implements TrackExportFormat {
     return title;
   }
 
-  private Title tryParse(String str, int separator) {
+  private BasicTrack tryParse(String str, int separator) {
     Position pos = new Position();
     
     DetailedTrack title = new DetailedTrack();
@@ -104,10 +104,10 @@ public class CSVFormat implements TrackExportFormat {
   }
 
   /**
-   * @see de.stationadmin.base.track.format.TrackExportFormat#toString(de.stationadmin.base.track.Title)
+   * @see de.stationadmin.base.track.format.TrackExportFormat#toString(de.stationadmin.base.track.BasicTrack)
    */
   @Override
-  public String toString(Title title) {
+  public String toString(BasicTrack title) {
     StringBuffer buf = new StringBuffer(100);
     buf.append(quote(title.getArtist()));
     buf.append(',');

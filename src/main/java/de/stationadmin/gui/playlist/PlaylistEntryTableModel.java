@@ -9,7 +9,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import de.stationadmin.base.playlist.util.PlaylistEntry;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.ClientContext;
 
@@ -64,7 +64,7 @@ public class PlaylistEntryTableModel extends AbstractTableModel {
   public Object getValueAt(int rowIndex, int columnIndex) {
     Column col = Column.values()[columnIndex];
     PlaylistEntry entry = this.entries.get(rowIndex);
-    Title title;
+    BasicTrack title;
     switch (col) {
     case ARTIST:
       title = ctx.getAdminClient().getTitleRegistry().getTrack(entry.getEntry().getTrackId());

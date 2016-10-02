@@ -9,7 +9,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 
 /**
@@ -20,7 +20,7 @@ import de.stationadmin.gui.ClientContext;
 public class DistributeTracksAction extends AbstractAction {
   private static final long serialVersionUID = 6360083656552138387L;
   private ClientContext ctx;
-  private List<Title> titles;
+  private List<BasicTrack> titles;
 
   public DistributeTracksAction(ClientContext ctx) {
     this.ctx = ctx;
@@ -43,7 +43,7 @@ public class DistributeTracksAction extends AbstractAction {
   /**
    * @return the titles
    */
-  public List<Title> getTitles() {
+  public List<BasicTrack> getTitles() {
     return titles;
   }
 
@@ -51,7 +51,7 @@ public class DistributeTracksAction extends AbstractAction {
    * @param titles
    *          the titles to set
    */
-  public void setTitles(List<Title> titles) {
+  public void setTitles(List<BasicTrack> titles) {
     this.titles = titles;
     this.setEnabled(this.titles != null && this.titles.size() > 0);
   }

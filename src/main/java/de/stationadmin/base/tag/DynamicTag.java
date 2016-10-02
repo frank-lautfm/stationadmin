@@ -15,7 +15,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * @author Frank
@@ -43,7 +43,7 @@ public class DynamicTag implements Tag {
     return this.getName().compareToIgnoreCase(o.getName());
   }
 
-  public boolean contains(Title title) {
+  public boolean contains(BasicTrack title) {
     if (this.matcher == null) {
       this.matcher = new Matcher();
     }
@@ -343,7 +343,7 @@ public class DynamicTag implements Tag {
 
     }
 
-    public boolean matches(Title title) {
+    public boolean matches(BasicTrack title) {
       if (matches(this.artistPatterns, title.getArtist()) && matches(this.titlePatterns, title.getTitle()) && title.getLength() > minLength
           && title.getLength() < maxLength) {
         if (this.albumPatterns != null) {

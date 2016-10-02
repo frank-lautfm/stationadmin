@@ -76,7 +76,7 @@ import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.tag.Tag;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.tag.TagNameComparator;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.mp3explorer.MP3DirectoryTableModel.Column;
@@ -626,7 +626,7 @@ public class MP3Explorer extends JFrame {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        Title t = model.getBean() != null ? (Title) model.getBean().getTitle() : null;
+        BasicTrack t = model.getBean() != null ? (BasicTrack) model.getBean().getTitle() : null;
         if (t != null) {
           String text = model.getBean().getArtist() + " - " + model.getBean().getName();
           if (model.getBean().getAlbum() != null) {
@@ -769,7 +769,7 @@ public class MP3Explorer extends JFrame {
         @Override
         @SuppressWarnings("unchecked")
         public void actionPerformed(ActionEvent e) {
-          List<Title> titles = (List<Title>) panel.getSelectionHolder().getValue();
+          List<BasicTrack> titles = (List<BasicTrack>) panel.getSelectionHolder().getValue();
           if (titles != null && titles.size() > 0) {
             titleModel.setTitle(titles.get(0));
             titleModel.setStatus(TitleStatus.IN_LAUTFM_POOL);

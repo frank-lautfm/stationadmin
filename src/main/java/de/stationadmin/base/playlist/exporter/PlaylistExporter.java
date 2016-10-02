@@ -13,7 +13,7 @@ import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * @author korf
@@ -21,7 +21,7 @@ import de.stationadmin.base.track.Title;
  */
 public abstract class PlaylistExporter {
 
-  protected abstract String toString(Entry entry, Title title);
+  protected abstract String toString(Entry entry, BasicTrack title);
 
   protected abstract String getHeadLine();
 
@@ -43,7 +43,7 @@ public abstract class PlaylistExporter {
       buf.append("\n");
     }
     for (Entry entry : playlist.getEntries()) {
-      Title title = entry.getTrack();
+      BasicTrack title = entry.getTrack();
       if (!(title instanceof DetailedTrack)) {
         RegisteredTrack regTitle = playlist.getTrackRegistry().getTrack(entry.getTrackId());
         if (regTitle != null) {

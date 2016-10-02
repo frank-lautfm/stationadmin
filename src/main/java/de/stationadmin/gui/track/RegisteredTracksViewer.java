@@ -69,7 +69,7 @@ import de.stationadmin.base.tag.TagSet;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.RegisteredTrack.PlaylistStatistics;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.base.track.exporter.TrackListCSVExporter;
 import de.stationadmin.base.track.exporter.TrackListExcelExporter;
@@ -471,7 +471,7 @@ public class RegisteredTracksViewer extends JPanel {
           StringBuffer buf = new StringBuffer();
           for (int i = 0; i < rows.length; i++) {
             int row = table.convertRowIndexToModel(rows[i]);
-            Title title = tableModel.getTrackAt(row);
+            BasicTrack title = tableModel.getTrackAt(row);
             if (title != null) {
               buf.append(title.toTabSeparatedValues());
               buf.append('\n');
@@ -566,7 +566,7 @@ public class RegisteredTracksViewer extends JPanel {
         if (!e.getValueIsAdjusting()) {
           int[] rows = table.getSelectedRows();
           int[] trackIds = new int[rows.length];
-          List<Title> entries = new ArrayList<Title>();
+          List<BasicTrack> entries = new ArrayList<BasicTrack>();
           for (int i = 0; i < rows.length; i++) {
             int row = table.convertRowIndexToModel(rows[i]);
             entries.add(tableModel.getTrackAt(row));
@@ -613,7 +613,7 @@ public class RegisteredTracksViewer extends JPanel {
 
     TrackTypeRenderer iconRenderer = new TrackTypeRenderer();
 
-    for (int i = Title.TYPE_MUSIC; i <= Title.TYPE_WORD; i++) {
+    for (int i = BasicTrack.TYPE_MUSIC; i <= BasicTrack.TYPE_WORD; i++) {
       panel.add(new JLabel(iconRenderer.getIcons()[i]), cc.xy(col, 2));
       panel.add(new JLabel(textProvider.getString("title.type." + i)), cc.xy(col + 2, 2));
       col += 4;

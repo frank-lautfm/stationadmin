@@ -4,7 +4,7 @@
 package de.stationadmin.base.playlist.exporter;
 
 import de.stationadmin.base.playlist.Playlist.Entry;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.format.ArtistTracknameFormat;
 import de.stationadmin.base.track.format.TrackExportFormat;
 
@@ -25,10 +25,10 @@ public class PlaylistTxtExporter extends PlaylistExporter {
 	}
 
 	/**
-	 * @see de.stationadmin.base.playlist.exporter.PlaylistExporter#toString(de.stationadmin.base.playlist.Playlist.Entry, de.stationadmin.base.track.Title)
+	 * @see de.stationadmin.base.playlist.exporter.PlaylistExporter#toString(de.stationadmin.base.playlist.Playlist.Entry, de.stationadmin.base.track.BasicTrack)
 	 */
 	@Override
-	protected String toString(Entry entry, Title title) {
+	protected String toString(Entry entry, BasicTrack title) {
 	  return this.format.toString(title);
 	}
 

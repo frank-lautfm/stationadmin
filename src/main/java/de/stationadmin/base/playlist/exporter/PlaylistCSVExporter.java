@@ -6,7 +6,7 @@ package de.stationadmin.base.playlist.exporter;
 import org.apache.commons.lang.StringUtils;
 
 import de.stationadmin.base.playlist.Playlist.Entry;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.TimeFormat;
 
 /**
@@ -25,7 +25,7 @@ public class PlaylistCSVExporter extends PlaylistExporter {
 	}
 
 	@Override
-	protected String toString(Entry entry, Title title) {
+	protected String toString(Entry entry, BasicTrack title) {
 		StringBuffer buf = new StringBuffer(100);
 		buf.append(quote(TimeFormat.format(entry.getStart(), true)));
 		buf.append(',');

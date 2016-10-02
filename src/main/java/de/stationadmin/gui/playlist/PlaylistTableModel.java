@@ -18,7 +18,7 @@ import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.validation.GVLValidator;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.TextProvider;
 
@@ -133,7 +133,7 @@ public class PlaylistTableModel extends AbstractTableModel {
     return this.playlist != null ? this.playlist.getEntries().size() : 0;
   }
 
-  public Title getTitleAt(int row) {
+  public BasicTrack getTitleAt(int row) {
     if (row > -1 && row < playlist.getEntries().size()) {
       Entry entry = playlist.getEntries().get(row);
       return entry.getTrack();
@@ -145,7 +145,7 @@ public class PlaylistTableModel extends AbstractTableModel {
   @Override
   public Object getValueAt(int row, int column) {
     Entry entry = playlist.getEntries().get(row);
-    Title track = entry.getTrack();
+    BasicTrack track = entry.getTrack();
     Column col = Column.values()[column];
 
     switch (col) {

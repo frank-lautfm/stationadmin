@@ -51,7 +51,7 @@ import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
@@ -68,15 +68,15 @@ import de.stationadmin.gui.util.SwingTools;
 public class TrackViewer extends JDialog {
   private static final long serialVersionUID = 6053311643511061488L;
   private ClientContext ctx;
-  private Title title;
+  private BasicTrack title;
   private Set<Integer> playlistIds;
 
-  public TrackViewer(ClientContext ctx, Title title) {
+  public TrackViewer(ClientContext ctx, BasicTrack title) {
     this(ctx, title, null);
 
   }
 
-  public TrackViewer(ClientContext ctx, Title title, Set<Integer> playlistIds) {
+  public TrackViewer(ClientContext ctx, BasicTrack title, Set<Integer> playlistIds) {
     super();
     this.ctx = ctx;
     this.title = title;

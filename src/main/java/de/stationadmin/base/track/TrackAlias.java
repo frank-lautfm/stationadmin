@@ -61,8 +61,8 @@ public class TrackAlias implements Serializable {
   }
   
   public boolean matches(String artist, String title) {
-    boolean ok = Title.isArtistEqual(this.artist, artist)
-        && Title.equals(this.title, title);
+    boolean ok = BasicTrack.isArtistEqual(this.artist, artist)
+        && BasicTrack.equals(this.title, title);
     return ok;
   }
 

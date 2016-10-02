@@ -5,7 +5,7 @@ package de.stationadmin.gui.playlist;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.JumpListener;
 
 /**
@@ -17,16 +17,16 @@ import de.stationadmin.gui.JumpListener;
  */
 public class PlaylistEntryJumpTarget {
   private Playlist playlist;
-  private Title title;
+  private BasicTrack title;
   private int startTime = -1;
 
-  public PlaylistEntryJumpTarget(Playlist playlist, Title title) {
+  public PlaylistEntryJumpTarget(Playlist playlist, BasicTrack title) {
     super();
     this.playlist = playlist;
     this.title = title;
   }
 
-  public PlaylistEntryJumpTarget(Playlist playlist, Title title, int startTime) {
+  public PlaylistEntryJumpTarget(Playlist playlist, BasicTrack title, int startTime) {
     this(playlist, title);
     this.startTime = startTime;
   }
@@ -41,7 +41,7 @@ public class PlaylistEntryJumpTarget {
   /**
    * @return the title
    */
-  public Title getTitle() {
+  public BasicTrack getTitle() {
     return title;
   }
 

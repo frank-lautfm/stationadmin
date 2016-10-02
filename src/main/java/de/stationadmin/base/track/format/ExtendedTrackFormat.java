@@ -8,7 +8,7 @@ import java.util.Date;
 import org.apache.commons.lang.StringUtils;
 
 import de.stationadmin.base.track.DetailedTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * Internal format with id, artist, title, length and type separated by tabs.
@@ -78,10 +78,10 @@ public class ExtendedTrackFormat implements TrackExportFormat {
   }
 
   /**
-   * @see de.stationadmin.base.track.format.TrackExportFormat#toString(de.stationadmin.base.track.Title)
+   * @see de.stationadmin.base.track.format.TrackExportFormat#toString(de.stationadmin.base.track.BasicTrack)
    */
   @Override
-  public String toString(Title title) {
+  public String toString(BasicTrack title) {
     String str = title.toTabSeparatedValues();
     if (this.writeDetailedData && title instanceof DetailedTrack) {
       DetailedTrack reg = (DetailedTrack) title;

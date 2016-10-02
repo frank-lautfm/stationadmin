@@ -23,7 +23,7 @@ import org.jdesktop.swingx.JXTable;
 
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.trackimport.TrackImportHandler;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 
 /**
@@ -190,7 +190,7 @@ class PlaylistTableTransferHandler extends TransferHandler {
       StringBuffer buf = new StringBuffer();
       for (int i = 0; i < rows.length; i++) {
         int row = table.convertRowIndexToModel(rows[i]);
-        Title title = model.getTitleAt(row);
+        BasicTrack title = model.getTitleAt(row);
         if (title != null) {
           buf.append(title.toTabSeparatedValues());
           buf.append('\n');

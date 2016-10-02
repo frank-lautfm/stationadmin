@@ -19,7 +19,7 @@ import org.jdesktop.swingx.error.ErrorInfo;
 
 import com.jgoodies.binding.value.ValueModel;
 
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.player.Snippet;
@@ -70,7 +70,7 @@ public class PlaySnippetAction extends AbstractAction {
   @SuppressWarnings("unchecked")
   public void playSnippet() {
     if (selectionHolder.getValue() != null) {
-      List<Title> titles = (List<Title>) selectionHolder.getValue();
+      List<BasicTrack> titles = (List<BasicTrack>) selectionHolder.getValue();
       if (titles.size() > 0 && mp3Launcher.isAvailable()) {
         List<String> urls = new ArrayList<String>();
 
@@ -99,7 +99,7 @@ public class PlaySnippetAction extends AbstractAction {
   @SuppressWarnings("unchecked")
   public void playSnippetInternal() {
     if (selectionHolder.getValue() != null) {
-      List<Title> titles = (List<Title>) selectionHolder.getValue();
+      List<BasicTrack> titles = (List<BasicTrack>) selectionHolder.getValue();
       if (titles.size() > 0) {
         List<Snippet> snippets = new ArrayList<Snippet>();
 

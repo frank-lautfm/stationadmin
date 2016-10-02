@@ -25,7 +25,7 @@ import org.json.JSONException;
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.track.DetailedTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
 import de.stationadmin.base.util.AbstractBean;
@@ -121,7 +121,7 @@ public class SubscriptionService extends AbstractBean implements Service {
       }
       if (value != null) {
         if (subscription.isEquals()) {
-          match = Title.equals(value, subscription.getQuery());
+          match = BasicTrack.equals(value, subscription.getQuery());
         } else {
           match = value.toLowerCase().contains(subscription.getQuery().toLowerCase());
         }

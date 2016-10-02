@@ -42,7 +42,7 @@ public class RegisteredTrack extends DetailedTrack {
     super();
   }
 
-  public RegisteredTrack(Title title) {
+  public RegisteredTrack(BasicTrack title) {
     super(title);
   }
 

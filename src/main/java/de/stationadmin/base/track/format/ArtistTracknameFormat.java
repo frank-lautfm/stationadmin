@@ -3,7 +3,7 @@
  */
 package de.stationadmin.base.track.format;
 
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * Simple format "artist - title"
@@ -16,7 +16,7 @@ public class ArtistTracknameFormat implements TrackExportFormat {
    * @see de.stationadmin.base.track.format.TrackExportFormat#fromString(java.lang.String)
    */
   @Override
-  public Title fromString(String str) {
+  public BasicTrack fromString(String str) {
     int separatorLength = 3;
     // first try to find separator with blanks
     int separator = str.indexOf(" - ");
@@ -28,7 +28,7 @@ public class ArtistTracknameFormat implements TrackExportFormat {
     if(separator > 0 && separator < str.length() - 1) {
       String artist = str.substring(0, separator).trim();
       String title = str.substring(separator + separatorLength).trim();
-      Title t = new Title();
+      BasicTrack t = new BasicTrack();
       t.setArtist(artist);
       t.setTitle(title);
       return t;
@@ -46,10 +46,10 @@ public class ArtistTracknameFormat implements TrackExportFormat {
   }
 
   /**
-   * @see de.stationadmin.base.track.format.TrackExportFormat#toString(de.stationadmin.base.track.Title)
+   * @see de.stationadmin.base.track.format.TrackExportFormat#toString(de.stationadmin.base.track.BasicTrack)
    */
   @Override
-  public String toString(Title title) {
+  public String toString(BasicTrack title) {
     return title.getArtist() + " - " + title.getTitle();
   }
 

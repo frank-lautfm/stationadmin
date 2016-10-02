@@ -42,7 +42,7 @@ import de.stationadmin.base.playlist.PlaylistNameCompator;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.StationAdminFrame;
 import de.stationadmin.gui.TextProvider;
@@ -129,11 +129,11 @@ public class UnplayedTracksViewer extends StationAdminFrame {
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
-          List<Title> titles = new ArrayList<Title>();
+          List<BasicTrack> titles = new ArrayList<BasicTrack>();
           int[] rows = table.getSelectedRows();
           for (int row : rows) {
             row = table.convertRowIndexToModel(row);
-            Title t = tableModel.getTracks().get(row);
+            BasicTrack t = tableModel.getTracks().get(row);
             titles.add(t);
           }
           titleHolder.setValue(titles);
@@ -151,7 +151,7 @@ public class UnplayedTracksViewer extends StationAdminFrame {
         @Override
         @SuppressWarnings("unchecked")
         public void propertyChange(PropertyChangeEvent evt) {
-          List<Title> titles = (List<Title>) evt.getNewValue();
+          List<BasicTrack> titles = (List<BasicTrack>) evt.getNewValue();
           int[] ids = new int[titles.size()];
           for (int i = 0; i < ids.length; i++) {
             ids[i] = titles.get(i).getId();

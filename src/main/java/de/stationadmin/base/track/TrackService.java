@@ -190,7 +190,7 @@ public class TrackService implements Service {
           Song[] songs = this.ctx.getLfmAPI().getLastSongs(this.ctx.getStation());
 
           for (Song played : songs) {
-            Title title = new Title();
+            BasicTrack title = new BasicTrack();
             title.setTitle(played.getTitle());
             title.setArtist(played.getArtist().getName());
             this.trackHistory.add(played.getStartedAt(), title);
@@ -321,7 +321,7 @@ public class TrackService implements Service {
             }
 
           } else {
-            Title t = fmt.fromString(line);
+            BasicTrack t = fmt.fromString(line);
             if (t instanceof DetailedTrack) {
               this.trackRegistry.add((DetailedTrack) t);
             }
@@ -480,7 +480,7 @@ public class TrackService implements Service {
 
       @Override
       public boolean matches(DetailedTrack result) {
-        return Title.isArtistEqual(artist, result.getArtist()) && title.equalsIgnoreCase(result.getTitle());
+        return BasicTrack.isArtistEqual(artist, result.getArtist()) && title.equalsIgnoreCase(result.getTitle());
       }
 
     }, false);

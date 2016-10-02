@@ -25,7 +25,7 @@ import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.tag.TagSet;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.base.track.format.ArtistTracknameFormat;
 import de.stationadmin.base.track.format.CSVFormat;
@@ -331,7 +331,7 @@ public class TrackImportHandler {
    * Adds the resolved titles of the tasks to the playlist
    */
   public void addTracksToPlaylist() {
-    List<Title> titles = new ArrayList<Title>();
+    List<BasicTrack> titles = new ArrayList<BasicTrack>();
     for (TrackImportTask task : tasks) {
       if (task.getTrackLibraryTitle() != null) {
         titles.add(task.getTrackLibraryTitle());

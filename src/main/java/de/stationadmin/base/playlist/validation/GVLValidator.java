@@ -10,7 +10,7 @@ import java.util.Map;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * Checks a playlist for violations of the GVL rules:
@@ -143,7 +143,7 @@ public class GVLValidator implements PlaylistValidator {
   private static class TitleEntry {
     private Playlist playlist;
     private Entry entry;
-    private Title title;
+    private BasicTrack title;
     private int startTime;
 
     public TitleEntry(Playlist playlist, Entry entry, int startTime) {
@@ -162,7 +162,7 @@ public class GVLValidator implements PlaylistValidator {
       return entry;
     }
 
-    public Title getTitle() {
+    public BasicTrack getTitle() {
       return title;
     }
 

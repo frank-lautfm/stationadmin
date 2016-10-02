@@ -29,7 +29,7 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.util.TrackDistributor;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistSelector;
@@ -46,9 +46,9 @@ public class DistributeTracksDlg extends JDialog {
   private static final long serialVersionUID = -3958107010200832125L;
   private ClientContext ctx;
   private TextProvider textProvider;
-  private List<Title> titles;
+  private List<BasicTrack> titles;
   
-  public DistributeTracksDlg(ClientContext ctx, List<Title> titles) {
+  public DistributeTracksDlg(ClientContext ctx, List<BasicTrack> titles) {
     super();
     this.ctx = ctx;
     this.textProvider = ctx.getTextProvider();
@@ -92,14 +92,14 @@ public class DistributeTracksDlg extends JDialog {
      */
     @Override
     public void actionPerformed(ActionEvent e) {
-      ArrayList<Title> failedTitles = new ArrayList<Title>();
+      ArrayList<BasicTrack> failedTitles = new ArrayList<BasicTrack>();
       TrackDistributor dist = new TrackDistributor();
       if(dist.distributeTitles(getSelectedPlaylists(), titles, failedTitles)) {
         dispose();
       }
       else {
         // display error information
-        JList list = new JList(new IndirectListModel<Title>(failedTitles));
+        JList list = new JList(new IndirectListModel<BasicTrack>(failedTitles));
         JDialog errorDlg = new JDialog();
         JXLabel label = new JXLabel(textProvider.getString("distributetitles.errormsg"));
         label.setLineWrap(true);

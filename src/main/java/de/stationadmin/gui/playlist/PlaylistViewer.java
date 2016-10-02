@@ -68,7 +68,7 @@ import de.stationadmin.base.playlist.validation.GVLValidator;
 import de.stationadmin.base.playlist.validation.PlaylistValidationException;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.PlaylistGeneratorFactory;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.ClientContext;
@@ -354,7 +354,7 @@ public class PlaylistViewer extends JPanel {
     final CopyTracksAction copyAction = new CopyTracksAction(this.ctx);
     final DistributeTracksAction distributeAction = new DistributeTracksAction(this.ctx);
     final TrackViewAction viewAction = new TrackViewAction(ctx);
-    final ValueModel titleHolder = new ValueHolder(new ArrayList<Title>());
+    final ValueModel titleHolder = new ValueHolder(new ArrayList<BasicTrack>());
     final FollowArtistsAction followAction = new FollowArtistsAction(this.ctx);
     this.entryHolder.addValueChangeListener(new PropertyChangeListener() {
 
@@ -363,11 +363,11 @@ public class PlaylistViewer extends JPanel {
         if (playlistHolder.getValue() != null) {
           if (evt.getNewValue() instanceof Entry) {
             tagMenu.setTitleIds(new int[] { ((Entry) evt.getNewValue()).getTrackId() });
-            Title title = ((Entry) evt.getNewValue()).getTrack();
+            BasicTrack title = ((Entry) evt.getNewValue()).getTrack();
             distributeAction.setTitles(Arrays.asList(title));
             titleHolder.setValue(Arrays.asList(title));
           } else if (evt.getNewValue() instanceof List) {
-            ArrayList<Title> titles = new ArrayList<Title>();
+            ArrayList<BasicTrack> titles = new ArrayList<BasicTrack>();
             int[] titleIds = new int[((List<?>) evt.getNewValue()).size()];
             int i = 0;
             for (Object item : (List<?>) evt.getNewValue()) {
@@ -382,10 +382,10 @@ public class PlaylistViewer extends JPanel {
             viewAction.setTitles(titles);
             followAction.setTitles(titles);
           } else {
-            distributeAction.setTitles(new ArrayList<Title>());
+            distributeAction.setTitles(new ArrayList<BasicTrack>());
           }
         } else {
-          distributeAction.setTitles(new ArrayList<Title>());
+          distributeAction.setTitles(new ArrayList<BasicTrack>());
         }
       }
 
@@ -417,7 +417,7 @@ public class PlaylistViewer extends JPanel {
           int row = table.rowAtPoint(e.getPoint());
           row = table.convertRowIndexToModel(row);
           if (row > -1) {
-            Title title = tableModel.getTitleAt(row);
+            BasicTrack title = tableModel.getTitleAt(row);
             if (title != null) {
               Set<Integer> playlistIds = (title instanceof RegisteredTrack) ? ((RegisteredTrack) title).getPlaylistIds() : new HashSet<Integer>();
               if (!(title instanceof RegisteredTrack) || !((RegisteredTrack) title).isOwnTrack()) {
@@ -462,7 +462,7 @@ public class PlaylistViewer extends JPanel {
           comp.setFont(ComponentFactory.boldLabelFont);
           comp.setForeground(Color.RED);
         } else {
-          Title title = tableModel.getTitleAt(row);
+          BasicTrack title = tableModel.getTitleAt(row);
           if (taggedTitlesHolder.getValue() != null) {
             BitSet bs = (BitSet) taggedTitlesHolder.getValue();
             if (title != null && bs.get(title.getId())) {

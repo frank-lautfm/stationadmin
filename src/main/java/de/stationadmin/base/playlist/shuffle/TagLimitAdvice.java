@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.json.JSONException;
 
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * @author korf
@@ -28,10 +28,10 @@ public class TagLimitAdvice implements Advice {
 
   /**
    * @see de.stationadmin.base.playlist.shuffle.Advice#accept(java.util.List,
-   *      de.stationadmin.base.track.Title)
+   *      de.stationadmin.base.track.BasicTrack)
    */
   @Override
-  public boolean accept(List<Title> titles, Title candidate) {
+  public boolean accept(List<BasicTrack> titles, BasicTrack candidate) {
     if (taggedTitleIds.contains(candidate.getId())) {
       int lenTagged = 0;
 

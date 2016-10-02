@@ -3,7 +3,7 @@
  */
 package de.stationadmin.base.track.format;
 
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * A <code>TitleExportFormat</code> transforms titles to a string representation
@@ -18,14 +18,14 @@ public interface TrackExportFormat {
    * @param title 
    * @return
    */
-  String toString(Title title);
+  String toString(BasicTrack title);
   
   /**
    * Creates a title based on the string representation
    * @param str
    * @return
    */
-  Title fromString(String str);
+  BasicTrack fromString(String str);
   
   /**
    * Checks if the given string has a supported format

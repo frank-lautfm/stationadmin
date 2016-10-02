@@ -13,7 +13,7 @@ import de.stationadmin.lfm.backend.Track;
  * 
  * @author Frank Korf
  */
-public class DetailedTrack extends Title {
+public class DetailedTrack extends BasicTrack {
   private String album;
   private String genre;
   private int year;
@@ -25,7 +25,7 @@ public class DetailedTrack extends Title {
     super();
   }
 
-  public DetailedTrack(Title title) {
+  public DetailedTrack(BasicTrack title) {
     super(title);
     if (title instanceof DetailedTrack) {
       DetailedTrack t = (DetailedTrack) title;

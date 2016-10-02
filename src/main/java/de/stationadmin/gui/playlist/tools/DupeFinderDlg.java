@@ -28,7 +28,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.util.DupeFinder;
 import de.stationadmin.base.playlist.util.PlaylistEntry;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackComparator;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
@@ -72,7 +72,7 @@ public class DupeFinderDlg extends JDialog {
       public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
           boolean cellHasFocus) {
         Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-        if (value instanceof Title) {
+        if (value instanceof BasicTrack) {
           this.setFont(ComponentFactory.boldLabelFont);
         }
         if (value instanceof PlaylistEntry) {
@@ -91,7 +91,7 @@ public class DupeFinderDlg extends JDialog {
         if (!e.getValueIsAdjusting()) {
           if (list.getSelectedValue() instanceof PlaylistEntry) {
             PlaylistEntry entry = (PlaylistEntry) list.getSelectedValue();
-            Title title = ctx.getAdminClient().getTrackService().getTrackRegistry()
+            BasicTrack title = ctx.getAdminClient().getTrackService().getTrackRegistry()
                 .getTrack(entry.getEntry().getTrackId());
             ctx.getJumpHandler().jumpTo(
                 new PlaylistEntryJumpTarget(entry.getPlaylist(), title, entry.getEntry().getStart()));
@@ -113,12 +113,12 @@ public class DupeFinderDlg extends JDialog {
       @SuppressWarnings("unchecked")
       public void propertyChange(PropertyChangeEvent evt) {
         List<Playlist> playlists = (List<Playlist>) evt.getNewValue();
-        Map<Title, List<PlaylistEntry>> dupes = dupeFinder.findDupes(playlists);
+        Map<BasicTrack, List<PlaylistEntry>> dupes = dupeFinder.findDupes(playlists);
 
         dupeListModel.clear();
-        List<Title> titles = new ArrayList<Title>(dupes.keySet());
+        List<BasicTrack> titles = new ArrayList<BasicTrack>(dupes.keySet());
         Collections.sort(titles, new TrackComparator());
-        for (Title title : titles) {
+        for (BasicTrack title : titles) {
           dupeListModel.addElement(title);
           List<PlaylistEntry> infos = dupes.get(title);
           Collections.sort(infos, new Comparator<PlaylistEntry>() {

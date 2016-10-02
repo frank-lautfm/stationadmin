@@ -29,7 +29,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.util.SwingTools;
 
@@ -109,7 +109,7 @@ public class ArchiveDialog extends JDialog {
       Playlist archivedPlaylist = new Playlist(playlist.getTrackRegistry(), PlaylistType.ARCHIVED);
       archivedPlaylist.setName(nameHolder.getString());
       for (Playlist.Entry entry : playlist.getEntries()) {
-        Title title = playlist.getTrackRegistry().getTrack(entry.getTrackId());
+        BasicTrack title = playlist.getTrackRegistry().getTrack(entry.getTrackId());
         if(title == null) {
           title = entry.getTrack();
         }

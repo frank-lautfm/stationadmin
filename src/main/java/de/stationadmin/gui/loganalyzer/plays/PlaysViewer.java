@@ -27,7 +27,7 @@ import com.jgoodies.binding.value.ValueModel;
 
 import de.stationadmin.base.loganalyzer.Play;
 import de.stationadmin.base.loganalyzer.PlayStatistics;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.loganalyzer.plays.PlaysTableModel.Column;
@@ -100,7 +100,7 @@ public class PlaysViewer extends JPanel {
         
         @Override
         public void valueChanged(ListSelectionEvent e) {
-          List<Title> titles = new ArrayList<Title>();
+          List<BasicTrack> titles = new ArrayList<BasicTrack>();
           int[] rows = table.getSelectedRows();
           for(int row : rows) {
             row = table.convertRowIndexToModel(row);
@@ -122,7 +122,7 @@ public class PlaysViewer extends JPanel {
         @Override
         @SuppressWarnings("unchecked")
         public void propertyChange(PropertyChangeEvent evt) {
-          List<Title> titles = (List<Title>)evt.getNewValue();
+          List<BasicTrack> titles = (List<BasicTrack>)evt.getNewValue();
           int[] ids = new int[titles.size()];
           for(int i = 0; i < ids.length; i++) {
             ids[i] = titles.get(i).getId();

@@ -9,7 +9,7 @@ import org.blinkenlights.jid3.v2.ID3V2Tag;
 import com.jgoodies.binding.beans.Model;
 
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * 
@@ -19,7 +19,7 @@ import de.stationadmin.base.track.Title;
 public class TitleModel extends Model {
   private static final long serialVersionUID = 6565522546652005173L;
   private MP3File file;
-  private Title title;
+  private BasicTrack title;
   private TitleStatus status;
 
   public TitleModel(MP3File file) {
@@ -72,7 +72,7 @@ public class TitleModel extends Model {
   /**
    * @return the title
    */
-  public Title getTitle() {
+  public BasicTrack getTitle() {
     return title;
   }
 
@@ -92,12 +92,12 @@ public class TitleModel extends Model {
   /**
    * @param title the title to set
    */
-  public void setTitle(Title title) {
+  public void setTitle(BasicTrack title) {
     String oldArtist = this.getArtist();
     String oldName = this.getName();
     String oldAlbum = this.getAlbum();
     boolean oldOwn = this.isOwnTitle();
-    Title old =  this.title;
+    BasicTrack old =  this.title;
     this.title = title;
     this.firePropertyChange("artist", oldArtist, this.getArtist());
     this.firePropertyChange("name", oldName, this.getName());

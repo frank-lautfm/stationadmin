@@ -50,7 +50,7 @@ import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.PlaylistNameCompator;
 import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.track.DetailedTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.upload.QueuedTrack;
 import de.stationadmin.base.track.upload.UploadManager;
 import de.stationadmin.gui.ClientContext;
@@ -300,9 +300,9 @@ public class UploadedTracksPanel extends JPanel {
           ctx.getAdminClient().getTrackService().getTrackRegistry().registerOwnTrack(track);
         }
 
-        List<Title> addedTracks = new ArrayList<Title>();
+        List<BasicTrack> addedTracks = new ArrayList<BasicTrack>();
         for (QueuedTrack track : model.getTracks()) {
-          Title t = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(track.getTrack().getId());
+          BasicTrack t = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(track.getTrack().getId());
           if (t != null) {
             addedTracks.add(t);
           }
@@ -312,7 +312,7 @@ public class UploadedTracksPanel extends JPanel {
           if (targetPlaylist.getValue() instanceof Playlist) {
             Playlist playlist = (Playlist) targetPlaylist.getValue();
             if (playlistAppend.getValue().equals(Boolean.TRUE)) {
-              for (Title t : addedTracks) {
+              for (BasicTrack t : addedTracks) {
                 playlist.addTrack(t);
               }
             } else {

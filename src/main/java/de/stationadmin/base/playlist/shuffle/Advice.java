@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.json.JSONException;
 
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 
 /**
@@ -22,7 +22,7 @@ public interface Advice {
    * @param candidate
    * @return <code>true</code> if accepted
    */
-  boolean accept(List<Title> titles, Title candidate);
+  boolean accept(List<BasicTrack> titles, BasicTrack candidate);
   
   /**
    * Exports the advice to a JSON string

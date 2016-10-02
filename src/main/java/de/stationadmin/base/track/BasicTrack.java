@@ -5,11 +5,11 @@ import java.util.Map;
 
 
 /**
- * Title
+ * Basic track information
  * 
  * @author korf
  */
-public class Title {
+public class BasicTrack {
   private static Map<Character, Character> characterMapping = new HashMap<Character, Character>();
   
   public static final int TYPE_MUSIC = 1;
@@ -42,10 +42,10 @@ public class Title {
   private int length;
   private int type = 1;
 
-  public Title() {
+  public BasicTrack() {
   }
 
-  public Title(Title title) {
+  public BasicTrack(BasicTrack title) {
     this.id = title.id;
     this.artist = title.artist;
     this.title = title.title;
@@ -53,7 +53,7 @@ public class Title {
     this.type = title.type;
   }
   
-  public Title(de.stationadmin.lfm.backend.Track track) {
+  public BasicTrack(de.stationadmin.lfm.backend.Track track) {
     this.id = track.getId();
     this.update(track);
   }

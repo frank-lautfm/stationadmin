@@ -14,7 +14,7 @@ import java.util.Random;
 import org.apache.log4j.Logger;
 
 import de.stationadmin.base.tag.TagManager;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * Preselects tracks by using random values in combination with weights assigned
@@ -61,7 +61,7 @@ public class WeightedTrackPreselector implements ArtistTrackPreselector {
   }
 
   @Override
-  public List<Title> preselect(List<Title> tracks, int max) {
+  public List<BasicTrack> preselect(List<BasicTrack> tracks, int max) {
     if (tracks.size() == 0) {
       return tracks;
     }
@@ -75,7 +75,7 @@ public class WeightedTrackPreselector implements ArtistTrackPreselector {
       log.debug("preselect " + max + " tracks for " + tracks.get(0).getArtist());
 
       List<TrackRef> refs = new ArrayList<WeightedTrackPreselector.TrackRef>();
-      for (Title track : tracks) {
+      for (BasicTrack track : tracks) {
         TrackRef ref = new TrackRef();
         ref.track = track;
         ref.score = 100 + this.random.nextInt(500);
@@ -95,7 +95,7 @@ public class WeightedTrackPreselector implements ArtistTrackPreselector {
 
       Collections.sort(refs);
 
-      tracks = new ArrayList<Title>();
+      tracks = new ArrayList<BasicTrack>();
       for (int i = 0; i < refs.size() && i < max; i++) {
         tracks.add(refs.get(i).track);
       }
@@ -103,13 +103,13 @@ public class WeightedTrackPreselector implements ArtistTrackPreselector {
     return tracks;
   }
 
-  public int getWeight(Title track) {
+  public int getWeight(BasicTrack track) {
     Integer w = this.trackWeights.get(track.getId());
     return w != null ? w.intValue() : 0;
   }
 
   protected static class TrackRef implements Comparable<TrackRef> {
-    Title track;
+    BasicTrack track;
     int score;
 
     @Override

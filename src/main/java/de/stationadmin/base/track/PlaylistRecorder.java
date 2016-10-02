@@ -80,7 +80,7 @@ public class PlaylistRecorder extends Thread {
             if (this.titleRegistry != null && this.titleRegistry.getTrack(curr.getId()) != null) {
               collector.add(this.titleRegistry.getTrack(curr.getId()));
             } else {
-              Title title = new Title();
+              BasicTrack title = new BasicTrack();
               title.setId(curr.getId());
               title.setArtist(curr.getArtist().getName());
               title.setTitle(curr.getTitle());

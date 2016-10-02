@@ -13,7 +13,7 @@ import javax.swing.Action;
 
 import de.stationadmin.base.subscription.Subscription;
 import de.stationadmin.base.subscription.Subscription.Field;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 
 /**
@@ -23,7 +23,7 @@ import de.stationadmin.gui.ClientContext;
 public class FollowArtistsAction extends AbstractAction {
   private static final long serialVersionUID = 6600669163746314642L;
   private ClientContext ctx;
-  private List<Title> titles;
+  private List<BasicTrack> titles;
 
   
   public FollowArtistsAction(ClientContext ctx) {
@@ -38,7 +38,7 @@ public class FollowArtistsAction extends AbstractAction {
   @Override
   public void actionPerformed(ActionEvent evt) {
     Set<String> artists = new HashSet<String>();
-    for(Title title : titles) {
+    for(BasicTrack title : titles) {
       artists.add(title.getArtist());
     }
     for(String artist : artists) {
@@ -47,11 +47,11 @@ public class FollowArtistsAction extends AbstractAction {
     }
   }
 
-  public List<Title> getTitles() {
+  public List<BasicTrack> getTitles() {
     return titles;
   }
 
-  public void setTitles(List<Title> titles) {
+  public void setTitles(List<BasicTrack> titles) {
     this.titles = titles;
     this.setEnabled(titles.size() > 0);
   }

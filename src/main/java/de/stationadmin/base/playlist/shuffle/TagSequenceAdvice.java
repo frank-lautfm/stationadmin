@@ -15,7 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.stationadmin.base.tag.TagChecker;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * Based in title tags, a <code>TagRule</code> defines what titles must or must
@@ -103,7 +103,7 @@ public class TagSequenceAdvice implements Advice {
   }
 
   @Override
-  public boolean accept(List<Title> titles, Title candidate) {
+  public boolean accept(List<BasicTrack> titles, BasicTrack candidate) {
     if (pattern.length > titles.size()) {
       // not applicable
       return true;
@@ -112,8 +112,8 @@ public class TagSequenceAdvice implements Advice {
     int t = titles.size() - 1;
     for (int p = pattern.length - 1; p >= 0; p--) {
       Set<Integer> tagTitles = this.taggedTitles.get(pattern[p]);
-      Title title = titles.get(t);
-      while (title.getType() != Title.TYPE_MUSIC) {
+      BasicTrack title = titles.get(t);
+      while (title.getType() != BasicTrack.TYPE_MUSIC) {
         t--;
         if (t < 0) {
           return true; // not applicable

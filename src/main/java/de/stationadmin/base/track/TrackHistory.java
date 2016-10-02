@@ -26,11 +26,11 @@ public class TrackHistory extends History implements TrackCollector {
 	private boolean logCurrentListeners = false;
 	private int currentListeners = 0;
 
-	public void add(Date date, Title title) {
+	public void add(Date date, BasicTrack title) {
 		this.entries.add(new Entry(date, title));
 	}
 
-	public void add(Title title) {
+	public void add(BasicTrack title) {
 		this.entries.add(new Entry(new Date(), title));
 		while (this.entries.size() >= maxSize) {
 			this.entries.removeFirst();
@@ -52,9 +52,9 @@ public class TrackHistory extends History implements TrackCollector {
 
 	public static class Entry implements Comparable<Entry> {
 		private Date date;
-		private Title title;
+		private BasicTrack title;
 
-		public Entry(Date date, Title title) {
+		public Entry(Date date, BasicTrack title) {
 			super();
 			this.date = date;
 			this.title = title;
@@ -64,7 +64,7 @@ public class TrackHistory extends History implements TrackCollector {
 			return date;
 		}
 
-		public Title getTitle() {
+		public BasicTrack getTitle() {
 			return title;
 		}
 
