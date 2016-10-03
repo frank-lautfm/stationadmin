@@ -81,16 +81,6 @@ public class TrackImportHandler {
       for (String line : lines) {
         if (!line.startsWith("#")) {
           StringTrackImportTask importTask = new StringTrackImportTask(format, line);
-          // TEMPORARY: Support for mapping tracks with legacy ids
-          if (importTask.getTrackLibraryTitle() != null && importTask.getTrackLibraryTitle().getId() > 0) {
-            int id = importTask.getTrackLibraryTitle().getId();
-            if (trackService.getTrackRegistry().getTrack(id) == null) {
-              DetailedTrack track = trackService.getTrackRegistry().getByLegacyId(id);
-              if(track != null) {
-                importTask.setTrackLibraryTitle(track);
-              }
-            }
-          }
           this.add(importTask);
         }
       }
