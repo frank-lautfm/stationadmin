@@ -22,8 +22,6 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.IO;
-
 import de.emjoy.stationadmin.base.Settings;
 import de.emjoy.stationadmin.base.StationAdminClient;
 import de.emjoy.stationadmin.base.playlist.Playlist;
@@ -37,8 +35,8 @@ import de.emjoy.stationadmin.raw.LautServerAccess;
 import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
 import de.stationadmin.base.tag.DynamicTag;
 import de.stationadmin.base.tag.StaticTag;
-import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.BasicTrack;
+import de.stationadmin.base.track.RegisteredTrack;
 
 /**
  * @author korf
@@ -75,7 +73,7 @@ public class MigrationUtil {
   public void init() throws Exception {
     this.clientV3 = new StationAdminClient(new LautServerAccess(), this.station, null);
     this.clientV3.load();
-    this.message("Version 3: " + this.clientV3.getTitleService().getTitleRegistry().getNumTitles() + " tracks, " + this.clientV3.getPlaylistService().getPlaylistRegistry().getAllPlaylists().size()
+    this.message("Version 3: " + this.clientV3.getTitleService().getTitleRegistry().getNumTitles() + " Titel, " + this.clientV3.getPlaylistService().getPlaylistRegistry().getAllPlaylists().size()
         + " Playlists");
     log.info(this.clientV3.getTitleService().getTitleRegistry().getNumTitles() + " tracks");
     log.info(this.clientV3.getPlaylistService().getPlaylistRegistry().getAllPlaylists().size() + " playlists");
@@ -154,6 +152,13 @@ public class MigrationUtil {
       this.message("Tag: " + stag.getName());
       log.info("tag " + stag.getName());
       int[] ids = clientV3.getTitleTagManager().getTitleIds(stag.getName());
+
+      // delete existing tag to get rid of tagged tracks
+      try {
+        clientV4.getTagManager().deleteTag(stag.getName());
+      } catch (Exception e) {
+
+      }
 
       StaticTag stag4 = new StaticTag();
       stag4.setName(stag.getName());
