@@ -17,6 +17,7 @@ import java.awt.event.FocusEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.prefs.Preferences;
@@ -87,7 +88,9 @@ public class LoginDlg extends JDialog {
       }
       this.adminService = new LautfmAdminService(token, ORIGIN);
       try {
-        this.stationList.setValue(adminService.getStations());
+        List<Station> stations = adminService.getStations();
+        Collections.sort(stations);
+        this.stationList.setValue(stations);
         messageText.setValue(null);
       } catch (de.stationadmin.lfm.backend.AuthenticationException e) {
         Toolkit.getDefaultToolkit().beep();

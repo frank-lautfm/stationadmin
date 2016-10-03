@@ -16,12 +16,12 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement(name = "Station")
-public class Station {
+public class Station implements Comparable<Station> {
   private int id;
   private String name;
-  
+
   private String role;
-  
+
   @JsonProperty("created_at")
   private Date createdAt;
   @JsonProperty("updated_at")
@@ -82,10 +82,16 @@ public class Station {
   }
 
   /**
-   * @param role the role to set
+   * @param role
+   *          the role to set
    */
   public void setRole(String role) {
     this.role = role;
+  }
+
+  @Override
+  public int compareTo(Station o) {
+    return this.name.compareToIgnoreCase(o.name);
   }
 
 }
