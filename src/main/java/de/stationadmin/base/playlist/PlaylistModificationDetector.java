@@ -42,7 +42,7 @@ public class PlaylistModificationDetector extends AbstractBean {
       }
       for (PlaylistHead head : ctx.getServer().getPlaylists(ctx.getStationId())) {
         Playlist playlist = this.playlistRegistry.getPlaylist(head.getId());
-        if (playlist == null || head.getUpdatedAt().getTime() > playlist.getUpdatedAt().getTime()) {
+        if (playlist == null || playlist.getUpdatedAt() == null || head.getUpdatedAt().getTime() > playlist.getUpdatedAt().getTime()) {
           modifiedIds.add(head.getId());
         }
         ids.remove(head.getId());
