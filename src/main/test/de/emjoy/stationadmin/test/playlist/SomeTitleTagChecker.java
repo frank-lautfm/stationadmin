@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.stationadmin.base.tag.TagChecker;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 public class SomeTitleTagChecker implements TagChecker {
   private Map<String, Set<Integer>> taggedTitles = new HashMap<String, Set<Integer>>();
@@ -25,13 +25,13 @@ public class SomeTitleTagChecker implements TagChecker {
     set.add(titleId);
   }
 
-  public void register(String tag, List<Title> titles) {
+  public void register(String tag, List<BasicTrack> titles) {
     Set<Integer> set = this.taggedTitles.get(tag);
     if (set == null) {
       set = new HashSet<Integer>();
       this.taggedTitles.put(tag, set);
     }
-    for (Title title : titles) {
+    for (BasicTrack title : titles) {
       set.add(title.getId());
     }
   }

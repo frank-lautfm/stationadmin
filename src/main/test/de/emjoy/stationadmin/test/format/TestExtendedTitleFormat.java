@@ -9,7 +9,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
 
 /**
@@ -21,17 +21,17 @@ public class TestExtendedTitleFormat {
   @Test
   public void testSimpleTitle() throws Exception {
 
-    Title t = new Title();
+    BasicTrack t = new BasicTrack();
     t.setArtist("Foo & the Bars");
     t.setTitle("What a foo");
     t.setId(123);
     t.setLength(180);
-    t.setType(Title.TYPE_MUSIC);
+    t.setType(BasicTrack.TYPE_MUSIC);
 
     ExtendedTrackFormat fmt = new ExtendedTrackFormat();
     String str = fmt.toString(t);
 
-    Title t2 = fmt.fromString(str);
+    BasicTrack t2 = fmt.fromString(str);
     Assert.assertEquals("id", t.getId(), t2.getId());
     Assert.assertEquals("artist", t.getArtist(), t2.getArtist());
     Assert.assertEquals("title", t.getTitle(), t2.getTitle());
@@ -48,7 +48,7 @@ public class TestExtendedTitleFormat {
     t.setTitle("What a foo");
     t.setId(123);
     t.setLength(180);
-    t.setType(Title.TYPE_MUSIC);
+    t.setType(BasicTrack.TYPE_MUSIC);
     t.setAlbum("Foobar");
     t.setGenre("FooMucke");
     t.setOwnTrack(true);

@@ -23,7 +23,7 @@ import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.shuffle.PlaylistGenerator;
 import de.stationadmin.base.playlist.shuffle.TagSequenceAdvice;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.util.TimeFormat;
 
@@ -124,7 +124,7 @@ public class TestPlaylistGenerator {
       title.setArtist("Jingle");
       title.setId(titleId);
       title.setTitle("J" + title.getId());
-      title.setType(Title.TYPE_JINGLE);
+      title.setType(BasicTrack.TYPE_JINGLE);
       title.setLength(15);
       this.titleRegistry.add(title);
       this.titleTagManager.register(TAG_JINGLE, titleId);
@@ -160,7 +160,7 @@ public class TestPlaylistGenerator {
   private static void assertJingleDistance(Playlist playlist, int interval) {
     int lastJingle = -1;
     for (Playlist.Entry entry : playlist.getEntries()) {
-      if (entry.getTrack().getType() == Title.TYPE_JINGLE) {
+      if (entry.getTrack().getType() == BasicTrack.TYPE_JINGLE) {
         if (lastJingle > -1) {
           int diff = entry.getStart() - lastJingle;
           Assert.assertTrue("jingles distance too small: " + diff, diff >= interval * 60);
@@ -278,7 +278,7 @@ public class TestPlaylistGenerator {
     Playlist playlist = newPlaylist("Test");
     playlist.setGenerateTags(TAG_SHOW_A + ";" + TAG_JINGLE);
 
-    Title someJingle = this.titleRegistry.getTrack(this.titleTagManager.getTrackIds(TAG_JINGLE)[0]);
+    BasicTrack someJingle = this.titleRegistry.getTrack(this.titleTagManager.getTrackIds(TAG_JINGLE)[0]);
     log.info("protect " + someJingle);
     playlist.addTrack(someJingle);
 

@@ -293,7 +293,6 @@ public class StationAdminClient {
   public void load() throws IOException {
     try {
       for (Service service : this.services) {
-        System.out.println(service.getClass().getName() + ": load");
         service.load();
       }
       this.updateStatus(null);

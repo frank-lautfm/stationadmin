@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.stationadmin.base.playlist.shuffle.TagSequenceAdvice;
-import de.stationadmin.base.track.Title;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * @author korf
@@ -22,10 +22,10 @@ import de.stationadmin.base.track.Title;
 public class TagTagSequenceAdvice {
   private SomeTitleTagChecker tagChecker;
   
-  private List<Title> titlesA = new ArrayList<Title>();
-  private List<Title> titlesB = new ArrayList<Title>();
-  private List<Title> titlesC = new ArrayList<Title>();
-  private List<Title> jingles = new ArrayList<Title>();
+  private List<BasicTrack> titlesA = new ArrayList<BasicTrack>();
+  private List<BasicTrack> titlesB = new ArrayList<BasicTrack>();
+  private List<BasicTrack> titlesC = new ArrayList<BasicTrack>();
+  private List<BasicTrack> jingles = new ArrayList<BasicTrack>();
   
   @Before
   public void setUp() {
@@ -44,13 +44,13 @@ public class TagTagSequenceAdvice {
     this.tagChecker.register("C", this.titlesC);
   }
   
-  private Title createTitle(int id, String name, boolean jingle) {
-    Title title = new Title();
+  private BasicTrack createTitle(int id, String name, boolean jingle) {
+    BasicTrack title = new BasicTrack();
     title.setId(id);
     title.setArtist("Artist of " + name);
     title.setTitle(name);
     title.setLength(300);
-    title.setType(jingle ? Title.TYPE_JINGLE : Title.TYPE_MUSIC);
+    title.setType(jingle ? BasicTrack.TYPE_JINGLE : BasicTrack.TYPE_MUSIC);
     return title;
   }
 
@@ -61,21 +61,21 @@ public class TagTagSequenceAdvice {
 
     // applicable title list
     {
-      List<Title> titles = Arrays.asList(this.titlesA.get(3));
+      List<BasicTrack> titles = Arrays.asList(this.titlesA.get(3));
       Assert.assertTrue("A => B: A => B", rule.accept(titles, this.titlesB.get(0)));
       Assert.assertFalse("A => B: A => C", rule.accept(titles, this.titlesC.get(0)));
     }
     
     // applicable title list with jingle
     {
-      List<Title> titles = Arrays.asList(this.titlesA.get(3), this.jingles.get(0));
+      List<BasicTrack> titles = Arrays.asList(this.titlesA.get(3), this.jingles.get(0));
       Assert.assertTrue("A => B: A,J => B", rule.accept(titles, this.titlesB.get(0)));
       Assert.assertFalse("A => B: A,J => C", rule.accept(titles, this.titlesC.get(0)));
     }
     
     // non-applicable title list
     {
-      List<Title> titles = Arrays.asList(this.titlesB.get(3));
+      List<BasicTrack> titles = Arrays.asList(this.titlesB.get(3));
       Assert.assertTrue("A => B", rule.accept(titles, this.titlesB.get(0)));
       Assert.assertTrue("A => B", rule.accept(titles, this.titlesC.get(0)));
     }
@@ -89,21 +89,21 @@ public class TagTagSequenceAdvice {
 
     // applicable title list
     {
-      List<Title> titles = Arrays.asList(this.titlesA.get(3));
+      List<BasicTrack> titles = Arrays.asList(this.titlesA.get(3));
       Assert.assertFalse("A => B: A => B", rule.accept(titles, this.titlesB.get(0)));
       Assert.assertTrue("A => B: A => C", rule.accept(titles, this.titlesC.get(0)));
     }
     
     // applicable title list with jingle
     {
-      List<Title> titles = Arrays.asList(this.titlesA.get(3), this.jingles.get(0));
+      List<BasicTrack> titles = Arrays.asList(this.titlesA.get(3), this.jingles.get(0));
       Assert.assertFalse("A => B: A,J => B", rule.accept(titles, this.titlesB.get(0)));
       Assert.assertTrue("A => B: A,J => C", rule.accept(titles, this.titlesC.get(0)));
     }
     
     // non-applicable title list
     {
-      List<Title> titles = Arrays.asList(this.titlesB.get(3));
+      List<BasicTrack> titles = Arrays.asList(this.titlesB.get(3));
       Assert.assertTrue("A => B", rule.accept(titles, this.titlesB.get(0)));
       Assert.assertTrue("A => B", rule.accept(titles, this.titlesC.get(0)));
     }
@@ -118,21 +118,21 @@ public class TagTagSequenceAdvice {
 
     // applicable title list
     {
-      List<Title> titles = Arrays.asList(this.titlesA.get(3), this.titlesB.get(1));
+      List<BasicTrack> titles = Arrays.asList(this.titlesA.get(3), this.titlesB.get(1));
       Assert.assertTrue("A,B => C: A,B => C", rule.accept(titles, this.titlesC.get(0)));
       Assert.assertFalse("A,B => C: A,B => C", rule.accept(titles, this.titlesA.get(0)));
     }
     
     // applicable title list with jingle
     {
-      List<Title> titles = Arrays.asList(this.titlesA.get(3), this.jingles.get(0), this.titlesB.get(1));
+      List<BasicTrack> titles = Arrays.asList(this.titlesA.get(3), this.jingles.get(0), this.titlesB.get(1));
       Assert.assertTrue("A,B => C: A,J,B => C", rule.accept(titles, this.titlesC.get(0)));
       Assert.assertFalse("A,B => C: A,J,B => C", rule.accept(titles, this.titlesA.get(0)));
     }
     
     // non-applicable title list
     {
-      List<Title> titles = Arrays.asList(this.titlesB.get(2), this.titlesB.get(3));
+      List<BasicTrack> titles = Arrays.asList(this.titlesB.get(2), this.titlesB.get(3));
       Assert.assertTrue("A,B => C: B,B", rule.accept(titles, this.titlesB.get(0)));
       Assert.assertTrue("A,B => C: B,B", rule.accept(titles, this.titlesC.get(0)));
     }
