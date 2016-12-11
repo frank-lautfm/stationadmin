@@ -6,6 +6,59 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.0.0
+--------------
+
+[#] Anpassung an den neuen Radioadmin
+[+] Anlegen und Löschen von Playlists
+
+Version 3.16.1
+--------------
+[*] Fehler beim Laden von Archiv-Playlists behoben
+[*] Kein Wert für Releasejahr beim editieren eines Titels erlaubt
+[+] Sicherheitsabfrage beim exportierten von Playlists in Dateien wenn angegebene Datei schon existiert
+
+
+Version 3.16.0
+--------------
+[+] Erweiterte Einstellungsmöglichkeiten für den Playlistgenerator in den allgemeinen Einstellungen.
+[#] Dialog mit den Einstellungen benutzt jetzt einen Tree anstatt Tabs. 
+
+Version 3.15.1
+--------------
+[*] Playlists wurden nach dem Shuffeln / Generieren über das Menü nicht gespeichert.
+
+Version 3.15.0
+--------------
+
+[+] Upload-Dialog: Titel als privat / zum Speichern markieren über Kontextmenü
+[+] Upload-Dialog: Hochgeladene Titel direkt taggen
+[+] Playlist-Viewer: Optionale Spalte mit Zahl der Playlists in der ein Titel enthalten ist
+[#] Titelvorschau: Klarere Darstellung für Playlists bei denen eine Vorschau nicht möglich ist + Bugfixes
+
+
+Version 3.14.2
+--------------
+[*] Playlist-Konfiguration wurde nicht aus Backup übernommen
+[*] Live-Playlist wurde ins Backup aufgenommen
+[*] Protokollierung der Tagesstatisik war unter Umständen fehlerhaft wenn Station Admin um Mitternaht lief
+
+
+Version 3.14.1
+--------------
+[+] http-URLs als Quelle für MP3-Live-Sendefunktion
+[+] Möglichkeit die Dauer einer Live-Übertragung zu begrenzen
+[*] Fehler beim Lesen von dynamischen Tags korrigiert - Umlaute etc gingen verloren
+[*] Fehler beim Registrieren der "Live"-Sendung korrigiert - fehlte nach dem Synchronisieren
+[*] Test ob Live-Senden für die Station konfiguriert ist an neues Serververhalten angepasst
+
+Version 3.14.0
+--------------
+
+[+] Vorgefertige Sendungen im mp3-Format 'live' senden (erfordert Freischaltung zum Live senden)
+[*] Playlistviewer: Spalte mit Nummer des Eintrags verbreitert damit auch 4stellige Zahlen komplett dargestellt werden können
+[*] Verbesserte Titelprotokollierung währen Live-Übertragung (insoweit die API das hergibt - funktioniert nicht wirklich gut)
+
 Version 3.13.2
 --------------
 [*] Gelöschte oder umbenannte Tags führen nicht mehr zu Fehlern beim Generieren von Playlists wenn Playlists noch 

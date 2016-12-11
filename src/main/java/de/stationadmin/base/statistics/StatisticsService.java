@@ -193,6 +193,7 @@ public class StatisticsService implements Service {
   }
 
   private class StatsRefresher extends TimerTask {
+    private boolean errorDisplayed = false;
 
     /**
      * @see java.util.TimerTask#run()
@@ -201,8 +202,13 @@ public class StatisticsService implements Service {
     public void run() {
       try {
         refreshStatistics();
-      } catch (IOException e) {
-        e.printStackTrace();
+      } catch (final Exception e) {
+        if (!errorDisplayed) {
+          if (sessionCtx.getErrorHandler() != null) {
+            sessionCtx.getErrorHandler().display("Fehler beim Aktualisieren der Statistik", e);
+          }
+          errorDisplayed = true;
+        }
       }
     }
 

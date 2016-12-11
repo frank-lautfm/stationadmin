@@ -28,6 +28,8 @@ public class SessionCtx {
 
   private Role role = Role.OWNER;
   
+  private ErrorHandler errorHandler;
+  
   /**
    * @param station
    * @param dataDirectory
@@ -159,6 +161,20 @@ public class SessionCtx {
   public boolean isDJOnly() {
     return role == Role.DJ;
 
+  }
+
+  /**
+   * @return the errorHandler
+   */
+  public ErrorHandler getErrorHandler() {
+    return errorHandler;
+  }
+
+  /**
+   * @param errorHandler the errorHandler to set
+   */
+  public void setErrorHandler(ErrorHandler errorHandler) {
+    this.errorHandler = errorHandler;
   }
 
 

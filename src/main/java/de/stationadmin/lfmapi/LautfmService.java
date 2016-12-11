@@ -22,7 +22,7 @@ import org.json.JSONObject;
  * @author Frank
  */
 public class LautfmService {
-  private static String BASE_URL = "http://api.laut.fm/";
+  public static String BASE_URL = "http://api.beta.laut.fm/";
 
   private DefaultHttpClient client;
 

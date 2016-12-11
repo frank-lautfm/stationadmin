@@ -261,7 +261,7 @@ public class StationAdminClient {
    * @throws IOException
    */
   public boolean isRadioStarted() throws IOException {
-    return true; // FIXME this.sessionCtx.getServer().isRadioStarted();
+    return this.sessionCtx.getServer().isRunning(this.sessionCtx.getStationId());
   }
   
   public LiveAccount getLiveAccount() throws IOException {
@@ -356,7 +356,8 @@ public class StationAdminClient {
    * @throws IOException
    */
   public boolean startRadio() throws IOException {
-    return false; // FiXME this.sessionCtx.getServer().startRadio();
+    this.sessionCtx.getServer().start(this.sessionCtx.getStationId());
+    return true;
   }
 
   /**
@@ -429,6 +430,10 @@ public class StationAdminClient {
    */
   public void setMp3Streamer(MP3Streamer mp3Streamer) {
     this.mp3Streamer = mp3Streamer;
+  }
+  
+  public void registerErrorHandler(ErrorHandler errorHandler) {
+    this.sessionCtx.setErrorHandler(errorHandler);
   }
 
 }

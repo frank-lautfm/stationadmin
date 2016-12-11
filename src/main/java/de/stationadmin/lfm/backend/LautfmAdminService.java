@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
@@ -176,6 +177,7 @@ public class LautfmAdminService {
     return response;
 
   }
+  
 
   public List<Station> getStations() throws IOException {
     CloseableHttpResponse response = this.doGet("/stations");
@@ -184,6 +186,23 @@ public class LautfmAdminService {
     response.close();
     return Arrays.asList(list.getStations());
   }
+  
+  public boolean isRunning(int stationId) throws IOException {
+    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/state");
+    try {
+    return IOUtils.toString(response.getEntity().getContent()).toLowerCase().contains("true");
+    } finally {
+      response.close();
+    }
+  }
+
+  public void start(int stationId) throws IOException {
+    HashMap<String,Object> args = new HashMap<String,Object>();
+    args.put("station_id", stationId);
+    CloseableHttpResponse response = this.doPost("/stations/" + stationId + "/state", args);
+    response.close();
+  }
+
 
   public List<PlaylistHead> getPlaylists(int stationId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/playlists");

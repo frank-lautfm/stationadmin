@@ -254,7 +254,7 @@ public class TrackImportDlg extends JDialog {
       });
       actionPanel.add(searchBtn, new CellConstraints(2, 2));
       final MenuLabel uploadBtn = new MenuLabel(textProvider.getString("playlistimport.action.upload"));
-      uploadBtn.setEnabled(false); // FIXME task instanceof MP3TitleImportTask && uploadAvailable);
+      uploadBtn.setEnabled(task instanceof MP3TrackImportTask);
       uploadBtn.setActionListener(new ActionListener() {
 
         @Override

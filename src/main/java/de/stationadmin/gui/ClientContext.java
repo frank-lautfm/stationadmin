@@ -5,18 +5,21 @@ import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
+import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
+import org.jdesktop.swingx.error.ErrorLevel;
 
 import com.jgoodies.binding.value.ValueHolder;
 
+import de.stationadmin.base.ErrorHandler;
 import de.stationadmin.base.StationAdminClient;
 import de.stationadmin.gui.upload.UploadWindowManager;
 import de.stationadmin.gui.util.AppUtils;
 
 /**
- * Context object for all classes of the GUI - provides access to relevant
- * objects and resources
+ * Context object for all classes of the GUI - provides access to relevant objects and resources
  * 
  * @author Frank Korf
  */
@@ -67,6 +70,26 @@ public class ClientContext {
 
   public void setAdminClient(StationAdminClient adminClient) {
     this.adminClient = adminClient;
+    this.adminClient.registerErrorHandler(new ErrorHandler() {
+
+      @Override
+      public void display(String text, Exception e) {
+        displayError(text, e);
+
+      }
+    });
+  }
+
+  protected void displayError(final String text, final Exception e) {
+    SwingUtilities.invokeLater(new Runnable() {
+
+      @Override
+      public void run() {
+        ErrorInfo errorInfo = new ErrorInfo(textProvider.getString("error.title"), text, null, "general", e, ErrorLevel.SEVERE, null);
+        JXErrorPane.showDialog(AppUtils.getRootFrame(), errorInfo);
+      }
+    });
+
   }
 
   /**

@@ -88,6 +88,27 @@ public class MigrationUtil {
     this.writeStationTrackMapping();
 
   }
+  
+  public void checkTracks() {
+    
+    message("Überprüfe ob alle verwendeten Tracks im neuen Radioadmin vorhanden sind...");
+    int cnt = 0;
+    int found = 0;
+    for(RegisteredTitle title : this.clientV3.getTitleService().getTitleRegistry().getAllTitles()) {
+      if(title.getPlaylistIds().size() > 0) {
+        cnt++;
+        if(!this.trackIdMap.containsKey(title.getId())) {
+          message("Fehlender Track: " + title.getId() + " " + title.getArtist() + " - " + title.getTitle());
+          
+        }
+        else {
+          found++;
+        }
+      }
+    }
+    message(found + " von " + cnt + " Tracks gefunden");
+    
+  }
 
   public boolean isTrackmappingDownloaded() {
     String file = this.clientV4.getSessionCtx().getDataDirectory() + "/trackmapping";

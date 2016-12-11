@@ -56,6 +56,7 @@ public class MigrationDlg extends StationAdminFrame {
 
     JPanel bottom = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
     bottom.add(new JButton(this.action));
+    bottom.add(new JButton(new CheckTracksAction()));
     bottom.add(this.reloadTrackMapping);
     this.getContentPane().add(bottom, BorderLayout.SOUTH);
   }
@@ -107,6 +108,51 @@ public class MigrationDlg extends StationAdminFrame {
             
             log("\nFertig!\n");
 
+          } catch (Exception e) {
+            Logger log = Logger.getLogger(MigrationDlg.class);
+            log.error("migration error", e);
+            JXErrorPane.showDialog(MigrationDlg.this, ctx.getTextProvider().createErrorInfo(e, "migrationerror"));
+          } finally {
+            action.setEnabled(true);
+          }
+
+        }
+      };
+      t.start();
+
+    }
+
+  }
+
+  private class CheckTracksAction extends AbstractAction {
+    private static final long serialVersionUID = 8515275611946529505L;
+
+    CheckTracksAction() {
+      this.putValue(Action.NAME, "Tracks überprüfen");
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      this.setEnabled(false);
+
+      Thread t = new Thread() {
+        public void run() {
+          MigrationUtil util = new MigrationUtil(ctx.getAdminClient());
+          util.setReloadTrackmapping(reloadTrackMapping.isSelected());
+
+          util.setMessageReceiver(new MessageReceiver() {
+
+            @Override
+            public void onMessage(String msg) {
+              log(msg);
+
+            }
+          });
+
+          try {
+            util.init();
+            util.checkTracks();
+            
           } catch (Exception e) {
             Logger log = Logger.getLogger(MigrationDlg.class);
             log.error("migration error", e);
