@@ -88,6 +88,7 @@
 			<fileset dir="${src.dir.resources}">
 				<include name="*.vm"/>
         <include name="stationadmin-default.conf"/>
+        <include name="trackmapping"/>
 			</fileset>
 		</copy>
 

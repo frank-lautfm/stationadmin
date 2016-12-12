@@ -9,15 +9,14 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 
@@ -28,6 +27,7 @@ import de.stationadmin.base.Settings;
 import de.stationadmin.base.Version;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackRegistry;
+import de.stationadmin.lfm.backend.TrackStatsEntry;
 
 /**
  * @author korf
@@ -38,7 +38,7 @@ public class LogAnalyzerService implements Service {
   private static final Logger log = Logger.getLogger(LogAnalyzerService.class);
   private static final String DATE_FORMAT = "yyyy-MM-dd";
   private static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-  private String apiURL = "http://stationadmin.emjoy.net/api/";
+  // private String apiURL = "http://stationadmin.emjoy.net/api/";
   private SessionCtx ctx;
   private Settings settings;
   private TrackRegistry titleRegistry;
@@ -49,6 +49,9 @@ public class LogAnalyzerService implements Service {
   private List<ListenersEntry> listenersToday;
   private List<Play> playsToday;
 
+  private TrackStatsEntry[] bufferedEntries;
+  private int bufferedEntriesDays = 0;
+
   public LogAnalyzerService(SessionCtx ctx, Settings settings, TrackRegistry titleRegistry) {
     this.ctx = ctx;
     this.settings = settings;
@@ -56,8 +59,7 @@ public class LogAnalyzerService implements Service {
     this.logCacheDir = ctx.getStationDirectory() + "log" + File.separatorChar;
 
     this.client = new DefaultHttpClient();
-    client.getParams().setParameter("http.useragent",
-        "Mozilla/4.0 (compatible; Station Admin " + Version.VERSION + "; " + System.getProperty("os.name") + ")");
+    client.getParams().setParameter("http.useragent", "Mozilla/4.0 (compatible; Station Admin " + Version.VERSION + "; " + System.getProperty("os.name") + ")");
 
   }
 
@@ -66,7 +68,7 @@ public class LogAnalyzerService implements Service {
    */
   @Override
   public void load() {
-    if(ctx.isDJOnly()) {
+    if (ctx.isDJOnly()) {
       return;
     }
     ctx.updateStatus("loadLogstatistics");
@@ -114,13 +116,54 @@ public class LogAnalyzerService implements Service {
       return FileUtils.readFileToString(file, "UTF-8");
     }
 
-    if (day.getTime() > System.currentTimeMillis() - DAY_IN_MS * 8 && this.settings.isLogDownloadPermitted()) {
+    Calendar calDay = Calendar.getInstance();
+    Calendar calEntry = Calendar.getInstance();
+    calDay.setTime(day);
+
+    if (day.getTime() > System.currentTimeMillis() - DAY_IN_MS * 8) {
+
+      SimpleDateFormat timeFmt = new SimpleDateFormat(TIME_FORMAT);
 
       // fetch from server
       log.info("download " + type + " for " + date);
-      HttpGet action = new HttpGet(apiURL + type + ".php?station=" + this.ctx.getStation() + "&day=" + date);
-      HttpResponse response = this.client.execute(action);
-      String content = IOUtils.toString(response.getEntity().getContent());
+
+      int numDays = (int) ((System.currentTimeMillis() - day.getTime()) / DAY_IN_MS) + 2;
+
+      TrackStatsEntry[] stats = null;
+
+      if (bufferedEntries != null && bufferedEntriesDays >= numDays && !isToday(day)) {
+        stats = bufferedEntries;
+      } else {
+        stats = this.ctx.getServer().getTrackStatistics(this.ctx.getStationId(), numDays);
+        Arrays.sort(stats, new Comparator<TrackStatsEntry>() {
+
+          @Override
+          public int compare(TrackStatsEntry o1, TrackStatsEntry o2) {
+            long d1 = o1.getStartedAt() != null ? o1.getStartedAt().getTime() : Long.MAX_VALUE;
+            long d2 = o2.getStartedAt() != null ? o2.getStartedAt().getTime() : Long.MAX_VALUE;
+            return Long.compare(d1, d2);
+          }
+        });
+        
+        bufferedEntries = stats;
+        bufferedEntriesDays = numDays;
+      }
+      StringBuilder buf = new StringBuilder();
+      for (TrackStatsEntry entry : stats) {
+        calEntry.setTime(entry.getStartedAt());
+        if (calDay.get(Calendar.DAY_OF_MONTH) == calEntry.get(Calendar.DAY_OF_MONTH) && calDay.get(Calendar.MONTH) == calEntry.get(Calendar.MONTH)) {
+
+          buf.append(timeFmt.format(entry.getStartedAt()));
+          buf.append('\t');
+          if (type.equals("station_listeners")) {
+            buf.append(entry.getListeners());
+          } else {
+            buf.append(entry.getId());
+          }
+          buf.append('\n');
+        }
+      }
+      String content = buf.toString();
 
       if (!isToday(day)) {
         // write data to cache
@@ -164,7 +207,7 @@ public class LogAnalyzerService implements Service {
           Date date = fmt.parse(cols[0]);
           int trackId = Integer.parseInt(cols[1]);
           DetailedTrack track = this.titleRegistry.getTrack(trackId);
-          if(track == null) {
+          if (track == null) {
             track = this.titleRegistry.getByLegacyId(trackId);
           }
           if (track == null) {
@@ -295,7 +338,7 @@ public class LogAnalyzerService implements Service {
     String date = new SimpleDateFormat(DATE_FORMAT).format(day);
     String filename = this.logCacheDir + "station_dailysummary" + "-" + date + ".log";
     File file = new File(filename);
-    
+
     Calendar cal = Calendar.getInstance();
     cal.setTime(day);
     cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -408,14 +451,13 @@ public class LogAnalyzerService implements Service {
   public void close() {
 
   }
-  
+
   private void checkAccess() {
     if (this.ctx.isDJOnly()) {
       throw new AccessDeniedException();
     }
 
   }
-
 
   /**
    * @see de.stationadmin.base.Service#initBackgroundTasks()
@@ -432,7 +474,7 @@ public class LogAnalyzerService implements Service {
       }
     });
 
-    this.ctx.getStationStatus().addPropertyChangeListener("currentTitleId", new PropertyChangeListener() {
+    this.ctx.getStationStatus().addPropertyChangeListener("currentTrackId", new PropertyChangeListener() {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {

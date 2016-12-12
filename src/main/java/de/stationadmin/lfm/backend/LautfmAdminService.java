@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
@@ -177,7 +178,6 @@ public class LautfmAdminService {
     return response;
 
   }
-  
 
   public List<Station> getStations() throws IOException {
     CloseableHttpResponse response = this.doGet("/stations");
@@ -186,23 +186,32 @@ public class LautfmAdminService {
     response.close();
     return Arrays.asList(list.getStations());
   }
-  
+
   public boolean isRunning(int stationId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/state");
     try {
-    return IOUtils.toString(response.getEntity().getContent()).toLowerCase().contains("true");
+      return IOUtils.toString(response.getEntity().getContent()).toLowerCase().contains("true");
+    } finally {
+      response.close();
+    }
+  }
+
+  public TrackStatsEntry[] getTrackStatistics(int stationId, int days) throws IOException {
+    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/tracks/stats?days=" + days);
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      return mapper.readValue(response.getEntity().getContent(), TrackStatsEntry[].class);
     } finally {
       response.close();
     }
   }
 
   public void start(int stationId) throws IOException {
-    HashMap<String,Object> args = new HashMap<String,Object>();
+    HashMap<String, Object> args = new HashMap<String, Object>();
     args.put("station_id", stationId);
     CloseableHttpResponse response = this.doPost("/stations/" + stationId + "/state", args);
     response.close();
   }
-
 
   public List<PlaylistHead> getPlaylists(int stationId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/playlists");
@@ -400,7 +409,7 @@ public class LautfmAdminService {
   public Track updateTrack(int stationId, Track track) throws IOException {
     if (track.getArtist() == null || track.getTitle() == null) {
       // throw new NullPointerException(); // FIXME remove if reason for occasional
-                                        // null values found
+      // null values found
     }
     CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/tracks/" + track.getId(), track);
     try {
@@ -488,7 +497,9 @@ public class LautfmAdminService {
   }
 
   public int[] getTaggedTracks(int stationId, String tag) throws IOException {
-    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/tracks/tags/" + URLEncoder.encode(tag, "UTF-8"));
+    tag = URLEncoder.encode(tag, "UTF-8");
+    tag = StringUtils.replace(tag, "+", "%20");
+    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/tracks/tags/" + tag);
     try {
       ObjectMapper mapper = new ObjectMapper();
       return mapper.readValue(response.getEntity().getContent(), int[].class);
@@ -577,11 +588,10 @@ public class LautfmAdminService {
       } else {
         throw new AdminServiceException(this.getErrorMessage(response));
       }
-    } catch(SocketException e) {
-      if(!progressListener.isAbortCurrent()) {
+    } catch (SocketException e) {
+      if (!progressListener.isAbortCurrent()) {
         throw e;
-      }
-      else {
+      } else {
         return null;
       }
     } finally {
@@ -599,7 +609,7 @@ public class LautfmAdminService {
       response.close();
     }
   }
-  
+
   public String getLivePassword(int stationId) throws IOException {
     CloseableHttpResponse response = doGet("/stations/" + stationId + "/live/password");
     try {
@@ -629,7 +639,7 @@ public class LautfmAdminService {
       response.close();
     }
   }
-  
+
   public String getToken() {
     return token;
   }
