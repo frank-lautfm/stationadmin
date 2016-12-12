@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,6 +79,11 @@ public class MigrationUtil {
     log.info(this.clientV3.getTitleService().getTitleRegistry().getNumTitles() + " tracks");
     log.info(this.clientV3.getPlaylistService().getPlaylistRegistry().getAllPlaylists().size() + " playlists");
 
+    
+    InputStream trackMappingStream = this.getClass().getClassLoader().getResourceAsStream("trackmapping");
+    this.trackIdMap = readTrackMapping(trackMappingStream);
+    
+    /*
     String file = this.clientV4.getSessionCtx().getDataDirectory() + "/trackmapping";
     if (new File(file).exists() && !reloadTrackmapping) {
       log.info("read track mapping");
@@ -86,6 +92,7 @@ public class MigrationUtil {
       this.downloadTrackMapping(file);
     }
     this.writeStationTrackMapping();
+    */
 
   }
   
@@ -116,10 +123,15 @@ public class MigrationUtil {
   }
 
   private Map<Integer, Integer> readTrackMapping(String file) throws IOException {
+    FileInputStream fin = new FileInputStream(file);
+    return readTrackMapping(fin);
+
+  }
+  
+  private Map<Integer, Integer> readTrackMapping(InputStream stream) throws IOException {
     Map<Integer, Integer> map;
 
-    FileInputStream fin = new FileInputStream(file);
-    BufferedInputStream bin = new BufferedInputStream(fin);
+    BufferedInputStream bin = new BufferedInputStream(stream);
     DataInputStream in = new DataInputStream(bin);
 
     int cnt = in.readInt();
@@ -133,6 +145,7 @@ public class MigrationUtil {
     return map;
 
   }
+
 
   private void writeTrackMapping(Map<Integer, Integer> map, String file) throws IOException {
     FileOutputStream fout = new FileOutputStream(file);

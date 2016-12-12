@@ -63,30 +63,29 @@ public class ListenersStatistics extends AbstractBean {
       int max = 0;
 
       
-      int tlm = 0;
-      int totalMinutes = 0;
+      float tlm = 0;
+      float totalMinutes = 0;
 
       for (int i = 0; i < entries.size(); i++) {
         ListenersEntry entry = entries.get(i);
         min = Math.min(min, entry.getListeners());
         max = Math.max(max, entry.getListeners());
-        
-        int intervalLength = 10;
-        if(i +1  < entries.size()) {
+                if(i +1  < entries.size()) {
           long startNext = entries.get(i+1).getTime().getTime();
-          int minutes = (int)((startNext - entry.getTime().getTime()) / 60000);
-          if(minutes < 10) {
-            intervalLength = minutes;
-          }
+          float minutes = ((startNext - entry.getTime().getTime()) / 60000f);
+          tlm += minutes * entry.getListeners();
+          totalMinutes += minutes;
         }
-        tlm += intervalLength * entry.getListeners();
-        totalMinutes += intervalLength;
+        else {
+          tlm += 3 * entry.getListeners();
+          totalMinutes += 3;
+        }
       }
       
       setMax(max);
       setMin(min);
-      setAvg((float) tlm / totalMinutes);
-      setTlh(tlm / 60);
+      setAvg(tlm / totalMinutes);
+      setTlh((int)(tlm / 60));
 
     } else {
       setMax(0);

@@ -56,8 +56,8 @@ public class MigrationDlg extends StationAdminFrame {
 
     JPanel bottom = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
     bottom.add(new JButton(this.action));
-    bottom.add(new JButton(new CheckTracksAction()));
-    bottom.add(this.reloadTrackMapping);
+    // bottom.add(new JButton(new CheckTracksAction()));
+    // bottom.add(this.reloadTrackMapping);
     this.getContentPane().add(bottom, BorderLayout.SOUTH);
   }
 

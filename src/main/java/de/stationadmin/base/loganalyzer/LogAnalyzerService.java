@@ -40,7 +40,6 @@ public class LogAnalyzerService implements Service {
   private static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
   // private String apiURL = "http://stationadmin.emjoy.net/api/";
   private SessionCtx ctx;
-  private Settings settings;
   private TrackRegistry titleRegistry;
   private String logCacheDir;
 
@@ -52,9 +51,8 @@ public class LogAnalyzerService implements Service {
   private TrackStatsEntry[] bufferedEntries;
   private int bufferedEntriesDays = 0;
 
-  public LogAnalyzerService(SessionCtx ctx, Settings settings, TrackRegistry titleRegistry) {
+  public LogAnalyzerService(SessionCtx ctx, TrackRegistry titleRegistry) {
     this.ctx = ctx;
-    this.settings = settings;
     this.titleRegistry = titleRegistry;
     this.logCacheDir = ctx.getStationDirectory() + "log" + File.separatorChar;
 
@@ -72,28 +70,25 @@ public class LogAnalyzerService implements Service {
       return;
     }
     ctx.updateStatus("loadLogstatistics");
-    if (this.settings.isLogDownloadPermitted() && this.settings.isLogAutodownloadPermitted()) {
-      Thread t = new Thread() {
+    Thread t = new Thread() {
 
-        @Override
-        public void run() {
-          // make sure statistics of past 7 days are downloaded
-          for (int i = 7; i > 0; i--) {
-            long time = System.currentTimeMillis() - i * 24 * 60 * 60 * 1000l;
-            Date day = new Date(time);
-            try {
-              getPlaysOf(day);
-              getListenersOf(day);
-            } catch (IOException e) {
-              log.error("error while loading log data for " + day);
-            }
+      @Override
+      public void run() {
+        // make sure statistics of past 7 days are downloaded
+        for (int i = 7; i > 0; i--) {
+          long time = System.currentTimeMillis() - i * 24 * 60 * 60 * 1000l;
+          Date day = new Date(time);
+          try {
+            getPlaysOf(day);
+            getListenersOf(day);
+          } catch (IOException e) {
+            log.error("error while loading log data for " + day);
           }
         }
+      }
 
-      };
-      t.start();
-
-    }
+    };
+    t.start();
 
     try {
       this.writeDailyStatistics();
@@ -144,7 +139,7 @@ public class LogAnalyzerService implements Service {
             return Long.compare(d1, d2);
           }
         });
-        
+
         bufferedEntries = stats;
         bufferedEntriesDays = numDays;
       }
@@ -369,22 +364,22 @@ public class LogAnalyzerService implements Service {
       // try to estimate duration based on listeners log
       List<ListenersEntry> listenersEntries = this.getListenersOf(day);
       if (listenersEntries.size() > 0) {
-        int tlm = 0;
+        double tlm = 0;
 
         for (int i = 0; i < listenersEntries.size(); i++) {
           ListenersEntry entry = listenersEntries.get(i);
-
-          int intervalLength = 10;
           if (i + 1 < listenersEntries.size()) {
             long startNext = listenersEntries.get(i + 1).getTime().getTime();
-            int minutes = (int) ((startNext - entry.getTime().getTime()) / 60000);
-            if (minutes < 10) {
-              intervalLength = minutes;
-            }
+
+            int diffMs = (int) (startNext - entry.getTime().getTime());
+            double minutes = Math.round((double) diffMs / 60000);
+            tlm += minutes * entry.getListeners();
           }
-          tlm += intervalLength * entry.getListeners();
+          else {
+            tlm += 3 * entry.getListeners();
+          }
         }
-        return new DailySummary(cal.getTime(), tlm);
+        return new DailySummary(cal.getTime(), (int)tlm);
       }
     }
 

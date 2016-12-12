@@ -175,40 +175,10 @@ public class SettingsDlg extends JDialog {
     {
       JPanel logPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref,5dlu,pref,5dlu"));
       logPanel.add(this.createAutologinPanel(), cc.xy(2, 2));
-      logPanel.add(this.createLogDownloadPanel(), cc.xy(2, 4));
+      // logPanel.add(this.createLogDownloadPanel(), cc.xy(2, 4));
       root.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.misc"), logPanel)));
     }
 
-  }
-
-  // private JPanel createUpdateCheckPanel() {
-  // JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu",
-  // "3dlu,pref,3dlu"));
-  // panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.updatecheck")));
-  //
-  // JCheckBox updateCheckCb =
-  // BasicComponentFactory.createCheckBox(model.getBufferedModel("autoUpdateCheckEnabled"),
-  // this.ctx.getTextProvider().getString("settings.property.updatecheck"));
-  // panel.add(updateCheckCb, new CellConstraints(2, 2));
-  //
-  // return panel;
-  // }
-
-  private JPanel createLogDownloadPanel() {
-    JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref,5dlu,pref,5dlu,pref,3dlu"));
-    panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.logdownload")));
-    CellConstraints cc = new CellConstraints();
-    JLabel label = new JLabel(ctx.getTextProvider().getString("settings.property.logdownload.msg", "stationadmin.emjoy.net"));
-    panel.add(label, cc.xy(2, 2));
-
-    JCheckBox logDownloadCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("logDownloadPermitted"),
-        ctx.getTextProvider().getString("settings.property.logdownload"));
-    panel.add(logDownloadCb, cc.xy(2, 4));
-    JCheckBox logAutoDownloadCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("logAutodownloadPermitted"), ctx.getTextProvider()
-        .getString("settings.property.logautodownload"));
-    panel.add(logAutoDownloadCb, cc.xy(2, 6));
-
-    return panel;
   }
 
   private JPanel createAutologinPanel() {

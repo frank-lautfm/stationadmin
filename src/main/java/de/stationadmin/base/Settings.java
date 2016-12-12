@@ -322,6 +322,7 @@ public class Settings extends AbstractBean {
     this.firePropertyChange("logRank", old, logRank);
   }
 
+  @Deprecated
   public boolean isLogDownloadPermitted() {
     return logDownloadPermitted;
   }
@@ -332,6 +333,7 @@ public class Settings extends AbstractBean {
     this.firePropertyChange("logDownloadPermitted", old, logDownloadPermitted);
   }
 
+  @Deprecated
   public boolean isLogAutodownloadPermitted() {
     return logAutodownloadPermitted;
   }
