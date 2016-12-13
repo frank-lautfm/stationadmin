@@ -219,6 +219,7 @@ public class MigrationUtil {
       log.info("tagging " + idx + " tracks");
       try {
         clientV4.getTagManager().tagTracks(stag.getName(), newIds);
+        Thread.sleep(1000);
       } catch (Exception e) {
         e.printStackTrace();
       }
