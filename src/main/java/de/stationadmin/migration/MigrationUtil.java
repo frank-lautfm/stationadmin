@@ -340,7 +340,7 @@ public class MigrationUtil {
     for (File file : this.clientV3.getTaskExecutionService().getTaskFiles()) {
       log.info("convert task " + file.getName());
       String str = FileUtils.readFileToString(file, "UTF-8");
-      str = str.replaceAll("de.emjoy.stationadmin.base.tasks", "de.stationadmin.base.tasks");
+      str = str.replaceAll("de.emjoy.stationadmin.", "de.stationadmin.");
       File file4 = new File(this.clientV4.getSessionCtx().getStationDirectory() + "/tasks/" + file.getName());
       FileUtils.writeStringToFile(file4, str, "UTF-8");
     }
