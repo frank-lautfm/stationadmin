@@ -658,6 +658,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
       if (t != null) {
         t.tagCountInc();
         t.update(tracks.get(id));
+        trackDirty = true;
       } else if (tracks.containsKey(id)) {
         RegisteredTrack title = new RegisteredTrack(tracks.get(id));
         title.tagCountInc();

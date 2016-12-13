@@ -372,8 +372,12 @@ public class TrackService implements Service {
       TrackList list = this.ctx.getServer().getTracks(ctx.getStationId(), page, filter, "created_at", false);
       for (Track track : list.getTracks()) {
         markForeign.remove(track.getId());
-        if (this.trackRegistry.getTrack(track.getId()) == null) {
+        RegisteredTrack regtrack = this.trackRegistry.getTrack(track.getId());
+        if (regtrack == null) {
           this.trackRegistry.registerOwnTrack(new DetailedTrack(track));
+        }
+        else {
+          regtrack.update(track);
         }
       }
       requestMore = list.hasNextPage();
