@@ -32,6 +32,7 @@ import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.base.util.XStreamFactory;
 import de.stationadmin.lfm.backend.LautfmAdminService;
+import de.stationadmin.lfm.backend.LiveAccessData;
 import de.stationadmin.lfm.backend.Station;
 import de.stationadmin.lfmapi.LautfmService;
 import de.stationadmin.streamlive.MP3Streamer;
@@ -265,13 +266,13 @@ public class StationAdminClient {
   }
   
   public LiveAccount getLiveAccount() throws IOException {
-    String password = this.sessionCtx.getServer().getLivePassword(this.sessionCtx.getStationId());
-    if(password != null) {
+    LiveAccessData data = this.sessionCtx.getServer().getLiveAccessData(this.sessionCtx.getStationId());
+    if(data != null && data.getPassword() != null) {
       LiveAccount account = new LiveAccount();
-      account.setPort(8080);
-      account.setServer("live.laut.fm");
-      account.setUser("source");
-      account.setPassword(password);
+      account.setPort(data.getPort());
+      account.setServer(data.getServer());
+      account.setUser(data.getUser());
+      account.setPassword(data.getPassword());
       return account;
     }
     return null;

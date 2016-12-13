@@ -620,6 +620,16 @@ public class LautfmAdminService {
     }
   }
 
+  public LiveAccessData getLiveAccessData(int stationId) throws IOException {
+    CloseableHttpResponse response = doGet("/stations/" + stationId + "/live");
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      return mapper.readValue(response.getEntity().getContent(), LiveAccessData.class);
+    } finally {
+      response.close();
+    }
+  }
+
   public Schedule updateSchedule(int stationId, Schedule schedule) throws IOException {
     CloseableHttpResponse response = doPatch("/stations/" + stationId + "/schedule", schedule);
     try {
