@@ -6,18 +6,23 @@ package de.stationadmin.gui;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.prefs.Preferences;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.apache.log4j.RollingFileAppender;
 import org.jdesktop.swingx.JXErrorPane;
 
+import de.stationadmin.base.StationAdminClient;
 import de.stationadmin.base.util.AbstractBean;
+import de.stationadmin.lfm.backend.LautfmAdminService;
+import de.stationadmin.lfm.backend.Station;
 
 /**
  * Main class to start the GUI application
@@ -30,15 +35,17 @@ public class Start {
 
   private static void configureLogging() {
     try {
-      System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
 
-      String dataDirectory = System.getProperty("user.home") + File.separatorChar + "laut.fm" + File.separatorChar;
-      FileAppender appender = new FileAppender(new PatternLayout("%r [%t] %p %c %x - %m%n"), dataDirectory + "stationadmin.log");
-      // ConsoleAppender appender = new ConsoleAppender(new
-      // PatternLayout("%r [%t] %p %c %x - %m%n"));
+      String dataDirectory = System.getProperty("user.home") + File.separatorChar + "laut.fm" + File.separatorChar + "StationAdmin" + File.separatorChar;
+      RollingFileAppender appender = new RollingFileAppender(new PatternLayout("%r [%t] %p %c %x - %m%n"), dataDirectory + "stationadmin.log");
+      appender.setMaximumFileSize(1024 * 1024 * 3);
+      appender.setMaxBackupIndex(10);
       BasicConfigurator.configure(appender);
 
-      Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.ERROR);
+      Logger.getRootLogger().setLevel(Level.INFO);
+      Logger.getLogger(LautfmAdminService.class).setLevel(Level.ERROR);
+
+      System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
 
     } catch (IOException e) {
       e.printStackTrace();
@@ -84,21 +91,27 @@ public class Start {
 
   public boolean login() {
     // FIXME
-    // boolean autologin = Preferences.userRoot().getBoolean("autologin",
-    // false);
-    // if (autologin) {
-    // String username = Preferences.userRoot().get("username", null);
-    // String password = Preferences.userRoot().get("password", null);
-    // if (username != null && password != null) {
-    // try {
-    // StationAdminClient client = new StationAdminClient(username, password);
-    // ctx.setAdminClient(client);
-    // return true;
-    // } catch (Exception e) {
-    // // autologin failed, proceed with login dialog below
-    // }
-    // }
-    // }
+    boolean autologin = Preferences.userRoot().getBoolean("autologin", false);
+    if (autologin) {
+      String token = Preferences.userRoot().get("token", null);
+      int stationId = Preferences.userRoot().getInt("station", -1);
+      if (token != null && stationId > 0) {
+        try {
+          LautfmAdminService service = new LautfmAdminService(token, "StationAdmin");
+          List<Station> stations = service.getStations();
+          for (Station s : stations) {
+            if (s.getId() == stationId) {
+              StationAdminClient client = new StationAdminClient(service, s);
+              ctx.setAdminClient(client);
+              return true;
+            }
+          }
+
+        } catch (Exception e) {
+          // autologin failed, proceed with login dialog below
+        }
+      }
+    }
 
     LoginDlg loginDlg = new LoginDlg(ctx);
     loginDlg.setModal(true);
