@@ -38,6 +38,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXLabel;
 
@@ -55,6 +57,7 @@ import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.SwingTools;
+import de.stationadmin.lfm.backend.LautfmAdminService;
 
 
 @SuppressWarnings("rawtypes")
@@ -175,10 +178,35 @@ public class SettingsDlg extends JDialog {
     {
       JPanel logPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref,5dlu,pref,5dlu"));
       logPanel.add(this.createAutologinPanel(), cc.xy(2, 2));
+      logPanel.add(this.createLoggingPanel(), cc.xy(2, 4));
       // logPanel.add(this.createLogDownloadPanel(), cc.xy(2, 4));
       root.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.misc"), logPanel)));
     }
 
+  }
+  
+  private JPanel createLoggingPanel() {
+    JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref,3dlu"));
+    panel.setBorder(BorderFactory.createTitledBorder("Logging"));
+    
+    final JCheckBox cb = new JCheckBox("Netzwerkverkehr für diese Sitzung loggen");
+    cb.setSelected(Logger.getLogger(LautfmAdminService.class).getLevel().equals(Level.INFO));
+    cb.addActionListener(new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if(cb.isSelected()) {
+          Logger.getLogger(LautfmAdminService.class).setLevel(Level.INFO);
+        }
+        else {
+          Logger.getLogger(LautfmAdminService.class).setLevel(Level.ERROR);
+        }
+      }
+    });
+    
+    panel.add(cb, new CellConstraints(2,2));
+    return panel;
+    
   }
 
   private JPanel createAutologinPanel() {

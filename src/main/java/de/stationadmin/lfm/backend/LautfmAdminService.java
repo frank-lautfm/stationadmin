@@ -4,6 +4,7 @@
 package de.stationadmin.lfm.backend;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
 import java.net.URLEncoder;
@@ -38,6 +39,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.message.AbstractHttpMessage;
+import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import de.stationadmin.base.Version;
@@ -48,6 +51,7 @@ import de.stationadmin.base.Version;
  */
 public class LautfmAdminService {
   private static final String BASE_URL = "https://api.radioadmin.laut.fm";
+  private static final Logger log = Logger.getLogger(LautfmAdminService.class);
 
   private String token;
   private String origin;
@@ -89,9 +93,20 @@ public class LautfmAdminService {
     }
   }
 
+  private <T> T deserializeJson(CloseableHttpResponse response, Class<T> type) throws IOException, JsonMappingException {
+    ObjectMapper mapper = new ObjectMapper();
+    InputStream stream = response.getEntity().getContent();
+    if (log.isInfoEnabled()) {
+      String content = IOUtils.toString(stream, "UTF-8");
+      log.info(response.getStatusLine().getStatusCode() + " - " + content);
+      return mapper.readValue(content, type);
+    } else {
+      return mapper.readValue(stream, type);
+    }
+  }
+
   private void addAuthHeaders(AbstractHttpMessage request) {
     request.addHeader("Authorization", "Bearer " + this.token);
-    // request.addHeader("TOKEN", this.token);
     request.addHeader("ORIGIN", this.origin);
   }
 
@@ -104,37 +119,62 @@ public class LautfmAdminService {
 
   @SuppressWarnings("unchecked")
   private String getErrorMessage(CloseableHttpResponse response) throws IOException {
+    String contentType = response.getEntity().getContentType().getValue();
+    if (contentType != null && contentType.toLowerCase().contains("html")) {
+      // HTML page - try to strip tags
+      String content = IOUtils.toString(response.getEntity().getContent());
+      content = content.replaceAll("\\<.*?\\>", "");
+      return content;
 
-    Map<String, Object> map = this.deserializeAsMap(response);
-    Map<String, Object> errors = (Map<String, Object>) map.get("_errors");
+    } else {
 
-    StringBuffer buf = new StringBuffer();
-    if (errors != null) {
-      for (Entry<String, Object> entry : errors.entrySet()) {
-        if (buf.length() > 0) {
-          buf.append("; ");
+      Map<String, Object> map = this.deserializeAsMap(response);
+      Map<String, Object> errors = (Map<String, Object>) map.get("_errors");
+
+      StringBuffer buf = new StringBuffer();
+      if (errors != null) {
+        for (Entry<String, Object> entry : errors.entrySet()) {
+          if (buf.length() > 0) {
+            buf.append("; ");
+          }
+          buf.append(entry.getKey() + ": " + entry.getValue());
         }
-        buf.append(entry.getKey() + ": " + entry.getValue());
       }
-    }
 
-    return buf.toString();
+      return buf.toString();
+    }
   }
 
   private void checkResponse(CloseableHttpResponse response) throws IOException {
     switch (response.getStatusLine().getStatusCode()) {
     case 400:
     case 500:
+    case 501:
+    case 502:
+    case 503:
+    case 504:
+    case 505:
+    case 506:
+    case 507:
+    case 508:
+    case 510:
+    case 511:
+      log.info(response.getStatusLine().getStatusCode());
       throw new AdminServiceException(getErrorMessage(response));
     case 401:
+      log.info(response.getStatusLine().getStatusCode());
       throw new AuthenticationException();
     case 404:
+      log.info(response.getStatusLine().getStatusCode());
       throw new ResourceNotFoundException();
     }
   }
 
   private CloseableHttpResponse doGet(String path) throws IOException {
     HttpGet request = new HttpGet(BASE_URL + path);
+    if (log.isInfoEnabled()) {
+      log.info("GET " + BASE_URL + path);
+    }
     this.addAuthHeaders(request);
     CloseableHttpResponse response = this.client.execute(request);
     this.checkResponse(response);
@@ -143,6 +183,10 @@ public class LautfmAdminService {
 
   private CloseableHttpResponse doDelete(String path) throws IOException {
     HttpDelete request = new HttpDelete(BASE_URL + path);
+    if (log.isInfoEnabled()) {
+      log.info("DELETE " + BASE_URL + path);
+    }
+
     this.addAuthHeaders(request);
     CloseableHttpResponse response = this.client.execute(request);
     this.checkResponse(response);
@@ -151,6 +195,9 @@ public class LautfmAdminService {
 
   private CloseableHttpResponse doPatch(String path, Object content) throws IOException {
     HttpPatch request = new HttpPatch(BASE_URL + path);
+    if (log.isInfoEnabled()) {
+      log.info("PATCH " + BASE_URL + path);
+    }
     this.addAuthHeaders(request);
 
     ObjectMapper mapper = new ObjectMapper();
@@ -165,12 +212,18 @@ public class LautfmAdminService {
 
   private CloseableHttpResponse doPost(String path, Object content) throws IOException {
     HttpPost request = new HttpPost(BASE_URL + path);
+
     this.addAuthHeaders(request);
 
     ObjectMapper mapper = new ObjectMapper();
-    StringEntity entity = new StringEntity(mapper.writeValueAsString(content), ContentType.APPLICATION_JSON);
-    // entity.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE,
-    // "application/json"));
+    String contentStr = mapper.writeValueAsString(content);
+
+    if (log.isInfoEnabled()) {
+      log.info("POST " + BASE_URL + path);
+      log.info(contentStr);
+    }
+
+    StringEntity entity = new StringEntity(contentStr, ContentType.APPLICATION_JSON);
     request.setEntity(entity);
     CloseableHttpResponse response = this.client.execute(request);
     this.checkResponse(response);
@@ -181,8 +234,7 @@ public class LautfmAdminService {
 
   public List<Station> getStations() throws IOException {
     CloseableHttpResponse response = this.doGet("/stations");
-    ObjectMapper mapper = new ObjectMapper();
-    StationList list = mapper.readValue(response.getEntity().getContent(), StationList.class);
+    StationList list = deserializeJson(response, StationList.class);
     response.close();
     return Arrays.asList(list.getStations());
   }
@@ -199,8 +251,7 @@ public class LautfmAdminService {
   public TrackStatsEntry[] getTrackStatistics(int stationId, int days) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/tracks/stats?days=" + days);
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      return mapper.readValue(response.getEntity().getContent(), TrackStatsEntry[].class);
+      return deserializeJson(response, TrackStatsEntry[].class);
     } finally {
       response.close();
     }
@@ -215,23 +266,20 @@ public class LautfmAdminService {
 
   public List<PlaylistHead> getPlaylists(int stationId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/playlists");
-    ObjectMapper mapper = new ObjectMapper();
-    PlaylistHeadList list = mapper.readValue(response.getEntity().getContent(), PlaylistHeadList.class);
+    PlaylistHeadList list = deserializeJson(response, PlaylistHeadList.class);
     response.close();
     return Arrays.asList(list.getPlaylists());
   }
 
   public Playlist getPlaylist(int stationId, int playlistId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/playlists/" + playlistId);
-    ObjectMapper mapper = new ObjectMapper();
-    Playlist playlist = mapper.readValue(response.getEntity().getContent(), Playlist.class);
+    Playlist playlist = deserializeJson(response, Playlist.class);
     response.close();
     return playlist;
   }
 
   private TrackList getTracks(CloseableHttpResponse response) throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-    TrackList list = mapper.readValue(response.getEntity().getContent(), TrackList.class);
+    TrackList list = deserializeJson(response, TrackList.class);
     response.close();
     return list;
   }
@@ -341,8 +389,7 @@ public class LautfmAdminService {
     Map<String, Object> map = new HashMap<String, Object>();
     map.put("entries", trackIds);
     CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/playlists/" + playlistId, map);
-    ObjectMapper mapper = new ObjectMapper();
-    Playlist playlist = mapper.readValue(response.getEntity().getContent(), Playlist.class);
+    Playlist playlist = deserializeJson(response, Playlist.class);
     response.close();
     return playlist;
   }
@@ -351,8 +398,7 @@ public class LautfmAdminService {
     CloseableHttpResponse response = this.doPost("/stations/" + stationId + "/playlists", playlist);
     try {
       if (response.getStatusLine().getStatusCode() == 201) {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(response.getEntity().getContent(), PlaylistHead.class);
+        return deserializeJson(response, PlaylistHead.class);
       } else {
         throw new AdminServiceException(this.getErrorMessage(response));
       }
@@ -398,8 +444,7 @@ public class LautfmAdminService {
   public Playlist updatePlaylist(int stationId, PlaylistHead playlist) throws IOException {
     CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/playlists/" + playlist.getId(), playlist);
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      return mapper.readValue(response.getEntity().getContent(), Playlist.class);
+      return deserializeJson(response, Playlist.class);
 
     } finally {
       response.close();
@@ -413,8 +458,7 @@ public class LautfmAdminService {
     }
     CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/tracks/" + track.getId(), track);
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      return mapper.readValue(response.getEntity().getContent(), Track.class);
+      return deserializeJson(response, Track.class);
 
     } finally {
       response.close();
@@ -489,8 +533,7 @@ public class LautfmAdminService {
   public List<String> getTags(int stationId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/tracks/tags");
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      return Arrays.asList(mapper.readValue(response.getEntity().getContent(), String[].class));
+      return Arrays.asList(deserializeJson(response, String[].class));
     } finally {
       response.close();
     }
@@ -501,8 +544,7 @@ public class LautfmAdminService {
     tag = StringUtils.replace(tag, "+", "%20");
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/tracks/tags/" + tag);
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      return mapper.readValue(response.getEntity().getContent(), int[].class);
+      return deserializeJson(response, int[].class);
     } finally {
       response.close();
     }
@@ -516,8 +558,7 @@ public class LautfmAdminService {
     do {
       CloseableHttpResponse response = this.doGet("/track_mappings/" + offset);
       try {
-        ObjectMapper mapper = new ObjectMapper();
-        result = mapper.readValue(response.getEntity().getContent(), HashMap.class);
+        result = deserializeJson(response, HashMap.class);
         for (Entry<Object, Object> entry : result.entrySet()) {
           Integer key, value;
           if (entry.getKey() instanceof Integer) {
@@ -574,8 +615,7 @@ public class LautfmAdminService {
       System.out.println("upload completed");
       this.checkResponse(response);
       if (response.getStatusLine().getStatusCode() == 201) {
-        ObjectMapper mapper = new ObjectMapper();
-        UploadResponse uploadResponse = mapper.readValue(response.getEntity().getContent(), UploadResponse.class);
+        UploadResponse uploadResponse = deserializeJson(response, UploadResponse.class);
         if (track.isPrivateTrack()) {
           MarkTrackPrivateRequest privateRequest = new MarkTrackPrivateRequest();
           privateRequest.setId(uploadResponse.getId());
@@ -603,8 +643,7 @@ public class LautfmAdminService {
   public Schedule getSchedule(int stationId) throws IOException {
     CloseableHttpResponse response = doGet("/stations/" + stationId + "/schedule");
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      return mapper.readValue(response.getEntity().getContent(), Schedule.class);
+      return deserializeJson(response, Schedule.class);
     } finally {
       response.close();
     }
@@ -613,8 +652,7 @@ public class LautfmAdminService {
   public String getLivePassword(int stationId) throws IOException {
     CloseableHttpResponse response = doGet("/stations/" + stationId + "/live/password");
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      return mapper.readValue(response.getEntity().getContent(), String.class);
+      return deserializeJson(response, String.class);
     } finally {
       response.close();
     }
@@ -623,8 +661,7 @@ public class LautfmAdminService {
   public LiveAccessData getLiveAccessData(int stationId) throws IOException {
     CloseableHttpResponse response = doGet("/stations/" + stationId + "/live");
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      return mapper.readValue(response.getEntity().getContent(), LiveAccessData.class);
+      return deserializeJson(response, LiveAccessData.class);
     } finally {
       response.close();
     }
@@ -633,8 +670,7 @@ public class LautfmAdminService {
   public Schedule updateSchedule(int stationId, Schedule schedule) throws IOException {
     CloseableHttpResponse response = doPatch("/stations/" + stationId + "/schedule", schedule);
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      return mapper.readValue(response.getEntity().getContent(), Schedule.class);
+      return deserializeJson(response, Schedule.class);
     } finally {
       response.close();
     }
@@ -643,8 +679,7 @@ public class LautfmAdminService {
   public Statistics getStatistics(int stationId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/stats");
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      return mapper.readValue(response.getEntity().getContent(), Statistics.class);
+      return deserializeJson(response, Statistics.class);
     } finally {
       response.close();
     }
