@@ -186,7 +186,7 @@ public class TrackService implements Service {
         this.ctx.updateStatus("initPlaylistRecording");
         // fetch history from server
         try {
-          log.info("retrieve recent titles from laut.fm");
+          log.debug("retrieve recent tracks from laut.fm");
           Song[] songs = this.ctx.getLfmAPI().getLastSongs(this.ctx.getStation());
 
           for (Song played : songs) {
@@ -196,11 +196,11 @@ public class TrackService implements Service {
             this.trackHistory.add(played.getStartedAt(), title);
           }
         } catch (Exception e) {
-          log.error("failed to retrieve title history from laut.fm", e);
+          log.error("failed to retrieve track history from laut.fm", e);
         }
 
         // init recorder
-        log.info("init playlist recorder");
+        log.debug("init playlist recorder");
         this.playlistRecorder = new PlaylistRecorder(this.trackRegistry, this.ctx.getLfmAPI(), this.ctx.getStation(), this.ctx.getStationStatus(),
             this.trackHistory);
         this.playlistRecorder.start();

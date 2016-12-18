@@ -42,6 +42,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.Timer;
 import javax.swing.TransferHandler;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -66,10 +67,10 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.tag.TagSet;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.RegisteredTrack.PlaylistStatistics;
-import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.base.track.exporter.TrackListCSVExporter;
 import de.stationadmin.base.track.exporter.TrackListExcelExporter;
@@ -94,6 +95,8 @@ import de.stationadmin.gui.util.IntTableCellRenderer;
 public class RegisteredTracksViewer extends JPanel {
   private static final long serialVersionUID = -7189974909473148787L;
 
+  private static final String REGKEY_COLUMNS = "stationadmin.tracks.columns";
+
   private static final Color OWN_PUBLIC = new Color(240, 240, 240);
   private static final Color OWN_PRIVATE = new Color(200, 200, 200);
 
@@ -110,6 +113,9 @@ public class RegisteredTracksViewer extends JPanel {
   private ValueModel length = new ValueHolder(0);
   private JXTable table;
 
+  private int visibleColums = 1 << Column.TYPE.ordinal() | 1 << Column.ARTIST.ordinal() | 1 << Column.TITLE.ordinal() | 1 << Column.ALBUM.ordinal() | 1 << Column.LENGTH.ordinal()
+      | 1 << Column.UPLOAD.ordinal() | 1 << Column.NUM_PLAYLISTS.ordinal() | 1 << Column.YEAR.ordinal();
+
   private RegisteredTracksTableModel tableModel;
   // private boolean allColumnsDisplayed = false;
 
@@ -123,6 +129,12 @@ public class RegisteredTracksViewer extends JPanel {
   }
 
   private void init() {
+
+    int colsPref = Preferences.userRoot().getInt(REGKEY_COLUMNS, -1);
+    if (colsPref > 0) {
+      this.visibleColums = colsPref;
+    }
+
     this.setLayout(new BorderLayout());
     this.add(this.createTablePanel(), BorderLayout.CENTER);
     this.add(this.createStatusBar(), BorderLayout.SOUTH);
@@ -142,6 +154,10 @@ public class RegisteredTracksViewer extends JPanel {
         }
       }
     });
+
+    Timer timer = new Timer(1000 * 5, new ColumnMonitor());
+    timer.setInitialDelay(1000 * 10);
+    timer.start();
 
   }
 
@@ -379,9 +395,6 @@ public class RegisteredTracksViewer extends JPanel {
         if (columnModel == Column.NUM_PLAYLISTS.ordinal()) {
           return playlistsRenderer;
         }
-        if (columnModel == Column.ID.ordinal() || columnModel == Column.LEGACY_ID.ordinal()) {
-          return idRenderer;
-        }
         return super.getCellRenderer(row, column);
       }
 
@@ -397,14 +410,13 @@ public class RegisteredTracksViewer extends JPanel {
     table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.YEAR.ordinal())).setPreferredWidth(60);
     table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.YEAR.ordinal())).setMaxWidth(60);
 
-    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LEGACY_ID.ordinal())).setPreferredWidth(80);
-    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LEGACY_ID.ordinal())).setMaxWidth(80);
     table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.ID.ordinal())).setPreferredWidth(80);
     table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.ID.ordinal())).setMaxWidth(80);
 
-    ((TableColumnExt) table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.GENRE.ordinal()))).setVisible(false);
-    ((TableColumnExt) table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LEGACY_ID.ordinal()))).setVisible(false);
-    ((TableColumnExt) table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.ID.ordinal()))).setVisible(false);
+    for (int i = 0; i <= Column.NUM_PLAYLISTS.ordinal(); i++) {
+      boolean visible = (this.visibleColums & (1 << i)) > 0;
+      ((TableColumnExt) table.getColumnModel().getColumn(table.convertColumnIndexToView(i))).setVisible(visible);
+    }
     table.setColumnControlVisible(true);
 
     table.addHighlighter(new AbstractHighlighter() {
@@ -711,13 +723,6 @@ public class RegisteredTracksViewer extends JPanel {
 
       if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
         try {
-
-          // TODO TEMPORARY for 4.0
-          if (exporter instanceof TrackListExcelExporter) {
-            ((TrackListExcelExporter) exporter).setIncludeIds(table.getColumnModel().getColumnCount() >= 10);
-          }
-          // END TEMPORARY
-
           exporter.toFile(tableModel.getTracks(), fileChooser.getSelectedFile());
         } catch (Exception ex) {
           JXErrorPane.showDialog(ctx.getRootWindow(), ctx.createErrorInfo(ex, "titles.action.export.msg.failed"));
@@ -725,6 +730,29 @@ public class RegisteredTracksViewer extends JPanel {
 
       }
 
+    }
+
+  }
+
+  private class ColumnMonitor implements ActionListener {
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+      int visibleCols = 0;
+      for (int i = 0; i <= Column.NUM_PLAYLISTS.ordinal(); i++) {
+        int index = table.convertColumnIndexToView(i);
+        if (index > -1) {
+          boolean visible = ((TableColumnExt) table.getColumnModel().getColumn(index)).isVisible();
+          if (visible) {
+            visibleCols |= (1 << i);
+          }
+        }
+      }
+      if (visibleColums != visibleCols) {
+        Preferences.userRoot().putInt(REGKEY_COLUMNS, visibleCols);
+        visibleColums = visibleCols;
+      }
     }
 
   }

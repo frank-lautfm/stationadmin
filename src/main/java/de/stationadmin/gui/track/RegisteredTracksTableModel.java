@@ -46,6 +46,7 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
   private ValueModel invertTag;
   private ValueModel numTracks = new ValueHolder(0);
   private ValueModel length = new ValueHolder(0);
+  
 
   public RegisteredTracksTableModel(TextProvider textProvidder, TrackRegistry titleRegistry,
       TagManager titleTagService, ValueModel tagSet, ValueModel tag, ValueModel invertTag, ValueModel updloadedBy) {
@@ -239,8 +240,6 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
         return track.getArtist();
       case ID:
         return track.getId();
-      case LEGACY_ID:
-        return this.trackRegistry.getLegacyId(track.getId());
       case TITLE :
         return track.getTitle();
       case ALBUM :
@@ -283,7 +282,7 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
   }
 
   public enum Column {
-    TYPE, ID, LEGACY_ID, ARTIST, TITLE, ALBUM, LENGTH, GENRE, YEAR, UPLOAD, NUM_PLAYLISTS
+    TYPE, ID, ARTIST, TITLE, ALBUM, LENGTH, GENRE, YEAR, UPLOAD, NUM_PLAYLISTS
   }
 
   /* (non-Javadoc)
@@ -303,8 +302,6 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
     case YEAR:
     case NUM_PLAYLISTS:
     case ID:
-    case LEGACY_ID:
-      return Integer.class;
     case UPLOAD:
       return Date.class;
     }

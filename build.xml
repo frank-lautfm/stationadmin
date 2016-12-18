@@ -70,7 +70,7 @@
 
 		<!-- copy resources -->
 		<copy todir="${build.dir}">
-			<fileset dir="${src.dir.resources}" excludes="*.vm stationadmin-default.conf" />
+			<fileset dir="${src.dir.resources}" excludes="*.vm stationadmin-default.conf trackmapping" />
 		</copy>
 
 	</target>

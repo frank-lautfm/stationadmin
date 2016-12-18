@@ -37,7 +37,7 @@ public class Start {
     try {
 
       String dataDirectory = System.getProperty("user.home") + File.separatorChar + "laut.fm" + File.separatorChar + "StationAdmin" + File.separatorChar;
-      RollingFileAppender appender = new RollingFileAppender(new PatternLayout("%r [%t] %p %c %x - %m%n"), dataDirectory + "stationadmin.log");
+      RollingFileAppender appender = new RollingFileAppender(new PatternLayout("%d [%t] %p %c %x - %m%n"), dataDirectory + "stationadmin.log");
       appender.setMaximumFileSize(1024 * 1024 * 3);
       appender.setMaxBackupIndex(10);
       BasicConfigurator.configure(appender);

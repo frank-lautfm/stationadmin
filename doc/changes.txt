@@ -6,11 +6,23 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+
+Version 4.0.1
+--------------
+[*] Statistik aktualisieren wenn ein neuer Track beginnt funktioniert wieder
+[*] Autologin funktioniert wieder
+[*] Live-Playlist aus Auswahl für Sendeplan entfernt (gibt's gar nicht mehr)
+[*] Verbessertes Fehlerhandling bei Non-JSON-Responses
+[+] Station Admin merkt sich ausgewählte Spalten in "Meine Titel" 
+[+] Option zur Protokollierung des Netzwerkverkehrs
+[#] Logging-Konfiguration angepasst
+
 Version 4.0.0
 --------------
 
 [#] Anpassung an den neuen Radioadmin
 [+] Anlegen und Löschen von Playlists
+[#] Statistiken werden vom laut.fm-Server geladen
 
 Version 3.16.1
 --------------
