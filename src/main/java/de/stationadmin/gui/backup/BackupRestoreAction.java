@@ -5,11 +5,15 @@ package de.stationadmin.gui.backup;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.jdesktop.swingx.JXErrorPane;
 
 import de.stationadmin.gui.ClientContext;
 
@@ -40,8 +44,12 @@ public class BackupRestoreAction extends AbstractAction {
     fileChooser.setCurrentDirectory(new File(ctx.getAdminClient().getBackupService().getBackupDirectory()));
 
     if (fileChooser.showOpenDialog(ctx.getRootWindow()) == JFileChooser.APPROVE_OPTION) {
-      BackupRestoreDlg dlg = new BackupRestoreDlg(this.ctx, fileChooser.getSelectedFile());
-      dlg.setVisible(true);
+      if (fileChooser.getSelectedFile().lastModified() < 1481806854618l) {
+        JXErrorPane.showDialog(ctx.getRootWindow(), ctx.createErrorInfo(null, "action.backup.restore.err.v3"));
+      } else {
+        BackupRestoreDlg dlg = new BackupRestoreDlg(this.ctx, fileChooser.getSelectedFile());
+        dlg.setVisible(true);
+      }
     }
 
   }

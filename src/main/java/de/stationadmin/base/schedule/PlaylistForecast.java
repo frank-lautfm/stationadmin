@@ -172,13 +172,6 @@ public class PlaylistForecast {
     }
 
     BasicTrack getNextTitle() {
-      if (this.playlist.getId() == PlaylistRegistry.LIVE_PLAYLIST_ID || this.playlist.getId() == PlaylistRegistry.LIVE_PLAYLIST_ID2) {
-        DetailedTrack track = new DetailedTrack();
-        track.setArtist("Live");
-        track.setTitle("");
-        track.setLength(60 * 60);
-        return track;
-      }
       Playlist.Entry plEntry = this.playlistEntries.get(this.plIdx);
       BasicTrack title = this.playlist.getTrackRegistry().getTrack(plEntry.getTrackId());
       this.plIdx++;

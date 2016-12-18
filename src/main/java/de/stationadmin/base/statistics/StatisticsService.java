@@ -82,11 +82,12 @@ public class StatisticsService implements Service {
       log.info("configure statistics refresher task");
       this.statsRefresherTask = new StatsRefresher();
       this.sessionCtx.getTimer().schedule(this.statsRefresherTask, 0, this.settings.getStatisticsRefreshInterval() * 1000 * 60);
-      this.sessionCtx.getStationStatus().removePropertyChangeListener("currentTitleId", this.onTitleChangeRefresher);
+      this.sessionCtx.getStationStatus().removePropertyChangeListener("currentTrackId", this.onTitleChangeRefresher);
     }
     if (this.settings.getStatisticsRefreshInterval() < 0) {
       // sychronize with start of title
-      this.sessionCtx.getStationStatus().addPropertyChangeListener("currentTitleId", this.onTitleChangeRefresher);
+      this.onTitleChangeRefresher.propertyChange(null);
+      this.sessionCtx.getStationStatus().addPropertyChangeListener("currentTrackId", this.onTitleChangeRefresher);
     }
   }
 

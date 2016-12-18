@@ -195,13 +195,17 @@ public class LautfmAdminService {
 
   private CloseableHttpResponse doPatch(String path, Object content) throws IOException {
     HttpPatch request = new HttpPatch(BASE_URL + path);
-    if (log.isInfoEnabled()) {
-      log.info("PATCH " + BASE_URL + path);
-    }
     this.addAuthHeaders(request);
 
     ObjectMapper mapper = new ObjectMapper();
-    StringEntity entity = new StringEntity(mapper.writeValueAsString(content), ContentType.APPLICATION_JSON);
+    String contentStr = mapper.writeValueAsString(content);
+
+    if (log.isInfoEnabled()) {
+      log.info("PATCH " + BASE_URL + path);
+      log.info(contentStr);
+    }
+
+    StringEntity entity = new StringEntity(contentStr, ContentType.APPLICATION_JSON);
     request.setEntity(entity);
     CloseableHttpResponse response = this.client.execute(request);
     this.checkResponse(response);

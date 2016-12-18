@@ -16,11 +16,6 @@ import de.stationadmin.base.util.AbstractBean;
  * @author korf
  */
 public class PlaylistRegistry extends AbstractBean {
-  public static int LIVE_PLAYLIST_ID = 79391;
-  public static int LIVE_PLAYLIST_ID2 = 79485;
-  
-  private Playlist livePlaylist;
-
   private List<Playlist> playlists = new ArrayList<Playlist>();
   private Map<Integer, Playlist> playlistsById = new HashMap<Integer, Playlist>();
   private Map<Integer, ExtendedPlaylistData> localData = new HashMap<Integer, ExtendedPlaylistData>();
@@ -153,19 +148,6 @@ public class PlaylistRegistry extends AbstractBean {
       }
       this.localData.put(data.getId(), data);
     }
-  }
-
-  public Playlist getLivePlaylist() {
-    return livePlaylist;
-  }
-
-  public void setLivePlaylist(Playlist livePlaylist) {
-    this.livePlaylist = livePlaylist;
-    this.playlistsById.put(LIVE_PLAYLIST_ID, livePlaylist);
-    this.playlistsById.put(LIVE_PLAYLIST_ID2, livePlaylist);
-    int oldNum = this.playlists.size();
-    this.playlists.add(livePlaylist);
-    this.getPcs().firePropertyChange("numPlaylists", oldNum, this.playlists.size());
   }
 
 }

@@ -66,7 +66,6 @@ public class PlaylistSelector extends JPanel {
   private ClientContext ctx;
   private PlaylistRegistry playlistRegistry;
   private PlaylistType playlistType;
-  private boolean includeLivePlaylist = false;
   private ValueModel playlistSelectionHolder;
   private JXList list;
   private IndirectListModel<Playlist> listModel;
@@ -96,14 +95,9 @@ public class PlaylistSelector extends JPanel {
   };
 
   public PlaylistSelector(ClientContext ctx, PlaylistType playlistType, ValueModel playlistSelectionHolder) {
-    this(ctx, playlistType, false, playlistSelectionHolder);
-  }
-
-  public PlaylistSelector(ClientContext ctx, PlaylistType playlistType, boolean includeLive, ValueModel playlistSelectionHolder) {
     this.ctx = ctx;
     this.playlistRegistry = ctx.getAdminClient().getPlaylistService().getPlaylistRegistry();
     this.playlistType = playlistType;
-    this.includeLivePlaylist = includeLive;
     this.playlistSelectionHolder = playlistSelectionHolder;
     this.init();
   }
@@ -186,9 +180,6 @@ public class PlaylistSelector extends JPanel {
 
   private JComponent createList() {
     List<Playlist> playlists = playlistRegistry.getPlaylists(this.playlistType);
-    if (this.includeLivePlaylist && playlistRegistry.getLivePlaylist() != null) {
-      playlists.add(playlistRegistry.getLivePlaylist());
-    }
 
     final IndirectListModel<Playlist> playlistModel = new IndirectListModel<Playlist>(this.filterPlaylists(playlists));
     this.listModel = playlistModel;
@@ -330,9 +321,6 @@ public class PlaylistSelector extends JPanel {
       }
       // set new playlists to list model
       List<Playlist> playlists = playlistRegistry.getPlaylists(this.playlistType);
-      if (this.includeLivePlaylist && playlistRegistry.getLivePlaylist() != null) {
-        playlists.add(playlistRegistry.getLivePlaylist());
-      }
       listModel.setList(this.filterPlaylists(playlists));
       // register property change listener for modified flag
       registerModificationListener(listModel);

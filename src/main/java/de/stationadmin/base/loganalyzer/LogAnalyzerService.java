@@ -352,6 +352,10 @@ public class LogAnalyzerService implements Service {
             listeners = Integer.parseInt(keyValue[1]);
           } else if (keyValue[0].equals("duration")) {
             duration = Integer.parseInt(keyValue[1]);
+            if(cal.getTimeInMillis() > 1481806854618l) {
+              duration = duration * 60; 
+            }
+            // else: Stats from Station Admin 3 have been in minutes anyway
           } else if (keyValue[0].equals("avg")) {
             avg = Integer.parseInt(keyValue[1]);
           }

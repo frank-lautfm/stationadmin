@@ -256,17 +256,6 @@ public class PlaylistService implements Service {
     if (this.getPlaylistRegistry().getNumPlaylists() == 0) {
       this.loadPlaylistsLegacy();
     }
-    try {
-      if (ctx.isLiveEnabled()) {
-        Playlist live = new Playlist(this.trackRegistry, PlaylistType.TEMPORARY);
-        live.setColor("#FF0000");
-        live.setName("Live");
-        live.setId(PlaylistRegistry.LIVE_PLAYLIST_ID);
-        this.playlistRegistry.setLivePlaylist(live);
-      }
-    } catch (Exception e) {
-
-    }
   }
 
   @SuppressWarnings("unchecked")

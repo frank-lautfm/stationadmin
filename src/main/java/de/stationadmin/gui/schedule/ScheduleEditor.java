@@ -91,7 +91,7 @@ public class ScheduleEditor extends JFrame {
     toolbar.add(new ExportHTMLAction());
 
     ValueModel selectionHolder = new ValueHolder();
-    PlaylistSelector selector = new PlaylistSelector(ctx, PlaylistType.ONLINE, true, selectionHolder);
+    PlaylistSelector selector = new PlaylistSelector(ctx, PlaylistType.ONLINE, selectionHolder);
     selector.setListCellRenderer(new SimplePlaylistListCellRender());
     selector.setTransferHandler(new PlaylistSelectorTransferHandler(selectionHolder));
 
