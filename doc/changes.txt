@@ -7,6 +7,14 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
+Version 4.0.2
+--------------
+[*] Fehler beim Laden von Sendeplan aus Datei gefixt
+[*] Fehler beim Drag & Drop von Tracks aus Playlist in andere Playlist der Playlist-Liste gefixt
+[*] Sortierung nach Spalten im MP3-Explorer funktionierte nicht
+[#] "Getaggte Titel hervorheben"-Menü verwendet gleiche gruppenbasierte Hierarchie wie Taggen / Tag löschen
+
+
 Version 4.0.1
 --------------
 [*] Statistik aktualisieren wenn ein neuer Track beginnt funktioniert wieder

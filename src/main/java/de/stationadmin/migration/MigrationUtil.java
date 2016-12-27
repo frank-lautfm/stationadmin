@@ -70,6 +70,10 @@ public class MigrationUtil {
       this.messageReceiver.onMessage(msg);
     }
   }
+  
+  public int getNewTrackId(int id) {
+    return this.trackIdMap.containsKey(id) ? this.trackIdMap.get(id) : -1;
+  }
 
   public void init() throws Exception {
     this.clientV3 = new StationAdminClient(new LautServerAccess(), this.station, null);
