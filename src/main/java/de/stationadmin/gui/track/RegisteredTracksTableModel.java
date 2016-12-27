@@ -302,6 +302,7 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
     case YEAR:
     case NUM_PLAYLISTS:
     case ID:
+      return Integer.class;
     case UPLOAD:
       return Date.class;
     }
