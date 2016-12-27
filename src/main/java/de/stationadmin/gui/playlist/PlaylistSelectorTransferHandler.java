@@ -37,6 +37,7 @@ class PlaylistSelectorTransferHandler extends TransferHandler {
   private StationAdminClient client;
   private ClientContext ctx;
   private ListModel model;
+  private JXList list;
 
   public PlaylistSelectorTransferHandler(ClientContext ctx, JXList list) {
     super();
@@ -44,6 +45,7 @@ class PlaylistSelectorTransferHandler extends TransferHandler {
     this.client = ctx.getAdminClient();
     this.ctx = ctx;
     this.model = list.getModel();
+    this.list = list;
   }
 
   public boolean canImport(TransferSupport support) {
@@ -87,6 +89,7 @@ class PlaylistSelectorTransferHandler extends TransferHandler {
 
   private boolean handleString(int row, String string) {
     if (row >= 0 && row < this.model.getSize()) {
+      row = list.convertIndexToModel(row);
       Playlist playlist = (Playlist) this.model.getElementAt(row);
       TrackImportHandler handler = new TrackImportHandler(client.getTrackService(), client.getTagManager(), playlist, playlist.getEntries().size());
       handler.add(string);
