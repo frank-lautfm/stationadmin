@@ -4,6 +4,7 @@
 package de.stationadmin.base.schedule;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -34,8 +35,9 @@ public class ScheduleImportTask extends AbstractTask {
     if (this.filename != null && new File(this.filename).exists()) {
 
       try {
-        List<Entry> entries = client.getSchedule().loadEntries(filename);
-        client.getSchedule().setEntries(entries);
+        FileInputStream stream = new FileInputStream(filename);
+        client.getSchedule().load(stream);
+        stream.close();
         client.getSchedule().submitToServer();
         client.getSchedule().save();
         result.setSucceeded(true);
