@@ -33,7 +33,7 @@ public class Start {
   private ClientContext ctx = new ClientContext();
   private StationAdminWindow mainWindow;
 
-  private static void configureLogging() {
+  public static void configureLogging() {
     try {
 
       String dataDirectory = System.getProperty("user.home") + File.separatorChar + "laut.fm" + File.separatorChar + "StationAdmin" + File.separatorChar;
