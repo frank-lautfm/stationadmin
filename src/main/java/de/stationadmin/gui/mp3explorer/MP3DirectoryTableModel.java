@@ -78,22 +78,18 @@ public class MP3DirectoryTableModel extends AbstractTableModel {
     MP3File file = this.files.get(rowIndex);
     try {
       switch (col) {
-        case FILENAME :
-          return file.file.getName();
-        case ALBUM :
-          return file.tag != null ? new Album(file.tag) : null;
-        case ARTIST :
-          return file.tag instanceof ID3V2Tag ? ((ID3V2Tag) file.tag).getArtist() : (file.tag instanceof ID3V1Tag
-              ? ((ID3V1Tag) file.tag).getArtist()
-              : null);
-        case TITLE :
-          return file.tag instanceof ID3V2Tag ? ((ID3V2Tag) file.tag).getTitle() : (file.tag instanceof ID3V1Tag
-              ? ((ID3V1Tag) file.tag).getTitle()
-              : null);
-        case TRACKNO :
-          return file.tag instanceof ID3V2Tag ? ((ID3V2Tag) file.tag).getTrackNumber() : 0;
-        case SIZE:
-          return file.size;
+      case FILENAME:
+        return file.file.getName();
+      case ALBUM:
+        return file.tag != null ? new Album(file.tag) : null;
+      case ARTIST:
+        return file.tag instanceof ID3V2Tag ? ((ID3V2Tag) file.tag).getArtist() : (file.tag instanceof ID3V1Tag ? ((ID3V1Tag) file.tag).getArtist() : null);
+      case TITLE:
+        return file.tag instanceof ID3V2Tag ? ((ID3V2Tag) file.tag).getTitle() : (file.tag instanceof ID3V1Tag ? ((ID3V1Tag) file.tag).getTitle() : null);
+      case TRACKNO:
+        return file.tag instanceof ID3V2Tag ? ((ID3V2Tag) file.tag).getTrackNumber() : 0;
+      case SIZE:
+        return file.size;
       }
     } catch (ID3Exception e) {
       return null;
@@ -114,18 +110,18 @@ public class MP3DirectoryTableModel extends AbstractTableModel {
   public String getColumnName(int column) {
     Column col = Column.values()[column];
     switch (col) {
-      case ARTIST :
-        return textProvider.getString("titleviewer.property.artist");
-      case TITLE :
-        return textProvider.getString("titleviewer.property.title");
-      case ALBUM :
-        return textProvider.getString("titleviewer.property.album");
-      case FILENAME :
-        return textProvider.getString("mp3explorer.property.filename");
-      case TRACKNO :
-        return textProvider.getString("mp3explorer.property.trackno");
-      case SIZE :
-        return textProvider.getString("mp3explorer.property.size");
+    case ARTIST:
+      return textProvider.getString("titleviewer.property.artist");
+    case TITLE:
+      return textProvider.getString("titleviewer.property.title");
+    case ALBUM:
+      return textProvider.getString("titleviewer.property.album");
+    case FILENAME:
+      return textProvider.getString("mp3explorer.property.filename");
+    case TRACKNO:
+      return textProvider.getString("mp3explorer.property.trackno");
+    case SIZE:
+      return textProvider.getString("mp3explorer.property.size");
     }
 
     return col.name().toLowerCase();
@@ -175,7 +171,8 @@ public class MP3DirectoryTableModel extends AbstractTableModel {
   }
 
   /**
-   * @param directories the directories to set
+   * @param directories
+   *          the directories to set
    */
   public void setDirectories(File[] directories) throws TooManyTitlesException {
     this.directories = directories;
@@ -190,7 +187,8 @@ public class MP3DirectoryTableModel extends AbstractTableModel {
   }
 
   /**
-   * @param recursive the recursive to set
+   * @param recursive
+   *          the recursive to set
    */
   public void setRecursive(boolean recursive) throws TooManyTitlesException {
     if (this.recursive != recursive) {
@@ -290,9 +288,33 @@ public class MP3DirectoryTableModel extends AbstractTableModel {
   }
 
   /**
-   * @param maxTitles the maxTitles to set
+   * @param maxTitles
+   *          the maxTitles to set
    */
   protected void setMaxTitles(int maxTitles) {
     this.maxTitles = maxTitles;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
+   */
+  @Override
+  public Class<?> getColumnClass(int columnIndex) {
+    Column col = Column.values()[columnIndex];
+    switch (col) {
+    case ARTIST:
+    case TITLE:
+    case FILENAME:
+      return String.class;
+    case ALBUM:
+      return Album.class;
+    case TRACKNO:
+      return Integer.class;
+    case SIZE:
+      return Float.class;
+    }
+    return String.class;
   }
 }
