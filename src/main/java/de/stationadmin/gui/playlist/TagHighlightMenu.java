@@ -7,7 +7,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -18,6 +20,7 @@ import javax.swing.event.ChangeListener;
 import com.jgoodies.binding.value.ValueModel;
 
 import de.stationadmin.base.tag.StaticTag;
+import de.stationadmin.base.tag.Tag;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.gui.TextProvider;
 
@@ -52,11 +55,28 @@ public class TagHighlightMenu extends JMenu {
 
   private void rebuild() {
     this.removeAll();
+    
+    Map<String, JMenu> groupsMenus = new HashMap<String, JMenu>();
+
+    for (String group : this.tagManager.getGroups(true)) {
+      JMenu menu = new JMenu(group);
+      this.add(menu);
+      groupsMenus.put(group, menu);
+    }
+    
     for (String tagName : tagManager.getTags()) {
       JCheckBoxMenuItem item = new JCheckBoxMenuItem(tagName);
       item.putClientProperty("tag", tagName);
       item.addChangeListener(listener);
-      this.add(item);
+      
+      Tag tag = tagManager.getTag(tagName);
+      String group = tag.getGroup();
+      JMenu menu = group != null ? groupsMenus.get(group) : null;
+      if (menu == null) {
+        this.add(item);
+      } else {
+        menu.add(item);
+      }
     }
 
     this.addSeparator();
