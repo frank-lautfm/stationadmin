@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -46,6 +47,7 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
+import de.stationadmin.base.schedule.Schedule;
 import de.stationadmin.base.schedule.Schedule.Entry;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
@@ -377,12 +379,24 @@ public class ScheduleEditor extends JFrame {
         try {
           String filename = fileChooser.getSelectedFile().getAbsolutePath();
           List<Entry> entries = ctx.getAdminClient().getSchedule().loadEntries(filename);
-          model.setEntries(entries);
+          model.setEntries(filter(entries));
         } catch (Exception e) {
           JXErrorPane.showDialog(ctx.getRootWindow(), textProvider.createErrorInfo(e, "scheduleeditor.msg.save.failed"));
         }
 
       }
+    }
+    
+    private List<Entry> filter(List<Entry> entries) {
+      List<Entry> filtered = new ArrayList<Entry>();
+      for (Schedule.Entry entry : entries) {
+        if (entry.getHour() > -1) {
+          filtered.add(entry);
+        } 
+        // else: contains information about base playlist - can't restore here
+      }
+      return filtered;
+
     }
 
   }
