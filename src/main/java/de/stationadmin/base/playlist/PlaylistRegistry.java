@@ -65,6 +65,12 @@ public class PlaylistRegistry extends AbstractBean {
    */
   public void clear() {
     int oldNum = this.playlists.size();
+    
+    // remove entries in order to clean up track registry
+    for(Playlist playlist : this.playlists) {
+      playlist.removeEntries(new ArrayList<Playlist.Entry>(playlist.getEntries()));
+    }
+    
     this.playlistsById.clear();
     this.playlists.clear();
     this.getPcs().firePropertyChange("numPlaylists", oldNum, this.playlists.size());
