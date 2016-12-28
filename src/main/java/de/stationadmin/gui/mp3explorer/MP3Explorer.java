@@ -842,7 +842,6 @@ public class MP3Explorer extends JFrame {
     private TitleModel titleModel;
 
     UploadAction() {
-      this.setEnabled(false);
       this.putValue(Action.SMALL_ICON, ctx.getIcon("upload.png"));
     }
 
