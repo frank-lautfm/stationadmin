@@ -6,6 +6,15 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.0.3
+--------------
+[*] Upload aus MP3-Explorer heraus wieder aktiviert
+[*] Beim Synchronisieren aller Playlists wurden Verbindungen zwischen Tracks und Playlists fälschlicherweise Aufrecht erhalten
+[*] Wenn neue Playlists direkt mit internen Settings (Playlistgenerator etc) angelegt wurden gingen diese verloren
+[+] Neuer Menüpunkt "Titelinformationen neu laden" im Kontextmenü für Tracks - lädt die Metadaten neu vom Server
+[+] Login: Fehlermeldung wenn dem Token keine Stationen zugeordnet sind
+[+] Login: Return-Taste im Token-Feld löst Laden der Stationen aus
+[*] Fehlerbehandlung wenn Server beim Upload keine Trackinformationen mehr liefert
 
 Version 4.0.2
 --------------
