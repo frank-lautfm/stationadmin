@@ -524,10 +524,10 @@ public class Playlist extends AbstractBean {
     }
   }
 
-  public void removeTrack(int titleId) {
+  public void removeTrack(int trackId) {
     ArrayList<Entry> entries = new ArrayList<Entry>(this.workingEntries);
     for (Entry entry : entries) {
-      if (entry.getTrackId() == titleId) {
+      if (entry.getTrackId() == trackId) {
         this.removeEntry(entry);
       }
     }

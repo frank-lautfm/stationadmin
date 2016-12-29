@@ -33,6 +33,7 @@ import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.Settings;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
 import de.stationadmin.lfm.backend.ProgressListener;
+import de.stationadmin.lfm.backend.ResourceNotFoundException;
 import de.stationadmin.lfm.backend.Track;
 import de.stationadmin.lfm.backend.TrackList;
 import de.stationadmin.lfm.backend.TrackUpload;
@@ -106,7 +107,11 @@ public class TrackService implements Service {
     for (int trackId : trackIds) {
       RegisteredTrack track = this.trackRegistry.getTrack(trackId);
       if (track != null && track.isOwnTrack()) {
-        this.ctx.getServer().deleteTrack(ctx.getStationId(), trackId);
+        try {
+          this.ctx.getServer().deleteTrack(ctx.getStationId(), trackId);
+        } catch (ResourceNotFoundException e) {
+          // track has already been deleted on server - just accept that
+        }
         modified = true;
         this.trackRegistry.remove(trackId);
       }
@@ -117,8 +122,7 @@ public class TrackService implements Service {
   }
 
   /**
-   * Searchs a title that matches the given {@link TrackMatcher}. If multiple
-   * results exist, only the first one is returned
+   * Searchs a title that matches the given {@link TrackMatcher}. If multiple results exist, only the first one is returned
    * 
    * @param text
    *          text to search for
@@ -142,8 +146,7 @@ public class TrackService implements Service {
   }
 
   public SearchResultSet find(TrackQuery query) throws IOException, JSONException {
-    TrackList list = ctx.getServer().getTracks(ctx.getStationId(), query.getPage(), query.asFilterMap(), query.getOrderBy(),
-        query.isOrderAscending());
+    TrackList list = ctx.getServer().getTracks(ctx.getStationId(), query.getPage(), query.asFilterMap(), query.getOrderBy(), query.isOrderAscending());
     ArrayList<DetailedTrack> titles = new ArrayList<DetailedTrack>();
     for (Track track : list.getTracks()) {
       titles.add(new DetailedTrack(track));
@@ -201,8 +204,7 @@ public class TrackService implements Service {
 
         // init recorder
         log.debug("init playlist recorder");
-        this.playlistRecorder = new PlaylistRecorder(this.trackRegistry, this.ctx.getLfmAPI(), this.ctx.getStation(), this.ctx.getStationStatus(),
-            this.trackHistory);
+        this.playlistRecorder = new PlaylistRecorder(this.trackRegistry, this.ctx.getLfmAPI(), this.ctx.getStation(), this.ctx.getStationStatus(), this.trackHistory);
         this.playlistRecorder.start();
       } finally {
         this.ctx.updateStatus(null);
@@ -345,8 +347,7 @@ public class TrackService implements Service {
   }
 
   /**
-   * Completely reloads all own titles. This should be used for initial loading
-   * and if files have been removed with another instance / via radioadmin
+   * Completely reloads all own titles. This should be used for initial loading and if files have been removed with another instance / via radioadmin
    * 
    * @throws IOException
    * @throws JSONException
@@ -358,7 +359,7 @@ public class TrackService implements Service {
     for (RegisteredTrack track : this.trackRegistry.getAllTracks()) {
       if (track.isOwnTrack() && track.getPlaylistIds().size() == 0) {
         this.trackRegistry.remove(track.getId());
-      } else if(track.isOwnTrack()) {
+      } else if (track.isOwnTrack()) {
         markForeign.add(track.getId());
       }
     }
@@ -375,8 +376,7 @@ public class TrackService implements Service {
         RegisteredTrack regtrack = this.trackRegistry.getTrack(track.getId());
         if (regtrack == null) {
           this.trackRegistry.registerOwnTrack(new DetailedTrack(track));
-        }
-        else {
+        } else {
           regtrack.update(track);
         }
       }
@@ -491,16 +491,37 @@ public class TrackService implements Service {
 
   }
 
-  public DetailedTrack getTrack(int titleId) throws IOException {
-    DetailedTrack title = this.trackRegistry.getTrack(titleId);
-    if (title == null) {
-      Track track = this.ctx.getServer().getTrack(ctx.getStationId(), titleId);
+  public DetailedTrack getTrack(int trackId) throws IOException {
+    DetailedTrack registeredTrack = this.trackRegistry.getTrack(trackId);
+    if (registeredTrack == null) {
+      Track track = this.ctx.getServer().getTrack(ctx.getStationId(), trackId);
       if (track != null) {
-        title = new DetailedTrack(track);
+        registeredTrack = new DetailedTrack(track);
       }
     }
+    return registeredTrack;
+  }
 
-    return title;
+  /**
+   * Reloads a track from the server and updates the entry in the track registry
+   * @param trackId
+   * @return
+   * @throws IOException
+   */
+  public DetailedTrack reloadTrack(int trackId) throws IOException {
+    DetailedTrack registeredTrack = this.trackRegistry.getTrack(trackId);
+    if (registeredTrack != null) {
+      Track track = this.ctx.getServer().getTrack(ctx.getStationId(), trackId);
+      if (track != null) {
+        registeredTrack.update(track);
+      }
+      else {
+        throw new ResourceNotFoundException();
+      }
+      return registeredTrack;
+    }
+    return null;
+
   }
 
   public void synchronize() throws IOException {
@@ -537,8 +558,7 @@ public class TrackService implements Service {
         if (requestMore && this.synchronizedOwnTill != null && track.getCreatedAt().getTime() < this.synchronizedOwnTill.getTime()) {
           requestMore = false;
         }
-        
-        
+
       }
       requestMore = requestMore && list.hasNextPage();
       page++;
