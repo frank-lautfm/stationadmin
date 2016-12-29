@@ -91,7 +91,12 @@ public class LoginDlg extends JDialog {
         List<Station> stations = adminService.getStations();
         Collections.sort(stations);
         this.stationList.setValue(stations);
-        messageText.setValue(null);
+        if (stations.size() > 0) {
+          messageText.setValue(null);
+        } else {
+          messageText.setValue(ctx.getTextProvider().getString("action.login.msg.nostations"));
+
+        }
       } catch (de.stationadmin.lfm.backend.AuthenticationException e) {
         Toolkit.getDefaultToolkit().beep();
         messageText.setValue(ctx.getTextProvider().getString("action.login.msg.autherror"));
@@ -103,8 +108,7 @@ public class LoginDlg extends JDialog {
   }
 
   private void init() {
-    this.getContentPane().setLayout(
-        new FormLayout("10dlu,pref,5dlu,pref,2dlu,pref,10dlu", "10dlu,pref,5dlu,pref,0dlu,pref,5dlu,pref,5dlu,pref,10dlu,pref,10dlu"));
+    this.getContentPane().setLayout(new FormLayout("10dlu,pref,5dlu,pref,2dlu,pref,10dlu", "10dlu,pref,5dlu,pref,0dlu,pref,5dlu,pref,5dlu,pref,10dlu,pref,10dlu"));
     CellConstraints cc = new CellConstraints();
 
     LoginAction loginAction = new LoginAction();
@@ -118,20 +122,26 @@ public class LoginDlg extends JDialog {
         resolveStations();
       }
     };
-    
+
     // this.messageText.setValue("test");
 
     panel.add(new JLabel(ctx.getTextProvider().getString("login.property.token")), cc.xy(2, 2));
     JTextField tokenTf = BasicComponentFactory.createTextField(this.token, false);
     tokenTf.setColumns(20);
     tokenTf.addFocusListener(focusListener);
+    tokenTf.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        resolveStations();
+      }
+    });
     tokenTf.setAction(loginAction);
     panel.add(tokenTf, cc.xy(4, 2));
-    
+
     final JPopupMenu popup = new JPopupMenu();
     popup.add(new ClipboardAction(ctx, tokenTf, this.token, TransferHandler.getPasteAction()));
     tokenTf.addMouseListener(new PopupListener(tokenTf, popup));
-
 
     JButton requestTokenBtn = new JButton("?");
     requestTokenBtn.addActionListener(new ActionListener() {
