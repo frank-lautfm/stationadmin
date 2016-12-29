@@ -237,13 +237,19 @@ public class UploadManager extends AbstractBean {
   protected int checkUploadedTracks() {
     int remaining = 0;
     boolean tracksCompleted = false;
+    List<QueuedTrack> toBeRemoved = new ArrayList<QueuedTrack>();
     for (QueuedTrack entry : queue) {
       if (entry.getTrack() == null) {
         remaining++;
         if (entry.getResponse() != null) {
           try {
             DetailedTrack track = trackService.getTrack(entry.getResponse().getId());
-            if (track.getId() > 0) {
+            if(track == null) {
+              log.error("No track retrieved for " + entry.getResponse().getId() + " - upload failed");
+              entry.setStatus(UploadStatus.ABORTED); // not the nicest thing, but we need to get rid of this entry
+              toBeRemoved.add(entry);
+            }
+            if (track != null && track.getId() > 0) {
               remaining--;
               entry.setTrack(track);
               entry.setStatus(UploadStatus.COMPLETED);
@@ -252,12 +258,20 @@ public class UploadManager extends AbstractBean {
               this.trackService.getTrackRegistry().registerOwnTrack(entry.getTrack());
               tracksCompleted = true;
             }
-          } catch (IOException e) {
+          } catch (Exception e) {
 
           }
         }
-
       }
+    }
+    if(toBeRemoved.size() > 0) {
+      int oldRemaining = this.getNumberOfRemainingFiles();
+      for(QueuedTrack track : toBeRemoved) {
+        this.queue.remove(track);
+        this.progressListener.remove(track.getFile().getFile());
+      }
+      this.firePropertyChange("numberOfRemainingFiles", oldRemaining, this.getNumberOfRemainingFiles());
+      this.saveQueue();
     }
     
     if(tracksCompleted) {
