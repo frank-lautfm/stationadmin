@@ -132,28 +132,4 @@ public class PlaylistRegistry extends AbstractBean {
     return allTags;
   }
 
-  /**
-   * Gets the extended playlist data as list
-   * @return
-   */
-  public List<ExtendedPlaylistData> getLocalData() {
-    ArrayList<ExtendedPlaylistData> dataList = new ArrayList<ExtendedPlaylistData>(this.localData.values());
-    return dataList;
-  }
-
-  /**
-   * Overwrites the current local data with the given data
-   * @param dataList
-   */
-  public void setLocalData(List<ExtendedPlaylistData> dataList) {
-    this.localData.clear();
-    for (ExtendedPlaylistData data : dataList) {
-      Playlist playlist = this.getPlaylist(data.getId());
-      if (playlist != null) {
-        playlist.setLocalData(data);
-      }
-      this.localData.put(data.getId(), data);
-    }
-  }
-
 }

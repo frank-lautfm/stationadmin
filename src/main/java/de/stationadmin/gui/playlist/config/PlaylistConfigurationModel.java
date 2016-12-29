@@ -51,7 +51,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   public PlaylistConfigurationModel(Playlist playlist, TagManager tagManager) {
     super(playlist);
     this.tags = new TagsModel();
-    this.generateTags = new TitleTagsModel();
+    this.generateTags = new TrackTagsModel();
     this.tagManager = tagManager;
     this.initAdvices(playlist);
 
@@ -339,7 +339,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
 
   }
 
-  protected class TitleTagsModel extends AbstractValueModel {
+  protected class TrackTagsModel extends AbstractValueModel {
     private static final long serialVersionUID = -7885567350534821978L;
 
     /**
