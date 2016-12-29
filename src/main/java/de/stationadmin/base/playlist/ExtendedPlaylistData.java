@@ -298,4 +298,11 @@ public class ExtendedPlaylistData {
     this.gvlCheck = gvlCheck;
   }
 
+  /**
+   * @param id the id to set
+   */
+  void setId(int id) {
+    this.id = id;
+  }
+
 }

@@ -653,6 +653,10 @@ public class Playlist extends AbstractBean {
 
   public void setId(int id) {
     this.id = id;
+    if(this.localData != null && this.localData.getId() != id) {
+      // id may have changed if we are working on a new playlist
+      this.localData.setId(id);
+    }
   }
 
   public void setLength(int length) {
