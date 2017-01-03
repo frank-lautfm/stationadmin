@@ -662,7 +662,7 @@ public class PlaylistViewer extends JPanel {
       try {
         handler.add(file);
         handler.resolveTags();
-        handler.resolveTitlesLocal();
+        handler.resolveTracksLocal();
         if (handler.isEverythingResolved()) {
           // if everything can be resolved without server requests handle this
           // silently

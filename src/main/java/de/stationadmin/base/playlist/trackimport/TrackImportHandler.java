@@ -246,7 +246,7 @@ public class TrackImportHandler {
   /**
    * Tries to find a track library title for the tasks within the local title registry
    */
-  public void resolveTitlesLocal() {
+  public void resolveTracksLocal() {
     try {
       log.info("try to resolve titles within local title registry");
       TagSet currentSet = this.tagService.getCurrentTagSet();
@@ -272,7 +272,7 @@ public class TrackImportHandler {
   /**
    * Sends search requests for the still unresolved tags to the server
    */
-  public void resolveTitlesRemote() throws IOException, JSONException {
+  public void resolveTracksRemote() throws IOException, JSONException {
     log.info("try to resolve titles within online track library");
     TagSet currentSet = this.tagService.getCurrentTagSet();
     BitSet accepted = currentSet != null ? this.tagService.getTrackIds(currentSet) : null;
@@ -321,17 +321,37 @@ public class TrackImportHandler {
    * Adds the resolved titles of the tasks to the playlist
    */
   public void addTracksToPlaylist() {
-    List<BasicTrack> titles = new ArrayList<BasicTrack>();
+    this.addTracksToPlaylist(false);
+  }
+
+  public void addTracksToPlaylist(boolean convertLegacyIds) {
+
+    List<BasicTrack> tracks = new ArrayList<BasicTrack>();
     for (TrackImportTask task : tasks) {
       if (task.getTrackLibraryTitle() != null) {
-        titles.add(task.getTrackLibraryTitle());
+        BasicTrack track = task.getTrackLibraryTitle();
+        if (convertLegacyIds) {
+          Integer newId = trackService.getTrackRegistry().convertLegacyId(track.getId());
+          if (newId != null) {
+            track.setId(newId);
+            tracks.add(track);
+          }
+          else {
+            System.out.println("No mapping for " + track);
+          }
+        } else {
+          tracks.add(track);
+        }
       }
     }
-    if (titles.size() == 1) {
-      this.playlist.insertTrack(this.position, titles.get(0));
-    } else if (titles.size() > 1) {
-      this.playlist.insertTracks(this.position, titles);
+    if (tracks.size() > 0) {
+      if (tracks.size() == 1) {
+        this.playlist.insertTrack(this.position, tracks.get(0));
+      } else if (tracks.size() > 1) {
+        this.playlist.insertTracks(this.position, tracks);
+      }
     }
+
   }
 
 }

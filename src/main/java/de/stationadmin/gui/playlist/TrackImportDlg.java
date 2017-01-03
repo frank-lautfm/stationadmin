@@ -66,7 +66,7 @@ import de.stationadmin.gui.util.SwingTools;
  * Dialog that handles the import of titles based on {@link TrackImportHandler}.
  * <p>
  * It is assumed that tags {@link TrackImportHandler#resolveTags()} and
- * {@link TrackImportHandler#resolveTitlesLocal()} has already been invoked -
+ * {@link TrackImportHandler#resolveTracksLocal()} has already been invoked -
  * this dialog guides the user through the rest of the process.
  * 
  * @author Frank Korf
@@ -141,7 +141,7 @@ public class TrackImportDlg extends JDialog {
       @Override
       public void run() {
         try {
-          handler.resolveTitlesRemote();
+          handler.resolveTracksRemote();
         } catch (final Exception e) {
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {

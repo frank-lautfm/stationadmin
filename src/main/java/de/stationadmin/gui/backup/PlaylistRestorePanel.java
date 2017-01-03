@@ -48,6 +48,7 @@ public class PlaylistRestorePanel extends JPanel {
   private static final long serialVersionUID = 333728681978983348L;
 
   private File file;
+  private boolean legacyBackup = false;
 
   private TextProvider textProvider;
   private StationAdminClient adminClient;
@@ -62,6 +63,7 @@ public class PlaylistRestorePanel extends JPanel {
   public PlaylistRestorePanel(TextProvider textProvider, StationAdminClient adminClient, File file) {
     super();
     this.file = file;
+    this.legacyBackup = file.lastModified() < StationAdminClient.TIMESTAMP_RADIOADMIN_SWITCH;
     this.textProvider = textProvider;
     this.adminClient = adminClient;
     this.init();
@@ -209,7 +211,7 @@ public class PlaylistRestorePanel extends JPanel {
         if (cb.isEnabled() && cb.isSelected()) {
           Playlist playlist = (Playlist) cb.getClientProperty("playlist");
           this.status = textProvider.getString("backup.restore.playlist.import.status", playlist.getName());
-          tool.restorePlaylist(file, playlist.getId());
+          tool.restorePlaylist(file, playlist.getId(), legacyBackup);
           cnt++;
         }
       }

@@ -255,7 +255,7 @@ public class MP3DirectoryTableModel extends AbstractTableModel {
               titleImportHandler.clear();
               titleImportHandler.add(new MP3TrackImportTask(file.getFile(), file.getTag()));
               titleImportHandler.resolveTags();
-              titleImportHandler.resolveTitlesLocal();
+              titleImportHandler.resolveTracksLocal();
               if (titleImportHandler.isEverythingResolved()) {
                 file.setStatus(TitleStatus.IN_LOCAL_POOL);
                 // tm.setTitle(importHandler.getTasks().get(0).getTrackLibraryTitle());

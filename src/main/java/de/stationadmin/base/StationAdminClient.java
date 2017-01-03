@@ -44,6 +44,9 @@ import de.stationadmin.streamlive.MP3Streamer;
  */
 public class StationAdminClient {
   private static final Logger log = Logger.getLogger(StationAdminClient.class);
+  
+  public static long TIMESTAMP_RADIOADMIN_SWITCH = 1481806854618l;
+  
   private SessionCtx sessionCtx;
   private TaskExecutionService taskExecutionService;
   private TrackService trackService;

@@ -302,7 +302,7 @@ public class MP3Explorer extends JFrame {
           if (tm.getFile().getTag() != null) {
             importHandler.add(new MP3TrackImportTask(tm.getFile().getFile(), tm.getFile().getTag()));
             importHandler.resolveTags();
-            importHandler.resolveTitlesLocal();
+            importHandler.resolveTracksLocal();
             if (importHandler.isEverythingResolved()) {
               tm.setStatus(TitleStatus.IN_LOCAL_POOL);
               tm.setTitle(importHandler.getTasks().get(0).getTrackLibraryTitle());

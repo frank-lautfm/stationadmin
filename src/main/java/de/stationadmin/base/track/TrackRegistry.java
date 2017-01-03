@@ -1,5 +1,9 @@
 package de.stationadmin.base.track;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +31,7 @@ public class TrackRegistry extends AbstractBean {
   private int numTracksBeforeBlock = -1;
 
   private Map<Integer, Integer> legacyIdMapping = new HashMap<Integer, Integer>();
+  private boolean fullLegacyIdMappingLoaded = false;
   private Map<Integer, Integer> reverseLegacyIdMapping = new HashMap<Integer, Integer>();
 
   /**
@@ -91,9 +96,7 @@ public class TrackRegistry extends AbstractBean {
   }
 
   /**
-   * Registers an alias for a given title. Should be used rather than using
-   * {@link RegisteredTrack#addAlias(String, String)} directly because this
-   * version replaces the artist by a shared string.
+   * Registers an alias for a given title. Should be used rather than using {@link RegisteredTrack#addAlias(String, String)} directly because this version replaces the artist by a shared string.
    * 
    * @param titleId
    * @param artist
@@ -146,8 +149,7 @@ public class TrackRegistry extends AbstractBean {
   }
 
   /**
-   * Removes the ownTitle flag from all registered titles and removes those
-   * titles from the registry that are not assigned to any playlist
+   * Removes the ownTitle flag from all registered titles and removes those titles from the registry that are not assigned to any playlist
    */
   public void resetOwnTitles() {
     Collection<RegisteredTrack> titles = new ArrayList<RegisteredTrack>(this.tracks.values());
@@ -208,9 +210,7 @@ public class TrackRegistry extends AbstractBean {
   /**
    * Adds a registered title - should only be used for import of persisted data
    * <p>
-   * Notice that this method does not fire property change events for numTracks
-   * - this would slow down the GUI application too much. Use
-   * {@link #firenumTracksEvent()} after all titles have been added.
+   * Notice that this method does not fire property change events for numTracks - this would slow down the GUI application too much. Use {@link #firenumTracksEvent()} after all titles have been added.
    * 
    * @param title
    */
@@ -318,9 +318,42 @@ public class TrackRegistry extends AbstractBean {
     this.legacyIdMapping.put(legacyId, id);
     this.reverseLegacyIdMapping.put(id, legacyId);
   }
-  
+
+  private Map<Integer, Integer> readTrackMapping(InputStream stream) throws IOException {
+    Map<Integer, Integer> map;
+
+    BufferedInputStream bin = new BufferedInputStream(stream);
+    DataInputStream in = new DataInputStream(bin);
+
+    int cnt = in.readInt();
+    map = new HashMap<Integer, Integer>(cnt);
+    for (int i = 0; i < cnt; i++) {
+      map.put(in.readInt(), in.readInt());
+    }
+
+    in.close();
+
+    return map;
+
+  }
+
   public Integer getLegacyId(int id) {
     return this.reverseLegacyIdMapping.get(id);
+  }
+
+  public Integer convertLegacyId(int legacyId) {
+    Integer id = this.legacyIdMapping.get(legacyId);
+    if (id == null && !fullLegacyIdMappingLoaded) {
+      fullLegacyIdMappingLoaded = true;
+      try {
+        InputStream trackMappingStream = this.getClass().getClassLoader().getResourceAsStream("trackmapping");
+        this.legacyIdMapping = readTrackMapping(trackMappingStream);
+        id = this.legacyIdMapping.get(legacyId);
+      } catch (Exception e) {
+      }
+    }
+
+    return id;
   }
 
   public RegisteredTrack getByLegacyId(int legacyId) {

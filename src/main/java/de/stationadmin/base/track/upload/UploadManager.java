@@ -52,7 +52,7 @@ public class UploadManager extends AbstractBean {
   }
   
   public boolean add(File file, boolean forcePrivate) {
-    if (file.exists() && !file.isDirectory() && file.getName().toLowerCase().endsWith("mp3") && file.length() < 1024 * 1024 * 25) {
+    if (file.exists() && !file.isDirectory() && file.getName().toLowerCase().endsWith("mp3") && file.length() < 1024 * 1024 * 65) {
       int oldRemaining = this.getNumberOfRemainingFiles();
       QueuedTrack track = new QueuedTrack(file);
       if(forcePrivate) {

@@ -66,8 +66,8 @@ public class BackupService implements Service {
 
   private SessionCtx sessionCtx;
   private PlaylistService playlistService;
-  private TrackService titleService;
-  private TagManager titleTagManager;
+  private TrackService trackService;
+  private TagManager trackManager;
   private PlaylistRegistry playlistRegistry;
   private Schedule schedule;
   private TaskExecutionService taskService;
@@ -86,8 +86,8 @@ public class BackupService implements Service {
     super();
     this.sessionCtx = sessionCtx;
     this.playlistService = playlistService;
-    this.titleService = titleService;
-    this.titleTagManager = titleTagManager;
+    this.trackService = titleService;
+    this.trackManager = titleTagManager;
     this.schedule = schedule;
     this.taskService = taskService;
     this.playlistRegistry = playlistService.getPlaylistRegistry();
@@ -160,7 +160,7 @@ public class BackupService implements Service {
       }
 
       // create tag backups
-      for (File tagFile : this.titleTagManager.getFiles()) {
+      for (File tagFile : this.trackManager.getFiles()) {
         ZipEntry entry = new ZipEntry("tags/" + tagFile.getName());
         zip.putNextEntry(entry);
         FileInputStream in = new FileInputStream(tagFile);
@@ -314,6 +314,10 @@ public class BackupService implements Service {
    * @throws PlaylistValidationException
    */
   public boolean restorePlaylist(File file, int playlistId) throws IOException, JSONException, PlaylistValidationException {
+    return restorePlaylist(file, playlistId, false);
+  }
+  
+  public boolean restorePlaylist(File file, int playlistId, boolean legacy) throws IOException, JSONException, PlaylistValidationException {
     ZipFile zip = new ZipFile(file);
     Playlist playlist = this.playlistRegistry.getPlaylist(playlistId);
     if (playlist != null) {
@@ -324,10 +328,10 @@ public class BackupService implements Service {
 
         this.restorePlaylistLocalData(playlist, playlistStr);
 
-        TrackImportHandler importHandler = new TrackImportHandler(this.titleService, this.titleTagManager, playlist, 0);
+        TrackImportHandler importHandler = new TrackImportHandler(this.trackService, this.trackManager, playlist, 0);
         importHandler.add(playlistStr);
         importHandler.resolveTags();
-        importHandler.addTracksToPlaylist();
+        importHandler.addTracksToPlaylist(legacy);
         this.playlistService.savePlaylist(playlist);
 
         return true;
@@ -335,6 +339,7 @@ public class BackupService implements Service {
     }
     return false;
   }
+
 
   @SuppressWarnings("unchecked")
   private boolean restorePlaylistLocalData(Playlist playlist, String playlistStr) {
@@ -408,12 +413,12 @@ public class BackupService implements Service {
   public void restoreTag(File file, String tagname, String filename) throws IOException {
     ZipFile zip = new ZipFile(file);
     ZipEntry entry = zip.getEntry(filename);
-    Tag tag = this.titleTagManager.getTag(tagname);
+    Tag tag = this.trackManager.getTag(tagname);
     if (tag == null) {
-      tag = this.titleTagManager.addStaticTag(tagname);
+      tag = this.trackManager.addStaticTag(tagname);
     }
     ((StaticTag) tag).writeRaw(zip.getInputStream(entry));
-    this.titleTagManager.updateTagOnServer(tagname);
+    this.trackManager.updateTagOnServer(tagname);
     zip.close();
   }
   

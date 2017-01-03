@@ -37,15 +37,15 @@ public class StringTrackImportTask extends TrackImportTask {
    */
   @Override
   public void resolve() {
-    BasicTrack title = this.format.fromString(this.source);
-    if (title != null) {
-      this.setArtist(title.getArtist());
-      this.setTitle(title.getTitle());
-      if (title instanceof DetailedTrack) {
-        this.setAlbum(((DetailedTrack) title).getAlbum());
+    BasicTrack track = this.format.fromString(this.source);
+    if (track != null) {
+      this.setArtist(track.getArtist());
+      this.setTitle(track.getTitle());
+      if (track instanceof DetailedTrack) {
+        this.setAlbum(((DetailedTrack) track).getAlbum());
       }
-      if (title.getId() > 0) {
-        this.setTrackLibraryTitle(title);
+      if (track.getId() > 0) {
+        this.setTrackLibraryTitle(track);
         this.setStatus(Status.RESOLVED);
       }
     } else {
