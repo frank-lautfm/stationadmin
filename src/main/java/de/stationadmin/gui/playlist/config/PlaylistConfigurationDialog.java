@@ -5,13 +5,19 @@ package de.stationadmin.gui.playlist.config;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -23,6 +29,7 @@ import javax.swing.JTextField;
 import org.jdesktop.swingx.JXErrorPane;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
+import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -30,6 +37,7 @@ import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
+import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.SwingTools;
 
@@ -58,6 +66,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     rowSpec.append("5dlu,");
     rowSpec.append("pref,5dlu,"); // name
     rowSpec.append("pref,5dlu,"); // description
+    rowSpec.append("pref,5dlu,"); // color
     rowSpec.append("pref,5dlu,"); // shuffle 1
     rowSpec.append("pref,5dlu,"); // shuffle 2
     rowSpec.append("pref,5dlu,"); // tags
@@ -94,24 +103,41 @@ public class PlaylistConfigurationDialog extends JDialog {
       row += 2;
     }
 
+    // color
+    {
+      panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.color")), cc.xy(2, row));
+
+      JPanel colorPanel = new JPanel(new FlowLayout());
+
+      ValueModel colorModel = this.model.getBufferedModel("color");
+
+      JTextField tf = BasicComponentFactory.createTextField(colorModel);
+      tf.setColumns(8);
+
+      colorPanel.add(tf);
+      colorPanel.add(new ColorButton(colorModel));
+
+      panel.add(colorPanel, cc.xy(4, row, CellConstraints.LEFT, CellConstraints.FILL));
+
+      row += 2;
+
+    }
+
     // shuffle
     {
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.shuffle")), cc.xy(2, row));
-      JCheckBox cbLaut = BasicComponentFactory.createCheckBox(this.model.getBufferedModel("shuffle"),
-          this.textProvider.getString("playlistcfg.property.shuffle.laut"));
+      JCheckBox cbLaut = BasicComponentFactory.createCheckBox(this.model.getBufferedModel("shuffle"), this.textProvider.getString("playlistcfg.property.shuffle.laut"));
       panel.add(cbLaut, cc.xy(4, row));
       row += 2;
 
-      JCheckBox cbLocal = BasicComponentFactory.createCheckBox(this.model.getBufferedModel("localShuffleAllowed"),
-          this.textProvider.getString("playlistcfg.property.shuffle.local"));
+      JCheckBox cbLocal = BasicComponentFactory.createCheckBox(this.model.getBufferedModel("localShuffleAllowed"), this.textProvider.getString("playlistcfg.property.shuffle.local"));
       panel.add(cbLocal, cc.xy(4, row));
       row += 2;
     }
 
     // tags
     {
-      panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.tags")),
-          cc.xy(2, row, CellConstraints.LEFT, CellConstraints.TOP));
+      panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.tags")), cc.xy(2, row, CellConstraints.LEFT, CellConstraints.TOP));
       JTextArea tf = BasicComponentFactory.createTextArea(this.model.getBufferedModel("tags"));
       tf.setToolTipText(this.textProvider.getString("playlistcfg.property.tags.tooltip"));
       tf.setRows(5);
@@ -120,21 +146,51 @@ public class PlaylistConfigurationDialog extends JDialog {
       panel.add(new JScrollPane(tf), cc.xy(4, row, CellConstraints.FILL, CellConstraints.FILL));
       row += 2;
     }
-    
+
     // comment
     {
-      panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.comment")),
-          cc.xy(2, row, CellConstraints.LEFT, CellConstraints.TOP));
+      panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.comment")), cc.xy(2, row, CellConstraints.LEFT, CellConstraints.TOP));
       JTextArea tf = BasicComponentFactory.createTextArea(this.model.getBufferedModel("comment"));
       tf.setRows(2);
       tf.setColumns(20);
       tf.setFont(tfFont);
       panel.add(new JScrollPane(tf), cc.xy(4, row, CellConstraints.FILL, CellConstraints.FILL));
       row += 2;
-      
+
     }
 
     return panel;
+
+  }
+
+  private static Color parseColor(String color) {
+    int red = 255;
+    int green = 255;
+    int blue = 255;
+    if (color.startsWith("#") && color.length() > 1) {
+      color = color.substring(1);
+    }
+    
+    if(color.length() > 6) {
+      color = color.substring(0, 6);
+    }
+    else if(color.length() < 6) {
+      for(int i = color.length(); i < 6; i++) {
+        color += "0";
+      }
+    }
+    
+    if (color.length() == 6) {
+      try {
+        red = Integer.parseInt(color.substring(0, 2), 16);
+        green = Integer.parseInt(color.substring(2, 4), 16);
+        blue = Integer.parseInt(color.substring(4, 6), 16);
+      } catch (Exception e) {
+
+      }
+    }
+
+    return new Color(red, green, blue);
 
   }
 
@@ -164,12 +220,11 @@ public class PlaylistConfigurationDialog extends JDialog {
           try {
             playlistService.savePlaylist(model.getBean());
             dispose();
-            
+
             ctx.getJumpHandler().jumpTo(new PlaylistEntryJumpTarget(model.getBean(), null));
-            
+
           } catch (Exception e) {
-            JXErrorPane.showFrame(PlaylistConfigurationDialog.this,
-                textProvider.createErrorInfo(e, "playlistcfg.msg.savefailed"));
+            JXErrorPane.showFrame(PlaylistConfigurationDialog.this, textProvider.createErrorInfo(e, "playlistcfg.msg.savefailed"));
           }
 
         }
@@ -186,6 +241,59 @@ public class PlaylistConfigurationDialog extends JDialog {
     this.setSize(Math.max(250, (int) prefSize.getWidth() + 30), (int) prefSize.getHeight() + 80);
     this.setTitle(textProvider.getString("playlistcfg.title"));
     SwingTools.centerWithin(ctx.getRootWindow(), this);
+
+  }
+
+  private class ColorButton extends JLabel {
+    private static final long serialVersionUID = 108077490057216245L;
+    private ValueModel colorModel;
+
+    /**
+     * @param colorModel
+     */
+    public ColorButton(ValueModel colorModel) {
+      super();
+      this.colorModel = colorModel;
+      this.setBackground(parseColor((String) colorModel.getValue()));
+      this.setOpaque(true);
+      this.setPreferredSize(new Dimension(20, 20));
+      colorModel.addValueChangeListener(new PropertyChangeListener() {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          String str = (String)evt.getNewValue();
+          Color c = parseColor(str);
+          if(!toHex(c).equals(str)) {
+            ColorButton.this.colorModel.setValue(toHex(c));
+          }
+          setBackground(c);
+        }
+      });
+      this.addMouseListener(new MouseAdapter() {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+          onClick();
+        }
+      });
+    }
+
+    public void onClick() {
+      Color color = JColorChooser.showDialog(AppUtils.getRootFrame(), "Playlistfarbe", this.getBackground());
+      if (color != null) {
+        String hex = toHex(color);
+        colorModel.setValue(hex);
+      }
+    }
+    
+    private String toHex(Color color) {
+      String hex = "#" + pad(Integer.toHexString(color.getRed())) + pad(Integer.toHexString(color.getGreen())) + pad(Integer.toHexString(color.getBlue()));
+      return hex;
+    }
+
+    private String pad(String hex) {
+      return hex.length() == 2 ? hex : "0" + hex;
+    }
 
   }
 
