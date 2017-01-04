@@ -22,6 +22,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -41,6 +42,7 @@ import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.BeanAdapter;
 import com.jgoodies.binding.list.IndirectListModel;
+import com.jgoodies.binding.list.SelectionInList;
 import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
@@ -60,8 +62,7 @@ import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.SwingTools;
 
 /**
- * Displays basic title information and - if available - a list of playlists in
- * which this title occurs
+ * Displays basic title information and - if available - a list of playlists in which this title occurs
  * 
  * @author korf
  */
@@ -91,17 +92,16 @@ public class TrackViewer extends JDialog {
     this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref:grow,5dlu,pref,5dlu"));
 
     JTabbedPane tabPane = new JTabbedPane();
-    tabPane.addTab(ctx.getTextProvider().getString("titleviewer.section.info"),
-        title instanceof DetailedTrack ? this.createEditableBasicPanel() : this.createBasicPanel());
+    tabPane.addTab(ctx.getTextProvider().getString("trackviewer.section.info"), title instanceof DetailedTrack ? this.createEditableBasicPanel() : this.createBasicPanel());
 
     JComponent playlistPanel = this.createPlaylistsPanel();
     if (playlistPanel != null) {
-      tabPane.addTab(ctx.getTextProvider().getString("titleviewer.section.playlists"), playlistPanel);
+      tabPane.addTab(ctx.getTextProvider().getString("trackviewer.section.playlists"), playlistPanel);
     }
 
     JComponent tagPanel = this.createTagPanel();
     if (tagPanel != null) {
-      tabPane.addTab(ctx.getTextProvider().getString("titleviewer.section.tags"), tagPanel);
+      tabPane.addTab(ctx.getTextProvider().getString("trackviewer.section.tags"), tagPanel);
     }
 
     this.getContentPane().add(tabPane, new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
@@ -120,7 +120,7 @@ public class TrackViewer extends JDialog {
 
     Dimension prefSize = this.getPreferredSize();
     this.setSize(Math.max(250, (int) prefSize.getWidth() + 30), Math.min((int) prefSize.getHeight() + 50, 500));
-    this.setTitle(ctx.getTextProvider().getString("titleviewer.title"));
+    this.setTitle(ctx.getTextProvider().getString("trackviewer.title"));
     SwingTools.centerOnScreen(this);
 
   }
@@ -142,42 +142,42 @@ public class TrackViewer extends JDialog {
     CellConstraints cc = new CellConstraints();
     int row = 2;
 
-    panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.artist")), cc.xy(2, row));
+    panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.artist")), cc.xy(2, row));
     panel.add(new JLabel(title.getArtist()), cc.xy(4, row));
     row += 2;
 
-    panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.title")), cc.xy(2, row));
+    panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.title")), cc.xy(2, row));
     panel.add(new JLabel(title.getTitle()), cc.xy(4, row));
     row += 2;
 
     if (this.title instanceof DetailedTrack) {
-      panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.album")), cc.xy(2, row));
+      panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.album")), cc.xy(2, row));
       panel.add(new JLabel(((DetailedTrack) title).getAlbum()), cc.xy(4, row));
       row += 2;
     }
 
-    panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.length")), cc.xy(2, row));
+    panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.length")), cc.xy(2, row));
     panel.add(new JLabel(TimeFormat.format(title.getLength(), false)), cc.xy(4, row));
     row += 2;
 
     if (this.title instanceof DetailedTrack) {
       DetailedTrack dtitle = (DetailedTrack) this.title;
-      panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.year")), cc.xy(2, row));
+      panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.year")), cc.xy(2, row));
       panel.add(new JLabel(Integer.toString(dtitle.getYear())), cc.xy(4, row));
       row += 2;
 
-      panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.genre")), cc.xy(2, row));
+      panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.genre")), cc.xy(2, row));
       panel.add(new JLabel(dtitle.getGenre()), cc.xy(4, row));
       row += 2;
 
       SimpleDateFormat fmt = new SimpleDateFormat("dd.MM.yyyy");
-      panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.upload")), cc.xy(2, row));
+      panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.upload")), cc.xy(2, row));
       if (dtitle.getUploadDate() != null) {
         panel.add(new JLabel(fmt.format(dtitle.getUploadDate())), cc.xy(4, row));
       }
       row += 2;
 
-      panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.private")), cc.xy(2, row));
+      panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.private")), cc.xy(2, row));
       JCheckBox privateTrack = new JCheckBox();
       privateTrack.setSelected(dtitle.isPrivateTrack());
       privateTrack.setEnabled(false);
@@ -188,8 +188,10 @@ public class TrackViewer extends JDialog {
     return new JScrollPane(panel);
   }
 
+  @SuppressWarnings("rawtypes")
   private JComponent createEditableBasicPanel() {
     StringBuilder rowSpec = new StringBuilder();
+    rowSpec.append("pref,5dlu,");
     rowSpec.append("pref,5dlu,");
     rowSpec.append("pref,5dlu,");
     rowSpec.append("pref,5dlu,");
@@ -227,25 +229,33 @@ public class TrackViewer extends JDialog {
     JTextField artistTf = BasicComponentFactory.createTextField(model.getBufferedModel("artist"), false);
     artistTf.setColumns(20);
     textFields.add(artistTf);
-    panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.artist")), cc.xy(2, row));
+    panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.artist")), cc.xy(2, row));
     panel.add(artistTf, cc.xy(4, row));
     row += 2;
 
     JTextField titleTf = BasicComponentFactory.createTextField(model.getBufferedModel("title"), false);
     titleTf.setColumns(20);
     textFields.add(titleTf);
-    panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.title")), cc.xy(2, row));
+    panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.title")), cc.xy(2, row));
     panel.add(titleTf, cc.xy(4, row));
+    row += 2;
+
+    SelectionInList<Integer> typeSelection = new SelectionInList<Integer>(
+        new Integer[] { Integer.valueOf(BasicTrack.TYPE_MUSIC), Integer.valueOf(BasicTrack.TYPE_JINGLE), Integer.valueOf(BasicTrack.TYPE_WORD) }, model.getBufferedModel("type"));
+    JComboBox typeCmb = BasicComponentFactory.createComboBox(typeSelection, new TrackTypeListCellRenderer(ctx.getTextProvider()));
+    typeCmb.setEnabled(model.getBean().isOwnTrack());
+    panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.type")), cc.xy(2, row));
+    panel.add(typeCmb, cc.xy(4, row));
     row += 2;
 
     JTextField albumTf = BasicComponentFactory.createTextField(model.getBufferedModel("album"), false);
     albumTf.setColumns(20);
     textFields.add(albumTf);
-    panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.album")), cc.xy(2, row));
+    panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.album")), cc.xy(2, row));
     panel.add(albumTf, cc.xy(4, row));
     row += 2;
 
-    panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.length")), cc.xy(2, row));
+    panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.length")), cc.xy(2, row));
     panel.add(new JLabel(TimeFormat.format(title.getLength(), false)), cc.xy(4, row));
     row += 2;
 
@@ -254,25 +264,25 @@ public class TrackViewer extends JDialog {
     JTextField yearTf = BasicComponentFactory.createIntegerField(model.getBufferedModel("year"), fmt, 0);
     yearTf.setColumns(4);
     textFields.add(yearTf);
-    panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.year")), cc.xy(2, row));
+    panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.year")), cc.xy(2, row));
     panel.add(yearTf, cc.xy(4, row));
     row += 2;
 
     JTextField genreTf = BasicComponentFactory.createTextField(model.getBufferedModel("genre"), false);
     genreTf.setColumns(20);
     textFields.add(genreTf);
-    panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.genre")), cc.xy(2, row));
+    panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.genre")), cc.xy(2, row));
     panel.add(genreTf, cc.xy(4, row));
     row += 2;
 
-    panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.upload")), cc.xy(2, row));
+    panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.upload")), cc.xy(2, row));
     if (((DetailedTrack) title).getUploadDate() != null) {
       SimpleDateFormat dateFmt = new SimpleDateFormat("dd.MM.yyyy");
       panel.add(new JLabel(dateFmt.format(((DetailedTrack) title).getUploadDate())), cc.xy(4, row));
     }
     row += 2;
 
-    panel.add(new JLabel(ctx.getTextProvider().getString("titleviewer.property.private")), cc.xy(2, row));
+    panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.private")), cc.xy(2, row));
     final JCheckBox privateTrack = BasicComponentFactory.createCheckBox(model.getBufferedModel("privateTrack"), null);
     privateTrack.setEnabled(false);
     panel.add(privateTrack, cc.xy(4, row));
@@ -313,7 +323,7 @@ public class TrackViewer extends JDialog {
 
       });
 
-      // panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("titleviewer.section.playlists")));
+      // panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("trackviewer.section.playlists")));
       return new JScrollPane(panel);
     } else {
       return null;
@@ -342,7 +352,7 @@ public class TrackViewer extends JDialog {
                   tagManager.untagTracks(tag, title.getId());
                 }
               } catch (IOException ex) {
-                ErrorInfo errorInfo = ctx.getTextProvider().createErrorInfo(ex, "titleviewer.tag.error", tag);
+                ErrorInfo errorInfo = ctx.getTextProvider().createErrorInfo(ex, "trackviewer.tag.error", tag);
                 JXErrorPane.showDialog(ctx.getRootWindow(), errorInfo);
               }
             }
@@ -400,6 +410,10 @@ public class TrackViewer extends JDialog {
         DetailedTrack track = model.getBean();
         ctx.getAdminClient().getTrackService().updateTrack(track);
       } catch (Exception e) {
+        try {
+          ctx.getAdminClient().getTrackService().reloadTrack(model.getBean().getId());
+        } catch (Exception ex) {
+        }
         JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.getTextProvider().createErrorInfo(e, "titleviever.update.msg.failed"));
 
       }

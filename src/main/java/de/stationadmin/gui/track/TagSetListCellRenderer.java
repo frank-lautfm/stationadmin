@@ -4,7 +4,6 @@
 package de.stationadmin.gui.track;
 
 import java.awt.Component;
-import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
@@ -16,6 +15,7 @@ import de.stationadmin.gui.TextProvider;
  * @author Frank
  *
  */
+@SuppressWarnings("rawtypes")
 public class TagSetListCellRenderer extends DefaultListCellRenderer {
   private static final long serialVersionUID = -86251475999681027L;
   

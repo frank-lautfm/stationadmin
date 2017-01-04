@@ -81,8 +81,8 @@ public class BackupService implements Service {
    * @param titleTagManager
    * @param schedule
    */
-  public BackupService(SessionCtx sessionCtx, PlaylistService playlistService, TrackService titleService, TagManager titleTagManager,
-      Schedule schedule, TaskExecutionService taskService, Settings settings) {
+  public BackupService(SessionCtx sessionCtx, PlaylistService playlistService, TrackService titleService, TagManager titleTagManager, Schedule schedule, TaskExecutionService taskService,
+      Settings settings) {
     super();
     this.sessionCtx = sessionCtx;
     this.playlistService = playlistService;
@@ -121,8 +121,7 @@ public class BackupService implements Service {
   }
 
   /**
-   * Checks for which of the currently registered playlist a backup is available
-   * in the given backup file
+   * Checks for which of the currently registered playlist a backup is available in the given backup file
    * 
    * @param file
    * @return
@@ -202,16 +201,20 @@ public class BackupService implements Service {
   public List<String> getArchivePlaylists(File file) throws IOException {
     List<String> names = new ArrayList<String>();
     ZipFile zip = new ZipFile(file);
-    Enumeration<? extends ZipEntry> entries = zip.entries();
-    while (entries.hasMoreElements()) {
-      ZipEntry entry = entries.nextElement();
-      if (entry.getName().startsWith(PATH_PLAYLIST_ARCHIVE)) {
-        String name = entry.getName().substring(PATH_PLAYLIST_ARCHIVE.length());
-        name = FilenameUtils.getBaseName(name);
-        names.add(name);
+    try {
+      Enumeration<? extends ZipEntry> entries = zip.entries();
+      while (entries.hasMoreElements()) {
+        ZipEntry entry = entries.nextElement();
+        if (entry.getName().startsWith(PATH_PLAYLIST_ARCHIVE)) {
+          String name = entry.getName().substring(PATH_PLAYLIST_ARCHIVE.length());
+          name = FilenameUtils.getBaseName(name);
+          names.add(name);
+        }
       }
+      return names;
+    } finally {
+      closeQuietly(zip);
     }
-    return names;
   }
 
   public Map<String, String> getAvailableTags(File file) throws IOException {
@@ -294,13 +297,17 @@ public class BackupService implements Service {
 
   public boolean restoreArchivePlaylist(File file, String name) throws IOException, PlaylistValidationException {
     ZipFile zip = new ZipFile(file);
-    ZipEntry entry = zip.getEntry(PATH_PLAYLIST_ARCHIVE + name + ".lfm");
-    if (entry != null) {
-      String content = IOUtils.toString(zip.getInputStream(entry), "UTF-8");
-      this.playlistService.importArchivedPlaylist(name + ".lfm", content);
-    }
+    try {
+      ZipEntry entry = zip.getEntry(PATH_PLAYLIST_ARCHIVE + name + ".lfm");
+      if (entry != null) {
+        String content = IOUtils.toString(zip.getInputStream(entry), "UTF-8");
+        this.playlistService.importArchivedPlaylist(name + ".lfm", content);
+      }
 
-    return false;
+      return false;
+    } finally {
+      closeQuietly(zip);
+    }
   }
 
   /**
@@ -316,30 +323,43 @@ public class BackupService implements Service {
   public boolean restorePlaylist(File file, int playlistId) throws IOException, JSONException, PlaylistValidationException {
     return restorePlaylist(file, playlistId, false);
   }
-  
+
   public boolean restorePlaylist(File file, int playlistId, boolean legacy) throws IOException, JSONException, PlaylistValidationException {
     ZipFile zip = new ZipFile(file);
-    Playlist playlist = this.playlistRegistry.getPlaylist(playlistId);
-    if (playlist != null) {
-      ZipEntry entry = zip.getEntry(this.getFilename(playlist));
-      if (entry != null) {
-        playlist.removeEntries(new ArrayList<Entry>(playlist.getEntries()));
-        String playlistStr = IOUtils.toString(zip.getInputStream(entry), "UTF-8");
+    try {
+      Playlist playlist = this.playlistRegistry.getPlaylist(playlistId);
+      if (playlist != null) {
+        ZipEntry entry = zip.getEntry(this.getFilename(playlist));
+        if (entry != null) {
+          playlist.removeEntries(new ArrayList<Entry>(playlist.getEntries()));
+          String playlistStr = IOUtils.toString(zip.getInputStream(entry), "UTF-8");
 
-        this.restorePlaylistLocalData(playlist, playlistStr);
+          this.restorePlaylistLocalData(playlist, playlistStr);
 
-        TrackImportHandler importHandler = new TrackImportHandler(this.trackService, this.trackManager, playlist, 0);
-        importHandler.add(playlistStr);
-        importHandler.resolveTags();
-        importHandler.addTracksToPlaylist(legacy);
-        this.playlistService.savePlaylist(playlist);
+          TrackImportHandler importHandler = new TrackImportHandler(this.trackService, this.trackManager, playlist, 0);
+          importHandler.add(playlistStr);
+          importHandler.resolveTags();
+          importHandler.addTracksToPlaylist(legacy);
+          this.playlistService.savePlaylist(playlist);
 
-        return true;
+          return true;
+        }
       }
+      return false;
+    } finally {
+      closeQuietly(zip);
     }
-    return false;
   }
 
+  private static void closeQuietly(ZipFile zip) {
+    if (zip == null)
+      return;
+    try {
+      zip.close();
+    } catch (Exception e) {
+
+    }
+  }
 
   @SuppressWarnings("unchecked")
   private boolean restorePlaylistLocalData(Playlist playlist, String playlistStr) {
@@ -421,7 +441,7 @@ public class BackupService implements Service {
     this.trackManager.updateTagOnServer(tagname);
     zip.close();
   }
-  
+
   public void restoreTask(ScheduledTask task) throws IOException {
     this.taskService.configureScheduledTask(task);
   }

@@ -167,6 +167,9 @@ public class PlaylistConfigurationDialog extends JDialog {
     int red = 255;
     int green = 255;
     int blue = 255;
+    if(color == null) {
+      color = "#FFFFFF";
+    }
     if (color.startsWith("#") && color.length() > 1) {
       color = color.substring(1);
     }
