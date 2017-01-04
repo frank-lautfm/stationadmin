@@ -217,7 +217,7 @@ public class MP3Explorer extends JFrame {
       protected Component doHighlight(Component comp, ComponentAdapter adapter) {
         int row = table.convertRowIndexToModel(adapter.row);
         MP3File file = mp3TableModel.getFileAt(row);
-        if (file != null && file.getStatus() == TitleStatus.IN_LOCAL_POOL) {
+        if (file != null && file.getStatus() == TrackStatus.IN_LOCAL_POOL) {
           comp.setFont(ComponentFactory.boldLabelFont);
         }
         return comp;
@@ -291,26 +291,26 @@ public class MP3Explorer extends JFrame {
     JPanel panel = new JPanel(layout);
     CellConstraints cc = new CellConstraints();
 
-    final PresentationModel<TitleModel> pm = new PresentationModel<TitleModel>((TitleModel) null);
+    final PresentationModel<TrackModel> pm = new PresentationModel<TrackModel>((TrackModel) null);
     mp3Holder.addValueChangeListener(new PropertyChangeListener() {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getNewValue() != null) {
-          TitleModel tm = new TitleModel((MP3File) evt.getNewValue());
+          TrackModel tm = new TrackModel((MP3File) evt.getNewValue());
           importHandler.clear();
           if (tm.getFile().getTag() != null) {
             importHandler.add(new MP3TrackImportTask(tm.getFile().getFile(), tm.getFile().getTag()));
             importHandler.resolveTags();
             importHandler.resolveTracksLocal();
             if (importHandler.isEverythingResolved()) {
-              tm.setStatus(TitleStatus.IN_LOCAL_POOL);
+              tm.setStatus(TrackStatus.IN_LOCAL_POOL);
               tm.setTitle(importHandler.getTasks().get(0).getTrackLibraryTitle());
             } else {
-              tm.setStatus(TitleStatus.UNRESOLVED);
+              tm.setStatus(TrackStatus.UNRESOLVED);
             }
           } else {
-            tm.setStatus(TitleStatus.UNRESOLVED);
+            tm.setStatus(TrackStatus.UNRESOLVED);
           }
           pm.setBean(tm);
         } else {
@@ -328,7 +328,7 @@ public class MP3Explorer extends JFrame {
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private JPanel createPlaylistPanel(final PresentationModel<TitleModel> model) {
+  private JPanel createPlaylistPanel(final PresentationModel<TrackModel> model) {
     List<Playlist> playlists = this.ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE);
     Collections.sort(playlists, new PlaylistNameCompator());
     final JPanel outerPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu,", "3dlu,20dlu:grow,3dlu,pref,3dlu,"));
@@ -448,7 +448,7 @@ public class MP3Explorer extends JFrame {
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private JPanel createTagsPanel(final PresentationModel<TitleModel> model) {
+  private JPanel createTagsPanel(final PresentationModel<TrackModel> model) {
     final TagManager tagManager = this.ctx.getAdminClient().getTagManager();
 
     List<StaticTag> tags = tagManager.getStaticTags();
@@ -599,7 +599,7 @@ public class MP3Explorer extends JFrame {
     return outerPanel;
   }
 
-  private JPanel createTitleInfoPanel(final PresentationModel<TitleModel> model) {
+  private JPanel createTitleInfoPanel(final PresentationModel<TrackModel> model) {
 
     JPanel panel = new JPanel(new FormLayout("3dlu,pref,3dlu,pref,5dlu:grow,max(pref;80px),3dlu", "3dlu,pref,3dlu,pref,3dlu"));
     CellConstraints cc = new CellConstraints();
@@ -610,7 +610,7 @@ public class MP3Explorer extends JFrame {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        TitleStatus status = (TitleStatus) evt.getNewValue();
+        TrackStatus status = (TrackStatus) evt.getNewValue();
         statusLabel.setText(status != null ? textProvider.getString("mp3explorer.property.status." + status.name().toLowerCase()) : "");
       }
 
@@ -647,9 +647,9 @@ public class MP3Explorer extends JFrame {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        playAction.setTitleModel((TitleModel) evt.getNewValue());
-        searchAction.setTitleModel((TitleModel) evt.getNewValue());
-        uploadAction.setTitleModel((TitleModel) evt.getNewValue());
+        playAction.setTitleModel((TrackModel) evt.getNewValue());
+        searchAction.setTitleModel((TrackModel) evt.getNewValue());
+        uploadAction.setTrackModel((TrackModel) evt.getNewValue());
       }
     });
 
@@ -667,9 +667,9 @@ public class MP3Explorer extends JFrame {
   }
 
   private class TagChangeListener implements ActionListener {
-    private PresentationModel<TitleModel> presentationModel;
+    private PresentationModel<TrackModel> presentationModel;
 
-    public TagChangeListener(PresentationModel<TitleModel> presentationModel) {
+    public TagChangeListener(PresentationModel<TrackModel> presentationModel) {
       super();
       this.presentationModel = presentationModel;
     }
@@ -679,7 +679,7 @@ public class MP3Explorer extends JFrame {
      */
     @Override
     public void actionPerformed(ActionEvent e) {
-      TitleModel model = presentationModel.getBean() != null ? presentationModel.getBean() : null;
+      TrackModel model = presentationModel.getBean() != null ? presentationModel.getBean() : null;
       if (e.getSource() instanceof JCheckBox && model != null && model.getTitle() != null) {
         TagManager tagManager = ctx.getAdminClient().getTagManager();
         String tag = (String) ((JCheckBox) e.getSource()).getClientProperty("tag");
@@ -712,9 +712,9 @@ public class MP3Explorer extends JFrame {
   }
 
   private class PlaylistChangeListener implements ActionListener {
-    private PresentationModel<TitleModel> presentationModel;
+    private PresentationModel<TrackModel> presentationModel;
 
-    public PlaylistChangeListener(PresentationModel<TitleModel> presentationModel) {
+    public PlaylistChangeListener(PresentationModel<TrackModel> presentationModel) {
       super();
       this.presentationModel = presentationModel;
     }
@@ -724,7 +724,7 @@ public class MP3Explorer extends JFrame {
      */
     @Override
     public void actionPerformed(ActionEvent e) {
-      TitleModel model = presentationModel.getBean() != null ? presentationModel.getBean() : null;
+      TrackModel model = presentationModel.getBean() != null ? presentationModel.getBean() : null;
       if (e.getSource() instanceof JCheckBox && model != null && model.getTitle() != null) {
         Playlist playlist = (Playlist) ((JCheckBox) e.getSource()).getClientProperty("playlist");
         boolean selected = ((JCheckBox) e.getSource()).isSelected();
@@ -743,7 +743,7 @@ public class MP3Explorer extends JFrame {
 
   class SearchAction extends AbstractAction implements PropertyChangeListener {
     private static final long serialVersionUID = -4065705669359479366L;
-    private TitleModel titleModel;
+    private TrackModel titleModel;
 
     SearchAction() {
       this.setEnabled(false);
@@ -772,7 +772,7 @@ public class MP3Explorer extends JFrame {
           List<BasicTrack> titles = (List<BasicTrack>) panel.getSelectionHolder().getValue();
           if (titles != null && titles.size() > 0) {
             titleModel.setTitle(titles.get(0));
-            titleModel.setStatus(TitleStatus.IN_LAUTFM_POOL);
+            titleModel.setStatus(TrackStatus.IN_LAUTFM_POOL);
             ctx.getAdminClient().getTrackService().getTrackRegistry()
                 .registerAlias(titles.get(0).getId(), titleModel.getID3Artist(), titleModel.getID3Name());
             try {
@@ -805,7 +805,7 @@ public class MP3Explorer extends JFrame {
     /**
      * @return the titleModel
      */
-    public TitleModel getTitleModel() {
+    public TrackModel getTitleModel() {
       return titleModel;
     }
 
@@ -813,7 +813,7 @@ public class MP3Explorer extends JFrame {
      * @param titleModel
      *          the titleModel to set
      */
-    public void setTitleModel(TitleModel titleModel) {
+    public void setTitleModel(TrackModel titleModel) {
       if (this.titleModel != null) {
         this.titleModel.removePropertyChangeListener("status", this);
       }
@@ -825,7 +825,7 @@ public class MP3Explorer extends JFrame {
     }
 
     private void checkEnabled() {
-      this.setEnabled(this.titleModel != null && this.titleModel.getStatus() == TitleStatus.UNRESOLVED);
+      this.setEnabled(this.titleModel != null && this.titleModel.getStatus() == TrackStatus.UNRESOLVED);
     }
 
     /**
@@ -839,10 +839,11 @@ public class MP3Explorer extends JFrame {
 
   class UploadAction extends AbstractAction implements PropertyChangeListener {
     private static final long serialVersionUID = 2851733588145314338L;
-    private TitleModel titleModel;
+    private TrackModel trackModel;
 
     UploadAction() {
       this.putValue(Action.SMALL_ICON, ctx.getIcon("upload.png"));
+      this.setEnabled(false);
     }
 
     /**
@@ -854,34 +855,34 @@ public class MP3Explorer extends JFrame {
       if (!win.isVisible()) {
         win.setVisible(true);
       }
-      win.addFiles(new File[] { titleModel.getFile().getFile() }, false);
-      titleModel.setStatus(TitleStatus.UPLOAD);
+      win.addFiles(new File[] { trackModel.getFile().getFile() }, false);
+      trackModel.setStatus(TrackStatus.UPLOAD);
     }
 
     /**
      * @return the titleModel
      */
-    public TitleModel getTitleModel() {
-      return titleModel;
+    public TrackModel getTrackModel() {
+      return trackModel;
     }
 
     /**
      * @param titleModel
      *          the titleModel to set
      */
-    public void setTitleModel(TitleModel titleModel) {
-      if (this.titleModel != null) {
-        this.titleModel.removePropertyChangeListener("status", this);
+    public void setTrackModel(TrackModel titleModel) {
+      if (this.trackModel != null) {
+        this.trackModel.removePropertyChangeListener("status", this);
       }
-      this.titleModel = titleModel;
-      if (this.titleModel != null) {
-        this.titleModel.addPropertyChangeListener("status", this);
+      this.trackModel = titleModel;
+      if (this.trackModel != null) {
+        this.trackModel.addPropertyChangeListener("status", this);
       }
       this.checkEnabled();
     }
 
     private void checkEnabled() {
-      this.setEnabled(false); // FIXME this.titleModel != null && this.titleModel.getStatus() == TitleStatus.UNRESOLVED);
+      this.setEnabled(this.trackModel != null && this.trackModel.getStatus() == TrackStatus.UNRESOLVED);
     }
 
     /**
@@ -895,7 +896,7 @@ public class MP3Explorer extends JFrame {
 
   class PlayAction extends AbstractAction {
     private static final long serialVersionUID = -5761869709815616309L;
-    private TitleModel titleModel;
+    private TrackModel titleModel;
 
     PlayAction() {
       this.setEnabled(false);
@@ -913,7 +914,7 @@ public class MP3Explorer extends JFrame {
     /**
      * @return the titleModel
      */
-    public TitleModel getTitleModel() {
+    public TrackModel getTitleModel() {
       return titleModel;
     }
 
@@ -921,7 +922,7 @@ public class MP3Explorer extends JFrame {
      * @param titleModel
      *          the titleModel to set
      */
-    public void setTitleModel(TitleModel titleModel) {
+    public void setTitleModel(TrackModel titleModel) {
       this.titleModel = titleModel;
       this.checkEnabled();
     }
@@ -1095,7 +1096,7 @@ public class MP3Explorer extends JFrame {
       MP3DirectoryTableModel model = (MP3DirectoryTableModel) table.getModel();
       table.getSelectionModel().clearSelection();
       for (int i = 0; i < model.getRowCount(); i++) {
-        if (model.getFileAt(i).getStatus() != TitleStatus.IN_LOCAL_POOL) {
+        if (model.getFileAt(i).getStatus() != TrackStatus.IN_LOCAL_POOL) {
           int idx = table.convertRowIndexToView(i);
           table.getSelectionModel().addSelectionInterval(idx, idx);
         }

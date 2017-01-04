@@ -251,13 +251,13 @@ public class MP3DirectoryTableModel extends AbstractTableModel {
           int myResolveId = resolveId; // used to detect if another thread has started
           for (int i = 0; myResolveId == resolveId && i < files.size(); i++) {
             MP3File file = files.get(i);
-            if (file.getStatus() == TitleStatus.UNRESOLVED) {
+            if (file.getStatus() == TrackStatus.UNRESOLVED) {
               titleImportHandler.clear();
               titleImportHandler.add(new MP3TrackImportTask(file.getFile(), file.getTag()));
               titleImportHandler.resolveTags();
               titleImportHandler.resolveTracksLocal();
               if (titleImportHandler.isEverythingResolved()) {
-                file.setStatus(TitleStatus.IN_LOCAL_POOL);
+                file.setStatus(TrackStatus.IN_LOCAL_POOL);
                 // tm.setTitle(importHandler.getTasks().get(0).getTrackLibraryTitle());
               }
             }

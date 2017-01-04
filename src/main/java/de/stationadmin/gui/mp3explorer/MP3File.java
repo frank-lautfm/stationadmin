@@ -11,7 +11,7 @@ import org.blinkenlights.jid3.ID3Tag;
 public class MP3File {
   File file;
   ID3Tag tag;
-  TitleStatus status = TitleStatus.UNRESOLVED;
+  TrackStatus status = TrackStatus.UNRESOLVED;
   float size;
 
   /**
@@ -50,14 +50,14 @@ public class MP3File {
   /**
    * @return the status
    */
-  public TitleStatus getStatus() {
+  public TrackStatus getStatus() {
     return status;
   }
 
   /**
    * @param status the status to set
    */
-  public void setStatus(TitleStatus status) {
+  public void setStatus(TrackStatus status) {
     this.status = status;
   }
 

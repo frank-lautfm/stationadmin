@@ -136,9 +136,9 @@ public class UploadedTrackTableModel extends AbstractTableModel {
       title.setGenre((String) value);
       break;
     case PRIVATE:
-      if (((Boolean) value).booleanValue() == false) {
-        title.setPrivateTrack((Boolean) value);
-      }
+      // if (((Boolean) value).booleanValue() == false) {
+      title.setPrivateTrack((Boolean) value);
+      // }
       break;
     case TITLE:
       title.setTitle((String) value);

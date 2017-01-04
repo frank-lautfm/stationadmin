@@ -16,13 +16,13 @@ import de.stationadmin.base.track.BasicTrack;
  * @author Frank Korf
  * 
  */
-public class TitleModel extends Model {
+public class TrackModel extends Model {
   private static final long serialVersionUID = 6565522546652005173L;
   private MP3File file;
   private BasicTrack title;
-  private TitleStatus status;
+  private TrackStatus status;
 
-  public TitleModel(MP3File file) {
+  public TrackModel(MP3File file) {
     super();
     this.file = file;
   }
@@ -49,7 +49,7 @@ public class TitleModel extends Model {
   /**
    * @return the status
    */
-  public TitleStatus getStatus() {
+  public TrackStatus getStatus() {
     return status;
   }
 
@@ -80,8 +80,8 @@ public class TitleModel extends Model {
    * @param status
    *          the status to set
    */
-  public void setStatus(TitleStatus status) {
-    TitleStatus old = this.status;
+  public void setStatus(TrackStatus status) {
+    TrackStatus old = this.status;
     this.status = status;
     if (this.file != null) {
       this.file.setStatus(status);
