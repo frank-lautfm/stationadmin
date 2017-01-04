@@ -6,6 +6,13 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.0.4
+--------------
+[#] Nachträgliches Setzen des private-Flags nach dem Upload
+[+] Importieren von Playlists aus Station Admin 3.x-Backups
+[+] Konfiguration der Playlist-Farbe
+[+] Ändern des Titeltyps (Musik, Jingle, Moderation) in den Titeldetails
+
 Version 4.0.3
 --------------
 [*] Upload aus MP3-Explorer heraus wieder aktiviert
