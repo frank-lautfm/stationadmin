@@ -111,11 +111,11 @@ public class MP3DirectoryTableModel extends AbstractTableModel {
     Column col = Column.values()[column];
     switch (col) {
     case ARTIST:
-      return textProvider.getString("titleviewer.property.artist");
+      return textProvider.getString("trackviewer.property.artist");
     case TITLE:
-      return textProvider.getString("titleviewer.property.title");
+      return textProvider.getString("trackviewer.property.title");
     case ALBUM:
-      return textProvider.getString("titleviewer.property.album");
+      return textProvider.getString("trackviewer.property.album");
     case FILENAME:
       return textProvider.getString("mp3explorer.property.filename");
     case TRACKNO:

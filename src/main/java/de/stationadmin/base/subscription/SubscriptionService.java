@@ -15,7 +15,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TimerTask;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,12 +27,13 @@ import org.json.JSONException;
 
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
-import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.BasicTrack;
+import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
 import de.stationadmin.base.util.AbstractBean;
 import de.stationadmin.lfm.backend.Track;
+import de.stationadmin.lfm.backend.TrackList;
 
 /**
  * @author korf
@@ -40,17 +44,16 @@ public class SubscriptionService extends AbstractBean implements Service {
   private static final ExtendedTrackFormat fmt = new ExtendedTrackFormat(true);
   private static final String DIR = "/subscriptions/";
   private SessionCtx sessionCtx;
-  private TrackRegistry titleRegistry;
-  private int maxFetch = 2500;
+  private TrackRegistry trackRegistry;
   private int maxAgeInDays = 14;
 
   private List<Subscription> subscriptions = new ArrayList<Subscription>();
-  private SubscriptionStatus status = new SubscriptionStatus();
+  private Date minSearchDate = new Date(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 2);
   private List<DetailedTrack> results = new ArrayList<DetailedTrack>();
 
   public SubscriptionService(SessionCtx ctx, TrackRegistry titleRegistry) {
     this.sessionCtx = ctx;
-    this.titleRegistry = titleRegistry;
+    this.trackRegistry = titleRegistry;
     new File(ctx.getStationDirectory() + DIR).mkdirs();
   }
 
@@ -100,108 +103,83 @@ public class SubscriptionService extends AbstractBean implements Service {
 
   }
 
-  private boolean checkTitle(Track result) {
+  private boolean checkTrack(Subscription subscription, Track result) {
     boolean match = false;
-    for (int i = 0; i < this.subscriptions.size() && !match; i++) {
-      Subscription subscription = this.subscriptions.get(i);
-      String value = null;
-      switch (subscription.getField()) {
-      case ARTIST:
-        value = result.getArtist();
-        break;
-      case ALBUM:
-        value = result.getAlbum();
-        break;
-      case GENRE:
-        value = result.getGenre();
-        break;
-      case TITLE:
-        value = result.getTitle();
-        break;
-      }
-      if (value != null) {
-        if (subscription.isEquals()) {
-          match = BasicTrack.equals(value, subscription.getQuery());
-        } else {
-          match = value.toLowerCase().contains(subscription.getQuery().toLowerCase());
-        }
+    String value = null;
+    switch (subscription.getField()) {
+    case ARTIST:
+      value = result.getArtist();
+      break;
+    case ALBUM:
+      value = result.getAlbum();
+      break;
+    case GENRE:
+      value = result.getGenre();
+      break;
+    case TITLE:
+      value = result.getTitle();
+      break;
+    }
+    if (value != null) {
+      if (subscription.isEquals()) {
+        match = BasicTrack.equals(value, subscription.getQuery());
+      } else {
+        match = value.toLowerCase().contains(subscription.getQuery().toLowerCase());
       }
     }
-    if (match) {
-      DetailedTrack title = new DetailedTrack(result);
-      synchronized (this.results) {
-        this.results.add(title);
-      }
-      return true;
-    }
-    return false;
+    return match;
   }
 
   public void executeQueries() throws IOException, JSONException {
-    // FIXME
-    // if (this.subscriptions.size() == 0) {
-    // return; // nothing to do
-    // }
-    //
-    // Set<Integer> known = new HashSet<Integer>();
-    // for(DetailedTitle t : this.results) {
-    // known.add(t.getId());
-    // }
-    //
-    // TitleQuery query = new TitleQuery("%", false);
-    // int blockSize = 500;
-    // query.setLimit(blockSize);
-    // query.setSort("upload_datum");
-    // query.setAscending(false);
-    // long t = System.currentTimeMillis();
-    // log.info("start subscritpion query");
-    // SearchResultList resultList = this.sessionCtx.getServer().search(query,
-    // true);
-    // int cnt = 0;
-    // int matches = 0;
-    // boolean abort = false;
-    // Date date = null;
-    // int maxId = status.getFetchedTill();
-    // do {
-    // cnt += resultList.getResults().size();
-    // for (SearchResult result : resultList.getResults()) {
-    // if (!abort) {
-    // if (result.getId() > status.getFetchedTill()) {
-    // if (!result.isPrivateTrack() &&
-    // this.titleRegistry.getTitle(result.getId()) == null &&
-    // !known.contains(result.getId())) {
-    // if (checkTitle(result)) {
-    // matches++;
-    // }
-    // }
-    // date = result.getUploadDate();
-    // maxId = Math.max(maxId, result.getId());
-    // } else {
-    // abort = true;
-    // }
-    // }
-    // }
-    // abort = abort || cnt >= maxFetch;
-    // if (!abort) {
-    // query.setStart(query.getStart() + blockSize);
-    // resultList = this.sessionCtx.getServer().search(query);
-    // }
-    // } while (resultList.getResults().size() > 0 && !abort);
-    //
-    // this.status.setFetchedTill(maxId);
-    // saveStatus();
-    // if (matches > 0) {
-    // this.firePropertyChange("results", new ArrayList<DetailedTitle>(),
-    // this.results);
-    // this.saveResults();
-    // }
-    //
-    // log.info("checked " + cnt + " titles in " + (System.currentTimeMillis() -
-    // t) + " ms, " + matches + " matches");
-    // log.info(date);
-    // if(matches > 0) {
-    // this.firePropertyChange("newMatches", 0, matches);
-    // }
+    if (this.subscriptions.size() == 0) {
+      return; // nothing to do
+    }
+
+    Set<Integer> known = new HashSet<Integer>();
+    for (DetailedTrack t : this.results) {
+      known.add(t.getId());
+    }
+
+    int matches = 0;
+    TrackList list;
+    for (Subscription subscription : this.subscriptions) {
+      if (subscription.getQuery().length() < 2) {
+        continue;
+      }
+      int page = 0;
+      HashMap<String, String> filter = new HashMap<String, String>();
+
+      boolean abort = false;
+      do {
+        filter.put(subscription.getField().getRawName(), subscription.getQuery());
+        list = this.sessionCtx.getServer().getTracks(this.sessionCtx.getStationId(), page, filter, "created_at", false);
+
+        for (Track track : list.getTracks()) {
+          if(track.getUpdatedAt().getTime() < minSearchDate.getTime()) {
+            abort = true;
+          }
+          if (!abort && !known.contains(track.getId()) && checkTrack(subscription, track) && !track.isPrivateTrack() && this.trackRegistry.getTrack(track.getId()) == null) {
+            synchronized (this.results) {
+              this.results.add(new DetailedTrack(track));
+              matches++;
+            }
+          }
+        }
+
+        page++;
+      } while (list.getTracks().length > 0 && !abort);
+      try {
+        Thread.sleep(1000);
+      } catch (Exception e) {
+      }
+    }
+
+    saveStatus();
+    if (matches > 0) {
+      this.firePropertyChange("results", new ArrayList<DetailedTrack>(), this.results);
+      this.saveResults();
+      this.firePropertyChange("newMatches", 0, matches);
+    }
   }
 
   public List<DetailedTrack> getResults() {
@@ -274,7 +252,7 @@ public class SubscriptionService extends AbstractBean implements Service {
       this.results.removeAll(titles);
     }
     this.saveResults();
-    this.firePropertyChange("results", new ArrayList<DetailedTrack>(), this.results);
+    this.firePropertyChange("results", null, this.results);
   }
 
   private void loadResults() {
@@ -290,6 +268,7 @@ public class SubscriptionService extends AbstractBean implements Service {
           this.results.add(title);
           line = bufReader.readLine();
         }
+        bufReader.close();
       } catch (IOException e) {
         log.error("failed to load subscription results", e);
       }
@@ -316,6 +295,7 @@ public class SubscriptionService extends AbstractBean implements Service {
           }
           line = bufReader.readLine();
         }
+        bufReader.close();
       } catch (IOException e) {
         log.error("failed to load subscription queries", e);
       }
@@ -329,8 +309,7 @@ public class SubscriptionService extends AbstractBean implements Service {
     try {
       FileOutputStream out = new FileOutputStream(fileName);
       DataOutputStream dOut = new DataOutputStream(out);
-      dOut.writeInt(this.status.getFetchedTill());
-      dOut.writeInt(this.status.getSeenTill());
+      dOut.writeLong(this.minSearchDate.getTime());
       dOut.flush();
       out.flush();
       out.close();
@@ -346,8 +325,7 @@ public class SubscriptionService extends AbstractBean implements Service {
       try {
         FileInputStream in = new FileInputStream(fileName);
         DataInputStream dIn = new DataInputStream(in);
-        this.status.setFetchedTill(dIn.readInt());
-        this.status.setSeenTill(dIn.readInt());
+        this.minSearchDate = new Date(dIn.readLong());
         in.close();
       } catch (IOException e) {
         log.error("failed to load subscription status", e);

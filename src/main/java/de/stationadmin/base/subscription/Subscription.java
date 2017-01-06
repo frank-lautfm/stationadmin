@@ -47,7 +47,20 @@ public class Subscription {
   }
 
   public enum Field {
-    ARTIST, TITLE, ALBUM, GENRE
+    ARTIST("artist"), TITLE("title"), ALBUM("album"), GENRE("genre");
+    
+    private String rawName;
+    
+    private Field(String rawName) {
+      this.rawName = rawName;
+    }
+    
+    public String getRawName() {
+      return this.rawName;
+    }
+    
+    
+    
   }
 
   public Field getField() {

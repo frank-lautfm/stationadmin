@@ -595,7 +595,7 @@ public class RegisteredTracksViewer extends JPanel {
           deleteAction.setTracks(entries);
           reloadAction.setTracks(entries);
           viewAction.setTitles(entries);
-          followAction.setTitles(entries);
+          followAction.setTracks(entries);
         }
       }
 

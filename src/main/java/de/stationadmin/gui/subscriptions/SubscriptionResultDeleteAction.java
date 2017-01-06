@@ -9,6 +9,7 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 
 import com.jgoodies.binding.value.ValueModel;
 
@@ -28,7 +29,7 @@ public class SubscriptionResultDeleteAction extends AbstractAction {
   
   public SubscriptionResultDeleteAction(ClientContext ctx, ValueModel  selectionHolder) {
     super();
-    ctx.getTextProvider().getString("action.subscriptionResult.delete");
+    this.putValue(Action.NAME, ctx.getTextProvider().getString("action.subscriptionResult.delete"));
     this.ctx = ctx;
     this.selectionHolder = selectionHolder;
     this.selectionHolder.addValueChangeListener(new PropertyChangeListener() {

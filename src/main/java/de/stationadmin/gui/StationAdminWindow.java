@@ -51,8 +51,8 @@ import de.stationadmin.base.Status;
 import de.stationadmin.base.Version;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.schedule.Schedule;
-import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.BasicTrack;
+import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.gui.backup.BackupCreateAction;
 import de.stationadmin.gui.backup.BackupRestoreAction;
 import de.stationadmin.gui.help.AboutDisplayAction;
@@ -77,6 +77,7 @@ import de.stationadmin.gui.playlist.tools.TempPlaylistDisplayAction;
 import de.stationadmin.gui.radioctrl.StartRadioAction;
 import de.stationadmin.gui.schedule.ScheduleEditorDisplayAction;
 import de.stationadmin.gui.settings.SettingsDisplayAction;
+import de.stationadmin.gui.subscriptions.SubscriptionManagerDisplayAction;
 import de.stationadmin.gui.synchronization.SynchronizationDialog;
 import de.stationadmin.gui.synchronization.SynchronizeFullAction;
 import de.stationadmin.gui.synchronization.SynchronizePlaylistsAction;
@@ -461,7 +462,7 @@ public class StationAdminWindow extends StationAdminFrame {
       JMenu menuTitles = new JMenu(this.ctx.getTextProvider().getString("menu.title"));
       menuTitles.add(new TagManagerDisplayAction(this.ctx));
       menuTitles.add(new TrackAliasManagerDisplayAction(this.ctx));
-      // menuTitles.add(new SubscriptionManagerDisplayAction(ctx));
+      menuTitles.add(new SubscriptionManagerDisplayAction(ctx));
       menuTitles.add(new MP3ExplorerDisplayAction(this.ctx));
       menuBar.add(menuTitles);
     }

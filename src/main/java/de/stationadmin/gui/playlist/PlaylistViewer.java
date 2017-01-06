@@ -380,7 +380,7 @@ public class PlaylistViewer extends JPanel {
             distributeAction.setTitles(titles);
             titleHolder.setValue(titles);
             viewAction.setTitles(titles);
-            followAction.setTitles(titles);
+            followAction.setTracks(titles);
           } else {
             distributeAction.setTitles(new ArrayList<BasicTrack>());
           }

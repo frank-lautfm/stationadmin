@@ -619,7 +619,7 @@ public class MP3Explorer extends JFrame {
 
     final JLabel titleLabel = new JLabel();
 
-    panel.add(new JLabel(textProvider.getString("titleviewer.property.title") + ":"), cc.xy(2, 2));
+    panel.add(new JLabel(textProvider.getString("trackviewer.property.title") + ":"), cc.xy(2, 2));
     panel.add(titleLabel, cc.xy(4, 2));
 
     model.getModel("title").addValueChangeListener(new PropertyChangeListener() {
@@ -701,7 +701,7 @@ public class MP3Explorer extends JFrame {
               }
             }
           } catch (IOException ex) {
-            ErrorInfo errorInfo = textProvider.createErrorInfo(ex, "titleviewer.tag.error", tag);
+            ErrorInfo errorInfo = textProvider.createErrorInfo(ex, "trackviewer.tag.error", tag);
             JXErrorPane.showDialog(ctx.getRootWindow(), errorInfo);
           }
         }

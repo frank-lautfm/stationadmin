@@ -23,7 +23,7 @@ import de.stationadmin.gui.ClientContext;
 public class FollowArtistsAction extends AbstractAction {
   private static final long serialVersionUID = 6600669163746314642L;
   private ClientContext ctx;
-  private List<BasicTrack> titles;
+  private List<BasicTrack> tracks;
 
   
   public FollowArtistsAction(ClientContext ctx) {
@@ -38,7 +38,7 @@ public class FollowArtistsAction extends AbstractAction {
   @Override
   public void actionPerformed(ActionEvent evt) {
     Set<String> artists = new HashSet<String>();
-    for(BasicTrack title : titles) {
+    for(BasicTrack title : tracks) {
       artists.add(title.getArtist());
     }
     for(String artist : artists) {
@@ -47,12 +47,12 @@ public class FollowArtistsAction extends AbstractAction {
     }
   }
 
-  public List<BasicTrack> getTitles() {
-    return titles;
+  public List<BasicTrack> getTracks() {
+    return tracks;
   }
 
-  public void setTitles(List<BasicTrack> titles) {
-    this.titles = titles;
+  public void setTracks(List<BasicTrack> titles) {
+    this.tracks = titles;
     this.setEnabled(titles.size() > 0);
   }
 

@@ -284,7 +284,7 @@ public class TrackViewer extends JDialog {
 
     panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.private")), cc.xy(2, row));
     final JCheckBox privateTrack = BasicComponentFactory.createCheckBox(model.getBufferedModel("privateTrack"), null);
-    privateTrack.setEnabled(false);
+    privateTrack.setEnabled(model.getBean().isOwnTrack());
     panel.add(privateTrack, cc.xy(4, row));
     row += 2;
 
