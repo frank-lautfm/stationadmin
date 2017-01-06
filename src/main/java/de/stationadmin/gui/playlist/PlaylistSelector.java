@@ -50,6 +50,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.PlaylistNameCompator;
 import de.stationadmin.base.playlist.PlaylistRegistry;
+import de.stationadmin.base.schedule.Schedule.Entry;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.gui.ClientContext;
@@ -62,6 +63,8 @@ import de.stationadmin.gui.ClientContext;
 public class PlaylistSelector extends JPanel {
   private static final long serialVersionUID = -2440928931577319044L;
   private static final String PREFKEY_RENDER_COLORS = "playlistselector.rendercolors";
+  private static final String TAG_USED = "#used";
+  private static final String TAG_UNUSED = "#unused";
 
   private ClientContext ctx;
   private PlaylistRegistry playlistRegistry;
@@ -76,8 +79,7 @@ public class PlaylistSelector extends JPanel {
   private HashSet<Integer> highlightedPlaylists = new HashSet<Integer>();
 
   /**
-   * registered as property change listener for the "modified" flag of playlists
-   * - need to repaint the list if this flag changes for a playlist
+   * registered as property change listener for the "modified" flag of playlists - need to repaint the list if this flag changes for a playlist
    */
   private PropertyChangeListener playlistModificationListener = new PropertyChangeListener() {
 
@@ -150,14 +152,19 @@ public class PlaylistSelector extends JPanel {
       private static final long serialVersionUID = -7901905125762119676L;
 
       /**
-       * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList,
-       *      java.lang.Object, int, boolean, boolean)
+       * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
        */
       @Override
       public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         if (value == null) {
           setText(ctx.getTextProvider().getString("playlistselector.all"));
+        } else if (value.equals(TAG_USED)) {
+          setText(ctx.getTextProvider().getString("playlistselector.used"));
+
+        } else if (value.equals(TAG_UNUSED)) {
+          setText(ctx.getTextProvider().getString("playlistselector.unused"));
+
         }
         return comp;
       }
@@ -263,9 +270,26 @@ public class PlaylistSelector extends JPanel {
   private List<Playlist> filterPlaylists(List<Playlist> playlists) {
     if (this.tagSelection.getValue() != null) {
       String tag = (String) this.tagSelection.getValue();
+
+      HashSet<Integer> used = null;
+      Boolean filterUsed = null;
+      if(tag.equals(TAG_UNUSED) || tag.equals(TAG_USED)) {
+        used = new HashSet<Integer>();
+        filterUsed = tag.equals(TAG_USED);
+        
+        for(Entry entry : ctx.getAdminClient().getSchedule().getEntries()) {
+          used.add(entry.getPlaylistId());
+        }
+      }
+
       ArrayList<Playlist> filtered = new ArrayList<Playlist>(playlists.size());
       for (Playlist playlist : playlists) {
-        if (playlist.isTaggedWith(tag)) {
+        if(filterUsed != null) {
+          if(used.contains(playlist.getId()) == filterUsed.booleanValue()) {
+            filtered.add(playlist);
+          }
+        }
+        else if (playlist.isTaggedWith(tag)) {
           filtered.add(playlist);
         }
       }
@@ -350,6 +374,8 @@ public class PlaylistSelector extends JPanel {
     ArrayList<String> entries = new ArrayList<String>(playlistRegistry.getUsedTags());
     Collections.sort(entries);
     entries.add(0, null);
+    entries.add(TAG_USED);
+    entries.add(TAG_UNUSED);
     tagModel.setList(entries);
 
   }
@@ -398,8 +424,7 @@ public class PlaylistSelector extends JPanel {
   }
 
   /**
-   * Sets the selection mode for the unerlying list - default is
-   * {@link ListSelectionModel#SINGLE_SELECTION}
+   * Sets the selection mode for the unerlying list - default is {@link ListSelectionModel#SINGLE_SELECTION}
    * 
    * @param selectionMode
    */
