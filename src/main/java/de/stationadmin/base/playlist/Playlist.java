@@ -123,22 +123,19 @@ public class Playlist extends AbstractBean {
   private Entry createEntry(int start, BasicTrack title, long addedAt) {
     RegisteredTrack regTitle = this.trackRegistry.getTrack(title.getId());
     Long timestamp = this.getTimestampMap().get(title.getId());
-    return new Entry(start, title.getId(), regTitle != null ? regTitle : title, timestamp != null && timestamp.longValue() < addedAt ? timestamp
-        : addedAt);
+    return new Entry(start, title.getId(), regTitle != null ? regTitle : title, timestamp != null && timestamp.longValue() < addedAt ? timestamp : addedAt);
   }
 
   private BasicTrack register(BasicTrack track) {
     if (this.type != PlaylistType.TEMPORARY) {
       return this.trackRegistry.register(this, track);
-    }
-    else {
+    } else {
       return track;
     }
   }
 
   /**
-   * Assigns Title objects to all entries. Necessary after loading 2.x
-   * playlists.
+   * Assigns Title objects to all entries. Necessary after loading 2.x playlists.
    */
   protected void resolveTitles() {
     for (Entry entry : this.entries) {
@@ -391,22 +388,27 @@ public class Playlist extends AbstractBean {
       }
       return;
     }
-    int titlePos = position;
+    int trackPos = position;
     int additionalLength = 0;
     for (BasicTrack track : tracks) {
       Entry entry = null;
-      if (titlePos == 0) {
+      if (trackPos == 0) {
         entry = this.createEntry(0, track, System.currentTimeMillis());
         this.workingEntries.add(0, entry);
       } else {
-        Entry last = this.workingEntries.get(this.workingEntries.size() - 1);
-        int start = last.getStart() + last.getTrack().getLength();
+        int start;
+        if (trackPos < this.workingEntries.size()) {
+          start =  this.workingEntries.get(trackPos).getStart();
+        } else {
+          Entry last = this.workingEntries.get(this.workingEntries.size() - 1);
+          start = last.getStart() + last.getTrack().getLength();
+        }
         entry = this.createEntry(start, track, System.currentTimeMillis());
-        this.workingEntries.add(titlePos, entry);
+        this.workingEntries.add(trackPos, entry);
       }
       entry.track = this.register(track);
       additionalLength += track.getLength();
-      titlePos++;
+      trackPos++;
     }
     this.updateStartTimes(position);
     this.setLength(this.length + additionalLength);
@@ -605,8 +607,7 @@ public class Playlist extends AbstractBean {
    * Configures if / which titles can be repeated when generating a playlist.
    * 
    * @param level
-   *          -1 = no repeats (default), 0 = any title, 1 - 3 corrosponds to the
-   *          push factor
+   *          -1 = no repeats (default), 0 = any title, 1 - 3 corrosponds to the push factor
    */
   public void setGenerateTitleRepeatLevel(int level) {
     this.ensureLocalDataExists();
@@ -635,11 +636,8 @@ public class Playlist extends AbstractBean {
   }
 
   /**
-   * Specifies whether or not repeating of artists shall be minimized. If
-   * repeats are minimized the generator will select titles from all other
-   * artists before repeating an artist. If repeats are not minimized it will
-   * only select one hour of music from other artists before an artist is
-   * repeated.
+   * Specifies whether or not repeating of artists shall be minimized. If repeats are minimized the generator will select titles from all other artists before repeating an artist. If repeats are not
+   * minimized it will only select one hour of music from other artists before an artist is repeated.
    * 
    * @param minimize
    *          <code>true</code> to minimize artist repeats (default)
@@ -653,7 +651,7 @@ public class Playlist extends AbstractBean {
 
   public void setId(int id) {
     this.id = id;
-    if(this.localData != null && this.localData.getId() != id) {
+    if (this.localData != null && this.localData.getId() != id) {
       // id may have changed if we are working on a new playlist
       this.localData.setId(id);
     }
@@ -721,7 +719,7 @@ public class Playlist extends AbstractBean {
     }
     if (map.containsKey("id")) {
       int id = Integer.parseInt(map.get("id"));
-      if (id < 1 << 20  && !preserveId) {
+      if (id < 1 << 20 && !preserveId) {
         this.id = id;
       } else {
         map.put("id", Integer.toString(this.id));
