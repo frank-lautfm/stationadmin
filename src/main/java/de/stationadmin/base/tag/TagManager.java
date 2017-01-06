@@ -97,17 +97,27 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
   }
 
   /**
-   * Deletes the tag with the given name completely - all tagging information
-   * gets lost
+   * Deletes the tag with the given name completely - all tagging information gets lost
    * 
    * @param tag
    */
   public void deleteTag(String tag) throws IOException {
+    this.deleteTag(tag, false);
+  }
+
+  /**
+   * Deletes the tag with the given name completely - all tagging information gets lost
+   * 
+   * @param tag
+   */
+  private void deleteTag(String tag, boolean localOnly) throws IOException {
     TagFile tagFile = this.getTagFile(tag, false);
     boolean tracksDirty = false;
     if (tagFile != null) {
       int[] ids = tagFile.getIds();
-      this.ctx.getServer().deleteTag(ctx.getStationId(), tag);
+      if (!localOnly) {
+        this.ctx.getServer().deleteTag(ctx.getStationId(), tag);
+      }
       tagFile.delete();
       this.staticTags.remove(tag.toLowerCase());
       this.firePropertyChange("tags", new ArrayList<String>(0), this.getTags());
@@ -256,8 +266,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
         Set<Integer> playlists = null;
         Set<Integer> tags = null;
         if (tag.getPlayedWithin() > 0) {
-          plays = this.getPlaysWithin(tag.getPlayedWithin(), tag.getPlayedWithinMinHour(), tag.getPlayedWithinMaxHour(),
-              tag.getPlayedWithinPlaylist());
+          plays = this.getPlaysWithin(tag.getPlayedWithin(), tag.getPlayedWithinMinHour(), tag.getPlayedWithinMaxHour(), tag.getPlayedWithinPlaylist());
         }
         if (tag.getPlaylistIds() != null) {
           playlists = this.getTracksOfPlaylists(tag.getPlaylistIds());
@@ -268,8 +277,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
 
         ArrayList<Integer> ids = new ArrayList<Integer>();
         for (BasicTrack title : this.trackRegistry.getAllTracks()) {
-          if (tag.contains(title) && (plays == null || plays.contains(title.getId())) && (playlists == null || playlists.contains(title.getId()))
-              && (tags == null || tags.contains(title.getId()))) {
+          if (tag.contains(title) && (plays == null || plays.contains(title.getId())) && (playlists == null || playlists.contains(title.getId())) && (tags == null || tags.contains(title.getId()))) {
             ids.add(title.getId());
           }
         }
@@ -437,9 +445,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
       if (dtag != null) {
         boolean match = dtag.contains(this.trackRegistry.getTrack(titleId));
         if (match && dtag.getPlayedWithin() > 0) {
-          match = this
-              .getPlaysWithin(dtag.getPlayedWithin(), dtag.getPlayedWithinMinHour(), dtag.getPlayedWithinMaxHour(), dtag.getPlayedWithinPlaylist())
-              .contains(titleId);
+          match = this.getPlaysWithin(dtag.getPlayedWithin(), dtag.getPlayedWithinMinHour(), dtag.getPlayedWithinMaxHour(), dtag.getPlayedWithinPlaylist()).contains(titleId);
         }
         if (match && dtag.getPlaylistIds() != null) {
           match = this.getTracksOfPlaylists(dtag.getPlaylistIds()).contains(titleId);
@@ -579,8 +585,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
 
     for (String tag : ctx.getServer().getTags(ctx.getStationId())) {
       this.ctx.updateStatus("getTag", tag);
-      
-      
+
       oldTags.remove(tag.toLowerCase());
 
       int[] ids = this.ctx.getServer().getTaggedTracks(ctx.getStationId(), tag);
@@ -633,7 +638,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
 
     // delete tags that do not exist anymore
     for (String tag : oldTags) {
-      this.deleteTag(tag);
+      this.deleteTag(tag, true);
     }
 
   }
@@ -650,7 +655,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
     trackIds = this.getTagFile(tag, true).tag(trackIds);
     this.updateRegisteredTracks(tracks, trackIds);
   }
-  
+
   private void updateRegisteredTracks(Map<Integer, Track> tracks, int[] trackIds) throws IOException {
     boolean trackDirty = false;
     for (int id : trackIds) {
@@ -669,11 +674,12 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
     if (trackDirty) {
       this.trackService.saveTracks();
     }
-    
+
   }
-  
+
   /**
    * Tags tracks on server based on the content of the local file - used during backup
+   * 
    * @param tag
    * @throws IOException
    */
@@ -715,6 +721,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
 
   /**
    * Should be called if tracks are deleted - removes the tracks from the static tag file
+   * 
    * @param trackIds
    * @throws IOException
    */
