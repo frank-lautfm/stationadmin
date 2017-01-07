@@ -38,6 +38,8 @@ import de.stationadmin.gui.subscriptions.SubscriptionResultTableModel.Column;
 import de.stationadmin.gui.track.DistributeTracksAction;
 import de.stationadmin.gui.track.PlaySnippetAction;
 import de.stationadmin.gui.track.TagMenu;
+import de.stationadmin.gui.util.IntTableCellRenderer;
+import de.stationadmin.gui.util.LengthTableCellRenderer;
 
 /**
  * 
@@ -64,7 +66,9 @@ public class SubscriptionResultViewer extends JPanel {
     tableModel.setResults(ctx.getAdminClient().getSubscriptionService().getResults());
     final JXTable table = new JXTable(tableModel);
     table.getColumn(Column.YEAR.ordinal()).setMaxWidth(50);
+    table.getColumn(Column.YEAR.ordinal()).setCellRenderer(new IntTableCellRenderer(0));
     table.getColumn(Column.LENGTH.ordinal()).setMaxWidth(70);
+    table.getColumn(Column.LENGTH.ordinal()).setCellRenderer(new LengthTableCellRenderer(false));;
     table.getColumn(Column.UPLOADDATE.ordinal()).setMaxWidth(80);
     table.setSortable(true);
     table.setSortOrder(Column.UPLOADDATE.ordinal(), SortOrder.DESCENDING);

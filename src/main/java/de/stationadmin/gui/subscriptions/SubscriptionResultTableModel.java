@@ -13,7 +13,6 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import de.stationadmin.base.track.DetailedTrack;
-import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.ClientContext;
 
 /**
@@ -102,7 +101,7 @@ public class SubscriptionResultTableModel extends AbstractTableModel {
     case ALBUM:
       return title.getAlbum();
     case LENGTH:
-      return TimeFormat.format(title.getLength(), false);
+      return title.getLength();
     case UPLOADDATE:
       return title.getUploadDate() != null ? new SimpleDateFormat("yyyy-MM-dd").format(title.getUploadDate()) : null;
     case YEAR:
@@ -135,6 +134,7 @@ public class SubscriptionResultTableModel extends AbstractTableModel {
     case UPLOADDATE:
       return Date.class;
     case YEAR:
+    case LENGTH:
       return Integer.class;
     default:
       return String.class;
