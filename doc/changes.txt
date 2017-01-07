@@ -6,16 +6,27 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+
+Version 4.1.0
+--------------
+[+] Neue Uploads durchsuchen
+[+] Filterung nach verwendeten / nicht verwendeten Playlists in der Playlistauswahl
+[+] Kontextmenü in der Playlistsauswahl
+[+] Kopie von Playlist erzeugen
+[#] Privat-Flag kann jetzt auch in den Titeldetails geändert werden - wenn der Titel schon von anderen Stationen verwendet wird gibt's eine Fehlermeldung
+[*] Falsche Anfangszeiten beim Einfügen mehrerer Tracks in eine Playlist korrigiert
+[*] Spaltensortierung diverser Tabellen war teilweise fehlerhaft
+
 Version 4.0.4
 --------------
 [#] Nachträgliches Setzen des private-Flags nach dem Upload
 [+] Importieren von Playlists aus Station Admin 3.x-Backups
 [+] Konfiguration der Playlist-Farbe
 [+] Ändern des Titeltyps (Musik, Jingle, Moderation) in den Titeldetails
+[*] Upload aus MP3-Explorer heraus wieder aktiviert
 
 Version 4.0.3
 --------------
-[*] Upload aus MP3-Explorer heraus wieder aktiviert
 [*] Beim Synchronisieren aller Playlists wurden Verbindungen zwischen Tracks und Playlists fälschlicherweise Aufrecht erhalten
 [*] Wenn neue Playlists direkt mit internen Settings (Playlistgenerator etc) angelegt wurden gingen diese verloren
 [+] Neuer Menüpunkt "Titelinformationen neu laden" im Kontextmenü für Tracks - lädt die Metadaten neu vom Server
