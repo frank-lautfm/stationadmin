@@ -50,10 +50,10 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.PlaylistNameCompator;
 import de.stationadmin.base.playlist.PlaylistRegistry;
 import de.stationadmin.base.schedule.Schedule.Entry;
-import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.gui.ClientContext;
 
@@ -465,7 +465,9 @@ public class PlaylistSelector extends JPanel {
 
     final JPopupMenu popup = new JPopupMenu();
     popup.add(new PlaylistNewAction(ctx, playlistSelectionHolder));
+    popup.add(new PlaylistDuplicateAction(ctx, playlistSelectionHolder));
     popup.add(new PlaylistDeleteAction(playlistSelectionHolder, ctx.getAdminClient().getPlaylistService(), ctx.getTextProvider(), false));
+    popup.addSeparator();
     popup.add(new PlaylistEditPropertiesAction(ctx, playlistSelectionHolder, false));
 
     list.addMouseListener(new MouseAdapter() {
