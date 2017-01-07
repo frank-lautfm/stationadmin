@@ -3,6 +3,7 @@
  */
 package de.stationadmin.gui.playlist;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,14 +65,14 @@ public class PlaylistEntryTableModel extends AbstractTableModel {
   public Object getValueAt(int rowIndex, int columnIndex) {
     Column col = Column.values()[columnIndex];
     PlaylistEntry entry = this.entries.get(rowIndex);
-    BasicTrack title;
+    BasicTrack track;
     switch (col) {
     case ARTIST:
-      title = ctx.getAdminClient().getTitleRegistry().getTrack(entry.getEntry().getTrackId());
-      return title.getArtist();
+      track = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(entry.getEntry().getTrackId());
+      return track.getArtist();
     case TITLE:
-      title = ctx.getAdminClient().getTitleRegistry().getTrack(entry.getEntry().getTrackId());
-      return title.getTitle();
+      track = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(entry.getEntry().getTrackId());
+      return track.getTitle();
     case PLAYLIST:
       return entry.getPlaylist().getDisplayName();
     case STARTTIME:
@@ -88,7 +89,7 @@ public class PlaylistEntryTableModel extends AbstractTableModel {
     this.entries = entries;
     this.fireTableDataChanged();
   }
-  
+
   public void removeEntries(List<PlaylistEntry> entries) {
     this.entries.removeAll(entries);
     this.fireTableDataChanged();
@@ -107,6 +108,25 @@ public class PlaylistEntryTableModel extends AbstractTableModel {
    */
   public ClientContext getCtx() {
     return ctx;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
+   */
+  @Override
+  public Class<?> getColumnClass(int columnIndex) {
+    Column col = Column.values()[columnIndex];
+    switch (col) {
+    case ARTIST:
+    case TITLE:
+    case PLAYLIST:
+      return String.class;
+    case STARTTIME:
+      return Date.class;
+    }
+    return super.getColumnClass(columnIndex);
   }
 
 }

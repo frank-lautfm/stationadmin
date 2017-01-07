@@ -5,6 +5,7 @@ package de.stationadmin.gui.subscriptions;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,16 +24,10 @@ import de.stationadmin.gui.ClientContext;
 public class SubscriptionResultTableModel extends AbstractTableModel {
 
   public enum Column {
-    ARTIST("artist"),
-    TITLE("title"),
-    ALBUM("album"),
-    LENGTH("playtime_seconds"),
-    YEAR("releaseyear"),
-    GENRE("genre"),
-    UPLOADDATE("upload_datum");
-    
+    ARTIST("artist"), TITLE("title"), ALBUM("album"), LENGTH("playtime_seconds"), YEAR("releaseyear"), GENRE("genre"), UPLOADDATE("upload_datum");
+
     private String rawName;
-    
+
     Column(String rawName) {
       this.rawName = rawName;
     }
@@ -43,10 +38,9 @@ public class SubscriptionResultTableModel extends AbstractTableModel {
     protected String getRawName() {
       return rawName;
     }
-    
-    
+
   }
-  
+
   private static final long serialVersionUID = 8544454516149594529L;
   private ClientContext ctx;
 
@@ -56,7 +50,7 @@ public class SubscriptionResultTableModel extends AbstractTableModel {
     super();
     this.ctx = ctx;
     ctx.getAdminClient().getSubscriptionService().addPropertyChangeListener("results", new PropertyChangeListener() {
-      
+
       @Override
       public void propertyChange(PropertyChangeEvent arg0) {
         setResults(SubscriptionResultTableModel.this.ctx.getAdminClient().getSubscriptionService().getResults());
@@ -77,10 +71,10 @@ public class SubscriptionResultTableModel extends AbstractTableModel {
    */
   @Override
   public String getColumnName(int column) {
-    Column col = Column.values() [column];
+    Column col = Column.values()[column];
     return ctx.getString("searchresult.column." + col.name().toLowerCase());
   }
-  
+
   /**
    * @see javax.swing.table.TableModel#getRowCount()
    */
@@ -96,11 +90,11 @@ public class SubscriptionResultTableModel extends AbstractTableModel {
   public Object getValueAt(int rowIndex, int columnIndex) {
     Column col = Column.values()[columnIndex];
     DetailedTrack title = this.results.get(rowIndex);
-    if(title == null) {
+    if (title == null) {
       return null;
     }
-    
-    switch(col) {
+
+    switch (col) {
     case ARTIST:
       return title.getArtist();
     case TITLE:
@@ -116,7 +110,7 @@ public class SubscriptionResultTableModel extends AbstractTableModel {
     case GENRE:
       return title.getGenre();
     }
-    
+
     return null;
   }
 
@@ -129,5 +123,22 @@ public class SubscriptionResultTableModel extends AbstractTableModel {
     this.fireTableDataChanged();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
+   */
+  @Override
+  public Class<?> getColumnClass(int columnIndex) {
+    Column col = Column.values()[columnIndex];
+    switch (col) {
+    case UPLOADDATE:
+      return Date.class;
+    case YEAR:
+      return Integer.class;
+    default:
+      return String.class;
+    }
+  }
 
 }

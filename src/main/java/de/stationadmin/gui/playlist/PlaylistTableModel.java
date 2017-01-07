@@ -97,11 +97,15 @@ public class PlaylistTableModel extends AbstractTableModel {
   public Class<?> getColumnClass(int columnIndex) {
     Column col = Column.values()[columnIndex];
     switch (col) {
-      case ENTRYNO :
-      case NUMPLAYLISTS :
-        return Integer.class;
-      default :
-        return String.class;
+    case ENTRYNO:
+    case NUMPLAYLISTS:
+    case YEAR:
+    case TYPE:
+      return Integer.class;
+    case ADDED:
+      return Date.class;
+    default:
+      return String.class;
     }
   }
 
@@ -149,31 +153,30 @@ public class PlaylistTableModel extends AbstractTableModel {
     Column col = Column.values()[column];
 
     switch (col) {
-      case ENTRYNO :
-        return row + 1;
-      case STARTTIME :
-        return TimeFormat.format(entry.getStart(), true);
-      case ARTIST :
-        return track != null ? track.getArtist() : "<unknown>";
-      case TITLE :
-        return track != null ? track.getTitle() : "<unknown>";
-      case LENGTH :
-        return track != null ? TimeFormat.format(track.getLength(), false) : null;
-      case GENRE:
-        return track instanceof DetailedTrack ? ((DetailedTrack)track).getGenre() : null;
-      case YEAR:
-        return track instanceof DetailedTrack ? ((DetailedTrack)track).getYear() : 0;
-      case TYPE :
-        return track != null ? track.getType() : -1;
-      case ADDED :
-        return new Date(entry.getTimestamp());
-      case NUMPLAYLISTS:
-        if(track instanceof RegisteredTrack) {
-          return ((RegisteredTrack)track).getPlaylistStatistics().getNumberOfPlaylistsTotal();
-        }
-        else {
-          return 0;
-        }
+    case ENTRYNO:
+      return row + 1;
+    case STARTTIME:
+      return TimeFormat.format(entry.getStart(), true);
+    case ARTIST:
+      return track != null ? track.getArtist() : "<unknown>";
+    case TITLE:
+      return track != null ? track.getTitle() : "<unknown>";
+    case LENGTH:
+      return track != null ? TimeFormat.format(track.getLength(), false) : null;
+    case GENRE:
+      return track instanceof DetailedTrack ? ((DetailedTrack) track).getGenre() : null;
+    case YEAR:
+      return track instanceof DetailedTrack ? ((DetailedTrack) track).getYear() : 0;
+    case TYPE:
+      return track != null ? track.getType() : -1;
+    case ADDED:
+      return new Date(entry.getTimestamp());
+    case NUMPLAYLISTS:
+      if (track instanceof RegisteredTrack) {
+        return ((RegisteredTrack) track).getPlaylistStatistics().getNumberOfPlaylistsTotal();
+      } else {
+        return 0;
+      }
     }
 
     return null;
@@ -217,7 +220,8 @@ public class PlaylistTableModel extends AbstractTableModel {
   }
 
   /**
-   * @param validate the validate to set
+   * @param validate
+   *          the validate to set
    */
   public void setValidationEnabled(boolean validate) {
     this.validationEnabled = validate;
@@ -231,7 +235,8 @@ public class PlaylistTableModel extends AbstractTableModel {
   }
 
   /**
-   * @param hasValidationErrors the hasValidationErrors to set
+   * @param hasValidationErrors
+   *          the hasValidationErrors to set
    */
   public void setHasValidationErrors(ValueModel hasValidationErrors) {
     this.hasValidationErrors = hasValidationErrors;

@@ -13,6 +13,7 @@ import javax.swing.table.AbstractTableModel;
 
 import de.stationadmin.base.tasks.ScheduledTask;
 import de.stationadmin.base.tasks.TaskExecutionService;
+import de.stationadmin.base.tasks.Trigger;
 import de.stationadmin.gui.TextProvider;
 
 /**
@@ -51,7 +52,7 @@ public class ScheduledTaskTableModel extends AbstractTableModel {
 
   @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
-    if(rowIndex >= this.tasks.size()) {
+    if (rowIndex >= this.tasks.size()) {
       return null;
     }
     ScheduledTask task = this.tasks.get(rowIndex);
@@ -76,6 +77,26 @@ public class ScheduledTaskTableModel extends AbstractTableModel {
   @Override
   public String getColumnName(int column) {
     return textProvider.getString("tasks.editor.table.column." + Column.values()[column].name().toLowerCase());
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
+   */
+  @Override
+  public Class<?> getColumnClass(int columnIndex) {
+    Column col = Column.values()[columnIndex];
+    switch (col) {
+    case LAST_EXECUTION:
+      return Date.class;
+    case TRIGGER:
+      return Trigger.class;
+    case STATUS:
+      return Boolean.class;
+    default:
+      return String.class;
+    }
   }
 
 }
