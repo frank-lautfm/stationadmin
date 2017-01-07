@@ -167,7 +167,7 @@ public class SubscriptionService extends AbstractBean implements Service {
         }
 
         page++;
-      } while (list.getTracks().length > 0 && !abort);
+      } while (list.getTracks().length > 0 && !abort && page < 5);
       try {
         Thread.sleep(1000);
       } catch (Exception e) {
