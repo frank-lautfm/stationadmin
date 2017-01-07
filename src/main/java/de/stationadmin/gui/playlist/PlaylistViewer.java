@@ -108,7 +108,7 @@ public class PlaylistViewer extends JPanel {
   private static final long serialVersionUID = -2324586164367971173L;
   ClientContext ctx;
   TextProvider textProvider;
-  private ValueModel playlistHolder;
+  ValueModel playlistHolder;
   private ValueModel entryHolder;
   PresentationModel<Playlist> presentationModel;
   private JXTable table;
@@ -501,13 +501,13 @@ public class PlaylistViewer extends JPanel {
     toolbar.addSeparator();
     toolbar.add(new SaveAction(ctx));
     toolbar.add(new ResetAction());
-    toolbar.add(new DeleteAction());
+    toolbar.add(new PlaylistDeleteAction(this.playlistHolder, this.ctx.getAdminClient().getPlaylistService(), this.textProvider, true));
     ValidationErrorFilterAction vAction = new ValidationErrorFilterAction();
     JToggleButton validationErrorFilterBtn = new JToggleButton(vAction);
     vAction.setButton(validationErrorFilterBtn); // ouch
     toolbar.add(validationErrorFilterBtn);
     toolbar.addSeparator();
-    toolbar.add(new ConfigureAction());
+    toolbar.add(new PlaylistEditPropertiesAction(ctx, playlistHolder, true));
     toolbar.addSeparator();
     final JToggleButton searchBtn = new JToggleButton(AppUtils.getIcon("searching.png"));
     searchBtn.setToolTipText(ctx.getString("action.search.tooltip"));
@@ -721,47 +721,6 @@ public class PlaylistViewer extends JPanel {
 
   }
 
-  protected class DeleteAction extends AbstractAction implements PropertyChangeListener {
-    private static final long serialVersionUID = 4692227689345527634L;
-
-    public DeleteAction() {
-      this.putValue(Action.SMALL_ICON, AppUtils.getIcon("delete.png"));
-      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("action.playlist.delete.tooltip"));
-      setEnabled(false);
-      presentationModel.getBeanChannel().addValueChangeListener(this);
-    }
-
-    /**
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    @Override
-    public void actionPerformed(ActionEvent evt) {
-      Playlist playlist = (Playlist) playlistHolder.getValue();
-      if (playlist != null) {
-        String key = playlist.getType() == PlaylistType.ARCHIVED ? "action.playlist.delete.msg.confirm.archived" : "action.playlist.delete.msg.confirm";
-        if (JOptionPane.showConfirmDialog(AppUtils.getRootFrame(), textProvider.getString(key, playlist.getName()),
-            null, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-          try {
-            ctx.getAdminClient().getPlaylistService().deletePlaylist(playlist);
-          } catch (IOException e) {
-            JXErrorPane.showDialog(null, textProvider.createErrorInfo(e, "action.playlist.delete.msg.failed"));
-
-          }
-        }
-      }
-
-    }
-
-    /**
-     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(evt.getNewValue() != null && ((Playlist) evt.getNewValue()).getType().isDeleteSupported() && ((Playlist) evt.getNewValue()).getId() > -1);
-    }
-
-  }
-
   protected class SaveAction extends ThreadedAction implements PropertyChangeListener {
     private static final long serialVersionUID = -1127269220503072051L;
 
@@ -920,40 +879,6 @@ public class PlaylistViewer extends JPanel {
 
   }
 
-  protected class ConfigureAction extends AbstractAction implements PropertyChangeListener {
-    private static final long serialVersionUID = -1127269220503072051L;
-
-    public ConfigureAction() {
-      this.putValue(Action.SMALL_ICON, AppUtils.getIcon("configure.png"));
-      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.configure.tooltip"));
-      setEnabled(false);
-      presentationModel.getBeanChannel().addValueChangeListener(this);
-    }
-
-    /**
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      Playlist playlist = presentationModel.getBean();
-      if (playlist != null) {
-        PlaylistConfigurationModel model = new PlaylistConfigurationModel(playlist, ctx.getAdminClient().getTagManager());
-        PlaylistConfigurationDialog dlg = new PlaylistConfigurationDialog(ctx, model);
-        dlg.setVisible(true);
-      }
-    }
-
-    /**
-     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      Playlist playlist = presentationModel.getBean();
-      setEnabled(evt.getNewValue() != null && playlist != null && playlist.getType() == PlaylistType.ONLINE);
-    }
-
-  }
-  
   protected class NewPlaylistAction extends PlaylistNewAction {
     private static final long serialVersionUID = -1127269220503072051L;
 

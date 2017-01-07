@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -273,23 +275,22 @@ public class PlaylistSelector extends JPanel {
 
       HashSet<Integer> used = null;
       Boolean filterUsed = null;
-      if(tag.equals(TAG_UNUSED) || tag.equals(TAG_USED)) {
+      if (tag.equals(TAG_UNUSED) || tag.equals(TAG_USED)) {
         used = new HashSet<Integer>();
         filterUsed = tag.equals(TAG_USED);
-        
-        for(Entry entry : ctx.getAdminClient().getSchedule().getEntries()) {
+
+        for (Entry entry : ctx.getAdminClient().getSchedule().getEntries()) {
           used.add(entry.getPlaylistId());
         }
       }
 
       ArrayList<Playlist> filtered = new ArrayList<Playlist>(playlists.size());
       for (Playlist playlist : playlists) {
-        if(filterUsed != null) {
-          if(used.contains(playlist.getId()) == filterUsed.booleanValue()) {
+        if (filterUsed != null) {
+          if (used.contains(playlist.getId()) == filterUsed.booleanValue()) {
             filtered.add(playlist);
           }
-        }
-        else if (playlist.isTaggedWith(tag)) {
+        } else if (playlist.isTaggedWith(tag)) {
           filtered.add(playlist);
         }
       }
@@ -458,6 +459,46 @@ public class PlaylistSelector extends JPanel {
         list.repaint();
       }
     });
+  }
+
+  public void enableContextMenu() {
+
+    final JPopupMenu popup = new JPopupMenu();
+    popup.add(new PlaylistNewAction(ctx, playlistSelectionHolder));
+    popup.add(new PlaylistDeleteAction(playlistSelectionHolder, ctx.getAdminClient().getPlaylistService(), ctx.getTextProvider(), false));
+    popup.add(new PlaylistEditPropertiesAction(ctx, playlistSelectionHolder, false));
+
+    list.addMouseListener(new MouseAdapter() {
+
+      private void checkPopup(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+          popup.show(list, e.getX(), e.getY());
+        }
+      }
+
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        this.checkPopup(e);
+      }
+
+      /**
+       * @see java.awt.event.MouseAdapter#mousePressed(java.awt.event.MouseEvent)
+       */
+      @Override
+      public void mousePressed(MouseEvent e) {
+        this.checkPopup(e);
+      }
+
+      /**
+       * @see java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
+       */
+      @Override
+      public void mouseReleased(MouseEvent e) {
+        this.checkPopup(e);
+      }
+
+    });
+
   }
 
 }

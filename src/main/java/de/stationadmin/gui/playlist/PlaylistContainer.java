@@ -37,7 +37,9 @@ public class PlaylistContainer extends JPanel {
   private void init() {
     final ValueHolder playlistSelectionHolder = new ValueHolder(null, true);
     final PlaylistSelector selectorOnline = new PlaylistSelector(this.ctx, PlaylistType.ONLINE, playlistSelectionHolder);
+    selectorOnline.enableContextMenu();
     final PlaylistSelector selectorArchive = new PlaylistSelector(this.ctx, PlaylistType.ARCHIVED, playlistSelectionHolder);
+    selectorArchive.enableContextMenu();
     final PlaylistViewer viewer = new PlaylistViewer(this.ctx, playlistSelectionHolder);
     selectorArchive.addHighlightedTitlesHolder(viewer.getHighlightedTitleHolder());
     selectorOnline.addHighlightedTitlesHolder(viewer.getHighlightedTitleHolder());
