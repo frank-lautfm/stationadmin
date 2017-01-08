@@ -167,8 +167,8 @@ public class PlaysViewer extends JPanel {
       statusBar.add(numPlays, playsConst);
 
       JXStatusBar.Constraint titlesConst = new JXStatusBar.Constraint(new Insets(2, 2, 2, 2));
-      PropertyPanel numTitles = new PropertyPanel(this.textProvider.getString("play.stats.titles") + ":", statsModel.getModel("numTitles"));
-      statusBar.add(numTitles, titlesConst);
+      PropertyPanel numTracks = new PropertyPanel(this.textProvider.getString("play.stats.titles") + ":", statsModel.getModel("numTracks"));
+      statusBar.add(numTracks, titlesConst);
 
       JXStatusBar.Constraint artistsConst = new JXStatusBar.Constraint(new Insets(2, 2, 2, 2));
       PropertyPanel numArtists = new PropertyPanel(this.textProvider.getString("play.stats.artists") + ":", statsModel.getModel("numArtists"));

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.util.AbstractBean;
 
@@ -19,7 +20,7 @@ import de.stationadmin.base.util.AbstractBean;
 public class PlayStatistics extends AbstractBean {
 
   private int numPlays;
-  private int numTitles;
+  private int numTracks;
   private int numArtists;
   private int score;
   
@@ -42,8 +43,8 @@ public class PlayStatistics extends AbstractBean {
     return numPlays;
   }
 
-  public int getNumTitles() {
-    return numTitles;
+  public int getNumTracks() {
+    return numTracks;
   }
 
   public void setFrequentArtists(List<ItemFrequency<String>> frequentArtists) {
@@ -70,26 +71,27 @@ public class PlayStatistics extends AbstractBean {
     this.firePropertyChange("numPlays", old, numPlays);
   }
 
-  public void setNumTitles(int numTitles) {
-    int old = this.numTitles;
-    this.numTitles = numTitles;
+  public void setNumTracks(int numTitles) {
+    int old = this.numTracks;
+    this.numTracks = numTitles;
     this.firePropertyChange("numTitles", old, numTitles);
+    this.firePropertyChange("numTracks", old, numTitles);
   }
 
   @Override
   public String toString() {
-    return this.numPlays + " / " + this.numTitles + " / " + this.numArtists;
+    return this.numPlays + " / " + this.numTracks + " / " + this.numArtists;
   }
 
   public void update(List<Play> plays) {
     
-    HashMap<Integer,ItemFrequency<DetailedTrack>> titles = new HashMap<Integer, ItemFrequency<DetailedTrack>>();
+    HashMap<Integer,ItemFrequency<DetailedTrack>> tracks = new HashMap<Integer, ItemFrequency<DetailedTrack>>();
     HashMap<String,ItemFrequency<String>> artists = new HashMap<String, ItemFrequency<String>>();
     for(Play play : plays) {
-      ItemFrequency<DetailedTrack> tf = titles.get(play.getTrack().getId());
+      ItemFrequency<DetailedTrack> tf = tracks.get(play.getTrack().getId());
       if(tf == null) {
         tf = new ItemFrequency<DetailedTrack>(play.getTrack(), 1);
-        titles.put(play.getTrack().getId(), tf);
+        tracks.put(play.getTrack().getId(), tf);
       }
       else {
         tf.inc();
@@ -106,10 +108,10 @@ public class PlayStatistics extends AbstractBean {
     }
     
     this.setNumPlays(plays.size());
-    this.setNumTitles(titles.size());
+    this.setNumTracks(tracks.size());
     this.setNumArtists(artists.size());
     
-    List<ItemFrequency<DetailedTrack>> titleList = new ArrayList<ItemFrequency<DetailedTrack>>(titles.values());
+    List<ItemFrequency<DetailedTrack>> titleList = new ArrayList<ItemFrequency<DetailedTrack>>(tracks.values());
     Collections.sort(titleList);
     this.setFrequentTracks(titleList);
     List<ItemFrequency<String>> artistList = new ArrayList<ItemFrequency<String>>(artists.values());
@@ -117,7 +119,7 @@ public class PlayStatistics extends AbstractBean {
     this.setFrequentArtists(artistList);
     
     if(numPlays > 0) {
-      float scoreF = ((float)numTitles / numPlays) * 0.75f + ((float)numArtists / numPlays) * 0.25f;
+      float scoreF = ((float)numTracks / numPlays) * 0.75f + ((float)numArtists / numPlays) * 0.25f;
       this.setScore((int)(scoreF * 100));
     }
     else {

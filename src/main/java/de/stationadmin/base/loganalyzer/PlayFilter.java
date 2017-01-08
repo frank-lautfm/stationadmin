@@ -12,6 +12,7 @@ import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.schedule.Schedule;
 import de.stationadmin.base.schedule.Schedule.Entry;
 import de.stationadmin.base.schedule.Schedule.Weekday;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.AbstractBean;
 
 /**
@@ -26,6 +27,7 @@ public class PlayFilter extends AbstractBean {
   private String artist;
   private String title;
   private Playlist playlist;
+  private boolean musicOnly = true;
 
   private Calendar cal = Calendar.getInstance();
 
@@ -100,6 +102,7 @@ public class PlayFilter extends AbstractBean {
 
   public boolean accept(Play play) {
     boolean accept = true;
+    accept = accept && (!musicOnly || play.getTrack().getType() == BasicTrack.TYPE_MUSIC);
     accept = accept && (this.fromTime == null || play.getStartTime().getTime() >= this.fromTime.getTime());
     accept = accept && (this.toTime == null || play.getStartTime().getTime() < this.toTime.getTime());
     accept = accept && (this.artist == null || play.getTrack().getArtist().toLowerCase().contains(this.artist.toLowerCase()));
@@ -122,6 +125,22 @@ public class PlayFilter extends AbstractBean {
       }
     }
     return filtered;
+  }
+
+  /**
+   * @return the musicOnly
+   */
+  public boolean isMusicOnly() {
+    return musicOnly;
+  }
+
+  /**
+   * @param musicOnly the musicOnly to set
+   */
+  public void setMusicOnly(boolean musicOnly) {
+    boolean old = this.musicOnly;
+    this.musicOnly = musicOnly;
+    this.firePropertyChange("musicOnly", old, musicOnly);
   }
 
 }

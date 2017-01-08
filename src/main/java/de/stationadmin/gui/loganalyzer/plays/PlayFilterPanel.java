@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -71,7 +72,7 @@ public class PlayFilterPanel extends JPanel {
 
     this.add(new JLabel(textProvider.getString("playsanalyzer.filter.artist") + ":"), cc.xy(1, 3));
 
-    JPanel metadataPanel = new JPanel(new FormLayout("pref,8dlu,pref,5dlu,pref,8dlu,pref,5dlu,pref", "pref"));
+    JPanel metadataPanel = new JPanel(new FormLayout("pref,8dlu,pref,5dlu,pref,8dlu,pref,5dlu,pref,8dlu,pref", "pref"));
     JTextField artistTf = BasicComponentFactory.createTextField(filterModel.getModel("artist"));
     artistTf.setColumns(15);
     metadataPanel.add(artistTf, cc.xy(1, 1));
@@ -100,6 +101,9 @@ public class PlayFilterPanel extends JPanel {
     JComboBox playlistCmb = BasicComponentFactory.createComboBox(playlistSelection);
     metadataPanel.add(new JLabel(textProvider.getString("playsanalyzer.filter.playlist") + ":"), cc.xy(7, 1));
     metadataPanel.add(playlistCmb, cc.xy(9, 1));
+    
+    JCheckBox musicOnlyCb = BasicComponentFactory.createCheckBox(filterModel.getModel("musicOnly"), textProvider.getString("playsanalyzer.filter.musiconly"));
+    metadataPanel.add(musicOnlyCb, cc.xy(11, 1));
 
     this.add(metadataPanel, cc.xy(3, 3));
 
