@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
@@ -76,7 +77,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
           }
         }
 
-        getBean().setGenerateAdvices(adviceStrings.size() > 0 ? adviceStrings.toArray(new String[adviceStrings.size()]) : null);
+        getBufferedModel("generateAdvices").setValue(adviceStrings.size() > 0 ? adviceStrings.toArray(new String[adviceStrings.size()]) : null);
       }
     };
 
@@ -85,7 +86,23 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
 
   }
 
-  private void initAdvices(Playlist playlist) {
+  static String tagsToString(Set<String> tagSet) {
+    if (tagSet == null) {
+      return null;
+    }
+    String[] tags = tagSet.toArray(new String[tagSet.size()]);
+    Arrays.sort(tags);
+    StringBuilder buf = new StringBuilder();
+    for (String tag : tags) {
+      if (buf.length() > 0) {
+        buf.append('\n');
+      }
+      buf.append(tag);
+    }
+    return buf.toString();
+  }
+
+  void initAdvices(Playlist playlist) {
     ArrayList<Advice> advices = new ArrayList<Advice>();
     if (playlist.getGenerateAdvices() != null) {
       List<String> adviceStrings = new ArrayList<String>(Arrays.asList(playlist.getGenerateAdvices()));
@@ -127,8 +144,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   }
 
   /**
-   * @see com.jgoodies.binding.PresentationModel#getModel(java.lang.String,
-   *      java.lang.String, java.lang.String)
+   * @see com.jgoodies.binding.PresentationModel#getModel(java.lang.String, java.lang.String, java.lang.String)
    */
   @Override
   public AbstractValueModel getModel(String propertyName, String getterName, String setterName) {
@@ -210,7 +226,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
     public void rebuild() {
       this.entries.clear();
       if (getBean() != null) {
-        String value = getBean().getGeneratePushTag();
+        String value = (String) getBufferedModel("generatePushTag").getValue();
         if (value != null && value.trim().length() > 0) {
 
           String[] tags = StringUtils.split(value, ";");
@@ -307,16 +323,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
     @Override
     public Object getValue() {
       if (getBean() != null) {
-        String[] tags = getBean().getTags().toArray(new String[getBean().getTags().size()]);
-        Arrays.sort(tags);
-        StringBuilder buf = new StringBuilder();
-        for (String tag : tags) {
-          if (buf.length() > 0) {
-            buf.append('\n');
-          }
-          buf.append(tag);
-        }
-        return buf.toString();
+        return tagsToString(getBean().getTags());
       }
       return null;
     }
@@ -325,12 +332,16 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
      * @see com.jgoodies.binding.value.ValueModel#setValue(java.lang.Object)
      */
     @Override
+    @SuppressWarnings("rawtypes")
     public void setValue(Object value) {
       if (getBean() != null) {
         if (value instanceof String) {
           String txt = (String) value;
           String[] tags = StringUtils.split(txt, "\r\n");
           getBean().setTags(new HashSet<String>(Arrays.asList(tags)));
+        } else if (value instanceof HashSet) {
+          getBean().setTags((HashSet) value);
+
         } else {
           getBean().setTags(new HashSet<String>());
         }
@@ -440,6 +451,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
     public void setMaxFraction(float maxFraction) {
       this.maxFraction = maxFraction;
     }
+
   }
 
   public ValueModel getAdvices() {

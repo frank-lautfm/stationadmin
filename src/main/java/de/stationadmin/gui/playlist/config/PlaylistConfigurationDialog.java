@@ -25,6 +25,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JToolBar;
 
 import org.jdesktop.swingx.JXErrorPane;
 
@@ -199,8 +200,14 @@ public class PlaylistConfigurationDialog extends JDialog {
 
   private void init() {
 
-    this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "pref:grow,3dlu,pref,5dlu"));
+    this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "1dlu,pref,0dlu,pref:grow,3dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
+    
+    JToolBar toolbar = new JToolBar();
+    toolbar.setFloatable(false);
+    toolbar.add(new PlaylistSettingsCopyAction(ctx, model));
+    this.getContentPane().add(toolbar, cc.xy(2, 2));
+    
 
     JTabbedPane tab = new JTabbedPane();
     tab.addTab(textProvider.getString("playlistcfg.tab.base"), this.createBasePanel());
@@ -209,7 +216,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     tab.setEnabledAt(1, !this.model.getBean().isShuffle());
     tab.setEnabledAt(2, !this.model.getBean().isShuffle());
 
-    this.getContentPane().add(tab, cc.xy(2, 1));
+    this.getContentPane().add(tab, cc.xy(2, 4));
 
     // buttons
     {
@@ -237,7 +244,7 @@ public class PlaylistConfigurationDialog extends JDialog {
       buttonPanel.add(okBtn);
       buttonPanel.add(new JButton(new DisposeAction(this, textProvider.getString("cancel"))));
 
-      this.getContentPane().add(buttonPanel, cc.xy(2, 3, CellConstraints.CENTER, CellConstraints.CENTER));
+      this.getContentPane().add(buttonPanel, cc.xy(2, 6, CellConstraints.CENTER, CellConstraints.CENTER));
     }
 
     Dimension prefSize = this.getPreferredSize();

@@ -6,6 +6,8 @@ package de.stationadmin.gui.playlist.config;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +28,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXTable;
 
@@ -43,13 +46,14 @@ import de.stationadmin.gui.TextProvider;
  * @author korf
  *
  */
-@SuppressWarnings({"rawtypes", "unchecked" })
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class PlaylistGeneratorBaseConfigurationPanel extends JPanel {
   private static final long serialVersionUID = 7684484525261978226L;
   private TagManager titleTagManager;
   private TextProvider textProvider;
   private PlaylistConfigurationModel model;
 
+  boolean updateInProgress = false;
 
   public PlaylistGeneratorBaseConfigurationPanel(ClientContext ctx, PlaylistConfigurationModel model) {
     this.textProvider = ctx.getTextProvider();
@@ -57,10 +61,20 @@ public class PlaylistGeneratorBaseConfigurationPanel extends JPanel {
     this.model = model;
     this.init();
   }
-  
+
+  private void updateSelection(JList list, List<String> tags, List<?> selection) {
+    if (!updateInProgress) {
+      int[] idxs = new int[selection.size()];
+      for (int i = 0; i < selection.size(); i++) {
+        idxs[i] = tags.indexOf(selection.get(i));
+      }
+      list.setSelectedIndices(idxs);
+    }
+
+  }
+
   private void init() {
-    this.setLayout(new FormLayout("5dlu,pref,5dlu,170dlu,5dlu",
-        "5dlu,pref,8dlu,50dlu,3dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,50dlu,5dlu"));
+    this.setLayout(new FormLayout("5dlu,pref,5dlu,170dlu,5dlu", "5dlu,pref,8dlu,50dlu,3dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,50dlu,5dlu"));
     CellConstraints cc = new CellConstraints();
     int row = 2;
 
@@ -75,31 +89,53 @@ public class PlaylistGeneratorBaseConfigurationPanel extends JPanel {
     {
       final ValueModel tagsModel = this.model.getBufferedModel("generateTags");
 
-      this.add(new JLabel(this.textProvider.getString("playlistcfg.property.generateTags")),
-          cc.xy(2, row, CellConstraints.LEFT, CellConstraints.TOP));
+      this.add(new JLabel(this.textProvider.getString("playlistcfg.property.generateTags")), cc.xy(2, row, CellConstraints.LEFT, CellConstraints.TOP));
       final List<String> tags = this.titleTagManager.getTags();
       Collections.sort(tags);
       final JList list = new JList(tags.toArray());
       list.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
       List<?> selection = (List<?>) tagsModel.getValue();
-      int[] idxs = new int[selection.size()];
-      for (int i = 0; i < selection.size(); i++) {
-        idxs[i] = tags.indexOf(selection.get(i));
-      }
-      list.setSelectedIndices(idxs);
+      updateSelection(list, tags, selection);
+      tagsModel.addValueChangeListener(new PropertyChangeListener() {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          if (evt.getNewValue() instanceof ArrayList) {
+            updateSelection(list, tags, (List<?>) evt.getNewValue());
+
+          } else {
+            String titleTagStr = (String) evt.getNewValue();
+            ArrayList<String> selection = new ArrayList<String>();
+            if (titleTagStr != null) {
+              String[] tags = StringUtils.split(titleTagStr, ";");
+              for (String tag : tags) {
+                selection.add(tag);
+              }
+            }
+            updateSelection(list, tags, (List<?>) selection);
+          }
+        }
+      });
 
       list.addListSelectionListener(new ListSelectionListener() {
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
           if (!e.getValueIsAdjusting()) {
-            Object[] values = list.getSelectedValues();
-            List<String> tags = new ArrayList<String>();
-            for (Object value : values) {
-              tags.add((String) value);
+            updateInProgress = true; // block further UI updates as we are already reactiving to an UI update
+            try {
+              Object[] values = list.getSelectedValues();
+              List<String> tags = new ArrayList<String>();
+              for (Object value : values) {
+                tags.add((String) value);
+              }
+              if (tagsModel.getValue() == null || !tagsModel.getValue().equals(tags)) {
+                tagsModel.setValue(tags);
+              }
+            } finally {
+              updateInProgress = false;
             }
-            tagsModel.setValue(tags);
           }
         }
 
@@ -110,12 +146,9 @@ public class PlaylistGeneratorBaseConfigurationPanel extends JPanel {
     }
 
     {
-      this.add(new JLabel(this.textProvider.getString("playlistcfg.property.generateTagsAll")),
-          cc.xy(2, row, CellConstraints.LEFT, CellConstraints.TOP));
-      JRadioButton anyBtn = BasicComponentFactory.createRadioButton(model.getBufferedModel("generateTagsAll"),
-          Boolean.FALSE, this.textProvider.getString("playlistcfg.property.generateTagsAll.any"));
-      JRadioButton allBtn = BasicComponentFactory.createRadioButton(model.getBufferedModel("generateTagsAll"),
-          Boolean.TRUE, this.textProvider.getString("playlistcfg.property.generateTagsAll.all"));
+      this.add(new JLabel(this.textProvider.getString("playlistcfg.property.generateTagsAll")), cc.xy(2, row, CellConstraints.LEFT, CellConstraints.TOP));
+      JRadioButton anyBtn = BasicComponentFactory.createRadioButton(model.getBufferedModel("generateTagsAll"), Boolean.FALSE, this.textProvider.getString("playlistcfg.property.generateTagsAll.any"));
+      JRadioButton allBtn = BasicComponentFactory.createRadioButton(model.getBufferedModel("generateTagsAll"), Boolean.TRUE, this.textProvider.getString("playlistcfg.property.generateTagsAll.all"));
 
       JPanel options = new JPanel(new GridLayout(2, 1));
       options.add(anyBtn);
@@ -155,19 +188,15 @@ public class PlaylistGeneratorBaseConfigurationPanel extends JPanel {
       row += 2;
 
     }
-    
-
 
     // title repeat level
     {
-      Integer[] values = new Integer[]{-1, 0, 1, 2, 3};
-      SelectionInList<Integer> titleRepeatSelection = new SelectionInList<Integer>(values,
-          this.model.getBufferedModel("generateTitleRepeatLevel"));
+      Integer[] values = new Integer[] { -1, 0, 1, 2, 3 };
+      SelectionInList<Integer> titleRepeatSelection = new SelectionInList<Integer>(values, this.model.getBufferedModel("generateTitleRepeatLevel"));
       JComboBox cmb = BasicComponentFactory.createComboBox(titleRepeatSelection, new DefaultListCellRenderer() {
         private static final long serialVersionUID = 4404056309589633917L;
 
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
-            boolean cellHasFocus) {
+        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
           Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
           setText(textProvider.getString("playlistcfg.property.generateTitleRepeatLevel.option." + value));
           return comp;
@@ -187,13 +216,12 @@ public class PlaylistGeneratorBaseConfigurationPanel extends JPanel {
       values.addAll(this.titleTagManager.getTags());
       JComboBox tagCombo = new JComboBox(values.toArray());
 
-      JComboBox weightCombo = new JComboBox(new Integer[]{-9, -3, -2, -1, 0, 1, 2, 3});
+      JComboBox weightCombo = new JComboBox(new Integer[] { -9, -3, -2, -1, 0, 1, 2, 3 });
       weightCombo.setRenderer(new DefaultListCellRenderer() {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
-            boolean cellHasFocus) {
+        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
           Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
           if (value != null && !value.equals(Integer.valueOf(0))) {
             setText(textProvider.getString("playlistcfg.property.generatePushTag.option." + value));
@@ -204,20 +232,18 @@ public class PlaylistGeneratorBaseConfigurationPanel extends JPanel {
         }
 
       });
-      
-      JComboBox maxCombo = new JComboBox( new Float[] { 1f, 0.9f, 0.8f, 0.7f, 0.6f, 0.5f, 0.4f, 0.3f, 0.2f, 0.1f });
+
+      JComboBox maxCombo = new JComboBox(new Float[] { 1f, 0.9f, 0.8f, 0.7f, 0.6f, 0.5f, 0.4f, 0.3f, 0.2f, 0.1f });
       maxCombo.setRenderer(new DefaultListCellRenderer() {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
-            boolean cellHasFocus) {
+        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
           Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-          if(value.equals(Float.valueOf(1f))) {
+          if (value.equals(Float.valueOf(1f))) {
             setText(" ");
-          }
-          else {
-            int p = (int)(((Float)value).floatValue() * 100);
+          } else {
+            int p = (int) (((Float) value).floatValue() * 100);
             setText(p + "%");
           }
           return comp;
@@ -238,23 +264,21 @@ public class PlaylistGeneratorBaseConfigurationPanel extends JPanel {
         }
 
       };
-      
+
       final TableCellRenderer maxRenderer = new DefaultTableCellRenderer() {
         private static final long serialVersionUID = 3085732842546961918L;
 
         @Override
         protected void setValue(Object value) {
-          if(value.equals(Float.valueOf(1f))) {
+          if (value.equals(Float.valueOf(1f))) {
             setText(" ");
-          }
-          else {
-            int p = (int)(((Float)value).floatValue() * 100);
+          } else {
+            int p = (int) (((Float) value).floatValue() * 100);
             setText(p + "%");
           }
         }
 
       };
-
 
       JXTable table = new JXTable(model.getWeightTableModel()) {
         private static final long serialVersionUID = -2623802397206568002L;
@@ -280,10 +304,16 @@ public class PlaylistGeneratorBaseConfigurationPanel extends JPanel {
       this.add(new JScrollPane(table), cc.xywh(2, row, 3, 1));
       row += 2;
 
+      model.getBufferedModel("generatePushTag").addValueChangeListener(new PropertyChangeListener() {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          ((PlaylistConfigurationModel.GenerateWeightTableModel) model.getWeightTableModel()).rebuild();
+        }
+      });
+
     }
 
-    
   }
 
-  
 }
