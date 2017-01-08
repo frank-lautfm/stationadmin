@@ -49,8 +49,8 @@ import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.PlaylistNameCompator;
 import de.stationadmin.base.tag.StaticTag;
-import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.BasicTrack;
+import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.upload.QueuedTrack;
 import de.stationadmin.base.track.upload.UploadManager;
 import de.stationadmin.gui.ClientContext;
@@ -155,6 +155,9 @@ public class UploadedTracksPanel extends JPanel {
 
     this.popup = new JPopupMenu();
     this.popup.add(new OpenMultiTitleEditor());
+    this.popup.addSeparator();
+    this.popup.add(new MarkPrivateAction(true));
+    this.popup.add(new MarkPrivateAction(false));
 
     table.addMouseListener(new MouseAdapter() {
 
@@ -380,6 +383,52 @@ public class UploadedTracksPanel extends JPanel {
         dlg.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
         dlg.setVisible(true);
       }
+    }
+  }
+
+  private class MarkPrivateAction extends AbstractAction {
+    private static final long serialVersionUID = -3048118417240804873L;
+    private boolean asPrivate = true;
+
+    MarkPrivateAction(boolean asPrivate) {
+      if (asPrivate) {
+        this.putValue(Action.NAME, textProvider.getString("upload.action.markprivate.name"));
+      } else {
+        this.putValue(Action.NAME, textProvider.getString("upload.action.markpublic.name"));
+      }
+      this.setEnabled(false);
+      this.asPrivate = asPrivate;
+      selection.addValueChangeListener(new PropertyChangeListener() {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          checkEnabled();
+        }
+
+      });
+    }
+
+    @SuppressWarnings("unchecked")
+    private void checkEnabled() {
+      List<QueuedTrack> tracks = (List<QueuedTrack>) selection.getValue();
+      this.setEnabled(tracks != null && tracks.size() > 0);
+    }
+
+    /**
+     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public void actionPerformed(ActionEvent e) {
+      List<QueuedTrack> tracks = (List<QueuedTrack>) selection.getValue();
+      for (QueuedTrack qtrack : tracks) {
+        if (qtrack.getTrack().isPrivateTrack() != asPrivate) {
+          qtrack.getTrack().setPrivateTrack(asPrivate);
+          qtrack.setModified(true);
+        }
+      }
+      UploadedTracksPanel.this.validate();
+      UploadedTracksPanel.this.repaint();
     }
   }
 
