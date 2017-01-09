@@ -27,7 +27,7 @@ import de.stationadmin.gui.ClientContext;
 public class SearchResultTableModel extends AbstractTableModel {
 
   public enum Column {
-    ARTIST("artist"), TITLE("title"), ALBUM("album"), LENGTH("duration"), YEAR("year", "release_year"), UPLOADDATE("created_at");
+    ARTIST("artist"), TITLE("title"), ALBUM("album"), GENRE("genre"), LENGTH("duration"), YEAR("year", "release_year"), UPLOADDATE("created_at");
 
     private String modelName;
     private String rawName;
@@ -115,6 +115,8 @@ public class SearchResultTableModel extends AbstractTableModel {
       case ARTIST:
       case TITLE:
       case ALBUM:
+      case GENRE:
+        return queryModel.getModel(col.getModelName()).getValue();
       case YEAR:
         Object year = queryModel.getModel(col.getModelName()).getValue();
         return year == null || year.equals(Integer.valueOf(0)) ? null : year;
@@ -131,6 +133,8 @@ public class SearchResultTableModel extends AbstractTableModel {
         return title.getArtist();
       case TITLE:
         return title.getTitle();
+      case GENRE:
+        return title.getGenre();
       case ALBUM:
         return title.getAlbum();
       case LENGTH:
@@ -187,6 +191,7 @@ public class SearchResultTableModel extends AbstractTableModel {
     switch (col) {
     case ALBUM:
     case ARTIST:
+    case GENRE:
     case TITLE:
     case YEAR:
       return true;
@@ -202,11 +207,7 @@ public class SearchResultTableModel extends AbstractTableModel {
       if (aValue == null && col == Column.YEAR) {
         aValue = 0;
       }
-      // Object old = queryModel.getModel(col.getModelName()).getValue();
       queryModel.getModel(col.getModelName()).setValue(aValue);
-      // if(searchAction != null && !ObjectUtils.equals(old, aValue)) {
-      // searchAction.actionPerformed(new ActionEvent(this, new Random().nextInt(), "search"));
-      // }
     }
   }
 

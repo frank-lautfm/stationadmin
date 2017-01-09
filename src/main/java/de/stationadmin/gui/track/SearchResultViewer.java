@@ -30,6 +30,7 @@ import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.AbstractHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.table.TableColumnExt;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.value.ValueModel;
@@ -76,6 +77,8 @@ public class SearchResultViewer extends JPanel {
 
     this.tableModel = new SearchResultTableModel(this.ctx, queryModel, searchResultHolder);
     final JXTable table = new JXTable(tableModel);
+    table.setColumnControlVisible(true);
+
     table.addHighlighter(new AbstractHighlighter() {
 
       @Override
@@ -139,6 +142,9 @@ public class SearchResultViewer extends JPanel {
     table.getColumn(Column.YEAR.ordinal()).setCellRenderer(new IntTableCellRenderer(0));
     table.getColumn(Column.LENGTH.ordinal()).setMaxWidth(70);
     table.getColumn(Column.UPLOADDATE.ordinal()).setMaxWidth(80);
+    
+    ((TableColumnExt) table.getColumnModel().getColumn(Column.GENRE.ordinal())).setVisible(false);
+    
     table.setSortable(true);
 
     final JPopupMenu popup = new JPopupMenu();
