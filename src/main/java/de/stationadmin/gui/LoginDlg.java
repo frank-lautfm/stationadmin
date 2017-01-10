@@ -152,7 +152,7 @@ public class LoginDlg extends JDialog {
         boolean browserRequest = false;
         if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
           try {
-            desktop.browse(new URI("https://new.radioadmin.laut.fm/login?callback_url=StationAdmin"));
+            desktop.browse(new URI("https://radioadmin.laut.fm/login?callback_url=StationAdmin"));
             browserRequest = true;
           } catch (Exception e) {
           }
