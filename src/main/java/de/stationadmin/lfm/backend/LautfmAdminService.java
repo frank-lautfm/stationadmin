@@ -507,7 +507,8 @@ public class LautfmAdminService {
 
   public void untagTracks(int stationId, String tag, int... trackIds) throws IOException {
     String prefix = "/stations/" + stationId + "/tracks/";
-    String suffix = "/tags/" + URLEncoder.encode(tag, "UTF-8");
+
+    String suffix = "/tags/" + StringUtils.replace(URLEncoder.encode(tag, "UTF-8"), "+", "%20");
     StringBuilder trackList = new StringBuilder();
     for (int i = 0; i < trackIds.length; i++) {
       if (trackList.length() > 0) {
