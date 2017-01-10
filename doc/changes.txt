@@ -13,8 +13,12 @@ Version 4.1.0
 [+] Filterung nach verwendeten / nicht verwendeten Playlists in der Playlistauswahl
 [+] Kontextmenü in der Playlistsauswahl
 [+] Kopie von Playlist erzeugen
+[+] Playlisteinstellungen von anderer Playlist kopieren
+[+] Anzeige von Server-Logs
+[#] Analyse / Gespielte Titel: Filterung nach Track-Typ, per Default werden nur noch Musiktitel angezeigt
 [#] Privat-Flag kann jetzt auch in den Titeldetails geändert werden - wenn der Titel schon von anderen Stationen verwendet wird gibt's eine Fehlermeldung
 [*] Falsche Anfangszeiten beim Einfügen mehrerer Tracks in eine Playlist korrigiert
+[*] Entfernen von Tags mit Leerzeichen funktionierte nicht
 [*] Spaltensortierung diverser Tabellen war teilweise fehlerhaft
 
 Version 4.0.4
