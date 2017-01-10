@@ -689,6 +689,15 @@ public class LautfmAdminService {
       response.close();
     }
   }
+  
+  public LogEntry[] getLogs(int stationId, int days) throws IOException {
+    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/logs?days=" + days);
+    try {
+      return deserializeJson(response, LogEntry[].class);
+    } finally {
+      response.close();
+    }
+  }
 
   public String getToken() {
     return token;

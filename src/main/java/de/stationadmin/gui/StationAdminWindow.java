@@ -62,6 +62,7 @@ import de.stationadmin.gui.loganalyzer.dailysummary.DailySummariesOpenAction;
 import de.stationadmin.gui.loganalyzer.listeners.ListenersAnalyzerOpenAction;
 import de.stationadmin.gui.loganalyzer.plays.PlaysAnalyzerOpenAction;
 import de.stationadmin.gui.loganalyzer.plays.UnplayedTracksViewerOpenAction;
+import de.stationadmin.gui.logs.LogViewerDisplayAction;
 import de.stationadmin.gui.migration.MigrationDlgDisplayAction;
 import de.stationadmin.gui.mp3explorer.MP3ExplorerDisplayAction;
 import de.stationadmin.gui.playlist.PlaylistContainer;
@@ -435,6 +436,7 @@ public class StationAdminWindow extends StationAdminFrame {
       menuServer.add(new UploadAction(this.ctx));
       if (!djOnly) {
         menuServer.add(new ScheduleEditorDisplayAction(this.ctx));
+        menuServer.add(new LogViewerDisplayAction(this.ctx));
         menuServer.addSeparator();
         menuServer.add(new MP3StreamerOpenAction(this.ctx));
         menuServer.addSeparator();

@@ -33,6 +33,7 @@ import de.stationadmin.base.track.TrackService;
 import de.stationadmin.base.util.XStreamFactory;
 import de.stationadmin.lfm.backend.LautfmAdminService;
 import de.stationadmin.lfm.backend.LiveAccessData;
+import de.stationadmin.lfm.backend.LogEntry;
 import de.stationadmin.lfm.backend.Station;
 import de.stationadmin.lfmapi.LautfmService;
 import de.stationadmin.streamlive.MP3Streamer;
@@ -279,6 +280,10 @@ public class StationAdminClient {
       return account;
     }
     return null;
+  }
+  
+  public LogEntry[] getLogs(int days) throws IOException {
+    return this.sessionCtx.getServer().getLogs(this.sessionCtx.getStationId(), days);
   }
 
   public boolean isLiveEnabled() throws IOException {
