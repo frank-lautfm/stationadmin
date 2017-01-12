@@ -698,6 +698,29 @@ public class LautfmAdminService {
       response.close();
     }
   }
+  
+  public ScheduledEvent[] getScheduledEvents(int stationId) throws IOException {
+    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/schedule/events");
+    try {
+      return deserializeJson(response, ScheduledEventList.class).getEvents();
+    } finally {
+      response.close();
+    }
+  }
+  
+  public ScheduledEvent scheduleEvent(int stationId, ScheduledEvent event) throws IOException {
+    CloseableHttpResponse response = this.doPost("/stations/" + stationId + "/schedule/events", event);
+    try {
+      return deserializeJson(response, ScheduledEvent.class);
+    } finally {
+      response.close();
+    }
+  }
+  
+  public void deleteScheduledEvent(int stationId, int eventId) throws IOException {
+    CloseableHttpResponse response = doDelete("/stations/" + stationId + "/schedule/events/" + eventId);
+    response.close();
+  }
 
   public String getToken() {
     return token;
