@@ -23,7 +23,6 @@ import org.apache.log4j.Logger;
 import de.stationadmin.base.AccessDeniedException;
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
-import de.stationadmin.base.Settings;
 import de.stationadmin.base.Version;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackRegistry;
@@ -146,7 +145,7 @@ public class LogAnalyzerService implements Service {
       StringBuilder buf = new StringBuilder();
       for (TrackStatsEntry entry : stats) {
         calEntry.setTime(entry.getStartedAt());
-        if (calDay.get(Calendar.DAY_OF_MONTH) == calEntry.get(Calendar.DAY_OF_MONTH) && calDay.get(Calendar.MONTH) == calEntry.get(Calendar.MONTH)) {
+        if (entry.getId() > -1 && calDay.get(Calendar.DAY_OF_MONTH) == calEntry.get(Calendar.DAY_OF_MONTH) && calDay.get(Calendar.MONTH) == calEntry.get(Calendar.MONTH)) {
 
           buf.append(timeFmt.format(entry.getStartedAt()));
           buf.append('\t');

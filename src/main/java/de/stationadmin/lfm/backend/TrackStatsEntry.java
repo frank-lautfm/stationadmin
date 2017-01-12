@@ -19,6 +19,7 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize;
 @XmlRootElement(name = "Track")
 public class TrackStatsEntry {
 
+  @JsonDeserialize(using = TrackIDDeserializer.class)
   private int id;
   private int listeners;
   @JsonProperty("started_at")
