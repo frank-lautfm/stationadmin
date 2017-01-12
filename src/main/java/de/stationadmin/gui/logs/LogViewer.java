@@ -57,7 +57,7 @@ public class LogViewer extends StationAdminFrame {
     try {
       model.setEntries(ctx.getAdminClient().getLogs(1));
     } catch (IOException e) {
-      JXErrorPane.showDialog(ctx.getRootWindow(), ctx.createErrorInfo(e, "logvievewer.error"));
+      JXErrorPane.showDialog(ctx.getRootWindow(), ctx.createErrorInfo(e, "logviewer.error"));
 
     }
 

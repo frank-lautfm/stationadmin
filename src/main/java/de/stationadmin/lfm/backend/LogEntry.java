@@ -22,8 +22,8 @@ public class LogEntry {
   private String msgType;
   private String message;
   private boolean shuffled;
-  @JsonProperty("shuffle_time")
-  private boolean shuffleTime;
+//  @JsonProperty("shuffle_time")
+//  private boolean shuffleTime;
   @JsonProperty("created_at")
   private Date createdAt;
 
@@ -117,20 +117,15 @@ public class LogEntry {
     this.shuffled = shuffled;
   }
 
-  /**
-   * @return the shuffleTime
-   */
+  /*
   public boolean isShuffleTime() {
     return shuffleTime;
   }
 
-  /**
-   * @param shuffleTime
-   *          the shuffleTime to set
-   */
   public void setShuffleTime(boolean shuffleTime) {
     this.shuffleTime = shuffleTime;
   }
+  */
 
   /**
    * @return the createdAt
