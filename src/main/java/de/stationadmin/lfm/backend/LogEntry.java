@@ -21,9 +21,9 @@ public class LogEntry {
   @JsonProperty("msg_type")
   private String msgType;
   private String message;
-  private boolean shuffled;
-//  @JsonProperty("shuffle_time")
-//  private boolean shuffleTime;
+  // private boolean shuffled;
+  // @JsonProperty("shuffle_time")
+  // private boolean shuffleTime;
   @JsonProperty("created_at")
   private Date createdAt;
 
@@ -100,38 +100,6 @@ public class LogEntry {
    */
   public void setMessage(String message) {
     this.message = message;
-  }
-
-  /**
-   * @return the shuffled
-   */
-  public boolean isShuffled() {
-    return shuffled;
-  }
-
-  /**
-   * @param shuffled
-   *          the shuffled to set
-   */
-  public void setShuffled(boolean shuffled) {
-    this.shuffled = shuffled;
-  }
-
-  /*
-  public boolean isShuffleTime() {
-    return shuffleTime;
-  }
-
-  public void setShuffleTime(boolean shuffleTime) {
-    this.shuffleTime = shuffleTime;
-  }
-  */
-
-  /**
-   * @return the createdAt
-   */
-  public Date getCreatedAt() {
-    return createdAt;
   }
 
   /**
