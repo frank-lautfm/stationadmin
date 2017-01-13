@@ -1022,7 +1022,7 @@ public class MP3Explorer extends JFrame {
 
         @Override
         public void valueChanged(ListSelectionEvent evt) {
-          setEnabled(false); // FIXME UploadTitlesAction.this.table.getSelectedRowCount() > 0);
+          setEnabled(UploadTitlesAction.this.table.getSelectedRowCount() > 0);
         }
       });
 
