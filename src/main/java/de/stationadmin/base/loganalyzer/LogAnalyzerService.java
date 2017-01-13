@@ -106,7 +106,7 @@ public class LogAnalyzerService implements Service {
     File file = new File(filename);
 
     // check if local copy exists
-    if (file.exists()) {
+    if (file.exists() && file.length() > 0) {
       return FileUtils.readFileToString(file, "UTF-8");
     }
 

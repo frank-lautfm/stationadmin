@@ -103,6 +103,13 @@ public class LogEntry {
   }
 
   /**
+   * @return the createdAt
+   */
+  public Date getCreatedAt() {
+    return createdAt;
+  }
+
+  /**
    * @param createdAt
    *          the createdAt to set
    */
