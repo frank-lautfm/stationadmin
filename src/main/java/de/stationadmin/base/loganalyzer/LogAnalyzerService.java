@@ -145,7 +145,7 @@ public class LogAnalyzerService implements Service {
       StringBuilder buf = new StringBuilder();
       for (TrackStatsEntry entry : stats) {
         calEntry.setTime(entry.getStartedAt());
-        if (entry.getId() > -1 && calDay.get(Calendar.DAY_OF_MONTH) == calEntry.get(Calendar.DAY_OF_MONTH) && calDay.get(Calendar.MONTH) == calEntry.get(Calendar.MONTH)) {
+        if (entry.getId() > 0 && calDay.get(Calendar.DAY_OF_MONTH) == calEntry.get(Calendar.DAY_OF_MONTH) && calDay.get(Calendar.MONTH) == calEntry.get(Calendar.MONTH)) {
 
           buf.append(timeFmt.format(entry.getStartedAt()));
           buf.append('\t');
