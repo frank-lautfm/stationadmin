@@ -18,11 +18,19 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class DateTableCellRenderer extends DefaultTableCellRenderer {
   private SimpleDateFormat format;
+  private int align = JLabel.RIGHT;
   
   public DateTableCellRenderer(SimpleDateFormat format) {
     super();
     this.format = format;
   }
+  
+  public DateTableCellRenderer(SimpleDateFormat format, int align) {
+    super();
+    this.format = format;
+    this.align = align;
+  }
+
 
   /**
    * @see javax.swing.table.DefaultTableCellRenderer#getTableCellRendererComponent(javax.swing.JTable, java.lang.Object, boolean, boolean, int, int)
@@ -30,7 +38,7 @@ public class DateTableCellRenderer extends DefaultTableCellRenderer {
   @Override
   public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
     super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-    this.setHorizontalAlignment(JLabel.RIGHT);
+    this.setHorizontalAlignment(align);
     if(value instanceof Date) {
       this.setText(this.format.format((Date)value));
     }

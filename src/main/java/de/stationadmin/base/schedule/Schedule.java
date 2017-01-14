@@ -34,6 +34,7 @@ import de.stationadmin.base.playlist.PlaylistRegistry;
 import de.stationadmin.base.util.AbstractBean;
 import de.stationadmin.base.util.XStreamFactory;
 import de.stationadmin.lfm.backend.ScheduleEntry;
+import de.stationadmin.lfm.backend.ScheduledEvent;
 
 /**
  * Playlist schedule
@@ -47,6 +48,7 @@ public class Schedule extends AbstractBean implements Service {
   private Playlist basePlaylist;
 
   private List<Entry> entries = Collections.synchronizedList(new ArrayList<Entry>());
+  private List<Event> events = Collections.synchronizedList(new ArrayList<Event>());
   private Entry current;
 
   private boolean dirty = true;
@@ -200,6 +202,64 @@ public class Schedule extends AbstractBean implements Service {
     return filtered;
   }
 
+  public List<Entry> getEffectiveEntriesOfToday() {
+    List<Entry> scheduledEntries = getEntriesOf(Schedule.getTodaysWeekday());
+    if (this.events.size() == 0) {
+      return scheduledEntries;
+    }
+    List<Event> eventsOfToday = new ArrayList<Event>();
+    Calendar calToday = Calendar.getInstance();
+    calToday.setTimeInMillis(System.currentTimeMillis());
+    Calendar calEvent = Calendar.getInstance();
+
+    for (Event evt : this.events) {
+      calEvent.setTime(evt.getStartTime());
+      if (calToday.get(Calendar.DAY_OF_YEAR) == calEvent.get(Calendar.DAY_OF_YEAR) && calToday.get(Calendar.YEAR) == calEvent.get(Calendar.YEAR)) {
+        eventsOfToday.add(evt);
+      } else {
+        calEvent.setTime(evt.getEndTime());
+        if (calToday.get(Calendar.DAY_OF_YEAR) == calEvent.get(Calendar.DAY_OF_YEAR) && calToday.get(Calendar.YEAR) == calEvent.get(Calendar.YEAR)) {
+          // create an artificial entry which just covers todays part of the event
+          int duration = calEvent.get(Calendar.HOUR_OF_DAY);
+          calEvent.set(Calendar.HOUR_OF_DAY, 0);
+          Date startTime = calEvent.getTime();
+          Event evtToday = new Event(evt.getPlaylistId(), startTime, duration);
+          eventsOfToday.add(evtToday);
+        }
+      }
+      // note: we won't catch entries spanning over the entire day
+    }
+
+    if (eventsOfToday.size() == 0) {
+      return scheduledEntries;
+    }
+
+    // build hour plan for the day
+    Entry[] hours = new Entry[24];
+    for (Entry entry : scheduledEntries) {
+      for (int i = entry.getHour(); i < hours.length; i++) {
+        hours[i] = new Entry(entry.getPlaylistId(), entry.getWeekday(), i);
+      }
+    }
+    for (Event evt : eventsOfToday) {
+      Entry entry = evt.getEntry();
+      for (int i = entry.getHour(); i < entry.getHour() + evt.getDuration(); i++) {
+        hours[i] = entry;
+      }
+    }
+
+    Entry last = null;
+    List<Entry> entries = new ArrayList<Schedule.Entry>();
+    for (int i = 0; i < hours.length; i++) {
+      if (last == null || last.getPlaylistId() != hours[i].getPlaylistId()) {
+        entries.add(hours[i]);
+        last = hours[i];
+      }
+    }
+
+    return entries;
+  }
+
   public List<Entry> getEntriesOfNext24h() {
     ArrayList<Entry> filtered = new ArrayList<Entry>();
 
@@ -282,7 +342,7 @@ public class Schedule extends AbstractBean implements Service {
    * @throws IOException
    */
   public void load() throws IOException {
-    if(this.ctx.getRole() == Role.DJ) {
+    if (this.ctx.getRole() == Role.DJ) {
       return;
     }
     File file = new File(this.ctx.getStationDirectory() + "schedule.xml");
@@ -296,9 +356,23 @@ public class Schedule extends AbstractBean implements Service {
           this.basePlaylist = this.playlistRegistry.getPlaylist(entry.getPlaylistId());
         }
       }
+      try {
+        this.loadEvents();
+      } catch (Exception e) {
+        log.error("Unable to load events", e);
+      }
       this.updateCurrentEntry();
       this.updateStatistics(playlistRegistry);
     }
+  }
+
+  private void loadEvents() throws IOException {
+    this.events.clear();
+    ScheduledEvent[] events = this.ctx.getServer().getScheduledEvents(ctx.getStationId());
+    for (ScheduledEvent event : events) {
+      this.events.add(new Event(event));
+    }
+    Collections.sort(this.events);
   }
 
   @SuppressWarnings("unchecked")
@@ -493,9 +567,22 @@ public class Schedule extends AbstractBean implements Service {
         }
       }
     }
+
+    try {
+      this.loadEvents();
+    } catch (Exception e) {
+      log.error("Unable to load events", e);
+    }
+
     this.updateCurrentEntry();
     this.updateStatistics(playlistRegistry);
     this.save();
+  }
+
+  public static Entry toEntry(ScheduledEvent evt) {
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(evt.getStartTime());
+    return new Entry(evt.getPlaylistId(), Weekday.getWeekday(evt.getStartTime()), cal.get(Calendar.HOUR_OF_DAY));
   }
 
   public void updateCurrentEntry() {
@@ -511,6 +598,12 @@ public class Schedule extends AbstractBean implements Service {
     for (int i = 0; i < entries.size(); i++) {
       if (hourOfDay >= entries.get(i).getHour()) {
         current = entries.get(i);
+      }
+    }
+
+    for (Event evt : this.events) {
+      if (System.currentTimeMillis() > evt.getStartTime().getTime() && System.currentTimeMillis() < evt.getEndTime().getTime()) {
+        current = evt.getEntry();
       }
     }
 
@@ -557,12 +650,18 @@ public class Schedule extends AbstractBean implements Service {
     private int playlistId;
     private Weekday weekday;
     private int hour;
+    private boolean event;
 
     public Entry(int playlistId, Weekday weekday, int hour) {
+      this(playlistId, weekday, hour, false);
+    }
+
+    public Entry(int playlistId, Weekday weekday, int hour, boolean event) {
       super();
       this.playlistId = playlistId;
       this.weekday = weekday;
       this.hour = hour;
+      this.event = event;
     }
 
     /**
@@ -625,6 +724,113 @@ public class Schedule extends AbstractBean implements Service {
     @Override
     public String toString() {
       return this.weekday + " - " + this.hour + ": " + this.playlistId;
+    }
+
+    /**
+     * @return the event
+     */
+    public boolean isEvent() {
+      return event;
+    }
+
+  }
+
+  public static class Event implements Comparable<Event> {
+    private int id;
+    private int playlistId;
+    private Date startTime;
+    private Date endTime;
+    private int duration;
+    private Entry entry;
+
+    public Event(ScheduledEvent evt) {
+      this(evt.getPlaylistId(), evt.getStartTime(), evt.getDuration());
+      this.id = evt.getId();
+    }
+
+    /**
+     * @param playlistId
+     * @param startTime
+     * @param duration
+     */
+    public Event(int playlistId, Date startTime, int duration) {
+      super();
+      this.playlistId = playlistId;
+      this.startTime = startTime;
+      this.endTime = new Date(this.startTime.getTime() + duration * 1000 * 60);
+      this.duration = duration;
+
+      Calendar cal = Calendar.getInstance();
+      cal.setTime(startTime);
+      entry = new Entry(playlistId, Weekday.getWeekday(startTime), cal.get(Calendar.HOUR_OF_DAY));
+    }
+
+    /**
+     * @return the playlistId
+     */
+    public int getPlaylistId() {
+      return playlistId;
+    }
+
+    /**
+     * @return the startTime
+     */
+    public Date getStartTime() {
+      return startTime;
+    }
+
+    /**
+     * @return the duration
+     */
+    public int getDuration() {
+      return duration;
+    }
+
+    /**
+     * @return the endTime
+     */
+    public Date getEndTime() {
+      return endTime;
+    }
+
+    /**
+     * @return the entry
+     */
+    public Entry getEntry() {
+      return entry;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    @Override
+    public int compareTo(Event o) {
+      return Long.compare(this.startTime.getTime(), o.getStartTime().getTime());
+    }
+
+    /**
+     * @return the id
+     */
+    public int getId() {
+      return id;
+    }
+
+    /**
+     * @param id
+     *          the id to set
+     */
+    public void setId(int id) {
+      this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj instanceof Event) {
+        return id == ((Event) obj).id || (playlistId == ((Event) obj).playlistId && startTime.equals(((Event) obj).startTime));
+      }
+      return false;
     }
 
   }
@@ -692,6 +898,27 @@ public class Schedule extends AbstractBean implements Service {
 
   public Playlist getBasePlaylist() {
     return basePlaylist;
+  }
+
+  /**
+   * @return the events
+   */
+  public List<Event> getEvents() {
+    return Collections.unmodifiableList(events);
+  }
+
+  public void scheduleEvent(Event event) throws IOException {
+    ScheduledEvent evt = new ScheduledEvent();
+    evt.setPlaylistId(event.getPlaylistId());
+    evt.setStartTime(event.getStartTime());
+    evt.setDuration(event.getDuration());
+    this.events.add(new Event(ctx.getServer().scheduleEvent(ctx.getStationId(), evt)));
+    Collections.sort(this.events);
+  }
+
+  public void deleteEvent(Event event) throws IOException {
+    this.ctx.getServer().deleteScheduledEvent(ctx.getStationId(), event.getId());
+    this.events.remove(event);
   }
 
 }

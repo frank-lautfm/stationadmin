@@ -5,7 +5,6 @@ package de.stationadmin.gui.schedule;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -25,7 +24,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
@@ -53,13 +52,12 @@ import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistSelector;
 import de.stationadmin.gui.playlist.SimplePlaylistListCellRender;
-import de.stationadmin.gui.util.SwingTools;
 
 /**
  * @author korf
  * 
  */
-public class ScheduleEditor extends JFrame {
+public class ScheduleEditor extends JPanel {
   private static final long serialVersionUID = 7506462225302959600L;
   private ClientContext ctx;
   private TextProvider textProvider;
@@ -71,7 +69,7 @@ public class ScheduleEditor extends JFrame {
    * @param ctx
    * @throws HeadlessException
    */
-  public ScheduleEditor(ClientContext ctx) throws HeadlessException {
+  public ScheduleEditor(ClientContext ctx) {
     super();
     this.ctx = ctx;
     this.textProvider = ctx.getTextProvider();
@@ -99,19 +97,13 @@ public class ScheduleEditor extends JFrame {
 
     JComponent table = this.createScheduleTable();
 
-    this.getContentPane().setLayout(
+    this.setLayout(
         new FormLayout("5dlu,pref,5dlu,100dlu:grow,5dlu", "2dlu,pref,2dlu," + (this.preferredTableHeight + 30) + "px,5dlu:grow"));
     CellConstraints cc = new CellConstraints();
 
-    this.getContentPane().add(toolbar, cc.xywh(2, 2, 4, 1));
-    this.getContentPane().add(selector, cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
-    this.getContentPane().add(table, cc.xy(4, 4, CellConstraints.FILL, CellConstraints.FILL));
-
-    Dimension dim = this.getPreferredSize();
-    this.setSize(850, (int) dim.getHeight() + 80);
-    this.setTitle(textProvider.getString("scheduleeditor.title"));
-
-    SwingTools.centerOnScreen(this);
+    this.add(toolbar, cc.xywh(2, 2, 4, 1));
+    this.add(selector, cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
+    this.add(table, cc.xy(4, 4, CellConstraints.FILL, CellConstraints.FILL));
   }
 
   private JComponent createScheduleTable() {

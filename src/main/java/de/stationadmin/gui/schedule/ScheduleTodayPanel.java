@@ -39,17 +39,11 @@ public class ScheduleTodayPanel extends JPanel {
   private static final long serialVersionUID = 896809155860392655L;
   private JumpHandler jumpHandler;
   private Schedule schedule;
-  private Weekday weekday;
 
   public ScheduleTodayPanel(Schedule schedule, JumpHandler jumpHandler) {
-    this(schedule, jumpHandler, Schedule.getTodaysWeekday());
-  }
-
-  public ScheduleTodayPanel(Schedule schedule, JumpHandler jumpHandler, Weekday day) {
     super();
     this.schedule = schedule;
     this.jumpHandler = jumpHandler;
-    this.weekday = day;
     this.setLayout(new FormLayout("pref", "50dlu:grow"));
     this.setBackground(Color.WHITE);
     this.setOpaque(true);
@@ -70,7 +64,7 @@ public class ScheduleTodayPanel extends JPanel {
     schedulePanel.setBackground(Color.WHITE);
     schedulePanel.setOpaque(true);
 
-    List<Schedule.Entry> entries = this.schedule.getEntriesOf(weekday);
+    List<Schedule.Entry> entries = this.schedule.getEffectiveEntriesOfToday();
 
     NumberFormat fmt = NumberFormat.getIntegerInstance();
     fmt.setMinimumIntegerDigits(2);
@@ -114,7 +108,7 @@ public class ScheduleTodayPanel extends JPanel {
 
         });
 
-        if (entries.get(i) == current) {
+        if (entries.get(i).equals(current)) {
           timeLabel.setFont(ComponentFactory.boldLabelFont);
           playlistLabel.setFont(ComponentFactory.boldLabelFont);
         }

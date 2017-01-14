@@ -37,7 +37,7 @@ public class ScheduleEditorDisplayAction extends AbstractAction {
   @Override
   public void actionPerformed(ActionEvent evt) {
     try {
-      ScheduleEditor editor = new ScheduleEditor(ctx);
+      ScheduleWindow editor = new ScheduleWindow(ctx);
       editor.setVisible(true);
     } catch (Exception e) {
       JXErrorPane.showDialog(ctx.getRootWindow(), this.ctx.createErrorInfo(e, "action.error.msg"));

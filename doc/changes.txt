@@ -6,6 +6,10 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.2.0
+-------------
+[+] Einmalige Sendungen im Sendeplan eintragen (Events)
+
 Version 4.1.1
 --------------
 [*] Werbung wird aus Trackstatistiken rausgefiltert
