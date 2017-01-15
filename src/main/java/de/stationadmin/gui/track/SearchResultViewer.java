@@ -171,7 +171,7 @@ public class SearchResultViewer extends JPanel {
       public void mouseClicked(MouseEvent e) {
         this.checkPopup(e);
         if (e.getClickCount() == 2) {
-          playSnippetAction.playSnippet();
+          playSnippetAction.playSnippetInternal();
         }
       }
 

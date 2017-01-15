@@ -187,6 +187,7 @@ public class SearchResultTableModel extends AbstractTableModel {
 
   @Override
   public boolean isCellEditable(int rowIndex, int columnIndex) {
+    if(rowIndex > 0) return false;
     Column col = Column.values()[columnIndex];
     switch (col) {
     case ALBUM:
