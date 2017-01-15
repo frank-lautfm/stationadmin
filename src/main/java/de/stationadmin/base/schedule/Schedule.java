@@ -345,25 +345,7 @@ public class Schedule extends AbstractBean implements Service {
     if (this.ctx.getRole() == Role.DJ) {
       return;
     }
-    File file = new File(this.ctx.getStationDirectory() + "schedule.xml");
-    if (file.exists()) {
-      List<Schedule.Entry> entries = this.load(file);
-      this.clear();
-      for (Schedule.Entry entry : entries) {
-        if (entry.getHour() > -1) {
-          this.addEntry(entry);
-        } else {
-          this.basePlaylist = this.playlistRegistry.getPlaylist(entry.getPlaylistId());
-        }
-      }
-      try {
-        this.loadEvents();
-      } catch (Exception e) {
-        log.error("Unable to load events", e);
-      }
-      this.updateCurrentEntry();
-      this.updateStatistics(playlistRegistry);
-    }
+    this.synchronize();
   }
 
   private void loadEvents() throws IOException {
@@ -729,7 +711,7 @@ public class Schedule extends AbstractBean implements Service {
     /**
      * @return the event
      */
-    public boolean isEvent() {
+    boolean isEvent() {
       return event;
     }
 

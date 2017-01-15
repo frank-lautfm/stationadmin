@@ -18,7 +18,7 @@ import org.codehaus.jackson.map.SerializerProvider;
  */
 public class ScheduledEventDateSerializer extends JsonSerializer<Date>{
   
-  private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+  private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
   /* (non-Javadoc)
    * @see org.codehaus.jackson.map.JsonSerializer#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator, org.codehaus.jackson.map.SerializerProvider)

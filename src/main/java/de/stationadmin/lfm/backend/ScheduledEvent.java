@@ -20,15 +20,15 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement(name = "ScheduledEvent")
-public class ScheduledEvent implements Comparable<ScheduledEvent>{
+public class ScheduledEvent {
   private int id;
   @JsonProperty("playlist_id")
   private int playlistId;
   @JsonProperty("start_at")
   @JsonSerialize(using = ScheduledEventDateSerializer.class)
   @JsonDeserialize(using = CustomJsonDateDeserializer.class)
-  private Date startTimeServer;
-  
+  private Date startTimeUTC;
+
   @JsonIgnore
   private Date startTime;
   private int duration;
@@ -67,8 +67,10 @@ public class ScheduledEvent implements Comparable<ScheduledEvent>{
    * @return the startTime
    */
   public Date getStartTime() {
-    if(this.startTime == null && this.startTimeServer != null) {
-      this.startTime = new Date(this.startTimeServer.getTime() + TimeZone.getDefault().getRawOffset());
+    if (this.startTime == null && this.startTimeUTC != null) {
+      TimeZone tz = TimeZone.getDefault();
+      int diff = tz.getRawOffset() + (tz.inDaylightTime(this.startTimeUTC) ? tz.getDSTSavings() : 0);
+      this.startTime = new Date(this.startTimeUTC.getTime() + diff);
     }
     return startTime;
   }
@@ -79,7 +81,10 @@ public class ScheduledEvent implements Comparable<ScheduledEvent>{
    */
   public void setStartTime(Date startTime) {
     this.startTime = startTime;
-    this.startTimeServer = startTime;
+    
+    TimeZone tz = TimeZone.getDefault();
+    int diff = tz.getRawOffset() + (tz.inDaylightTime(startTime) ? tz.getDSTSavings() : 0);
+    this.startTimeUTC = new Date(startTime.getTime() - diff);
   }
 
   /**
@@ -100,23 +105,17 @@ public class ScheduledEvent implements Comparable<ScheduledEvent>{
   /**
    * @return the startTimeServer
    */
-  public Date getStartTimeServer() {
-    return startTimeServer;
+  public Date getStartTimeUTC() {
+    return startTimeUTC;
   }
 
-  public Date getEndTime() {
-    return new Date(getStartTime().getTime() + 1000 * 60 * duration);
-  }
-  
   /**
-   * @param startTimeServer the startTimeServer to set
+   * @param startTimeServer
+   *          the startTimeServer to set
    */
-  public void setStartTimeServer(Date startTimeServer) {
-    this.startTimeServer = startTimeServer;
+  public void setStartTimeUTC(Date startTimeServer) {
+    this.startTimeUTC = startTimeServer;
+    this.startTime = null;
   }
 
-  @Override
-  public int compareTo(ScheduledEvent o) {
-    return Long.compare(this.getStartTime().getTime(), o.getStartTime().getTime());
-  }
 }
