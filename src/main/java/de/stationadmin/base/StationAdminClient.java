@@ -45,9 +45,9 @@ import de.stationadmin.streamlive.MP3Streamer;
  */
 public class StationAdminClient {
   private static final Logger log = Logger.getLogger(StationAdminClient.class);
-  
+
   public static long TIMESTAMP_RADIOADMIN_SWITCH = 1481806854618l;
-  
+
   private SessionCtx sessionCtx;
   private TaskExecutionService taskExecutionService;
   private TrackService trackService;
@@ -74,12 +74,11 @@ public class StationAdminClient {
 
     String sAdminDefaultDir = System.getProperty("defaultDir", "laut.fm/StationAdmin/");
 
-    if(!(new File(System.getProperty("user.home") + File.separatorChar + sAdminDefaultDir)).exists() && new File(System.getProperty("user.home") + File.separatorChar + "laut.fm/beta").exists()) {
+    if (!(new File(System.getProperty("user.home") + File.separatorChar + sAdminDefaultDir)).exists() && new File(System.getProperty("user.home") + File.separatorChar + "laut.fm/beta").exists()) {
       File old = new File(System.getProperty("user.home") + File.separatorChar + "laut.fm/beta");
       old.renameTo(new File(System.getProperty("user.home") + File.separatorChar + sAdminDefaultDir));
     }
 
-    
     String dataDirectory = props.getProperty("data.dir", System.getProperty("user.home") + File.separatorChar + sAdminDefaultDir);
     String settingsDirectory = props.getProperty("settings.dir", dataDirectory + station.getName().toLowerCase());
 
@@ -94,15 +93,13 @@ public class StationAdminClient {
     this.playlistService = new PlaylistService(this.sessionCtx, titleRegistry, playlistRegistry);
     this.schedule = new Schedule(sessionCtx, playlistRegistry);
     this.logAnalyzerService = new LogAnalyzerService(this.sessionCtx, titleRegistry);
-    this.tagManager = new TagManager(this.sessionCtx, this.trackService, this.playlistService.getPlaylistRegistry(), logAnalyzerService,
-        this.schedule);
+    this.tagManager = new TagManager(this.sessionCtx, this.trackService, this.playlistService.getPlaylistRegistry(), logAnalyzerService, this.schedule);
     this.statisticsService = new StatisticsService(this.sessionCtx, this.settings);
     this.subscriptionService = new SubscriptionService(this.sessionCtx, titleRegistry);
 
-    this.backupService = new BackupService(sessionCtx, this.playlistService, this.trackService, this.tagManager, this.schedule,
-        this.taskExecutionService, this.settings);
-    this.services.addAll(Arrays.asList(this.taskExecutionService, this.trackService, this.tagManager, this.playlistService, this.schedule,
-        this.statisticsService, this.backupService, this.subscriptionService, this.logAnalyzerService));
+    this.backupService = new BackupService(sessionCtx, this.playlistService, this.trackService, this.tagManager, this.schedule, this.taskExecutionService, this.settings);
+    this.services.addAll(Arrays.asList(this.taskExecutionService, this.trackService, this.tagManager, this.playlistService, this.schedule, this.statisticsService, this.backupService,
+        this.subscriptionService, this.logAnalyzerService));
 
     this.loadSettings();
   }
@@ -144,6 +141,26 @@ public class StationAdminClient {
   @Deprecated
   public PlaylistRegistry getPlaylistRegistry() {
     return playlistService.getPlaylistRegistry();
+  }
+
+  public void autoSynchronize() throws IOException, JSONException {
+    if(this.settings.getAutoSynchronisation() == null) {
+      return;
+    }
+    switch (this.settings.getAutoSynchronisation()) {
+    case FULL:
+      this.synchronize();
+      break;
+    case MODIFIED_PLAYLISTS:
+      int[] modified = this.playlistService.getPlaylistModificationDetector().detectModifiedPlaylists();
+      if (modified != null && modified.length > 0) {
+        this.playlistService.synchronize(modified);
+      }
+      break;
+    case NONE:
+      break;
+
+    }
   }
 
   public void initBackgroundTasks() {
@@ -194,8 +211,7 @@ public class StationAdminClient {
   }
 
   /**
-   * Gets the station status. This includes data like current listeners, rank,
-   * current title or current playlist
+   * Gets the station status. This includes data like current listeners, rank, current title or current playlist
    * 
    * @return station status
    */
@@ -268,10 +284,10 @@ public class StationAdminClient {
   public boolean isRadioStarted() throws IOException {
     return this.sessionCtx.getServer().isRunning(this.sessionCtx.getStationId());
   }
-  
+
   public LiveAccount getLiveAccount() throws IOException {
     LiveAccessData data = this.sessionCtx.getServer().getLiveAccessData(this.sessionCtx.getStationId());
-    if(data != null && data.getPassword() != null) {
+    if (data != null && data.getPassword() != null) {
       LiveAccount account = new LiveAccount();
       account.setPort(data.getPort());
       account.setServer(data.getServer());
@@ -281,7 +297,7 @@ public class StationAdminClient {
     }
     return null;
   }
-  
+
   public LogEntry[] getLogs(int days) throws IOException {
     return this.sessionCtx.getServer().getLogs(this.sessionCtx.getStationId(), days);
   }
@@ -435,12 +451,13 @@ public class StationAdminClient {
   }
 
   /**
-   * @param mp3Streamer the mp3Streamer to set
+   * @param mp3Streamer
+   *          the mp3Streamer to set
    */
   public void setMp3Streamer(MP3Streamer mp3Streamer) {
     this.mp3Streamer = mp3Streamer;
   }
-  
+
   public void registerErrorHandler(ErrorHandler errorHandler) {
     this.sessionCtx.setErrorHandler(errorHandler);
   }

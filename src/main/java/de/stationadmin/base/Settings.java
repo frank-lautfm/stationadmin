@@ -50,6 +50,8 @@ public class Settings extends AbstractBean {
 
   private boolean logDownloadPermitted = false;
   private boolean logAutodownloadPermitted = false;
+  
+  private Autosynchronisation autoSynchronisation = Autosynchronisation.NONE;
 
   public int getStatisticsRefreshInterval() {
     return statisticsRefreshInterval;
@@ -90,10 +92,9 @@ public class Settings extends AbstractBean {
     this.setMp3Root(settings.getMp3Root());
     this.setBackupDirectory(settings.getBackupDirectory());
     this.setBackupFrequency(settings.getBackupFrequency());
-    this.setLogAutodownloadPermitted(settings.isLogAutodownloadPermitted());
-    this.setLogDownloadPermitted(settings.isLogDownloadPermitted());
     this.setArtistNormalizerAliases(settings.getArtistNormalizerAliases());
     this.setArtistNormalizerSeperators(settings.getArtistNormalizerSeperators());
+    this.setAutoSynchronisation(settings.getAutoSynchronisation());
   }
 
   public String getTitleLogFile() {
@@ -435,6 +436,22 @@ public class Settings extends AbstractBean {
    */
   public void setArtistNormalizerAliases(Map<String, String> artistNormalizerAliass) {
     this.artistNormalizerAliases = artistNormalizerAliass;
+  }
+
+  /**
+   * @return the autoSynchronization
+   */
+  public Autosynchronisation getAutoSynchronisation() {
+    return autoSynchronisation;
+  }
+
+  /**
+   * @param autoSynchronization the autoSynchronization to set
+   */
+  public void setAutoSynchronisation(Autosynchronisation autoSynchronization) {
+    Autosynchronisation old = this.autoSynchronisation;
+    this.autoSynchronisation = autoSynchronization;
+    this.firePropertyChange("autoSynchronisation", old, autoSynchronization);
   }
 
 }

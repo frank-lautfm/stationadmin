@@ -415,7 +415,7 @@ public class StationAdminWindow extends StationAdminFrame {
 
     {
       JMenu menuServer = new JMenu(this.ctx.getTextProvider().getString("menu.server"));
-      
+
       JMenu menuSynchronize = new JMenu(this.ctx.getTextProvider().getString("action.synchronize"));
       menuSynchronize.add(new SynchronizeFullAction(this.ctx.getTextProvider(), ctx.getAdminClient()));
       menuSynchronize.addSeparator();
@@ -426,10 +426,9 @@ public class StationAdminWindow extends StationAdminFrame {
       menuSynchronize.add(new SynchronizeTracksAction(this.ctx.getTextProvider(), ctx.getAdminClient()));
       menuSynchronize.addSeparator();
       menuSynchronize.add(new ReloadOwnTitlesAction(ctx.getTextProvider(), ctx.getAdminClient().getTrackService()));
-      
+
       menuServer.add(menuSynchronize);
 
-      
       menuServer.add(new SaveModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getSchedule()));
       menuServer.add(new ResetModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService()));
       menuServer.addSeparator();
@@ -552,6 +551,11 @@ public class StationAdminWindow extends StationAdminFrame {
       Exception exception = null;
       try {
         ctx.getAdminClient().load();
+        try {
+          ctx.getAdminClient().autoSynchronize();
+        } catch (Exception e) {
+          exception = e;
+        }
         ctx.getAdminClient().initBackgroundTasks();
       } catch (Exception e) {
         exception = e;

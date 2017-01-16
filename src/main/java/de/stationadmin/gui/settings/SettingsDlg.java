@@ -51,6 +51,7 @@ import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
+import de.stationadmin.base.Autosynchronisation;
 import de.stationadmin.base.Settings;
 import de.stationadmin.base.backup.BackupFrequency;
 import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
@@ -176,9 +177,10 @@ public class SettingsDlg extends JDialog {
 
     // misc
     {
-      JPanel logPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref,5dlu,pref,5dlu"));
+      JPanel logPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
       logPanel.add(this.createAutologinPanel(), cc.xy(2, 2));
-      logPanel.add(this.createLoggingPanel(), cc.xy(2, 4));
+      logPanel.add(this.createAutosynchronizePanel(), cc.xy(2, 4));
+      logPanel.add(this.createLoggingPanel(), cc.xy(2, 6));
       // logPanel.add(this.createLogDownloadPanel(), cc.xy(2, 4));
       root.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.misc"), logPanel)));
     }
@@ -219,6 +221,33 @@ public class SettingsDlg extends JDialog {
 
     return panel;
   }
+  
+  private JPanel createAutosynchronizePanel() {
+    JPanel panel = new JPanel(new FormLayout("3dlu,pref,5dlu,pref,3dlu", "3dlu,pref,3dlu"));
+    panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.autosynchronisation")));
+
+    panel.add(new JLabel(ctx.getString("settings.property.autosynchronisation")), new CellConstraints(2, 2));
+
+    SelectionInList<Autosynchronisation> selection = new SelectionInList<Autosynchronisation>(Autosynchronisation.values(), model.getBufferedModel("autoSynchronisation"));
+    JComboBox cmb = BasicComponentFactory.createComboBox(selection, new DefaultListCellRenderer() {
+      private static final long serialVersionUID = -7509561259749019548L;
+
+      @Override
+      public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        if(value instanceof Autosynchronisation) {
+          String name = ((Autosynchronisation)value).name().toLowerCase();
+          setText(ctx.getTextProvider().getString("settings.property.autosynchronisation." + name));
+        }
+        return comp;
+      }
+      
+    });
+    panel.add(cmb, new CellConstraints(4, 2));
+
+    return panel;
+  }
+
 
   private JPanel createTitleLogPanel() {
     JPanel panel = new JPanel(new FormLayout("3dlu,max(pref;60dlu),5dlu,pref,3dlu,pref,3dlu", "3dlu,pref,3dlu,pref,3dlu"));
