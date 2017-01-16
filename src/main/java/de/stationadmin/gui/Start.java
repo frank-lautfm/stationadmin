@@ -66,7 +66,9 @@ public class Start {
     }
 
     try {
-      if (admin.getCtx().getAdminClient() != null || admin.login()) {
+      String token = args.length > 1 ? args[0] : null;
+      String stationName = args.length > 1 ? args[1] : null;
+      if (admin.getCtx().getAdminClient() != null || admin.login(token, stationName)) {
         admin.showMain();
       }
     } catch (Throwable t) {
@@ -89,11 +91,29 @@ public class Start {
     return ctx;
   }
 
-  public boolean login() {
-    // FIXME
+  public boolean login(String token, String stationName) {
+
+    if (token != null && stationName != null) {
+      // try to log in with passed token and station name
+      try {
+        LautfmAdminService service = new LautfmAdminService(token, "StationAdmin");
+        List<Station> stations = service.getStations();
+        for (Station s : stations) {
+          if (s.getName().equalsIgnoreCase(stationName)) {
+            StationAdminClient client = new StationAdminClient(service, s);
+            ctx.setAdminClient(client);
+            return true;
+          }
+        }
+      } catch (Exception e) {
+      }
+
+    }
+
     boolean autologin = Preferences.userRoot().getBoolean("autologin", false);
     if (autologin) {
-      String token = Preferences.userRoot().get("token", null);
+      // try autologin
+      token = Preferences.userRoot().get("token", null);
       int stationId = Preferences.userRoot().getInt("station", -1);
       if (token != null && stationId > 0) {
         try {
@@ -112,7 +132,8 @@ public class Start {
         }
       }
     }
-
+    
+    // log in via dialog
     LoginDlg loginDlg = new LoginDlg(ctx);
     loginDlg.setModal(true);
     loginDlg.setVisible(true);
