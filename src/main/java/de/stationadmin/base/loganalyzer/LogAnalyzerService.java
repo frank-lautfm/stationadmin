@@ -122,6 +122,9 @@ public class LogAnalyzerService implements Service {
       log.info("download " + type + " for " + date);
 
       int numDays = (int) ((System.currentTimeMillis() - day.getTime()) / DAY_IN_MS) + 2;
+      if(numDays > 7) {
+        numDays = 7;
+      }
 
       TrackStatsEntry[] stats = null;
 
