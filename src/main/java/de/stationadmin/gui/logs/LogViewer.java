@@ -44,8 +44,8 @@ public class LogViewer extends StationAdminFrame {
     table.setSortable(true);
     
     table.getColumnModel().getColumn(Column.CREATED_AT.ordinal()).setCellRenderer(new DateTableCellRenderer(new SimpleDateFormat(ctx.getTextProvider().getString("timeFormat"))));
-    table.getColumnModel().getColumn(Column.CREATED_AT.ordinal()).setPreferredWidth(110);
-    table.getColumnModel().getColumn(Column.CREATED_AT.ordinal()).setMaxWidth(110);
+    table.getColumnModel().getColumn(Column.CREATED_AT.ordinal()).setPreferredWidth(130);
+    table.getColumnModel().getColumn(Column.CREATED_AT.ordinal()).setMaxWidth(130);
     table.getColumnModel().getColumn(Column.LEVEL.ordinal()).setPreferredWidth(70);
     table.getColumnModel().getColumn(Column.LEVEL.ordinal()).setMaxWidth(70);
     table.getColumnModel().getColumn(Column.TYPE.ordinal()).setPreferredWidth(80);
