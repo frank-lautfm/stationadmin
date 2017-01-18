@@ -66,9 +66,9 @@ import de.stationadmin.base.playlist.shuffle.PlaylistShuffler;
 import de.stationadmin.base.playlist.trackimport.TrackImportHandler;
 import de.stationadmin.base.playlist.validation.GVLValidator;
 import de.stationadmin.base.playlist.validation.PlaylistValidationException;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.PlaylistGeneratorFactory;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.ClientContext;
@@ -151,6 +151,22 @@ public class PlaylistViewer extends JPanel {
 
       }
     });
+    this.searchPanel.setSelectionEnterAction(new AbstractAction() {
+      private static final long serialVersionUID = -4485102580616529596L;
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        List<BasicTrack> list = (List<BasicTrack>) searchPanel.getSelectionHolder().getValue();
+        if (list != null && list.size() > 0 && PlaylistViewer.this.playlistHolder.getValue() != null) {
+          Playlist playlist = (Playlist) PlaylistViewer.this.playlistHolder.getValue();
+          for (BasicTrack track : list) {
+            playlist.addTrack(track);
+          }
+          table.scrollRowToVisible(playlist.getEntries().size() - 1);
+        }
+      }
+    });
 
     this.subscriptionPanel = new SubscriptionResultViewer(ctx, new ValueHolder(), true);
     this.subscriptionPanel.setVisible(false);
@@ -196,8 +212,7 @@ public class PlaylistViewer extends JPanel {
       public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getNewValue() instanceof Playlist) {
           Playlist playlist = (Playlist) evt.getNewValue();
-          statistics.setText(textProvider.getString("playlistviewer.statistics", Integer.toString(playlist.getEntries().size()),
-              Integer.toString(playlist.getNumDifferentArtists())));
+          statistics.setText(textProvider.getString("playlistviewer.statistics", Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists())));
         } else {
           statistics.setText("");
         }
@@ -255,7 +270,7 @@ public class PlaylistViewer extends JPanel {
     final TrackTypeRenderer typeRenderer = new TrackTypeRenderer();
     final DateTableCellRenderer timeRenderer = new DateTableCellRenderer(new SimpleDateFormat(this.ctx.getTextProvider().getString("timeFormat")));
     this.table = new JXTable(tableModel);
-    
+
     table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setPreferredWidth(40);
     table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setMaxWidth(40);
     table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setPreferredWidth(70);
@@ -349,8 +364,7 @@ public class PlaylistViewer extends JPanel {
     popup.addSeparator();
     final TagMenu tagMenu = new TagMenu(this.ctx.getTextProvider(), ctx.getAdminClient().getTagManager(), true);
     final TagMenu untagMenu = new TagMenu(this.ctx.getTextProvider(), ctx.getAdminClient().getTagManager(), false);
-    final TagHighlightMenu tagHighlightMenu = new TagHighlightMenu(this.ctx.getTextProvider(), ctx.getAdminClient().getTagManager(),
-        taggedTitlesHolder);
+    final TagHighlightMenu tagHighlightMenu = new TagHighlightMenu(this.ctx.getTextProvider(), ctx.getAdminClient().getTagManager(), taggedTitlesHolder);
     final CopyTracksAction copyAction = new CopyTracksAction(this.ctx);
     final DistributeTracksAction distributeAction = new DistributeTracksAction(this.ctx);
     final TrackViewAction viewAction = new TrackViewAction(ctx);
@@ -657,8 +671,7 @@ public class PlaylistViewer extends JPanel {
         row = table.getModel().getRowCount();
       }
 
-      TrackImportHandler handler = new TrackImportHandler(ctx.getAdminClient().getTrackService(), ctx.getAdminClient().getTagManager(),
-          (Playlist) playlistHolder.getValue(), row);
+      TrackImportHandler handler = new TrackImportHandler(ctx.getAdminClient().getTrackService(), ctx.getAdminClient().getTagManager(), (Playlist) playlistHolder.getValue(), row);
       try {
         handler.add(file);
         handler.resolveTags();
@@ -771,8 +784,7 @@ public class PlaylistViewer extends JPanel {
       Playlist playlist = (Playlist) playlistHolder.getValue();
       if (playlist != null) {
         if (e instanceof PlaylistValidationException) {
-          JXErrorPane.showDialog(null, textProvider.createErrorInfo(e, "playlist.validationerror."
-              + ((PlaylistValidationException) e).getError().name().toLowerCase(), playlist.getDisplayName()));
+          JXErrorPane.showDialog(null, textProvider.createErrorInfo(e, "playlist.validationerror." + ((PlaylistValidationException) e).getError().name().toLowerCase(), playlist.getDisplayName()));
         } else {
           JXErrorPane.showDialog(null, textProvider.createErrorInfo(e, "action.playlist.save.error", playlist.getDisplayName()));
         }
@@ -787,8 +799,7 @@ public class PlaylistViewer extends JPanel {
           List<Entry> violations = new ArrayList<Entry>();
           new GVLValidator().validate(playlist, violations);
           if (violations.size() > 0) {
-            return JOptionPane.showConfirmDialog(ctx.getRootWindow(),
-                textProvider.getString("action.playlist.save.msg.validationerror", playlist.getName()), null, JOptionPane.OK_CANCEL_OPTION,
+            return JOptionPane.showConfirmDialog(ctx.getRootWindow(), textProvider.getString("action.playlist.save.msg.validationerror", playlist.getName()), null, JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION;
           }
         }
@@ -816,8 +827,8 @@ public class PlaylistViewer extends JPanel {
       Playlist playlist = (Playlist) playlistHolder.getValue();
       if (playlist != null) {
         if (playlist.isShuffle()) {
-          if (JOptionPane.showOptionDialog(ctx.getRootWindow(), ctx.getTextProvider().getString("playlistviewer.shuffle.msg.confirm"), null,
-              JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.NO_OPTION) {
+          if (JOptionPane.showOptionDialog(ctx.getRootWindow(), ctx.getTextProvider().getString("playlistviewer.shuffle.msg.confirm"), null, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+              null, null, null) == JOptionPane.NO_OPTION) {
             return;
           }
         }
@@ -854,8 +865,8 @@ public class PlaylistViewer extends JPanel {
       Playlist playlist = (Playlist) playlistHolder.getValue();
       if (playlist != null) {
         if (playlist.isShuffle()) {
-          if (JOptionPane.showOptionDialog(ctx.getRootWindow(), ctx.getTextProvider().getString("playlistviewer.generate.msg.confirm"), null,
-              JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.NO_OPTION) {
+          if (JOptionPane.showOptionDialog(ctx.getRootWindow(), ctx.getTextProvider().getString("playlistviewer.generate.msg.confirm"), null, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+              null, null, null) == JOptionPane.NO_OPTION) {
             return;
           }
         }
@@ -873,8 +884,7 @@ public class PlaylistViewer extends JPanel {
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(evt.getNewValue() != null && StringUtils.isNotEmpty(((Playlist) evt.getNewValue()).getGenerateTags())
-          && ((Playlist) evt.getNewValue()).getGenerateLength() > 0);
+      setEnabled(evt.getNewValue() != null && StringUtils.isNotEmpty(((Playlist) evt.getNewValue()).getGenerateTags()) && ((Playlist) evt.getNewValue()).getGenerateLength() > 0);
     }
 
   }
@@ -903,7 +913,6 @@ public class PlaylistViewer extends JPanel {
     }
 
   }
-
 
   protected class SortAction extends AbstractAction implements PropertyChangeListener {
     private static final long serialVersionUID = -1127269220503072051L;
@@ -1018,8 +1027,7 @@ public class PlaylistViewer extends JPanel {
   }
 
   /**
-   * Gets a value model that holds the ids of titles that are currently
-   * requested for highlighting because they are selected in the search panel.
+   * Gets a value model that holds the ids of titles that are currently requested for highlighting because they are selected in the search panel.
    * 
    * @return the highlightedTitleHolder
    */

@@ -5,7 +5,6 @@ package de.stationadmin.gui.track;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -17,7 +16,6 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
@@ -31,8 +29,8 @@ import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-import de.stationadmin.base.track.SearchResultSet;
 import de.stationadmin.base.track.BasicTrack;
+import de.stationadmin.base.track.SearchResultSet;
 import de.stationadmin.base.track.TrackQuery;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.util.NonObservingPresentationModel;
@@ -49,6 +47,7 @@ public class SearchPanel extends JPanel {
   private PresentationModel<TrackQuery> model = new NonObservingPresentationModel<TrackQuery>(new TrackQuery());
   private ValueModel searchResultHolder = new ValueHolder(null, true);
   private ValueModel selectionHolder = new ValueHolder(new ArrayList<BasicTrack>(0), true);
+  private SearchResultViewer searchResultViewer;
 
   private ValueHolder pageNum = new ValueHolder(1);
 
@@ -64,9 +63,9 @@ public class SearchPanel extends JPanel {
 
   private void init(boolean multiSelection) {
     this.setLayout(new BorderLayout());
-    SearchResultViewer viewer = new SearchResultViewer(ctx, model, this.searchResultHolder, this.selectionHolder, multiSelection);
-    viewer.setSearchAction(new Search());
-    this.add(viewer, BorderLayout.CENTER);
+    this.searchResultViewer = new SearchResultViewer(ctx, model, this.searchResultHolder, this.selectionHolder, multiSelection);
+    this.searchResultViewer.setSearchAction(new Search());
+    this.add(this.searchResultViewer, BorderLayout.CENTER);
     this.add(this.createBottomPanel(), BorderLayout.SOUTH);
   }
 
@@ -222,8 +221,7 @@ public class SearchPanel extends JPanel {
         } catch (Exception e) {
           JXErrorPane.showDialog(null, ctx.getTextProvider().createErrorInfo(e, "action.search.error"));
         }
-      }
-      else {
+      } else {
         JXErrorPane.showDialog(null, ctx.getTextProvider().createErrorInfo(null, "action.search.empty"));
       }
     }
@@ -319,6 +317,21 @@ public class SearchPanel extends JPanel {
    */
   public ValueModel getSelectionHolder() {
     return selectionHolder;
+  }
+
+  /**
+   * @return the selectionEnterAction
+   */
+  public Action getSelectionEnterAction() {
+    return this.searchResultViewer.getSelectionEnterAction();
+  }
+
+  /**
+   * @param selectionEnterAction
+   *          the selectionEnterAction to set
+   */
+  public void setSelectionEnterAction(Action selectionEnterAction) {
+    this.searchResultViewer.setSelectionEnterAction(selectionEnterAction);
   }
 
 }

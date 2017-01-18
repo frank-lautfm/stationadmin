@@ -5,18 +5,24 @@ package de.stationadmin.gui.track;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Event;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
@@ -37,11 +43,12 @@ import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.BasicTrack;
+import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackQuery;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.track.SearchResultTableModel.Column;
+import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.IntTableCellRenderer;
 
@@ -59,6 +66,8 @@ public class SearchResultViewer extends JPanel {
   private ValueModel selectionHolder;
   private PlaySnippetAction playSnippetAction;
   private SearchResultTableModel tableModel;
+  private Action searchAction;
+  private Action selectionEnterAction;
 
   public SearchResultViewer(ClientContext ctx, PresentationModel<TrackQuery> queryModel, ValueModel searchResultHolder, ValueModel selectionHolder, boolean multiSelection) {
     this.ctx = ctx;
@@ -69,7 +78,7 @@ public class SearchResultViewer extends JPanel {
   }
 
   public void setSearchAction(Action action) {
-    this.tableModel.setSearchAction(action);
+    this.searchAction = action;
   }
 
   private void init(boolean multiSelection) {
@@ -142,9 +151,9 @@ public class SearchResultViewer extends JPanel {
     table.getColumn(Column.YEAR.ordinal()).setCellRenderer(new IntTableCellRenderer(0));
     table.getColumn(Column.LENGTH.ordinal()).setMaxWidth(70);
     table.getColumn(Column.UPLOADDATE.ordinal()).setMaxWidth(80);
-    
+
     ((TableColumnExt) table.getColumnModel().getColumn(Column.GENRE.ordinal())).setVisible(false);
-    
+
     table.setSortable(true);
 
     final JPopupMenu popup = new JPopupMenu();
@@ -264,6 +273,23 @@ public class SearchResultViewer extends JPanel {
 
     });
 
+    AbstractAction enterAction = new AbstractAction() {
+      private static final long serialVersionUID = -9142971667998033541L;
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (table.getSelectedRow() == 0) {
+          searchAction.actionPerformed(e);
+        }
+        else if(selectionEnterAction != null) {
+          selectionEnterAction.actionPerformed(e);
+        }
+      }
+    };
+
+    table.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "enter");
+    table.getActionMap().put("enter", enterAction);
+
     this.add(new JScrollPane(table), new CellConstraints(1, 1, CellConstraints.FILL, CellConstraints.FILL));
 
   }
@@ -273,6 +299,20 @@ public class SearchResultViewer extends JPanel {
    */
   public ValueModel getSelectionHolder() {
     return selectionHolder;
+  }
+
+  /**
+   * @return the selectionEnterAction
+   */
+  public Action getSelectionEnterAction() {
+    return selectionEnterAction;
+  }
+
+  /**
+   * @param selectionEnterAction the selectionEnterAction to set
+   */
+  public void setSelectionEnterAction(Action selectionEnterAction) {
+    this.selectionEnterAction = selectionEnterAction;
   }
 
 }

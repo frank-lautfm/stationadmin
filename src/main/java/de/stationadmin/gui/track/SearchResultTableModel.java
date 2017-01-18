@@ -61,8 +61,6 @@ public class SearchResultTableModel extends AbstractTableModel {
   private PresentationModel<TrackQuery> queryModel;
   private SearchResultSet resultSet;
 
-  private Action searchAction;
-
   public SearchResultTableModel(ClientContext ctx, PresentationModel<TrackQuery> queryModel, ValueModel resultSetHolder) {
     super();
     this.ctx = ctx;
@@ -210,14 +208,6 @@ public class SearchResultTableModel extends AbstractTableModel {
       }
       queryModel.getModel(col.getModelName()).setValue(aValue);
     }
-  }
-
-  public Action getSearchAction() {
-    return searchAction;
-  }
-
-  public void setSearchAction(Action searchAction) {
-    this.searchAction = searchAction;
   }
 
 }
