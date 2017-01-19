@@ -12,6 +12,8 @@ Version 4.2.0
 [+] Token und Stationsname können optional beim Programmstart übergeben werden - 
     Logindialog wird dann übersprungen
 [+] Optional automatische Synchronisierung beim Programmstart
+[+] Tracksuche im Pool: Suchen / Titel übernehmen per Return-Taste
+[+] Filtermöglichkeiten beim Logviewer
 [#] Sendeplan wird immer beim Programmstart vom Server geladen - 
     keine explizie Sendeplansynchronisierung nach dem Start mehr nötig.
 [*] Suchergebnisse für Suche im Trackpool: Zellen mit Ergebnistiteln waren editierbar

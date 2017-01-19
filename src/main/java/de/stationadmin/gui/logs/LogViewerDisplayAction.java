@@ -32,6 +32,7 @@ public class LogViewerDisplayAction extends AbstractAction {
 
     LogViewer viewer = new LogViewer(ctx);
     viewer.setVisible(true);
+    viewer.search();
 
   }
 
