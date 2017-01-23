@@ -26,6 +26,7 @@ import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.Version;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackRegistry;
+import de.stationadmin.lfm.backend.Statistics;
 import de.stationadmin.lfm.backend.TrackStatsEntry;
 
 /**
@@ -73,8 +74,8 @@ public class LogAnalyzerService implements Service {
 
       @Override
       public void run() {
-        // make sure statistics of past 7 days are downloaded
-        for (int i = 7; i > 0; i--) {
+        // make sure statistics of past 6 days are downloaded
+        for (int i = 6; i > 0; i--) {
           long time = System.currentTimeMillis() - i * 24 * 60 * 60 * 1000l;
           Date day = new Date(time);
           try {
@@ -512,20 +513,35 @@ public class LogAnalyzerService implements Service {
     if (this.ctx.getStationStatus().getListenersYesterday() == 0) {
       return;
     }
+    
+    Statistics stats = ctx.getServer().getStatistics(ctx.getStationId());
+    
     Calendar cal = Calendar.getInstance();
     cal.setTimeInMillis(System.currentTimeMillis());
-    cal.add(Calendar.DAY_OF_MONTH, -1);
 
-    String date = new SimpleDateFormat(DATE_FORMAT).format(cal.getTime());
-    String filename = this.logCacheDir + "station_dailysummary" + "-" + date + ".log";
 
-    if (!new File(filename).exists()) {
-      StringBuilder buf = new StringBuilder();
-      buf.append("listeners\t" + this.ctx.getStationStatus().getListenersYesterday() + "\n");
-      buf.append("duration\t" + this.ctx.getStationStatus().getDurationYesterday() + "\n");
-      buf.append("avg\t" + this.ctx.getStationStatus().getAvgListeningTimeYesterday() + "\n");
-      FileUtils.writeStringToFile(new File(filename), buf.toString());
+    for(int i = 0; i < 5; i++) {
+      cal.add(Calendar.DAY_OF_MONTH, -1);
+      String date = new SimpleDateFormat(DATE_FORMAT).format(cal.getTime());
+      String filename = this.logCacheDir + "station_dailysummary" + "-" + date + ".log";
+      
+      if (!new File(filename).exists() && stats.getTlhLog().containsKey(date)) {
+        StringBuilder buf = new StringBuilder();
+        
+        Integer listeners = stats.getSwitchonsLog().get(date);
+        Integer hours = stats.getTlhLog().get(date);
+        int avg = listeners != null ? hours.intValue() * 60 / listeners.intValue() : 0;
+        
+        buf.append("listeners\t" + (listeners != null ? listeners.intValue() : 0) + "\n");
+        buf.append("duration\t" + hours + "\n");
+        buf.append("avg\t" + avg + "\n");
+        FileUtils.writeStringToFile(new File(filename), buf.toString());
+      }
+
+      
     }
+
+
 
   }
 
