@@ -444,7 +444,8 @@ public class RegisteredTracksViewer extends JPanel {
     final CopyTracksAction copyAction = new CopyTracksAction(this.ctx);
     final DistributeTracksAction distributeAction = new DistributeTracksAction(this.ctx);
     final FollowArtistsAction followAction = new FollowArtistsAction(this.ctx);
-    final RemoveTracksFromPlaylistsAction removeTitlesAction = new RemoveTracksFromPlaylistsAction(this.ctx);
+    final RemoveTracksFromPlaylistsAction removeTracksAction = new RemoveTracksFromPlaylistsAction(this.ctx);
+    final ClearTagsAction clearTagsAction = new ClearTagsAction(ctx);
     final TracksDeleteAction deleteAction = new TracksDeleteAction(ctx);
     final TracksReloadAction reloadAction = new TracksReloadAction(ctx);
     final TrackViewAction viewAction = new TrackViewAction(ctx);
@@ -457,7 +458,8 @@ public class RegisteredTracksViewer extends JPanel {
     popup.add(distributeAction);
     popup.add(followAction);
     popup.addSeparator();
-    popup.add(removeTitlesAction);
+    popup.add(removeTracksAction);
+    popup.add(clearTagsAction);
     popup.add(deleteAction);
     popup.add(reloadAction);
     popup.addSeparator();
@@ -591,7 +593,8 @@ public class RegisteredTracksViewer extends JPanel {
           untagMenu.setTitleIds(trackIds);
           copyAction.setTitles(entries);
           distributeAction.setTitles(entries);
-          removeTitlesAction.setTitles(entries);
+          removeTracksAction.setTracks(entries);
+          clearTagsAction.setTracks(entries);
           deleteAction.setTracks(entries);
           reloadAction.setTracks(entries);
           viewAction.setTitles(entries);
