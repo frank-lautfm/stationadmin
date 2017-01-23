@@ -12,6 +12,7 @@ Version 4.2.0
 [+] Token und Stationsname können optional beim Programmstart übergeben werden - 
     Logindialog wird dann übersprungen
 [+] Optional automatische Synchronisierung beim Programmstart
+[+] Meine Titel: Alle Tags löschen per Kontextemnü
 [+] Tracksuche im Pool: Suchen / Titel übernehmen per Return-Taste
 [+] Filtermöglichkeiten beim Logviewer
 [#] Sendeplan wird immer beim Programmstart vom Server geladen - 
@@ -19,6 +20,7 @@ Version 4.2.0
 [*] Suchergebnisse für Suche im Trackpool: Zellen mit Ergebnistiteln waren editierbar
 [*] Änderung des Shuffle-Flags bei der Playlist wurde nicht auf dem Server gespeichert wenn das die
     einzige Änderung war.
+[*} Kosmetische Korrekturen im Dialog zum Verwalten der Ansichten für "Meine Titel".    
 
 Version 4.1.1
 --------------
