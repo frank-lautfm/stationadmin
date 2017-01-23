@@ -750,6 +750,9 @@ public class Playlist extends AbstractBean {
   public void setShuffle(boolean shuffle) {
     boolean old = this.shuffle;
     this.shuffle = shuffle;
+    if(old != shuffle) {
+      this.metaDataModified = true;
+    }
     getPcs().firePropertyChange("shuffle", old, shuffle);
   }
 
