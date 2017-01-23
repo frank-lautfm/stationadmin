@@ -17,6 +17,8 @@ Version 4.2.0
 [#] Sendeplan wird immer beim Programmstart vom Server geladen - 
     keine explizie Sendeplansynchronisierung nach dem Start mehr nötig.
 [*] Suchergebnisse für Suche im Trackpool: Zellen mit Ergebnistiteln waren editierbar
+[*] Änderung des Shuffle-Flags bei der Playlist wurde nicht auf dem Server gespeichert wenn das die
+    einzige Änderung war.
 
 Version 4.1.1
 --------------
