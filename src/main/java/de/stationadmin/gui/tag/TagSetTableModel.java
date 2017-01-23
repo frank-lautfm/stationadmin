@@ -143,9 +143,18 @@ public class TagSetTableModel extends DefaultTableModel {
     }
   }
 
+
+  /* (non-Javadoc)
+   * @see javax.swing.table.DefaultTableModel#getColumnName(int)
+   */
   @Override
-  public Class<?> getColumnClass(int columnIndex) {
-    // TODO Auto-generated method stub
-    return super.getColumnClass(columnIndex);
+  public String getColumnName(int column) {
+    switch(column) {
+    case 0:
+      return textProvider.getString("tagset.column.tag");
+    case 1:
+      return textProvider.getString("tagset.column.visibility");
+    }
+    return super.getColumnName(column);
   }
 }

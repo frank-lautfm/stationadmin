@@ -68,7 +68,7 @@ public class TagSetManagerDlg extends JFrame {
         .setLayout(
             new FormLayout("5dlu,120dlu,5dlu,pref:grow,5dlu",
                 "5dlu,pref:grow,5dlu"));
-    this.setTitle(ctx.getString("titletagsetmanager.title"));
+    this.setTitle(ctx.getString("tagsetmanager.title"));
 
     {
       final IndirectListModel<TagSet> model = new IndirectListModel<TagSet>(
@@ -186,7 +186,7 @@ public class TagSetManagerDlg extends JFrame {
     SaveAction() {
       this.putValue(Action.SMALL_ICON, ctx.getIcon("save.png"));
       this.putValue(Action.SHORT_DESCRIPTION,
-          ctx.getString("titletagsetmanager.action.save.tooltip"));
+          ctx.getString("tagsetmanager.action.save.tooltip"));
       this.setEnabled(false);
     }
 
@@ -200,7 +200,7 @@ public class TagSetManagerDlg extends JFrame {
         } 
       } catch (IOException e) {
         ErrorInfo errorInfo = ctx.createErrorInfo(e,
-            "titletagsetmanager.action.save.failed");
+            "tagsetmanager.action.save.failed");
         JXErrorPane.showDialog(TagSetManagerDlg.this, errorInfo);
       }
 
@@ -225,7 +225,7 @@ public class TagSetManagerDlg extends JFrame {
     DeleteAction() {
       this.putValue(Action.SMALL_ICON, ctx.getIcon("delete.png"));
       this.putValue(Action.SHORT_DESCRIPTION,
-          ctx.getString("titletagsetmanager.action.delete.tooltip"));
+          ctx.getString("tagsetmanager.action.delete.tooltip"));
       this.setEnabled(false);
     }
 
@@ -237,13 +237,13 @@ public class TagSetManagerDlg extends JFrame {
       if (JOptionPane
           .showConfirmDialog(
               TagSetManagerDlg.this,
-              ctx.getString("titletagsetmanager.action.delete.confirm",
+              ctx.getString("tagsetmanager.action.delete.confirm",
                   tagSet.getName()), "", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
         try {
           tagManager.deleteTagSet(tagSet);
         } catch (IOException e) {
           ErrorInfo errorInfo = ctx.createErrorInfo(e,
-              "titletagmanager.action.delete.failed");
+              "tagmanager.action.delete.failed");
           JXErrorPane.showDialog(TagSetManagerDlg.this, errorInfo);
         }
       }

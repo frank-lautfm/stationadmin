@@ -1,6 +1,7 @@
 package de.stationadmin.gui.tag;
 
 import java.awt.Component;
+import java.awt.Dimension;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultListCellRenderer;
@@ -59,7 +60,7 @@ public class TagSetEditor extends JPanel {
       @Override
       protected void setValue(Object value) {
         if (value != null) {
-          setText(ctx.getTextProvider().getString("titletagset.property.status.option." + value.toString().toLowerCase()));
+          setText(ctx.getTextProvider().getString("tagset.property.status.option." + value.toString().toLowerCase()));
         } else {
           setText(" ");
         }
@@ -77,8 +78,6 @@ public class TagSetEditor extends JPanel {
         }
         return super.getCellRenderer(row, column);
       }
-
-      
     };
     
     JComboBox statusCombo = new JComboBox(new Boolean[] {null, Boolean.TRUE, Boolean.FALSE });
@@ -90,7 +89,7 @@ public class TagSetEditor extends JPanel {
           boolean cellHasFocus) {
         Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         if (value != null) {
-          setText(ctx.getTextProvider().getString("titletagset.property.status.option." + value.toString().toLowerCase()));
+          setText(ctx.getTextProvider().getString("tagset.property.status.option." + value.toString().toLowerCase()));
         } else {
           setText(" ");
         }
@@ -101,8 +100,10 @@ public class TagSetEditor extends JPanel {
     table.getColumn(1).setCellEditor(new DefaultCellEditor(statusCombo));
 
     
+    JScrollPane tableScroll = new JScrollPane(table);
+    tableScroll.setPreferredSize(new Dimension(100, 50));
     
-    this.add(new JScrollPane(table), cc.xywh(2, 4, 3, 1));
+    this.add(tableScroll, cc.xywh(2, 4, 3, 1, CellConstraints.FILL, CellConstraints.FILL));
 
   }
 }

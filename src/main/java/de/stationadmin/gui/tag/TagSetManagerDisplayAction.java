@@ -13,7 +13,7 @@ public class TagSetManagerDisplayAction extends AbstractAction {
   
   public TagSetManagerDisplayAction(ClientContext ctx) {
     this.putValue(Action.SMALL_ICON, ctx.getIcon("configure.png"));
-    this.putValue(Action.SHORT_DESCRIPTION, ctx.getTextProvider().getString("titletagset.action.open.tooltip"));
+    this.putValue(Action.SHORT_DESCRIPTION, ctx.getTextProvider().getString("tagset.action.open.tooltip"));
     this.ctx = ctx;
   }
 
