@@ -53,7 +53,11 @@ public class PlaylistContainer extends JPanel {
       @Override
       public void jumpTo(Object target) {
         if (target instanceof Playlist) {
-          playlistSelectionHolder.setValue(target);
+          // re-fetch from registry as target might be an obsolete instance from before last synchronization
+          Playlist playlist = ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylist(((Playlist) target).getId());
+          if (playlist != null) {
+            playlistSelectionHolder.setValue(playlist);
+          }
         }
         if (target instanceof PlaylistEntryJumpTarget) {
           selector.setSelectedIndex(0);
@@ -67,7 +71,7 @@ public class PlaylistContainer extends JPanel {
     this.setLayout(new BorderLayout());
 
     JSplitPane split = new JSplitPane();
-    
+
     split.setLeftComponent(new TitledPanel("Playlists", selector));
     split.setRightComponent(new TitledPanel(viewer.getPresentationModel().getModel("name"), viewer));
     split.setDividerLocation(250);

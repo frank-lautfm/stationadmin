@@ -45,7 +45,7 @@ public class Schedule extends AbstractBean implements Service {
   private static final Logger log = Logger.getLogger(Schedule.class);
   private SessionCtx ctx;
   private PlaylistRegistry playlistRegistry;
-  private Playlist basePlaylist;
+  private int basePlaylistId;
 
   private List<Entry> entries = Collections.synchronizedList(new ArrayList<Entry>());
   private List<Event> events = Collections.synchronizedList(new ArrayList<Event>());
@@ -345,7 +345,10 @@ public class Schedule extends AbstractBean implements Service {
     if (this.ctx.getRole() == Role.DJ) {
       return;
     }
-    this.synchronize();
+    if (this.playlistRegistry.getAllPlaylists().size() > 1) {
+      this.synchronize();
+    }
+    // otherwise: Not enough playlists for a schedule
   }
 
   private void loadEvents() throws IOException {
@@ -376,7 +379,7 @@ public class Schedule extends AbstractBean implements Service {
       if (entry.getHour() > -1) {
         this.addEntry(entry);
       } else {
-        this.basePlaylist = this.playlistRegistry.getPlaylist(entry.getPlaylistId());
+        this.basePlaylistId = entry.getPlaylistId();
       }
     }
     this.updateCurrentEntry();
@@ -429,7 +432,7 @@ public class Schedule extends AbstractBean implements Service {
   public void save(OutputStream stream) throws IOException {
     XStream xstream = this.getXStream();
     ArrayList<Entry> entries = new ArrayList<Schedule.Entry>();
-    entries.add(new Entry(basePlaylist.getId(), Weekday.MONDAY, -1));
+    entries.add(new Entry(basePlaylistId, Weekday.MONDAY, -1));
     entries.addAll(this.getEntries());
     BufferedOutputStream out = new BufferedOutputStream(stream, 2048);
     xstream.toXML(entries, out);
@@ -486,7 +489,7 @@ public class Schedule extends AbstractBean implements Service {
     ArrayList<ScheduleEntry> entries = new ArrayList<ScheduleEntry>();
     while (slot < 7 * 24) {
       int plId = table[slot / 24][slot % 24];
-      if (plId != this.basePlaylist.getId()) {
+      if (plId != this.basePlaylistId) {
         int start = slot;
         int duration = 1;
         slot++;
@@ -519,7 +522,7 @@ public class Schedule extends AbstractBean implements Service {
 
     this.ctx.updateStatus("getSchedule");
     de.stationadmin.lfm.backend.Schedule schedule = this.ctx.getServer().getSchedule(ctx.getStationId());
-    this.basePlaylist = this.playlistRegistry.getPlaylist(schedule.getBasePlaylistId());
+    this.basePlaylistId = schedule.getBasePlaylistId();
 
     // construct a day/hour matrix
     int[][] table = new int[7][24];
@@ -879,7 +882,7 @@ public class Schedule extends AbstractBean implements Service {
   }
 
   public Playlist getBasePlaylist() {
-    return basePlaylist;
+    return this.playlistRegistry.getPlaylist(basePlaylistId);
   }
 
   /**

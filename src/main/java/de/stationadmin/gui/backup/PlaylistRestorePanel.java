@@ -34,6 +34,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.StationAdminClient;
 import de.stationadmin.base.backup.BackupService;
 import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.PlaylistNameCompator;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.util.AppUtils;
@@ -84,7 +85,7 @@ public class PlaylistRestorePanel extends JPanel {
     {
       JPanel playlistPanel = new JPanel(new GridLayout(-1, 2));
       playlistPanel.setBackground(Color.WHITE);
-      List<Playlist> playlists = adminClient.getPlaylistRegistry().getAllPlaylists();
+      List<Playlist> playlists = adminClient.getPlaylistService().getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE);
       Collections.sort(playlists, new PlaylistNameCompator());
       for (Playlist playlist : playlists) {
         JCheckBox cb = new JCheckBox(playlist.getName());

@@ -6,6 +6,13 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.2.1
+-------------
+
+[*] Laden des Sendeplans beim Start führte zu Fehler wenn noch keine Playlists geladen waren
+[*] Playlistauswahl über Sendeplan im Übersichts-Tab funktionierte nach Synchronisierung nicht richtig
+[*] Backup-Import: Archiv-Playlists wurden für den Import von Online-Playlists angeboten
+
 Version 4.2.0
 -------------
 [+] Einmalige Sendungen im Sendeplan eintragen (Events)
