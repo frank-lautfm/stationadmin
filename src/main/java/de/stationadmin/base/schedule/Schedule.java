@@ -742,7 +742,7 @@ public class Schedule extends AbstractBean implements Service {
       super();
       this.playlistId = playlistId;
       this.startTime = startTime;
-      this.endTime = new Date(this.startTime.getTime() + duration * 1000 * 60);
+      this.endTime = new Date(this.startTime.getTime() + duration * 1000 * 60 * 60);
       this.duration = duration;
 
       Calendar cal = Calendar.getInstance();
