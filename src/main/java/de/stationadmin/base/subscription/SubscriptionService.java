@@ -173,6 +173,8 @@ public class SubscriptionService extends AbstractBean implements Service {
       } catch (Exception e) {
       }
     }
+    
+    this.minSearchDate = new Date();
 
     saveStatus();
     if (matches > 0) {
