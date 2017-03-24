@@ -243,7 +243,7 @@ public class Schedule extends AbstractBean implements Service {
     }
     for (Event evt : eventsOfToday) {
       Entry entry = evt.getEntry();
-      for (int i = entry.getHour(); i < entry.getHour() + evt.getDuration(); i++) {
+      for (int i = entry.getHour(); i < entry.getHour() + evt.getDuration() && i < hours.length; i++) {
         hours[i] = entry;
       }
     }
