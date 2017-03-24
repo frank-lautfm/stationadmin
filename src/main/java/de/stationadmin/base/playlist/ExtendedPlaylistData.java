@@ -155,19 +155,19 @@ public class ExtendedPlaylistData {
       if (this.generatePushTag != null) {
         properties.add("generate.tags.push = " + this.generatePushTag);
       }
-      properties.add("generate.tags.all = " + Boolean.toString(this.generateTagsAll));
-      properties.add("generate.length = " + Integer.toString(this.generateLength));
-      properties.add("generate.minimizeArtistRepeats = " + Boolean.toString(this.generateMinimizeArtistRepeats));
-      properties.add("generate.titleRepeatLevel = " + Integer.toString(this.generateTitleRepeatLevel));
-      properties.add("generate.maxArtistTitles= " + Integer.toString(this.generateMaxArtistTitles));
-
-      if (this.generateAdvices != null) {
-        for (int i = 0; i < this.generateAdvices.length; i++) {
-          properties.add("generate.advice." + i + " = " + this.generateAdvices[i]);
-        }
-      }
-
     }
+    properties.add("generate.tags.all = " + Boolean.toString(this.generateTagsAll));
+    properties.add("generate.length = " + Integer.toString(this.generateLength));
+    properties.add("generate.minimizeArtistRepeats = " + Boolean.toString(this.generateMinimizeArtistRepeats));
+    properties.add("generate.titleRepeatLevel = " + Integer.toString(this.generateTitleRepeatLevel));
+    properties.add("generate.maxArtistTitles= " + Integer.toString(this.generateMaxArtistTitles));
+
+    if (this.generateAdvices != null) {
+      for (int i = 0; i < this.generateAdvices.length; i++) {
+        properties.add("generate.advice." + i + " = " + this.generateAdvices[i]);
+      }
+    }
+
     if (StringUtils.isNotEmpty(this.comment)) {
       properties.add("comment = " + this.comment.replaceAll("[\\r|\\n]+", " "));
     }
@@ -197,35 +197,34 @@ public class ExtendedPlaylistData {
           data.setGeneratePushTag(null); // fix illegal entry from previous
                                          // version
         }
-        if (map.containsKey("generate.tags.all")) {
-          data.setGenerateTagsAll(map.get("generate.tags.all").equalsIgnoreCase("true"));
+      }
+      if (map.containsKey("generate.tags.all")) {
+        data.setGenerateTagsAll(map.get("generate.tags.all").equalsIgnoreCase("true"));
+      }
+      if (map.containsKey("generate.length")) {
+        try {
+          data.setGenerateLength(Integer.parseInt(map.get("generate.length")));
+        } catch (NumberFormatException e) {
         }
-        if (map.containsKey("generate.length")) {
-          try {
-            data.setGenerateLength(Integer.parseInt(map.get("generate.length")));
-          } catch (NumberFormatException e) {
-          }
-        }
-        if (map.containsKey("generate.minimizeArtistRepeats")) {
-          data.setGenerateMinimizeArtistRepeats(map.get("generate.minimizeArtistRepeats").equalsIgnoreCase("true"));
-        }
-        if (map.containsKey("generate.titleRepeatLevel")) {
-          data.setGenerateTitleRepeatLevel(Integer.parseInt(map.get("generate.titleRepeatLevel")));
-        }
-        if (map.containsKey("generate.maxArtistTitles")) {
-          data.setGenerateMaxArtistTitles(Integer.parseInt(map.get("generate.maxArtistTitles")));
-        }
+      }
+      if (map.containsKey("generate.minimizeArtistRepeats")) {
+        data.setGenerateMinimizeArtistRepeats(map.get("generate.minimizeArtistRepeats").equalsIgnoreCase("true"));
+      }
+      if (map.containsKey("generate.titleRepeatLevel")) {
+        data.setGenerateTitleRepeatLevel(Integer.parseInt(map.get("generate.titleRepeatLevel")));
+      }
+      if (map.containsKey("generate.maxArtistTitles")) {
+        data.setGenerateMaxArtistTitles(Integer.parseInt(map.get("generate.maxArtistTitles")));
+      }
 
-        int adviceIdx = 0;
-        List<String> advices = new ArrayList<String>();
-        while (map.containsKey("generate.advice." + adviceIdx)) {
-          advices.add(map.get("generate.advice." + adviceIdx));
-          adviceIdx++;
-        }
-        if (advices.size() > 0) {
-          data.setGenerateAdvices(advices.toArray(new String[advices.size()]));
-        }
-
+      int adviceIdx = 0;
+      List<String> advices = new ArrayList<String>();
+      while (map.containsKey("generate.advice." + adviceIdx)) {
+        advices.add(map.get("generate.advice." + adviceIdx));
+        adviceIdx++;
+      }
+      if (advices.size() > 0) {
+        data.setGenerateAdvices(advices.toArray(new String[advices.size()]));
       }
 
       data.setComment(map.get("comment"));
@@ -299,7 +298,8 @@ public class ExtendedPlaylistData {
   }
 
   /**
-   * @param id the id to set
+   * @param id
+   *          the id to set
    */
   void setId(int id) {
     this.id = id;
