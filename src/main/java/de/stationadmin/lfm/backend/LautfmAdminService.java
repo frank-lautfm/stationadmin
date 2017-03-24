@@ -435,7 +435,7 @@ public class LautfmAdminService {
 
   public void deleteTag(int stationId, String tag) throws IOException {
     // /stations/:station_id/tracks/tags/:tagname
-    CloseableHttpResponse response = this.doDelete("/stations/" + stationId + "/tracks/tags/" + URLEncoder.encode(tag, "UTF-8"));
+    CloseableHttpResponse response = this.doDelete("/stations/" + stationId + "/tracks/tags/" + StringUtils.replace(URLEncoder.encode(tag, "UTF-8"), "+", "%20"));
     try {
       if (response.getStatusLine().getStatusCode() != 204 && response.getStatusLine().getStatusCode() != 200) {
         throw new AdminServiceException(this.getErrorMessage(response));
