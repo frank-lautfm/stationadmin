@@ -213,8 +213,10 @@ public class PlaylistConfigurationDialog extends JDialog {
     tab.addTab(textProvider.getString("playlistcfg.tab.base"), this.createBasePanel());
     tab.addTab(textProvider.getString("playlistcfg.tab.generate.base"), new PlaylistGeneratorBaseConfigurationPanel(ctx, model));
     tab.addTab(textProvider.getString("playlistcfg.tab.generate.advice"), new PlaylistGeneratorAdviceConfigurationPanel(ctx, model));
-    tab.setEnabledAt(1, !this.model.getBean().isShuffle());
-    tab.setEnabledAt(2, !this.model.getBean().isShuffle());
+    
+    boolean hasTags = ctx.getAdminClient().getTagManager().getTags().size() > 0;
+    tab.setEnabledAt(1, !this.model.getBean().isShuffle() && hasTags);
+    tab.setEnabledAt(2, !this.model.getBean().isShuffle() && hasTags);
 
     this.getContentPane().add(tab, cc.xy(2, 4));
 
