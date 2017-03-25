@@ -6,6 +6,18 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.2.2
+-------------
+[*] Tags mit Leerzeichen liessen sich nicht löschen
+[*] Neue Uploads durchsuchen: Eingrenzung der Suche bis zum Zeitpunkt der letzten Suche
+[*] Fehlerhafte Berechnung des Endes eines Events korrigiert - Anzeige der aktuellen Sendung funktionierte 
+    deswegen nicht richtig wenn gerade ein Event lief
+[*] Fehler beim Anzeigen des heutigen Sendeplans wenn ein Event über das Ende des Tages hinaus ging korrigiert
+[*] Formatierungsfehler für Jahr im Playlistviewer
+[#] Einstellung für den Playlistgenerator werden jetzt in jedem Fall abgespeichert, auch wenn kein Tag 
+    ausgewählt ist
+[+] Optionale Spalte "Album" im Playlistviewer
+
 Version 4.2.1
 -------------
 
