@@ -23,6 +23,7 @@ public class Song implements Serializable {
   private int releaseYear;
   private int length;
   private Date createdAt;
+  private String type;
 
   private Date startedAt;
   private Date endsAt;
@@ -41,6 +42,7 @@ public class Song implements Serializable {
     this.createdAt = JSONUtil.getDate(json, "created_at", JSONUtil.DEFAULT_DATE_FORMAT);
     this.startedAt = JSONUtil.getDate(json, "started_at", JSONUtil.DEFAULT_DATE_FORMAT);
     this.endsAt = JSONUtil.getDate(json, "ends_at", JSONUtil.DEFAULT_DATE_FORMAT);
+    this.type = JSONUtil.getString(json, "type");
   }
 
   /**
@@ -115,6 +117,20 @@ public class Song implements Serializable {
   
   public String toString() {
     return this.artist.getName() + " - " + this.title;
+  }
+
+  /**
+   * @return the type
+   */
+  public String getType() {
+    return type;
+  }
+
+  /**
+   * @param type the type to set
+   */
+  public void setType(String type) {
+    this.type = type;
   }
 
 }
