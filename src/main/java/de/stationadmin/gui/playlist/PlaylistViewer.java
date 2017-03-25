@@ -92,6 +92,7 @@ import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ClipboardAction;
 import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.DateTableCellRenderer;
+import de.stationadmin.gui.util.IntTableCellRenderer;
 import de.stationadmin.gui.util.ThreadedAction;
 
 /**
@@ -287,12 +288,14 @@ public class PlaylistViewer extends JPanel {
     table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setPreferredWidth(40);
     table.getColumn(Column.TYPE.ordinal()).setCellRenderer(typeRenderer);
     table.getColumn(Column.ADDED.ordinal()).setCellRenderer(timeRenderer);
-
+    table.getColumn(Column.YEAR.ordinal()).setCellRenderer(new IntTableCellRenderer(0));
+    
     table.setDropMode(DropMode.INSERT_ROWS);
     table.setDragEnabled(true);
     table.setTransferHandler(new PlaylistTableTransferHandler(ctx, table));
 
     table.setColumnControlVisible(true);
+    table.getColumnExt(table.convertColumnIndexToView(Column.ALBUM.ordinal())).setVisible(false);
     table.getColumnExt(table.convertColumnIndexToView(Column.YEAR.ordinal())).setVisible(false);
     table.getColumnExt(table.convertColumnIndexToView(Column.GENRE.ordinal())).setVisible(false);
     table.getColumnExt(table.convertColumnIndexToView(Column.ADDED.ordinal())).setVisible(false);

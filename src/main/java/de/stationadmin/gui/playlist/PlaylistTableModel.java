@@ -161,6 +161,8 @@ public class PlaylistTableModel extends AbstractTableModel {
       return track != null ? track.getArtist() : "<unknown>";
     case TITLE:
       return track != null ? track.getTitle() : "<unknown>";
+    case ALBUM:
+      return track instanceof DetailedTrack ? ((DetailedTrack) track).getAlbum() : null;
     case LENGTH:
       return track != null ? TimeFormat.format(track.getLength(), false) : null;
     case GENRE:
@@ -209,7 +211,7 @@ public class PlaylistTableModel extends AbstractTableModel {
   }
 
   public enum Column {
-    ENTRYNO, TYPE, STARTTIME, ARTIST, TITLE, GENRE, YEAR, LENGTH, ADDED, NUMPLAYLISTS
+    ENTRYNO, TYPE, STARTTIME, ARTIST, TITLE, ALBUM, GENRE, YEAR, LENGTH, ADDED, NUMPLAYLISTS
   }
 
   /**
