@@ -169,6 +169,7 @@ public class DynamicTag implements Tag {
             } catch (NumberFormatException e) {
             }
           }
+          this.playlistIds = ids;
         } else if (key.equals("tags")) {
           this.tags = StringUtils.split(value, "\t");
         }

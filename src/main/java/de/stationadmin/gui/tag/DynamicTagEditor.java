@@ -335,7 +335,7 @@ public class DynamicTagEditor extends JPanel {
       }
     });
 
-    panel.add(new JLabel(ctx.getTextProvider().getString("titletagmanager.property.playlistIds")), cc.xy(2, 2));
+    panel.add(new JLabel(ctx.getTextProvider().getString("titletagmanager.property.tags")), cc.xy(2, 2));
     panel.add(new JScrollPane(list), cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
 
     return panel;

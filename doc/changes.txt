@@ -6,6 +6,12 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.2.3
+-------------
+
+[*] Fehler beim Laden von dynamischen Tags mit Playlist als Filter behoben
+[*] Fehlerhafte Beschriftung im "Tags"-Tab im Editor für dynamische Tags korrigiert
+
 Version 4.2.2
 -------------
 [*] Tags mit Leerzeichen liessen sich nicht löschen
