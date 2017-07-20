@@ -487,7 +487,9 @@ public class LogAnalyzerService implements Service {
               // might happen during start up - just ignore the event
               return;
             }
-            playsToday.add(new Play(new Date(System.currentTimeMillis()), titleRegistry.getTrack(titleId)));
+            if(titleId > 0) {
+              playsToday.add(new Play(new Date(System.currentTimeMillis()), titleRegistry.getTrack(titleId)));
+            }
           } catch (Exception e) {
             log.error(e);
           }
