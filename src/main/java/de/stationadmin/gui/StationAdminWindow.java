@@ -63,7 +63,6 @@ import de.stationadmin.gui.loganalyzer.listeners.ListenersAnalyzerOpenAction;
 import de.stationadmin.gui.loganalyzer.plays.PlaysAnalyzerOpenAction;
 import de.stationadmin.gui.loganalyzer.plays.UnplayedTracksViewerOpenAction;
 import de.stationadmin.gui.logs.LogViewerDisplayAction;
-import de.stationadmin.gui.migration.MigrationDlgDisplayAction;
 import de.stationadmin.gui.mp3explorer.MP3ExplorerDisplayAction;
 import de.stationadmin.gui.playlist.PlaylistContainer;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
@@ -485,8 +484,6 @@ public class StationAdminWindow extends StationAdminFrame {
         menuBackup.addSeparator();
         menuBackup.add(new BackupCreateAction(ctx.getTextProvider(), ctx.getAdminClient()));
         menuBackup.add(new BackupRestoreAction(this.ctx));
-        menuBackup.addSeparator();
-        menuBackup.add(new MigrationDlgDisplayAction(ctx));
         menuBackup.addSeparator();
       }
       menuBackup.add(new SettingsDisplayAction(this.ctx));
