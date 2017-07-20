@@ -9,12 +9,12 @@ package de.stationadmin.base;
  * @author Frank Korf
  */
 public interface Version {
-  
+
   int MAJOR = 4;
-  int MINOR = 2;
-  int STEP = 3;
-  String STATUS = "";
-  
+  int MINOR = 3;
+  int STEP = 0;
+  String STATUS = "Alpha";
+
   String VERSION = MAJOR + "." + MINOR + "." + STEP + " " + STATUS;
 
 }

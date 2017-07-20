@@ -6,6 +6,12 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.3.0
+-------------
+
+[+] "Titelinformationen bearbeiten" zum Bearbeiten der Titeldetails mehrerer ausgewählter Tracks
+[*] Analyse / Gespielte Titel funktionierte nach Werbetrack nicht mehr
+
 Version 4.2.3
 -------------
 
