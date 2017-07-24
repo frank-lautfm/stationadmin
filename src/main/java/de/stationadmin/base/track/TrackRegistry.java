@@ -128,6 +128,7 @@ public class TrackRegistry extends AbstractBean {
       regTitle.setGenre(title.getGenre());
       regTitle.setPrivateTrack(title.isPrivateTrack());
       regTitle.setYear(title.getYear());
+      regTitle.setType(title.getType());
     }
   }
 
