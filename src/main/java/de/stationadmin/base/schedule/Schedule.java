@@ -718,6 +718,13 @@ public class Schedule extends AbstractBean implements Service {
       return event;
     }
 
+    /**
+     * @param playlistId the playlistId to set
+     */
+    public void setPlaylistId(int playlistId) {
+      this.playlistId = playlistId;
+    }
+
   }
 
   public static class Event implements Comparable<Event> {

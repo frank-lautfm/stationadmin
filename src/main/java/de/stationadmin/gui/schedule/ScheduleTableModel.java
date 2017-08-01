@@ -317,4 +317,11 @@ public class ScheduleTableModel extends AbstractTableModel {
     return modified;
   }
 
+  /**
+   * @return the schedulerEntries
+   */
+  public List<Schedule.Entry> getEntries() {
+    return schedulerEntries;
+  }
+
 }

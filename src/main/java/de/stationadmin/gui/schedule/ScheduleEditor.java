@@ -64,7 +64,7 @@ public class ScheduleEditor extends JPanel {
   private ScheduleTableModel model;
   private int preferredTableHeight;
   private ValueModel selectionHolder = new ValueHolder();
-
+  
   /**
    * @param ctx
    * @throws HeadlessException
@@ -88,6 +88,7 @@ public class ScheduleEditor extends JPanel {
     toolbar.add(new ImportAction());
     toolbar.add(new ExportAction());
     toolbar.addSeparator();
+    toolbar.add(new ShuffleDlgAction());
     toolbar.add(new ExportHTMLAction());
 
     ValueModel selectionHolder = new ValueHolder();
@@ -497,6 +498,27 @@ public class ScheduleEditor extends JPanel {
       HTMLExportDlg dlg = new HTMLExportDlg(ctx, model);
       dlg.setVisible(true);
     }
+  }
+  
+  private class ShuffleDlgAction extends AbstractAction {
+    private static final long serialVersionUID = 2594800254185182408L;
+
+    ShuffleDlgAction() {
+      this.putValue(Action.SMALL_ICON, ctx.getIcon("shuffle.png"));
+      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("scheduleeditor.action.shuffle.tooltip"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      ShuffleDlg dlg = new ShuffleDlg(ctx, model);
+      dlg.setVisible(true);
+    }
+}
+
+  /**
+   * @return the model
+   */
+  ScheduleTableModel getModel() {
+    return model;
   }
 
 }
