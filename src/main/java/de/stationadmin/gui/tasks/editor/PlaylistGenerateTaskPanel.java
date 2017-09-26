@@ -51,7 +51,7 @@ public class PlaylistGenerateTaskPanel extends JPanel implements ScheduledTaskEd
   private JLabel playlistNameLabel, hourLabel;
 
   private JTextField taskNameTf;
-  private JCheckBox artistCb, titleCb, titleStrictCb, restartCb;
+  private JCheckBox artistCb, titleCb, titleStrictCb, restartCb, synchronizeCb;
   private JPanel genOptionsPanel;
 
   public PlaylistGenerateTaskPanel(PlaylistRegistry playlistRegistry, TextProvider textProvider) {
@@ -62,7 +62,7 @@ public class PlaylistGenerateTaskPanel extends JPanel implements ScheduledTaskEd
   }
 
   private void init() {
-    this.setLayout(new FormLayout("max(30dlu;pref),5dlu,pref:grow", "pref,5dlu,pref,3dlu,pref,5dlu,pref,pref,5dlu,pref,5dlu,pref"));
+    this.setLayout(new FormLayout("max(30dlu;pref),5dlu,pref:grow", "pref,5dlu,pref,3dlu,pref,5dlu,pref,pref,5dlu,pref,5dlu,pref,5dlu,pref"));
     CellConstraints cc = new CellConstraints();
     
     this.taskNameTf = new JTextField(15);
@@ -116,8 +116,11 @@ public class PlaylistGenerateTaskPanel extends JPanel implements ScheduledTaskEd
 
     this.add(this.genOptionsPanel, cc.xywh(1, 10, 3, 1, CellConstraints.LEFT, CellConstraints.CENTER));
 
+    this.synchronizeCb = new JCheckBox(this.textProvider.getString("task.shuffle.editor.property.synchronize"));
+    this.add(synchronizeCb, cc.xywh(1, 12, 3, 1, CellConstraints.LEFT, CellConstraints.CENTER));
+
     this.restartCb = new JCheckBox(this.textProvider.getString("task.shuffle.editor.property.restart"));
-    this.add(restartCb, cc.xywh(1, 12, 3, 1, CellConstraints.LEFT, CellConstraints.CENTER));
+    this.add(restartCb, cc.xywh(1, 14, 3, 1, CellConstraints.LEFT, CellConstraints.CENTER));
 
   }
 
@@ -152,6 +155,7 @@ public class PlaylistGenerateTaskPanel extends JPanel implements ScheduledTaskEd
       this.titleCb.setSelected(generateTask.isTitlePenaltyEnabled());
       this.titleStrictCb.setSelected(generateTask.isTitlePenaltyStrictEnabled());
       this.restartCb.setSelected(generateTask.isRestartStation());
+      this.synchronizeCb.setSelected(generateTask.isSynchronize());
       this.updateVisbility();
     }
 
@@ -173,6 +177,7 @@ public class PlaylistGenerateTaskPanel extends JPanel implements ScheduledTaskEd
       generateTask.setTitlePenaltyEnabled(this.titleCb.isSelected());
       generateTask.setTitlePenaltyStrictEnabled(this.titleStrictCb.isSelected());
       generateTask.setRestartStation(this.restartCb.isSelected());
+      generateTask.setSynchronize(this.synchronizeCb.isSelected());
     }
 
   }

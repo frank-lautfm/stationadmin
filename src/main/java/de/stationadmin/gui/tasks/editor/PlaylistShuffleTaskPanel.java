@@ -50,6 +50,7 @@ public class PlaylistShuffleTaskPanel extends JPanel implements ScheduledTaskEdi
   private JComboBox playlistCmb;
   private JLabel playlistNameLabel, hourLabel;
   private JCheckBox restartCb;
+  private JCheckBox synchronizeCb;
   
   public PlaylistShuffleTaskPanel(PlaylistRegistry playlistRegistry, TextProvider textProvider) {
     super();
@@ -59,7 +60,7 @@ public class PlaylistShuffleTaskPanel extends JPanel implements ScheduledTaskEdi
   }
 
   private void init() {
-    this.setLayout(new FormLayout("max(30dlu;pref),5dlu,pref:grow", "pref,5dlu,pref,3dlu,pref,5dlu,pref,pref,5dlu,pref"));
+    this.setLayout(new FormLayout("max(30dlu;pref),5dlu,pref:grow", "pref,5dlu,pref,3dlu,pref,5dlu,pref,pref,5dlu,pref,5dlu,pref"));
     CellConstraints cc = new CellConstraints();
 
     this.taskNameTf = new JTextField(15);
@@ -95,8 +96,11 @@ public class PlaylistShuffleTaskPanel extends JPanel implements ScheduledTaskEdi
     this.hourLabel.setVisible(false);
     this.hourSpinner.setVisible(false);
 
+    this.synchronizeCb = new JCheckBox(this.textProvider.getString("task.shuffle.editor.property.synchronize"));
+    this.add(synchronizeCb, cc.xywh(1, 10, 3, 1, CellConstraints.LEFT, CellConstraints.CENTER));
+
     this.restartCb = new JCheckBox(this.textProvider.getString("task.shuffle.editor.property.restart"));
-    this.add(restartCb, cc.xywh(1, 10, 3, 1, CellConstraints.LEFT, CellConstraints.CENTER));
+    this.add(restartCb, cc.xywh(1, 12, 3, 1, CellConstraints.LEFT, CellConstraints.CENTER));
 
   }
 
@@ -126,6 +130,7 @@ public class PlaylistShuffleTaskPanel extends JPanel implements ScheduledTaskEdi
         singlePlaylist.setValue(false);
         this.hourSpinner.setValue(shuffleTask.getHours());
       }
+      this.synchronizeCb.setSelected(shuffleTask.isSynchronize());
       this.restartCb.setSelected(shuffleTask.isRestartStation());
       this.updateVisbility();
     }
@@ -144,6 +149,7 @@ public class PlaylistShuffleTaskPanel extends JPanel implements ScheduledTaskEdi
         shuffleTask.setPlaylistName(null);
         shuffleTask.setHours((Integer) this.hourSpinner.getValue());
       }
+      shuffleTask.setSynchronize(synchronizeCb.isSelected());
       shuffleTask.setRestartStation(this.restartCb.isSelected());
     }
 

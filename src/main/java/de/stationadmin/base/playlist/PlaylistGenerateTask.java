@@ -27,6 +27,7 @@ public class PlaylistGenerateTask extends AbstractTask {
   private boolean titlePenaltyStrictEnabled = true;
 
   private boolean restartStation = false;
+  private boolean synchronize = false;
 
   /**
    * 
@@ -34,6 +35,14 @@ public class PlaylistGenerateTask extends AbstractTask {
   @Override
   public TaskExecutionResult execute(StationAdminClient client) {
     TaskExecutionResult result = new TaskExecutionResult();
+
+	if(this.synchronize) {
+		try {
+			client.synchronize();
+		} catch (Exception e) {
+			result.addMessage(false, "playlist.shuffle.synchronizefailed");
+		}
+	}
 
     PlaylistGenerator generator = PlaylistGeneratorFactory.createGenerator(client);
     generator.setArtistPenaltyEnabled(artistPenaltyEnabled);
@@ -124,5 +133,13 @@ public class PlaylistGenerateTask extends AbstractTask {
   public void setRestartStation(boolean restartStation) {
     this.restartStation = restartStation;
   }
+
+public boolean isSynchronize() {
+	return synchronize;
+}
+
+public void setSynchronize(boolean synchronize) {
+	this.synchronize = synchronize;
+}
 
 }

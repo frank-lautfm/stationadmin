@@ -19,77 +19,97 @@ import de.stationadmin.base.util.PlaylistGeneratorFactory;
  * 
  */
 public class PlaylistShuffleTask extends AbstractTask {
-  private int hours = 2;
-  private String playlistName;
-  private boolean restartStation = false;
+	private int hours = 2;
+	private String playlistName;
+	private boolean restartStation = false;
+	private boolean synchronize = false;
 
-  /**
-   * 
-   */
-  @Override
-  public TaskExecutionResult execute(StationAdminClient client) {
-    TaskExecutionResult result = new TaskExecutionResult();
-    PlaylistShuffler shuffler = PlaylistGeneratorFactory.createShuffler(client);
-    shuffler.setProtectFirstJingle(client.getSettings().isShuffleProtectFirstJingle());
-    shuffler.setJingleInterval(client.getSettings().getShuffleJingleInterval());
-    shuffler.setWordDistribution(client.getSettings().getShuffleWordDistributionStrategy());
+	/**
+	 * 
+	 */
+	@Override
+	public TaskExecutionResult execute(StationAdminClient client) {
+		
+		TaskExecutionResult result = new TaskExecutionResult();
+		if(this.synchronize) {
+			try {
+				client.synchronize();
+			} catch (Exception e) {
+				result.addMessage(false, "playlist.shuffle.synchronizefailed");
+			}
+		}
+		
+		PlaylistShuffler shuffler = PlaylistGeneratorFactory.createShuffler(client);
+		shuffler.setProtectFirstJingle(client.getSettings().isShuffleProtectFirstJingle());
+		shuffler.setJingleInterval(client.getSettings().getShuffleJingleInterval());
+		shuffler.setWordDistribution(client.getSettings().getShuffleWordDistributionStrategy());
 
-    ArrayList<Playlist> playlists = new ArrayList<Playlist>();
+		ArrayList<Playlist> playlists = new ArrayList<Playlist>();
 
-    List<Playlist> allPlaylists = this.hours > 0 ? client.getSchedule().getPlaylistsAfter(new Date(), hours) : client.getPlaylistService()
-        .getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE);
-    for (Playlist playlist : allPlaylists) {
-      if (playlist.isLocalShuffleAllowed()) {
-        if (this.playlistName == null || playlist.getName().equalsIgnoreCase(this.playlistName)) {
-          playlists.add(playlist);
-        }
-      }
-    }
+		List<Playlist> allPlaylists = this.hours > 0 ? client.getSchedule().getPlaylistsAfter(new Date(), hours)
+				: client.getPlaylistService().getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE);
+		for (Playlist playlist : allPlaylists) {
+			if (playlist.isLocalShuffleAllowed()) {
+				if (this.playlistName == null || playlist.getName().equalsIgnoreCase(this.playlistName)) {
+					playlists.add(playlist);
+				}
+			}
+		}
 
-    for (Playlist playlist : playlists) {
-      try {
-        shuffler.shuffle(playlist);
-        client.getPlaylistService().savePlaylist(playlist);
-        result.addMessage(false, "playlist.shuffle", playlist.getName());
-      } catch (Exception e) {
-        result.addMessage(true, "playlist.shuffle.failed", playlist.getName(), e.getMessage() != null ? e.getMessage() : e.getLocalizedMessage());
-      }
-    }
+		for (Playlist playlist : playlists) {
+			try {
+				shuffler.shuffle(playlist);
+				client.getPlaylistService().savePlaylist(playlist);
+				result.addMessage(false, "playlist.shuffle", playlist.getName());
+			} catch (Exception e) {
+				result.addMessage(true, "playlist.shuffle.failed", playlist.getName(),
+						e.getMessage() != null ? e.getMessage() : e.getLocalizedMessage());
+			}
+		}
 
-    if (this.restartStation) {
-      try {
-        client.startRadio();
-        result.addMessage(false, "station.restart");
-      } catch (Exception e) {
-        result.addMessage(true, "station.restart.failed", e.getMessage() != null ? e.getMessage() : e.getLocalizedMessage());
-      }
-    }
+		if (this.restartStation) {
+			try {
+				client.startRadio();
+				result.addMessage(false, "station.restart");
+			} catch (Exception e) {
+				result.addMessage(true, "station.restart.failed",
+						e.getMessage() != null ? e.getMessage() : e.getLocalizedMessage());
+			}
+		}
 
-    return result;
-  }
+		return result;
+	}
 
-  public int getHours() {
-    return hours;
-  }
+	public int getHours() {
+		return hours;
+	}
 
-  public void setHours(int hours) {
-    this.hours = hours;
-  }
+	public void setHours(int hours) {
+		this.hours = hours;
+	}
 
-  public String getPlaylistName() {
-    return playlistName;
-  }
+	public String getPlaylistName() {
+		return playlistName;
+	}
 
-  public void setPlaylistName(String playlistName) {
-    this.playlistName = playlistName;
-  }
+	public void setPlaylistName(String playlistName) {
+		this.playlistName = playlistName;
+	}
 
-  public boolean isRestartStation() {
-    return restartStation;
-  }
+	public boolean isRestartStation() {
+		return restartStation;
+	}
 
-  public void setRestartStation(boolean restartStation) {
-    this.restartStation = restartStation;
-  }
+	public void setRestartStation(boolean restartStation) {
+		this.restartStation = restartStation;
+	}
+
+	public boolean isSynchronize() {
+		return synchronize;
+	}
+
+	public void setSynchronize(boolean synchronize) {
+		this.synchronize = synchronize;
+	}
 
 }
