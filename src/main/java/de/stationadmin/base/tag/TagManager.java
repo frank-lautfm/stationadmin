@@ -277,7 +277,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
 
         ArrayList<Integer> ids = new ArrayList<Integer>();
         for (BasicTrack title : this.trackRegistry.getAllTracks()) {
-          if (tag.contains(title) && (plays == null || plays.contains(title.getId())) && (playlists == null || playlists.contains(title.getId())) && (tags == null || tags.contains(title.getId()))) {
+          if (tag.contains(title) && (plays == null || tag.isPlayedWithinInverse() != plays.contains(title.getId())) && (playlists == null || playlists.contains(title.getId())) && (tags == null || tags.contains(title.getId()))) {
             ids.add(title.getId());
           }
         }
@@ -445,7 +445,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
       if (dtag != null) {
         boolean match = dtag.contains(this.trackRegistry.getTrack(titleId));
         if (match && dtag.getPlayedWithin() > 0) {
-          match = this.getPlaysWithin(dtag.getPlayedWithin(), dtag.getPlayedWithinMinHour(), dtag.getPlayedWithinMaxHour(), dtag.getPlayedWithinPlaylist()).contains(titleId);
+          match = dtag.isPlayedWithinInverse() != this.getPlaysWithin(dtag.getPlayedWithin(), dtag.getPlayedWithinMinHour(), dtag.getPlayedWithinMaxHour(), dtag.getPlayedWithinPlaylist()).contains(titleId);
         }
         if (match && dtag.getPlaylistIds() != null) {
           match = this.getTracksOfPlaylists(dtag.getPlaylistIds()).contains(titleId);

@@ -6,6 +6,12 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+
+Version 4.4.0
+-------------
+[+] Optional: Synchronisation vor dem Shuffeln oder Generieren per Task
+[+] Dynamische Tags: Filtern nach nicht gespielten Titeln.
+
 Version 4.3.0
 -------------
 

@@ -4,6 +4,7 @@
 package de.stationadmin.gui.tag;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ItemEvent;
@@ -18,6 +19,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -343,7 +345,7 @@ public class DynamicTagEditor extends JPanel {
 
   private JPanel createPlayedWithinPanel() {
     JPanel panel = new JPanel();
-    panel.setLayout(new FormLayout("3dlu,pref,3dlu,pref:grow", "3dlu,pref,5dlu,pref,5dlu,pref,3dlu"));
+    panel.setLayout(new FormLayout("3dlu,pref,3dlu,pref:grow", "3dlu,pref,3dlu,pref,8dlu,pref,5dlu,pref,3dlu"));
     CellConstraints cc = new CellConstraints();
     int row = 2;
 
@@ -356,10 +358,33 @@ public class DynamicTagEditor extends JPanel {
       p.add(new JLabel(ctx.getString("titletagmanager.property.playedWithin.desc") + " "));
       p.add(hoursTf);
       p.add(new JLabel(" " + ctx.getString("titletagmanager.property.playedWithin.unit")));
+      
+      SelectionInList<Boolean> selection = new SelectionInList<Boolean>(new Boolean[] { Boolean.FALSE, Boolean.TRUE }, model.getBufferedModel(("playedWithinInverse")));
+      JComboBox cmb = BasicComponentFactory.createComboBox(selection, new DefaultListCellRenderer() {
+
+		@Override
+		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+				boolean cellHasFocus) {
+			Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+			if(value.equals(Boolean.TRUE)) {
+				setText(ctx.getString("titletagmanager.property.playedWithin.inverse.true"));
+			}
+			else {
+				
+				setText(ctx.getString("titletagmanager.property.playedWithin.inverse.false"));
+			}
+			return comp;
+		}
+    	  
+      });
 
       panel.add(new JLabel(ctx.getString("titletagmanager.property.playedWithin")), cc.xy(2, row));
       panel.add(p, cc.xy(4, row));
       row += 2;
+      
+      panel.add(cmb, cc.xy(4, row, CellConstraints.LEFT, CellConstraints.CENTER));
+      row += 2;
+
 
     }
 
