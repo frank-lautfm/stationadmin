@@ -117,7 +117,7 @@ public class PlaylistViewer extends JPanel {
   private SubscriptionResultViewer subscriptionPanel;
   private ValueModel taggedTitlesHolder = new ValueHolder();
   private ValueModel hasValidationErrors = new ValueHolder(Boolean.FALSE);
-  private ValueModel highlightedTitleHolder = new ValueHolder(new HashSet<Integer>(), true);
+  private ValueModel highlightedTrackHolder = new ValueHolder(new HashSet<Integer>(), true);
 
   boolean isSelectionUpdating = false;
 
@@ -143,11 +143,11 @@ public class PlaylistViewer extends JPanel {
           for (Object item : (List<?>) evt.getNewValue()) {
             ids.add(((DetailedTrack) item).getId());
           }
-          highlightedTitleHolder.setValue(ids);
+          highlightedTrackHolder.setValue(ids);
           invalidate();
           repaint();
         } else {
-          highlightedTitleHolder.setValue(null);
+          highlightedTrackHolder.setValue(null);
         }
 
       }
@@ -206,20 +206,28 @@ public class PlaylistViewer extends JPanel {
       }
     });
 
+    
     final JLabel statistics = new JLabel("");
+    
     this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
 
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getNewValue() instanceof Playlist) {
-          Playlist playlist = (Playlist) evt.getNewValue();
-          statistics.setText(textProvider.getString("playlistviewer.statistics", Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists())));
-        } else {
-          statistics.setText("");
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          if (evt.getNewValue() instanceof Playlist) {
+            Playlist playlist = (Playlist) evt.getNewValue();
+            updateStatsLabel(statistics, playlist);
+          }
         }
-      }
-
-    });
+      });
+    this.taggedTitlesHolder.addValueChangeListener(new PropertyChangeListener() {
+		
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+            Playlist playlist = (Playlist) playlistHolder.getValue();
+            updateStatsLabel(statistics, playlist);
+			
+		}
+	});
 
     // if the playlist is modified, remove statistics text - it is not longer up
     // to date
@@ -262,6 +270,30 @@ public class PlaylistViewer extends JPanel {
     statusBar.add(shuffleLabel, shuffleConst);
 
     return statusBar;
+  }
+  
+  private void updateStatsLabel(JLabel statistics, Playlist playlist) {
+	if(playlist != null) {
+      int numSelectedForTag = taggedTitlesHolder.getValue() != null ?  ((BitSet) taggedTitlesHolder.getValue()).cardinality() : 0;
+      int numTagged = 0;
+      if(numSelectedForTag > 0) {
+      	BitSet bs = (BitSet) taggedTitlesHolder.getValue();
+      	for(Entry entry : playlist.getEntries()) {
+      		if(bs.get(entry.getTrackId())) {
+      			numTagged++;
+      		}
+      	}
+      }
+      if(numTagged > 0) {
+          statistics.setText(textProvider.getString("playlistviewer.statistics.highlighted", Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists()), Integer.toString(numTagged)));
+      }
+      else {
+      statistics.setText(textProvider.getString("playlistviewer.statistics", Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists())));
+      }
+    } else {
+      statistics.setText("");
+    }
+	  
   }
 
   private JComponent createTabelPanel() {
@@ -488,8 +520,8 @@ public class PlaylistViewer extends JPanel {
               }
             }
           }
-          if (highlightedTitleHolder.getValue() != null) {
-            Set<?> values = (Set<?>) highlightedTitleHolder.getValue();
+          if (highlightedTrackHolder.getValue() != null) {
+            Set<?> values = (Set<?>) highlightedTrackHolder.getValue();
             if (values.contains(title.getId())) {
               comp.setBackground(new Color(240, 240, 0));
             }
@@ -534,7 +566,7 @@ public class PlaylistViewer extends JPanel {
       public void actionPerformed(ActionEvent e) {
         searchPanel.setVisible(searchBtn.isSelected());
         if (!searchBtn.isSelected()) {
-          highlightedTitleHolder.setValue(null);
+          highlightedTrackHolder.setValue(null);
         }
       }
     });
@@ -1034,8 +1066,8 @@ public class PlaylistViewer extends JPanel {
    * 
    * @return the highlightedTitleHolder
    */
-  public ValueModel getHighlightedTitleHolder() {
-    return highlightedTitleHolder;
+  public ValueModel getHighlightedTrackHolder() {
+    return highlightedTrackHolder;
   }
 
 }

@@ -41,8 +41,8 @@ public class PlaylistContainer extends JPanel {
     final PlaylistSelector selectorArchive = new PlaylistSelector(this.ctx, PlaylistType.ARCHIVED, playlistSelectionHolder);
     selectorArchive.enableContextMenu();
     final PlaylistViewer viewer = new PlaylistViewer(this.ctx, playlistSelectionHolder);
-    selectorArchive.addHighlightedTitlesHolder(viewer.getHighlightedTitleHolder());
-    selectorOnline.addHighlightedTitlesHolder(viewer.getHighlightedTitleHolder());
+    selectorArchive.addHighlightedTitlesHolder(viewer.getHighlightedTrackHolder());
+    selectorOnline.addHighlightedTitlesHolder(viewer.getHighlightedTrackHolder());
 
     final JTabbedPane selector = new JTabbedPane(JTabbedPane.BOTTOM);
     selector.addTab(ctx.getTextProvider().getString("playlisttype.online"), selectorOnline);
