@@ -13,6 +13,7 @@ Version 4.4.0
 [+] Dynamische Tags: Filtern nach nicht gespielten Titeln.
 [+] Settings für Shuffeln / Generieren: Expliziter Hinweis dass die Einstellung nur für Station Admin gelten
 [+] Anzeige der Zahl der hervorgehobenen Titel in der Statusbar des Playlistviewers
+[*] Analyse / Tagesstatistik: Filterung mit Enddatum lieferte einen Tag zu viel
 
 Version 4.3.0
 -------------

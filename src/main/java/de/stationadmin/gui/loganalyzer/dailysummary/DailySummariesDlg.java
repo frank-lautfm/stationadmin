@@ -153,7 +153,9 @@ public class DailySummariesDlg extends StationAdminFrame {
     CellConstraints cc = new CellConstraints();
 
     this.fromTime = new TimeEditor(this.ctx.getTextProvider(), new Date(System.currentTimeMillis() - LogAnalyzerService.DAY_IN_MS * 7));
+    this.fromTime.getTimePanel().setText("0:00");
     this.toTime = new TimeEditor(this.ctx.getTextProvider(), new Date(System.currentTimeMillis()));
+    this.toTime.getTimePanel().setText("0:00");
 
     panel.add(fromTime.getDateChooser(), cc.xy(1, 1));
     panel.add(new JLabel("-"), cc.xy(3, 1));

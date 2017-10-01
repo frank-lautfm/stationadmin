@@ -68,6 +68,8 @@ public class TimeEditor {
       cal2.setTime(time);
       cal.set(Calendar.HOUR_OF_DAY, cal2.get(Calendar.HOUR_OF_DAY));
       cal.set(Calendar.MINUTE, cal2.get(Calendar.MINUTE));
+      cal.set(Calendar.SECOND, 0);
+      cal.set(Calendar.MILLISECOND, 0);
       
     } catch(Exception e) {
       
