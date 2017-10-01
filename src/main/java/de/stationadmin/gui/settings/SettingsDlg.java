@@ -1,6 +1,7 @@
 package de.stationadmin.gui.settings;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -362,7 +363,7 @@ public class SettingsDlg extends JDialog {
 
   private JPanel createShufflePanel() {
     JPanel panel = new JPanel(new FormLayout("3dlu,60dlu,5dlu,pref,2dlu,pref,pref,pref:grow,3dlu",
-        "3dlu,pref,3dlu,pref,3dlu,pref,7dlu,pref,3dlu,pref,5dlu,pref,3dlu,pref,5dlu,pref,3dlu"));
+        "3dlu,pref,3dlu,pref,3dlu,pref,10dlu,pref,3dlu"));
     panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.shuffle")));
     CellConstraints cc = new CellConstraints();
 
@@ -417,22 +418,12 @@ public class SettingsDlg extends JDialog {
     panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.shuffleWordDistribution")), cc.xy(2, 6));
     panel.add(wordDistCmb, cc.xywh(4, 6, 5, 1));
 
-    //
-    // ValueHolder preselectLimit = new ValueHolder(0);
-    //
-    // JPanel preselectProperyPanel = new JPanel(new
-    // FormLayout("pref,2dlu,pref,2dlu,pref,8dlu:grow:pref","pref"));
-    // JTextField preselectLimitTf =
-    // BasicComponentFactory.createIntegerField(preselectLimit, 0);
-    // preselectLimitTf.setColumns(2);
-    // preselectProperyPanel.add(new
-    // JLabel(this.ctx.getTextProvider().getString("settings.property.generatePreselect.prefix")),
-    // cc.xy(1,1));
-    // preselectProperyPanel.add(preselectLimitTf, cc.xy(3,1));
-    // preselectProperyPanel.add(new
-    // JLabel(this.ctx.getTextProvider().getString("settings.property.generatePreselect.suffix")),
-    // cc.xy(5,1));
-    // panel.add(preselectProperyPanel, cc.xywh(2, 16, 7, 1));
+    JLabel hint = new JLabel(ctx.getString("settings.shuffle.hint"));
+    hint.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+    hint.setBackground(new Color(0xFF, 0xFF, 0xCC));
+    hint.setOpaque(true);
+    panel.add(hint, cc.xywh(2, 8, 7, 1));
+    
 
     return panel;
 
