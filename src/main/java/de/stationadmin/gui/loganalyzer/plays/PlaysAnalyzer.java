@@ -68,7 +68,7 @@ public class PlaysAnalyzer extends StationAdminFrame {
   private void init() {
     TextProvider textProvider = this.ctx.getTextProvider();
     this.setTitle(textProvider.getString("playsanalyzer.title"));
-    this.filter = new PlayFilter();
+    this.filter = new PlayFilter(this.ctx.getAdminClient().getTagManager());
     this.filter.setSchedule(this.ctx.getAdminClient().getSchedule());
     this.filter.setFromTime(toFullMinute(System.currentTimeMillis() - LogAnalyzerService.DAY_IN_MS));
     this.filter.setToTime(toFullMinute(System.currentTimeMillis()));

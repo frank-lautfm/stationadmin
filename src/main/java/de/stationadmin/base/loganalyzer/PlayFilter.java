@@ -3,6 +3,7 @@
  */
 package de.stationadmin.base.loganalyzer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -12,6 +13,7 @@ import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.schedule.Schedule;
 import de.stationadmin.base.schedule.Schedule.Entry;
 import de.stationadmin.base.schedule.Schedule.Weekday;
+import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.AbstractBean;
 
@@ -21,18 +23,27 @@ import de.stationadmin.base.util.AbstractBean;
  * @author korf
  */
 public class PlayFilter extends AbstractBean {
-  private static final Weekday[] weekdays = { null, Weekday.SUNDAY, Weekday.MONDAY, Weekday.TUESDAY, Weekday.WEDNESDAY, Weekday.THURSDAY,
-      Weekday.FRIDAY, Weekday.SATURDAY };
+  private static final Weekday[] weekdays = { null, Weekday.SUNDAY, Weekday.MONDAY, Weekday.TUESDAY, Weekday.WEDNESDAY, Weekday.THURSDAY, Weekday.FRIDAY, Weekday.SATURDAY };
   private Date fromTime, toTime;
   private String artist;
   private String title;
   private Playlist playlist;
+  private String tag;
   private boolean musicOnly = true;
 
   private Calendar cal = Calendar.getInstance();
 
   private Schedule schedule;
   private int[][] scheduleTable;
+
+  private TagManager tagManager;
+
+  public PlayFilter() {
+  }
+
+  public PlayFilter(TagManager tagManager) {
+    this.tagManager = tagManager;
+  }
 
   public Date getFromTime() {
     return fromTime;
@@ -113,6 +124,12 @@ public class PlayFilter extends AbstractBean {
       int hour = cal.get(Calendar.HOUR_OF_DAY);
       accept = playlist.getId() == scheduleTable[weekday.ordinal()][hour];
     }
+    if (accept && tag != null && tagManager != null) {
+      try {
+        accept = tagManager.isTagged(tag, play.getTrack().getId());
+      } catch (IOException e) {
+      }
+    }
 
     return accept;
   }
@@ -141,6 +158,20 @@ public class PlayFilter extends AbstractBean {
     boolean old = this.musicOnly;
     this.musicOnly = musicOnly;
     this.firePropertyChange("musicOnly", old, musicOnly);
+  }
+
+  public String getTag() {
+    return tag;
+  }
+
+  public void setTag(String tag) {
+    String old = this.tag;
+    this.tag = tag;
+    this.firePropertyChange("tag", old, tag);
+  }
+
+  public TagManager getTagManager() {
+    return tagManager;
   }
 
 }

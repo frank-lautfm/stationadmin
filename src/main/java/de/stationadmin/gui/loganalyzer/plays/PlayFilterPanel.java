@@ -72,14 +72,14 @@ public class PlayFilterPanel extends JPanel {
 
     this.add(new JLabel(textProvider.getString("playsanalyzer.filter.artist") + ":"), cc.xy(1, 3));
 
-    JPanel metadataPanel = new JPanel(new FormLayout("pref,8dlu,pref,5dlu,pref,8dlu,pref,5dlu,pref,8dlu,pref", "pref"));
+    JPanel metadataPanel = new JPanel(new FormLayout("pref,8dlu,pref,5dlu,pref,8dlu,pref,5dlu,min(pref;100dlu),8dlu,pref,5dlu,min(pref;100dlu),8dlu,pref", "pref"));
     JTextField artistTf = BasicComponentFactory.createTextField(filterModel.getModel("artist"));
-    artistTf.setColumns(15);
+    artistTf.setColumns(13);
     metadataPanel.add(artistTf, cc.xy(1, 1));
 
     metadataPanel.add(new JLabel(textProvider.getString("playsanalyzer.filter.title") + ":"), cc.xy(3, 1));
     JTextField titelTf = BasicComponentFactory.createTextField(filterModel.getModel("title"));
-    titelTf.setColumns(15);
+    titelTf.setColumns(13);
     metadataPanel.add(titelTf, cc.xy(5, 1));
 
     List<Playlist> playlists = new ArrayList<Playlist>();
@@ -101,9 +101,24 @@ public class PlayFilterPanel extends JPanel {
     JComboBox playlistCmb = BasicComponentFactory.createComboBox(playlistSelection);
     metadataPanel.add(new JLabel(textProvider.getString("playsanalyzer.filter.playlist") + ":"), cc.xy(7, 1));
     metadataPanel.add(playlistCmb, cc.xy(9, 1));
-    
+
+    int colIdx = 11;
+    if (filter.getTagManager() != null) {
+      long t = System.currentTimeMillis();
+      List<String> allTags = filter.getTagManager().getTags();
+      SelectionInList<String> tagSelection = new SelectionInList<>(allTags, filterModel.getModel("tag"));
+      JComboBox tagCmb = BasicComponentFactory.createComboBox(tagSelection);
+
+      metadataPanel.add(new JLabel(textProvider.getString("playsanalyzer.filter.tag") + ":"), cc.xy(colIdx, 1));
+      colIdx += 2;
+      metadataPanel.add(tagCmb, cc.xy(colIdx, 1));
+      colIdx += 2;
+      System.out.println((System.currentTimeMillis() - t) + " ms");
+    }
+
     JCheckBox musicOnlyCb = BasicComponentFactory.createCheckBox(filterModel.getModel("musicOnly"), textProvider.getString("playsanalyzer.filter.musiconly"));
-    metadataPanel.add(musicOnlyCb, cc.xy(11, 1));
+    metadataPanel.add(musicOnlyCb, cc.xy(colIdx, 1));
+    colIdx += 2;
 
     this.add(metadataPanel, cc.xy(3, 3));
 
