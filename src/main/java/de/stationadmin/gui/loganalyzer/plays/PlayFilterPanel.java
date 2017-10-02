@@ -106,7 +106,7 @@ public class PlayFilterPanel extends JPanel {
     if (filter.getTagManager() != null) {
       long t = System.currentTimeMillis();
       List<String> allTags = filter.getTagManager().getTags();
-      SelectionInList<String> tagSelection = new SelectionInList<>(allTags, filterModel.getModel("tag"));
+      SelectionInList<String> tagSelection = new SelectionInList<String>(allTags, filterModel.getModel("tag"));
       JComboBox tagCmb = BasicComponentFactory.createComboBox(tagSelection);
 
       metadataPanel.add(new JLabel(textProvider.getString("playsanalyzer.filter.tag") + ":"), cc.xy(colIdx, 1));
