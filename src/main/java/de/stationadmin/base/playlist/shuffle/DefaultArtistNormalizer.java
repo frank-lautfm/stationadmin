@@ -54,7 +54,7 @@ public class DefaultArtistNormalizer implements ArtistNormalizer {
     for (String separator : this.separators) {
       int pos = artist.indexOf(separator);
       if (pos > 0) {
-        artist = artist.substring(0, pos);
+        artist = artist.substring(0, pos).trim();
         return artist;
       }
     }

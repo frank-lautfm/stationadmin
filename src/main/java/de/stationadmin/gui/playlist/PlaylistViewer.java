@@ -39,6 +39,8 @@ import javax.swing.KeyStroke;
 import javax.swing.TransferHandler;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang.StringUtils;
@@ -118,6 +120,8 @@ public class PlaylistViewer extends JPanel {
   private ValueModel taggedTitlesHolder = new ValueHolder();
   private ValueModel hasValidationErrors = new ValueHolder(Boolean.FALSE);
   private ValueModel highlightedTrackHolder = new ValueHolder(new HashSet<Integer>(), true);
+
+  private JLabel statisticsLabel = new JLabel("");
 
   boolean isSelectionUpdating = false;
 
@@ -207,15 +211,13 @@ public class PlaylistViewer extends JPanel {
     });
 
     
-    final JLabel statistics = new JLabel("");
-    
     this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
           if (evt.getNewValue() instanceof Playlist) {
             Playlist playlist = (Playlist) evt.getNewValue();
-            updateStatsLabel(statistics, playlist);
+            updateStatsLabel(playlist);
           }
         }
       });
@@ -224,23 +226,25 @@ public class PlaylistViewer extends JPanel {
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
             Playlist playlist = (Playlist) playlistHolder.getValue();
-            updateStatsLabel(statistics, playlist);
+            updateStatsLabel(playlist);
 			
 		}
 	});
 
     // if the playlist is modified, remove statistics text - it is not longer up
     // to date
+    /*
     this.presentationModel.getModel("modified").addValueChangeListener(new PropertyChangeListener() {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getNewValue() instanceof Boolean && evt.getNewValue().equals(Boolean.TRUE)) {
-          statistics.setText("");
+          statisticsLabel.setText("");
         }
       }
 
     });
+    */
 
     final JLabel type = new JLabel("");
     this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
@@ -264,7 +268,7 @@ public class PlaylistViewer extends JPanel {
     statusBar.add(lengthLabel, lengthConst);
 
     JXStatusBar.Constraint statisticsConst = new JXStatusBar.Constraint();
-    statusBar.add(statistics, statisticsConst);
+    statusBar.add(statisticsLabel, statisticsConst);
 
     JXStatusBar.Constraint shuffleConst = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
     statusBar.add(shuffleLabel, shuffleConst);
@@ -272,7 +276,7 @@ public class PlaylistViewer extends JPanel {
     return statusBar;
   }
   
-  private void updateStatsLabel(JLabel statistics, Playlist playlist) {
+  private void updateStatsLabel(Playlist playlist) {
 	if(playlist != null) {
       int numSelectedForTag = taggedTitlesHolder.getValue() != null ?  ((BitSet) taggedTitlesHolder.getValue()).cardinality() : 0;
       int numTagged = 0;
@@ -285,13 +289,13 @@ public class PlaylistViewer extends JPanel {
       	}
       }
       if(numTagged > 0) {
-          statistics.setText(textProvider.getString("playlistviewer.statistics.highlighted", Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists()), Integer.toString(numTagged)));
+          statisticsLabel.setText(textProvider.getString("playlistviewer.statistics.highlighted", Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists()), Integer.toString(numTagged)));
       }
       else {
-      statistics.setText(textProvider.getString("playlistviewer.statistics", Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists())));
+        statisticsLabel.setText(textProvider.getString("playlistviewer.statistics", Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists())));
       }
     } else {
-      statistics.setText("");
+      statisticsLabel.setText("");
     }
 	  
   }
@@ -300,6 +304,16 @@ public class PlaylistViewer extends JPanel {
 
     final PlaylistTableModel tableModel = new PlaylistTableModel(this.textProvider, this.playlistHolder, this.entryHolder);
     tableModel.setHasValidationErrors(this.hasValidationErrors);
+    tableModel.addTableModelListener(new TableModelListener() {
+      
+      @Override
+      public void tableChanged(TableModelEvent e) {
+        if(playlistHolder.getValue() instanceof Playlist) {
+          updateStatsLabel((Playlist)playlistHolder.getValue());
+        }
+      }
+    });
+    
     final TrackTypeRenderer typeRenderer = new TrackTypeRenderer();
     final DateTableCellRenderer timeRenderer = new DateTableCellRenderer(new SimpleDateFormat(this.ctx.getTextProvider().getString("timeFormat")));
     this.table = new JXTable(tableModel);
