@@ -44,7 +44,7 @@ public class AboutDlg extends JDialog {
     
     this.getContentPane().add(new JLabel(ctx.getString("about.license")), cc.xy(2, row));
     row += 2;
-    this.getContentPane().add(new JLabel("(c) 2009 - 2015 Frank Korf"), cc.xy(2, row));
+    this.getContentPane().add(new JLabel("(c) 2009 - 2017 Frank Korf"), cc.xy(2, row));
     row += 2;
 
     this.getContentPane().add(new JLabel(ctx.getString("about.apache")), cc.xy(2, row));

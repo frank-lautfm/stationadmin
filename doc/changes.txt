@@ -7,6 +7,13 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
+Version 4.4.1
+-------------
+[#] Kleine Verzögerung beim Setzen des private-Flags für Uploads - scheint das Problem zu beseitigen dass das private-Flag
+    manchmal verloren geht
+[*] Playlist-Viewer: Anzeige für Zahl hervorgehobener Titel wurde beim Hinzufügen oder Löschen von Titel nicht aktualisiert.
+[*] Artist-Normalisierung: Beim Abschneiden nach Trennzeichen wurden vorangehende Leerzeichen nicht entfernt.
+
 Version 4.4.0
 -------------
 [+] Optional: Synchronisation vor dem Shuffeln oder Generieren per Task

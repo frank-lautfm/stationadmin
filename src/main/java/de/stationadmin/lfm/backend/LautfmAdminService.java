@@ -622,6 +622,10 @@ public class LautfmAdminService {
       if (response.getStatusLine().getStatusCode() == 201) {
         UploadResponse uploadResponse = deserializeJson(response, UploadResponse.class);
         if (track.isPrivateTrack()) {
+          try {
+            Thread.sleep(500);
+          } catch (Exception e) {
+          }
           MarkTrackPrivateRequest privateRequest = new MarkTrackPrivateRequest();
           privateRequest.setId(uploadResponse.getId());
           privateRequest.setPrivateTrack(true);
@@ -689,7 +693,7 @@ public class LautfmAdminService {
       response.close();
     }
   }
-  
+
   public LogEntry[] getLogs(int stationId, int days) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/logs?days=" + days);
     try {
@@ -698,7 +702,7 @@ public class LautfmAdminService {
       response.close();
     }
   }
-  
+
   public ScheduledEvent[] getScheduledEvents(int stationId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/schedule/events");
     try {
@@ -707,7 +711,7 @@ public class LautfmAdminService {
       response.close();
     }
   }
-  
+
   public ScheduledEvent scheduleEvent(int stationId, ScheduledEvent event) throws IOException {
     CloseableHttpResponse response = this.doPost("/stations/" + stationId + "/schedule/events", event);
     try {
@@ -716,7 +720,7 @@ public class LautfmAdminService {
       response.close();
     }
   }
-  
+
   public void deleteScheduledEvent(int stationId, int eventId) throws IOException {
     CloseableHttpResponse response = doDelete("/stations/" + stationId + "/schedule/events/" + eventId);
     response.close();
