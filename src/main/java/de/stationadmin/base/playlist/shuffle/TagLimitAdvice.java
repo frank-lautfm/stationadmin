@@ -16,14 +16,22 @@ import de.stationadmin.base.track.BasicTrack;
  * 
  */
 public class TagLimitAdvice implements Advice {
-  private Set<Integer> taggedTitleIds = new HashSet<Integer>();
+  private Set<Integer> taggedTrackIds = new HashSet<Integer>();
   private int maxLengthTagged;
+  private float maxFraction;
 
-  public TagLimitAdvice(int[] titleIds, int maxLengthTagged) {
+  public TagLimitAdvice(int[] trackIds, int maxLengthTagged, float maxFraction ) {
     this.maxLengthTagged = maxLengthTagged;
-    for (int id : titleIds) {
-      this.taggedTitleIds.add(id);
+    this.maxFraction = maxFraction;
+    for (int id : trackIds) {
+      this.taggedTrackIds.add(id);
     }
+  }
+
+  TagLimitAdvice(TagLimitAdvice source, int targetLengh) {
+    this.maxLengthTagged = (int)(targetLengh * source.maxFraction);
+    this.maxFraction = source.maxFraction;
+    this.taggedTrackIds = source.taggedTrackIds;
   }
 
   /**
@@ -32,11 +40,11 @@ public class TagLimitAdvice implements Advice {
    */
   @Override
   public boolean accept(List<BasicTrack> titles, BasicTrack candidate) {
-    if (taggedTitleIds.contains(candidate.getId())) {
+    if (taggedTrackIds.contains(candidate.getId())) {
       int lenTagged = 0;
 
       for (int i = 0; i < titles.size(); i++) {
-        if (taggedTitleIds.contains(titles.get(i).getId())) {
+        if (taggedTrackIds.contains(titles.get(i).getId())) {
           lenTagged += titles.get(i).getLength();
         }
       }

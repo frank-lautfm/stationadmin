@@ -193,9 +193,8 @@ public class PlaylistGenerator {
    * Generates a single playlist
    * 
    * @param playlist
-   * @param append
-   *          <code>true</code> to append titles to playlist, <code>false</code>
-   *          to replace titles
+   * @param append <code>true</code> to append titles to playlist,
+   *        <code>false</code> to replace titles
    */
   public void generate(Playlist playlist, boolean append) throws IOException {
     log.info("generate " + playlist);
@@ -310,7 +309,7 @@ public class PlaylistGenerator {
     int iterationMaxLength = playlist.isGenerateMinimizeArtistRepeats() ? Integer.MAX_VALUE : 60 * 60;
     int maxTotalSegmentsLength = maxLength;
     if (ctx.getAdvices().size() > 0) {
-      maxTotalSegmentsLength += 60 * 15 * numSegments;
+      maxTotalSegmentsLength += 60 * 30 * numSegments;
     } else {
       maxTotalSegmentsLength += 60 * 5 * numSegments;
     }
@@ -370,14 +369,14 @@ public class PlaylistGenerator {
 
           int currentSegment;
           if (artist.segments == null) {
-            int numTitles = Math.min(maxArtistTitles, artist.getTracks().size());
-            int artistSegments = numSegments / numTitles;
+            int numArtistTracks = Math.min(maxArtistTitles, artist.getTracks().size());
+            int artistSegments = numSegments / numArtistTracks;
 
             // find least filled segment that can act as first segment for this
             // artist
             int minLength = segments[0].getLength();
             currentSegment = 0;
-            for (int i = 1; i < artistSegments; i++) {
+            for (int i = 1; i < numSegments; i++) {
               if (segments[i].getLength() < minLength) {
                 currentSegment = i;
                 minLength = segments[i].getLength();
@@ -386,10 +385,10 @@ public class PlaylistGenerator {
               }
             }
             artist.segments = new ArrayList<Integer>();
-            int next = currentSegment + artistSegments;
-            for (int i = 1; i < numTitles; i++) {
+            int next = (currentSegment + artistSegments) % numSegments;
+            for (int i = 1; i < numArtistTracks; i++) {
               artist.segments.add(next);
-              next += artistSegments;
+              next = (next + artistSegments) % numSegments;
             }
           } else {
             currentSegment = artist.segments.remove(artist.segments.size() / 2);
@@ -414,16 +413,16 @@ public class PlaylistGenerator {
       }
     }
 
-    // randomize best titles in segments
+    // randomize best tracks in segments
     int segmentTargetLength = maxLength / segments.length;
     for (Segment seg : segments) {
-      Collections.sort(seg.getTitles(), new Comparator<BasicTrack>() {
+      Collections.sort(seg.getTracks(), new Comparator<BasicTrack>() {
         @Override
         public int compare(BasicTrack o1, BasicTrack o2) {
           return titleScores.get(o1.getId()).compareTo(titleScores.get(o2.getId()));
         }
       });
-      seg.randomizeFirst(segmentTargetLength);
+      seg.randomizeFirst(ctx, segmentTargetLength);
     }
 
     // jingles
@@ -477,17 +476,17 @@ public class PlaylistGenerator {
 
         if (ctx.getProtectedTitleAt(newTitleList.size()) != null) {
           newTitleList.add(ctx.getProtectedTitleAt(newTitleList.size()));
-        } else if (seg.getTitles().size() > 0) {
+        } else if (seg.getTracks().size() > 0) {
 
           // select a title from the current segment
-          BasicTrack title = seg.getTitles().get(0);
+          BasicTrack title = seg.getTracks().get(0);
 
           // check advices
           if (!ctx.checkAdvices(newTitleList, title)) {
             log.info("advice violoation - searching replacement for " + title);
             boolean accepted = false;
-            for (int t = 1; t < seg.getTitles().size() && t < 20 && !accepted; t++) {
-              BasicTrack candidate = seg.getTitles().get(t);
+            for (int t = 1; t < seg.getTracks().size() && t < 20 && !accepted; t++) {
+              BasicTrack candidate = seg.getTracks().get(t);
               if (ctx.checkAdvices(newTitleList, candidate)) {
                 log.info("accepted " + candidate);
                 accepted = true;
@@ -502,10 +501,9 @@ public class PlaylistGenerator {
           // try to bring short titles to the end
           if (this.useShortTitlesAtEnd && length + title.getLength() > targetLength - 120) {
             // check if we can find a shorter title as last title
-            for (int t = 1; t < seg.getTitles().size() && t < 5; t++) {
-              BasicTrack candidate = seg.getTitles().get(t);
-              if ((length + candidate.getLength() > targetLength || length + candidate.getLength() < targetLength - 150)
-                  && candidate.getLength() < title.getLength()) {
+            for (int t = 1; t < seg.getTracks().size() && t < 5; t++) {
+              BasicTrack candidate = seg.getTracks().get(t);
+              if ((length + candidate.getLength() > targetLength || length + candidate.getLength() < targetLength - 150) && candidate.getLength() < title.getLength()) {
                 title = candidate;
               }
             }
@@ -551,9 +549,10 @@ public class PlaylistGenerator {
           emptySegments.add(seg);
         }
 
-        if (seg.getTitles().size() == 0 || length >= segmentTargetLength * segCnt) {
+        if (seg.getTracks().size() == 0 || length >= segmentTargetLength * segCnt) {
           // move on to next segment
           sIdx = (sIdx + 1) % segments.length;
+          // System.out.println("Segement " + sIdx);
           segCnt++;
         }
       }
@@ -585,7 +584,7 @@ public class PlaylistGenerator {
           }
         }
         if (maxFraction < 1) {
-          ctx.getAdvices().add(new TagLimitAdvice(titleIds, (int) (playlist.getGenerateLength() * 60 * 60 * maxFraction)));
+          ctx.getAdvices().add(new TagLimitAdvice(titleIds, (int) (playlist.getGenerateLength() * 60 * 60 * maxFraction), maxFraction));
         }
       }
     } catch (Exception e) {
@@ -724,28 +723,25 @@ public class PlaylistGenerator {
   }
 
   /**
-   * @param artistNormalizer
-   *          the artistNormalizer to set
+   * @param artistNormalizer the artistNormalizer to set
    */
   public void setArtistNormalizer(ArtistNormalizer artistNormalizer) {
     this.artistNormalizer = artistNormalizer;
   }
 
   /**
-   * Configures whether or not to put a penalty on artists that have been used
-   * in previous playlists that were generated with this instance of
+   * Configures whether or not to put a penalty on artists that have been used in
+   * previous playlists that were generated with this instance of
    * PlaylistGenerator.
    * 
-   * @param artistPenaltyEnabled
-   *          the artistPenaltyEnabled to set
+   * @param artistPenaltyEnabled the artistPenaltyEnabled to set
    */
   public void setArtistPenaltyEnabled(boolean artistPenaltyEnabled) {
     this.artistPenaltyEnabled = artistPenaltyEnabled;
   }
 
   /**
-   * @param jingleInterval
-   *          the jingleInterval to set
+   * @param jingleInterval the jingleInterval to set
    */
   public void setJingleInterval(int jingleInterval) {
     this.jingleInterval = jingleInterval;
@@ -755,38 +751,34 @@ public class PlaylistGenerator {
    * Sets the minimum value for random values that are used for title selection.
    * <p>
    * Values between 0 and the minimum value can only be reached after applying
-   * push tags. This means the higher the minimum value is set the more values
-   * are only available for pushed titles. Or in other words: The higher the
-   * value is the more likely it is that pushed titles are choosen.
+   * push tags. This means the higher the minimum value is set the more values are
+   * only available for pushed titles. Or in other words: The higher the value is
+   * the more likely it is that pushed titles are choosen.
    * <p>
    * The default value is 100.
    * 
-   * @param minRandomValue
-   *          minimum value
+   * @param minRandomValue minimum value
    */
   public void setMinRandomValue(int minRandomValue) {
     this.minRandomValue = minRandomValue;
   }
 
   /**
-   * @param protectFirstJingle
-   *          the protectFirstJingle to set
+   * @param protectFirstJingle the protectFirstJingle to set
    */
   public void setProtectFirstJingle(boolean protectFirstJingle) {
     this.protectFirstJingle = protectFirstJingle;
   }
 
   /**
-   * @param time
-   *          the time to set
+   * @param time the time to set
    */
   public void setTime(long time) {
     this.time = time;
   }
 
   /**
-   * Gets the time period for which titles get a penalty once they have been
-   * used
+   * Gets the time period for which titles get a penalty once they have been used
    * 
    * @return period in minutes
    */
@@ -795,13 +787,12 @@ public class PlaylistGenerator {
   }
 
   /**
-   * Sets the time period for which titles get a penalty once they have been
-   * used. The penalty is getting lower the longer the last play is in the past.
+   * Sets the time period for which titles get a penalty once they have been used.
+   * The penalty is getting lower the longer the last play is in the past.
    * <p>
    * If set to 0 the full {@link #getTrackPenaltyMax()} value is always added.
    * 
-   * @param titlePenaltyPeriod
-   *          period in minutes
+   * @param titlePenaltyPeriod period in minutes
    */
   public void setTrackPenaltyPeriod(int titlePenaltyPeriod) {
     this.trackPenaltyPeriod = titlePenaltyPeriod;
@@ -838,8 +829,7 @@ public class PlaylistGenerator {
    * previous playlists that were generated with this instance of
    * PlaylistGenerator.
    * 
-   * @param titlePenaltyEnabled
-   *          the titlePenaltyEnabled to set
+   * @param titlePenaltyEnabled the titlePenaltyEnabled to set
    */
   public void setTrackPenaltyEnabled(boolean titlePenaltyEnabled) {
     this.trackPenaltyEnabled = titlePenaltyEnabled;
@@ -961,8 +951,7 @@ public class PlaylistGenerator {
     }
 
     /**
-     * @param plays
-     *          the plays to set
+     * @param plays the plays to set
      */
     void incPlays() {
       this.plays++;
@@ -985,16 +974,14 @@ public class PlaylistGenerator {
     }
 
     /**
-     * @param startSegment
-     *          the startSegment to set
+     * @param startSegment the startSegment to set
      */
     protected void setCurrentSegment(int startSegment) {
       this.currentSegment = startSegment;
     }
 
     /**
-     * @param lastPlay
-     *          the lastPlay to set
+     * @param lastPlay the lastPlay to set
      */
     void setLastPlay(long lastPlay) {
       this.lastPlay = lastPlay;
@@ -1029,8 +1016,7 @@ public class PlaylistGenerator {
     }
 
     /**
-     * @param titles
-     *          the titles to set
+     * @param titles the titles to set
      */
     public void setTracks(List<TrackInstance> titles) {
       this.tracks = titles;
@@ -1076,8 +1062,7 @@ public class PlaylistGenerator {
     }
 
     /**
-     * @param firstJingle
-     *          the firstJingle to set
+     * @param firstJingle the firstJingle to set
      */
     protected void setFirstJingle(BasicTrack firstJingle) {
       this.firstJingle = firstJingle;
@@ -1101,7 +1086,7 @@ public class PlaylistGenerator {
    * A Segment is a part of the playlist as it is generated.
    */
   private class Segment {
-    private List<BasicTrack> titles = new ArrayList<BasicTrack>();
+    private List<BasicTrack> tracks = new ArrayList<BasicTrack>();
     private int length;
 
     public Segment() {
@@ -1109,7 +1094,7 @@ public class PlaylistGenerator {
     }
 
     void add(BasicTrack title) {
-      this.titles.add(title);
+      this.tracks.add(title);
       this.length += title.getLength();
     }
 
@@ -1117,33 +1102,60 @@ public class PlaylistGenerator {
       return length;
     }
 
-    public List<BasicTrack> getTitles() {
-      return titles;
+    public List<BasicTrack> getTracks() {
+      return tracks;
     }
 
     public void remove(BasicTrack title) {
-      if (this.titles.remove(title)) {
+      if (this.tracks.remove(title)) {
         this.length -= title.getLength();
       }
     }
 
-    public void randomizeFirst(int seconds) {
+    private boolean checkSegementAdvices(List<Advice> advices, List<BasicTrack> tracks, BasicTrack candidate) {
+      for (Advice advice : advices) {
+        if (!advice.accept(tracks, candidate)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    public void randomizeFirst(GeneratorCtx ctx, int seconds) {
       int len = 0;
       int idx = 0;
       List<BasicTrack> first = new ArrayList<BasicTrack>();
       List<BasicTrack> last = new ArrayList<BasicTrack>();
-      while (idx < this.titles.size()) {
+      List<BasicTrack> adviceViolations = new ArrayList<BasicTrack>();
+
+      List<Advice> segmentAdvices = new ArrayList<Advice>();
+      for (Advice advice : ctx.getAdvices()) {
+        if (advice instanceof TagLimitAdvice) {
+          segmentAdvices.add(new TagLimitAdvice((TagLimitAdvice) advice, seconds + (int) (seconds * 0.1)));
+        }
+      }
+
+      while (idx < this.tracks.size()) {
         if (len < seconds) {
-          len += this.titles.get(idx).getLength();
-          first.add(titles.get(idx));
+          if (checkSegementAdvices(segmentAdvices, first, tracks.get(idx))) {
+            len += this.tracks.get(idx).getLength();
+            first.add(tracks.get(idx));
+          }
+          else {
+            adviceViolations.add(tracks.get(idx));
+          }
         } else {
-          last.add(titles.get(idx));
+          last.add(tracks.get(idx));
         }
         idx++;
       }
-      this.titles.clear();
-      this.titles.addAll(randomize(first));
-      this.titles.addAll(last);
+
+      this.tracks.clear();
+      first = randomize(first);
+      this.tracks.addAll(first);
+      this.tracks.addAll(last);
+      this.tracks.addAll(adviceViolations);
     }
 
   }
@@ -1238,16 +1250,14 @@ public class PlaylistGenerator {
     }
 
     /**
-     * @param last
-     *          the last to set
+     * @param last the last to set
      */
     void setLastPlay(long last) {
       this.lastPlay = last;
     }
 
     /**
-     * @param pushFactor
-     *          the pushFactor to set
+     * @param pushFactor the pushFactor to set
      */
     public void setPushFactor(int pushFactor) {
       this.minPushFactor = Math.min(this.minPushFactor, pushFactor);
@@ -1270,8 +1280,7 @@ public class PlaylistGenerator {
     }
 
     /**
-     * @param repeatAllowed
-     *          the repeatAllowed to set
+     * @param repeatAllowed the repeatAllowed to set
      */
     public void setRepeatAllowed(boolean repeatAllowed) {
       this.repeatAllowed = repeatAllowed;
@@ -1295,8 +1304,7 @@ public class PlaylistGenerator {
   }
 
   /**
-   * @param artistPenaltyPeriod
-   *          the artistPenaltyPeriod to set
+   * @param artistPenaltyPeriod the artistPenaltyPeriod to set
    */
   public void setArtistPenaltyPeriod(int artistPenaltyPeriod) {
     this.artistPenaltyPeriod = artistPenaltyPeriod;
@@ -1310,8 +1318,7 @@ public class PlaylistGenerator {
   }
 
   /**
-   * @param maxArtistTitles
-   *          the maxArtistTitles to set
+   * @param maxArtistTitles the maxArtistTitles to set
    */
   public void setMaxArtistTitles(int maxArtistTitles) {
     this.maxArtistTitles = maxArtistTitles;
@@ -1325,8 +1332,7 @@ public class PlaylistGenerator {
   }
 
   /**
-   * @param globalWeightTags
-   *          the globalWeightTags to set
+   * @param globalWeightTags the globalWeightTags to set
    */
   public void setGlobalWeightTags(List<TagWeight> globalWeightTags) {
     this.globalPushTags = globalWeightTags;
@@ -1335,7 +1341,7 @@ public class PlaylistGenerator {
   public void addGlobalWeightTag(TagWeight weight) {
     this.globalPushTags.add(weight);
   }
-  
+
   /**
    * @return the artistTrackPreselector
    */
@@ -1344,8 +1350,7 @@ public class PlaylistGenerator {
   }
 
   /**
-   * @param artistTrackPreselector
-   *          the artistTrackPreselector to set
+   * @param artistTrackPreselector the artistTrackPreselector to set
    */
   public void setArtistTrackPreselector(ArtistTrackPreselector artistTrackPreselector) {
     this.artistTrackPreselector = artistTrackPreselector;
