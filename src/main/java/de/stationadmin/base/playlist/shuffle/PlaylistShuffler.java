@@ -28,6 +28,7 @@ public class PlaylistShuffler {
   private static final Logger log = Logger.getLogger(PlaylistShuffler.class);
   private Random random = new Random();
   private boolean protectFirstJingle = true;
+  private boolean protectAllJingles = false;
   private WordDistributionStrategy wordDistribution = WordDistributionStrategy.RANDOM;
   private ArtistNormalizer artistNormalizer = new DefaultArtistNormalizer();
 
@@ -57,20 +58,18 @@ public class PlaylistShuffler {
         boolean randomTrack = true;
         if (title.getType() == BasicTrack.TYPE_WORD) {
           if (this.wordDistribution == WordDistributionStrategy.PROTECT) {
-            ProtectedTitle fxtitle = new ProtectedTitle(pos, title);
-            ctx.addProtectedTitle(fxtitle);
+            ProtectedTrack fxtitle = new ProtectedTrack(pos, title);
+            ctx.addProtectedTrack(fxtitle);
             randomTrack = false;
-          }
-          else if(this.wordDistribution == WordDistributionStrategy.SUCCESSOR_COUPLING && pos < entries.size() - 1) {
+          } else if (this.wordDistribution == WordDistributionStrategy.SUCCESSOR_COUPLING && pos < entries.size() - 1) {
             BasicTrack nextTitle = playlist.getTrackRegistry().getTrack(entries.get(pos + 1).getTrackId());
-            if(nextTitle != null) {
+            if (nextTitle != null) {
               ctx.addCoupledTitle(title, nextTitle);
               randomTrack = false;
             }
-          }
-          else if(this.wordDistribution == WordDistributionStrategy.PREDECESSOR_COUPLING && pos > 0) {
+          } else if (this.wordDistribution == WordDistributionStrategy.PREDECESSOR_COUPLING && pos > 0) {
             BasicTrack prevTitle = playlist.getTrackRegistry().getTrack(entries.get(pos - 1).getTrackId());
-            if(prevTitle != null) {
+            if (prevTitle != null) {
               ctx.addCoupledTitle(title, prevTitle);
               randomTrack = false;
             }
@@ -93,12 +92,17 @@ public class PlaylistShuffler {
         }
       } else {
         // jingle
-        if (!jingleIds.contains(title.getId())) {
-          ctx.getJingles().add(title);
-          jingleIds.add(title.getId());
-        }
-        if (pos == 0) {
-          ctx.setStartsWithJingle(true);
+        if (protectAllJingles) {
+          ProtectedTrack fxtitle = new ProtectedTrack(pos, title);
+          ctx.addProtectedTrack(fxtitle);
+        } else {
+          if (!jingleIds.contains(title.getId())) {
+            ctx.getJingles().add(title);
+            jingleIds.add(title.getId());
+          }
+          if (pos == 0) {
+            ctx.setStartsWithJingle(true);
+          }
         }
       }
     }
@@ -153,16 +157,14 @@ public class PlaylistShuffler {
   }
 
   /**
-   * @param jingleInterval
-   *          the jingleInterval to set
+   * @param jingleInterval the jingleInterval to set
    */
   public void setJingleInterval(int jingleInterval) {
     this.jingleInterval = jingleInterval;
   }
 
   /**
-   * @param protectFirstJingle
-   *          the protectFirstJingle to set
+   * @param protectFirstJingle the protectFirstJingle to set
    */
   public void setProtectFirstJingle(boolean protectFirstJingle) {
     this.protectFirstJingle = protectFirstJingle;
@@ -224,21 +226,21 @@ public class PlaylistShuffler {
     for (Segment segment : segments) {
       log.debug("segement length: " + segment.getLength() / 60 + " minutes");
       List<BasicTrack> segmentTitles = this.randomize(segment.getTitles());
-      for(BasicTrack title : segmentTitles) {
+      for (BasicTrack title : segmentTitles) {
         BasicTrack coupledTitle = ctx.getCoupledTitles().get(title);
-        if(coupledTitle != null && this.wordDistribution == WordDistributionStrategy.SUCCESSOR_COUPLING) {
+        if (coupledTitle != null && this.wordDistribution == WordDistributionStrategy.SUCCESSOR_COUPLING) {
           newTitleList.add(coupledTitle);
           lockedPositions.set(newTitleList.size());
         }
         newTitleList.add(title);
-        if(coupledTitle != null && this.wordDistribution == WordDistributionStrategy.PREDECESSOR_COUPLING) {
+        if (coupledTitle != null && this.wordDistribution == WordDistributionStrategy.PREDECESSOR_COUPLING) {
           lockedPositions.set(newTitleList.size());
           newTitleList.add(coupledTitle);
         }
       }
     }
 
-    if (ctx.jingles.size() > 0) {
+    if (ctx.jingles.size() > 0 && !this.protectAllJingles) {
       // insert jingles
       ArrayList<BasicTrack> titleList = new ArrayList<BasicTrack>(newTitleList);
       int timeNextJingle = 0;
@@ -249,8 +251,7 @@ public class PlaylistShuffler {
       int jingleInterval = this.jingleInterval;
       if (jingleInterval == 0) {
         jingleInterval = (playlist.getLength() / ctx.jingles.size()) / 60;
-        log.debug(ctx.jingles.size() + " jingles for " + (playlist.getLength() / 60) + " minutes - place jingle every "
-            + jingleInterval + " minutes");
+        log.debug(ctx.jingles.size() + " jingles for " + (playlist.getLength() / 60) + " minutes - place jingle every " + jingleInterval + " minutes");
       }
 
       int jingleOffset = 0;
@@ -282,8 +283,7 @@ public class PlaylistShuffler {
 
         for (int i = 0; i < titleList.size(); i++) {
           if ((currentTimeSec / 60) >= timeNextJingle && !lockedPositions.get(i)) {
-            log.debug("place jingle " + jingleIdx + " at " + (currentTimeSec / 60) + " / target time was "
-                + timeNextJingle);
+            log.debug("place jingle " + jingleIdx + " at " + (currentTimeSec / 60) + " / target time was " + timeNextJingle);
             newTitleList.add(ctx.getJingles().get(jingleIdx));
             unusedJingles.remove(ctx.getJingles().get(jingleIdx));
             jingleIdx = (jingleIdx + 1) % ctx.getJingles().size();
@@ -301,27 +301,27 @@ public class PlaylistShuffler {
       }
     }
 
-    if (ctx.getFixedTitles().size() > 0) {
-      for (ProtectedTitle fxtitle : ctx.getFixedTitles()) {
-        newTitleList.add(fxtitle.getPosition(), fxtitle.getTitle());
+    if (ctx.getProtectedTracks().size() > 0) {
+      for (ProtectedTrack fxtitle : ctx.getProtectedTracks()) {
+        newTitleList.add(fxtitle.getPosition(), fxtitle.getTrack());
       }
     }
 
     playlist.setTracks(newTitleList);
   }
 
-  private static class ProtectedTitle {
+  private static class ProtectedTrack {
     private int position;
-    private BasicTrack title;
+    private BasicTrack track;
 
     /**
      * @param position
      * @param title
      */
-    ProtectedTitle(int position, BasicTrack title) {
+    ProtectedTrack(int position, BasicTrack title) {
       super();
       this.position = position;
-      this.title = title;
+      this.track = title;
     }
 
     /**
@@ -334,8 +334,8 @@ public class PlaylistShuffler {
     /**
      * @return the title
      */
-    BasicTrack getTitle() {
-      return title;
+    BasicTrack getTrack() {
+      return track;
     }
 
   }
@@ -365,18 +365,18 @@ public class PlaylistShuffler {
   private static class ShuffleCtx {
     private Map<String, List<BasicTrack>> titleMap = new HashMap<String, List<BasicTrack>>();
     private List<BasicTrack> jingles = new ArrayList<BasicTrack>();
-    private List<ProtectedTitle> protectedTitles = new ArrayList<ProtectedTitle>();
-    private Map<BasicTrack,BasicTrack> coupledTitles = new HashMap<BasicTrack, BasicTrack>();
+    private List<ProtectedTrack> protectedTracks = new ArrayList<ProtectedTrack>();
+    private Map<BasicTrack, BasicTrack> coupledTitles = new HashMap<BasicTrack, BasicTrack>();
     private boolean startsWithJingle = false;
 
     public void addCoupledTitle(BasicTrack coupledTitle, BasicTrack coupledTo) {
       this.coupledTitles.put(coupledTo, coupledTitle);
     }
 
-    public void addProtectedTitle(ProtectedTitle title) {
-      this.protectedTitles.add(title);
+    public void addProtectedTrack(ProtectedTrack title) {
+      this.protectedTracks.add(title);
     }
-    
+
     /**
      * @return the coupledTitles
      */
@@ -387,8 +387,8 @@ public class PlaylistShuffler {
     /**
      * @return the fixedTitles
      */
-    public List<ProtectedTitle> getFixedTitles() {
-      return protectedTitles;
+    public List<ProtectedTrack> getProtectedTracks() {
+      return protectedTracks;
     }
 
     /**
@@ -413,23 +413,21 @@ public class PlaylistShuffler {
     }
 
     /**
-     * @param jingles
-     *          the jingles to set
+     * @param jingles the jingles to set
      */
     public void setJingles(List<BasicTrack> jingles) {
       this.jingles = jingles;
     }
 
     /**
-     * @param startsWithJingle
-     *          the startsWithJingle to set
+     * @param startsWithJingle the startsWithJingle to set
      */
     public void setStartsWithJingle(boolean startsWithJingle) {
       this.startsWithJingle = startsWithJingle;
     }
 
   }
-  
+
   /**
    * @return the artistNormalizer
    */
@@ -443,6 +441,13 @@ public class PlaylistShuffler {
   public void setArtistNormalizer(ArtistNormalizer artistNormalizer) {
     this.artistNormalizer = artistNormalizer;
   }
-  
+
+  public boolean isProtectAllJingles() {
+    return protectAllJingles;
+  }
+
+  public void setProtectAllJingles(boolean protectAllJingles) {
+    this.protectAllJingles = protectAllJingles;
+  }
 
 }

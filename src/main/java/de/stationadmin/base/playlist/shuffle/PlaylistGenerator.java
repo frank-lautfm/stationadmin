@@ -39,6 +39,7 @@ public class PlaylistGenerator {
   private TrackRegistry trackRegistry;
   private Random random = new Random();
   private boolean protectFirstJingle = true;
+  private boolean protectAllJingles = false;
   private int jingleInterval = 0;
 
   private long time = System.currentTimeMillis();
@@ -56,7 +57,6 @@ public class PlaylistGenerator {
 
   private int minRandomValue = 100;
 
-  private boolean useShortTitlesAtEnd = true;
   private WordDistributionStrategy wordDistribution = WordDistributionStrategy.RANDOM;
 
   private List<TagWeight> globalPushTags = new ArrayList<TagWeight>();
@@ -179,11 +179,12 @@ public class PlaylistGenerator {
     this.generate(playlist, false);
   }
 
-  private void extractProtectedTitles(Playlist playlist, GeneratorCtx ctx) {
-    if (this.wordDistribution == WordDistributionStrategy.PROTECT) {
+  private void extractProtectedTracks(Playlist playlist, GeneratorCtx ctx) {
+    if (this.wordDistribution == WordDistributionStrategy.PROTECT || this.protectAllJingles) {
       for (int i = 0; i < playlist.getEntries().size(); i++) {
-        if (playlist.getEntries().get(i).getTrack().getType() == BasicTrack.TYPE_WORD) {
-          ctx.addProtectedTitle(i, playlist.getEntries().get(i).getTrack());
+        if ((this.wordDistribution == WordDistributionStrategy.PROTECT && playlist.getEntries().get(i).getTrack().getType() == BasicTrack.TYPE_WORD)
+            || (this.protectAllJingles && playlist.getEntries().get(i).getTrack().getType() == BasicTrack.TYPE_JINGLE)) {
+          ctx.addProtectedTrack(i, playlist.getEntries().get(i).getTrack());
         }
       }
     }
@@ -202,7 +203,7 @@ public class PlaylistGenerator {
 
     GeneratorCtx ctx = new GeneratorCtx();
 
-    if (this.protectFirstJingle && playlist.getEntries().size() > 0) {
+    if (this.protectFirstJingle && playlist.getEntries().size() > 0 && !this.protectAllJingles) {
       // check if first title is jingle and protect it if so
       Entry entry = playlist.getEntries().get(0);
       BasicTrack firstTitle = this.trackRegistry.getTrack(entry.getTrackId());
@@ -211,7 +212,7 @@ public class PlaylistGenerator {
       }
     }
 
-    this.extractProtectedTitles(playlist, ctx);
+    this.extractProtectedTracks(playlist, ctx);
     Set<BasicTrack> titles = this.collectTitles(playlist);
     HashSet<String> localWeightTags = new HashSet<String>();
     if (playlist.getGeneratePushTag() != null) {
@@ -453,7 +454,7 @@ public class PlaylistGenerator {
     }
 
     // build new list
-    ArrayList<BasicTrack> newTitleList = new ArrayList<BasicTrack>();
+    ArrayList<BasicTrack> newTrackList = new ArrayList<BasicTrack>();
     {
       int targetLength = maxLength;
       int length = 0;
@@ -464,7 +465,7 @@ public class PlaylistGenerator {
       int nextJingleAfter = this.jingleInterval > 0 ? random.nextInt(jingleInterval) : maxLength;
 
       if (ctx.getFirstJingle() != null) {
-        newTitleList.add(ctx.getFirstJingle());
+        newTrackList.add(ctx.getFirstJingle());
         length += ctx.getFirstJingle().getLength();
       }
 
@@ -474,20 +475,20 @@ public class PlaylistGenerator {
       while (length < targetLength && emptySegments.size() < segments.length) {
         Segment seg = segments[sIdx];
 
-        if (ctx.getProtectedTitleAt(newTitleList.size()) != null) {
-          newTitleList.add(ctx.getProtectedTitleAt(newTitleList.size()));
+        if (ctx.getProtectedTrackAt(newTrackList.size()) != null) {
+          newTrackList.add(ctx.getProtectedTrackAt(newTrackList.size()));
         } else if (seg.getTracks().size() > 0) {
 
           // select a title from the current segment
           BasicTrack title = seg.getTracks().get(0);
 
           // check advices
-          if (!ctx.checkAdvices(newTitleList, title)) {
+          if (!ctx.checkAdvices(newTrackList, title)) {
             log.info("advice violoation - searching replacement for " + title);
             boolean accepted = false;
             for (int t = 1; t < seg.getTracks().size() && t < 20 && !accepted; t++) {
               BasicTrack candidate = seg.getTracks().get(t);
-              if (ctx.checkAdvices(newTitleList, candidate)) {
+              if (ctx.checkAdvices(newTrackList, candidate)) {
                 log.info("accepted " + candidate);
                 accepted = true;
                 title = candidate;
@@ -498,26 +499,15 @@ public class PlaylistGenerator {
             }
           }
 
-          // try to bring short titles to the end
-          if (this.useShortTitlesAtEnd && length + title.getLength() > targetLength - 120) {
-            // check if we can find a shorter title as last title
-            for (int t = 1; t < seg.getTracks().size() && t < 5; t++) {
-              BasicTrack candidate = seg.getTracks().get(t);
-              if ((length + candidate.getLength() > targetLength || length + candidate.getLength() < targetLength - 150) && candidate.getLength() < title.getLength()) {
-                title = candidate;
-              }
-            }
-
-          }
           seg.remove(title);
 
           // add selected title to playlist
-          newTitleList.add(title);
+          newTrackList.add(title);
           length += title.getLength();
           this.register(title);
 
           boolean addJingle = false;
-          if (distributeJingles && length < targetLength) {
+          if (!this.protectAllJingles && distributeJingles && length < targetLength) {
             if (this.jingleInterval == 0) {
               if (!jinglePositions.isEmpty() && jinglePositions.getFirst().intValue() <= length) {
                 addJingle = true;
@@ -536,7 +526,7 @@ public class PlaylistGenerator {
           if (addJingle) {
             // assign next jingle
             BasicTrack jingle = ctx.getJingles().get(jingleIdx);
-            newTitleList.add(jingle);
+            newTrackList.add(jingle);
             numJingles++;
             log.info("jingle " + numJingles + " (" + jingle.getTitle() + ") at " + TimeFormat.format(length, true));
             length += jingle.getLength();
@@ -559,11 +549,11 @@ public class PlaylistGenerator {
     }
 
     if (append) {
-      for (BasicTrack t : newTitleList) {
+      for (BasicTrack t : newTrackList) {
         playlist.addTrack(t);
       }
     } else {
-      playlist.setTracks(newTitleList);
+      playlist.setTracks(newTrackList);
     }
   }
 
@@ -816,14 +806,6 @@ public class PlaylistGenerator {
     this.trackPenaltyMax = titlePenaltyMax;
   }
 
-  public boolean isUseShortTitlesAtEnd() {
-    return useShortTitlesAtEnd;
-  }
-
-  public void setUseShortTitlesAtEnd(boolean useShortTitlesAtEnd) {
-    this.useShortTitlesAtEnd = useShortTitlesAtEnd;
-  }
-
   /**
    * Configures whether or not to put a penalty on titles that have been used in
    * previous playlists that were generated with this instance of
@@ -1027,17 +1009,17 @@ public class PlaylistGenerator {
   private static class GeneratorCtx {
     private Map<String, Artist> titleMap = new HashMap<String, Artist>();
     private List<BasicTrack> jingles = new ArrayList<BasicTrack>();
-    private Map<Integer, BasicTrack> protectedTitles = new HashMap<Integer, BasicTrack>();
+    private Map<Integer, BasicTrack> protectedTracks = new HashMap<Integer, BasicTrack>();
     private BasicTrack firstJingle;
 
     private List<Advice> advices = new ArrayList<Advice>();
 
-    public void addProtectedTitle(int pos, BasicTrack title) {
-      this.protectedTitles.put(pos, title);
+    public void addProtectedTrack(int pos, BasicTrack title) {
+      this.protectedTracks.put(pos, title);
     }
 
-    public BasicTrack getProtectedTitleAt(int pos) {
-      return this.protectedTitles.get(pos);
+    public BasicTrack getProtectedTrackAt(int pos) {
+      return this.protectedTracks.get(pos);
     }
 
     /**
@@ -1141,8 +1123,7 @@ public class PlaylistGenerator {
           if (checkSegementAdvices(segmentAdvices, first, tracks.get(idx))) {
             len += this.tracks.get(idx).getLength();
             first.add(tracks.get(idx));
-          }
-          else {
+          } else {
             adviceViolations.add(tracks.get(idx));
           }
         } else {
@@ -1354,6 +1335,14 @@ public class PlaylistGenerator {
    */
   public void setArtistTrackPreselector(ArtistTrackPreselector artistTrackPreselector) {
     this.artistTrackPreselector = artistTrackPreselector;
+  }
+
+  public boolean isProtectAllJingles() {
+    return protectAllJingles;
+  }
+
+  public void setProtectAllJingles(boolean protectAllJingles) {
+    this.protectAllJingles = protectAllJingles;
   }
 
 }

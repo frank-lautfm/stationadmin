@@ -29,6 +29,7 @@ public class Settings extends AbstractBean {
   private boolean logRank = false;
 
   private boolean shuffleProtectFirstJingle = false;
+  private boolean shuffleProtectAllJingles = false;
   private int shuffleJingleInterval = 0;
   private WordDistributionStrategy shuffleWordDistributionStrategy = WordDistributionStrategy.RANDOM;
   private int generateMinRandomValue = 100;
@@ -79,6 +80,7 @@ public class Settings extends AbstractBean {
     this.setTitleLogFile(settings.getTitleLogFile());
     this.setShuffleJingleInterval(settings.getShuffleJingleInterval());
     this.setShuffleProtectFirstJingle(settings.isShuffleProtectFirstJingle());
+    this.setShuffleProtectAllJingles(settings.isShuffleProtectAllJingles());
     this.setShuffleWordDistributionStrategy(settings.getShuffleWordDistributionStrategy());
     this.setGenerateMinRandomValue(settings.getGenerateMinRandomValue());
     this.setGenerateArtistPreselectLimits(settings.getGenerateArtistPreselectLimits());
@@ -452,6 +454,16 @@ public class Settings extends AbstractBean {
     Autosynchronisation old = this.autoSynchronisation;
     this.autoSynchronisation = autoSynchronization;
     this.firePropertyChange("autoSynchronisation", old, autoSynchronization);
+  }
+
+  public boolean isShuffleProtectAllJingles() {
+    return shuffleProtectAllJingles;
+  }
+
+  public void setShuffleProtectAllJingles(boolean shuffleProtectAllJingles) {
+    boolean old = this.shuffleProtectAllJingles;
+    this.shuffleProtectAllJingles = shuffleProtectAllJingles;
+    this.firePropertyChange("shuffleProtectAllJingles", old, shuffleProtectAllJingles);
   }
 
 }

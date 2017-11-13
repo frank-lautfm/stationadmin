@@ -363,7 +363,7 @@ public class SettingsDlg extends JDialog {
 
   private JPanel createShufflePanel() {
     JPanel panel = new JPanel(new FormLayout("3dlu,60dlu,5dlu,pref,2dlu,pref,pref,pref:grow,3dlu",
-        "3dlu,pref,3dlu,pref,3dlu,pref,10dlu,pref,3dlu"));
+        "3dlu,pref,3dlu,pref,3dlu,pref,3dlu,pref,10dlu,pref,3dlu"));
     panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.shuffle")));
     CellConstraints cc = new CellConstraints();
 
@@ -389,9 +389,11 @@ public class SettingsDlg extends JDialog {
 
     });
 
-    JCheckBox protect1stCb = BasicComponentFactory.createCheckBox(this.model.getBufferedModel("shuffleProtectFirstJingle"), null);
-    JCheckBox jingleIntervalEnableCb = BasicComponentFactory.createCheckBox(jingleIntervalEnable, null);
-    JTextField jingleIntervalTf = BasicComponentFactory.createIntegerField(this.model.getBufferedModel("shuffleJingleInterval"), 0);
+    final JCheckBox protect1stCb = BasicComponentFactory.createCheckBox(this.model.getBufferedModel("shuffleProtectFirstJingle"), null);
+    ValueModel protectAllJinglesModel = this.model.getBufferedModel("shuffleProtectAllJingles");
+    final JCheckBox protectAllCb = BasicComponentFactory.createCheckBox(protectAllJinglesModel, null);
+    final JCheckBox jingleIntervalEnableCb = BasicComponentFactory.createCheckBox(jingleIntervalEnable, null);
+    final JTextField jingleIntervalTf = BasicComponentFactory.createIntegerField(this.model.getBufferedModel("shuffleJingleInterval"), 0);
     jingleIntervalTf.setColumns(3);
 
     panel.add(protect1stCb, cc.xy(4, 2));
@@ -402,6 +404,31 @@ public class SettingsDlg extends JDialog {
     panel.add(jingleIntervalTf, cc.xy(7, 4));
     panel.add(new JLabel(" " + ctx.getTextProvider().getString("settings.shuffle.interval.minute")), cc.xy(8, 4));
 
+    panel.add(protectAllCb, cc.xy(4, 6));
+    panel.add(new JLabel(ctx.getTextProvider().getString("settings.shuffle.protectAllJingles")), cc.xywh(6, 6, 3, 1));
+
+    boolean enableJingleOptions = !ctx.getAdminClient().getSettings().isShuffleProtectAllJingles();
+    protect1stCb.setEnabled(enableJingleOptions);
+    jingleIntervalEnableCb.setEnabled(enableJingleOptions);
+    jingleIntervalTf.setEditable(enableJingleOptions);
+
+    protectAllJinglesModel.addValueChangeListener(new PropertyChangeListener() {
+      
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        boolean enable = !evt.getNewValue().equals(Boolean.TRUE);
+        protect1stCb.setEnabled(enable);
+        jingleIntervalEnableCb.setEnabled(enable);
+        jingleIntervalTf.setEditable(enable);
+        if(!enable) {
+          protect1stCb.setSelected(false);
+          jingleIntervalEnableCb.setSelected(false);
+        }
+        
+      }
+    });
+
+    
     SelectionInList<WordDistributionStrategy> wordDistSelection = new SelectionInList<WordDistributionStrategy>(WordDistributionStrategy.values(),
         this.model.getBufferedModel("shuffleWordDistributionStrategy"));
     JComboBox wordDistCmb = BasicComponentFactory.createComboBox(wordDistSelection, new DefaultListCellRenderer() {
@@ -415,14 +442,14 @@ public class SettingsDlg extends JDialog {
         return this;
       }
     });
-    panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.shuffleWordDistribution")), cc.xy(2, 6));
-    panel.add(wordDistCmb, cc.xywh(4, 6, 5, 1));
+    panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.shuffleWordDistribution")), cc.xy(2, 8));
+    panel.add(wordDistCmb, cc.xywh(4, 8, 5, 1));
 
     JLabel hint = new JLabel(ctx.getString("settings.shuffle.hint"));
     hint.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
     hint.setBackground(new Color(0xFF, 0xFF, 0xCC));
     hint.setOpaque(true);
-    panel.add(hint, cc.xywh(2, 8, 7, 1));
+    panel.add(hint, cc.xywh(2, 10, 7, 1));
     
 
     return panel;

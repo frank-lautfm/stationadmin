@@ -26,6 +26,7 @@ public class PlaylistGeneratorFactory {
     PlaylistGenerator generator = new PlaylistGenerator(client.getTagManager(), client.getTrackService()
         .getTrackRegistry());
     generator.setProtectFirstJingle(settings.isShuffleProtectFirstJingle());
+    generator.setProtectAllJingles(settings.isShuffleProtectAllJingles());
     generator.setJingleInterval(settings.getShuffleJingleInterval());
     generator.setMinRandomValue(settings.getGenerateMinRandomValue());
     generator.setWordDistribution(settings.getShuffleWordDistributionStrategy());
@@ -79,6 +80,7 @@ public class PlaylistGeneratorFactory {
   public static PlaylistShuffler createShuffler(StationAdminClient client) {
     PlaylistShuffler shuffler = new PlaylistShuffler();
     shuffler.setProtectFirstJingle(client.getSettings().isShuffleProtectFirstJingle());
+    shuffler.setProtectAllJingles(client.getSettings().isShuffleProtectAllJingles());
     shuffler.setJingleInterval(client.getSettings().getShuffleJingleInterval());
     shuffler.setWordDistribution(client.getSettings().getShuffleWordDistributionStrategy());
     shuffler.setArtistNormalizer(createNormalizer(client.getSettings()));

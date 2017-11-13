@@ -7,6 +7,11 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
+Version 4.5.0
+-------------
+[+] Shuffeln / Generieren: Neue Option: Jingles generell nicht verschieben
+[#] Playlistgenerator: Bessere Verteilung übergewichteter Tracks
+
 Version 4.4.1
 -------------
 [#] Kleine Verzögerung beim Setzen des private-Flags für Uploads - scheint das Problem zu beseitigen dass das private-Flag

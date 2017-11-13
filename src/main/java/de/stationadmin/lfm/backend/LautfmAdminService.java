@@ -622,10 +622,6 @@ public class LautfmAdminService {
       if (response.getStatusLine().getStatusCode() == 201) {
         UploadResponse uploadResponse = deserializeJson(response, UploadResponse.class);
         if (track.isPrivateTrack()) {
-          try {
-            Thread.sleep(500);
-          } catch (Exception e) {
-          }
           MarkTrackPrivateRequest privateRequest = new MarkTrackPrivateRequest();
           privateRequest.setId(uploadResponse.getId());
           privateRequest.setPrivateTrack(true);
