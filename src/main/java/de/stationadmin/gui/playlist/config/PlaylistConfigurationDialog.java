@@ -82,7 +82,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     // name
     {
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.name")), cc.xy(2, row));
-      JTextField tf = BasicComponentFactory.createTextField(this.model.getBufferedModel("name"));
+      JTextField tf = ctx.getComponentFactory().createTextField(this.model.getBufferedModel("name"));
       tf.setColumns(20);
       tfFont = tf.getFont();
       tfBackground = tf.getBackground();
@@ -93,7 +93,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     // description
     {
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.description")), cc.xy(2, row));
-      JTextArea tf = BasicComponentFactory.createTextArea(this.model.getBufferedModel("description"));
+      JTextArea tf = ctx.getComponentFactory().createTextArea(this.model.getBufferedModel("description"));
       tf.setWrapStyleWord(true);
       tf.setLineWrap(true);
       tf.setRows(2);
@@ -112,7 +112,7 @@ public class PlaylistConfigurationDialog extends JDialog {
 
       ValueModel colorModel = this.model.getBufferedModel("color");
 
-      JTextField tf = BasicComponentFactory.createTextField(colorModel);
+      JTextField tf = ctx.getComponentFactory().createTextField(colorModel);
       tf.setColumns(8);
 
       colorPanel.add(tf);
@@ -139,7 +139,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     // tags
     {
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.tags")), cc.xy(2, row, CellConstraints.LEFT, CellConstraints.TOP));
-      JTextArea tf = BasicComponentFactory.createTextArea(this.model.getBufferedModel("tags"));
+      JTextArea tf = ctx.getComponentFactory().createTextArea(this.model.getBufferedModel("tags"));
       tf.setToolTipText(this.textProvider.getString("playlistcfg.property.tags.tooltip"));
       tf.setRows(5);
       tf.setColumns(20);
@@ -151,7 +151,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     // comment
     {
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.comment")), cc.xy(2, row, CellConstraints.LEFT, CellConstraints.TOP));
-      JTextArea tf = BasicComponentFactory.createTextArea(this.model.getBufferedModel("comment"));
+      JTextArea tf = ctx.getComponentFactory().createTextArea(this.model.getBufferedModel("comment"));
       tf.setRows(2);
       tf.setColumns(20);
       tf.setFont(tfFont);

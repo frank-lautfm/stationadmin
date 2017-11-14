@@ -109,12 +109,12 @@ public class TrackAliasManager extends JFrame {
         JPanel titlePanel = new JPanel(new FormLayout("2dlu,pref,5dlu,pref:grow,2dlu", "2dlu,pref,5dlu,pref,2dlu"));
 
         titlePanel.add(new JLabel(textProvider.getString("titlealiasmanager.property.artist") + ":"), cc.xy(2, 2));
-        JTextField artistTf = BasicComponentFactory.createTextField(aliasPm.getBufferedModel("titleArtist"));
+        JTextField artistTf = ctx.getComponentFactory().createTextField(aliasPm.getBufferedModel("titleArtist"));
         artistTf.setEditable(false);
         titlePanel.add(artistTf, cc.xy(4, 2));
 
         titlePanel.add(new JLabel(textProvider.getString("titlealiasmanager.property.title") + ":"), cc.xy(2, 4));
-        JTextField titleTf = BasicComponentFactory.createTextField(aliasPm.getBufferedModel("titleName"));
+        JTextField titleTf = ctx.getComponentFactory().createTextField(aliasPm.getBufferedModel("titleName"));
         titleTf.setEditable(false);
         titlePanel.add(titleTf, cc.xy(4, 4));
 
@@ -126,13 +126,13 @@ public class TrackAliasManager extends JFrame {
         JPanel aliasPanel = new JPanel(new FormLayout("2dlu,pref,5dlu,pref:grow,2dlu", "2dlu,pref,5dlu,pref,2dlu"));
 
         aliasPanel.add(new JLabel(textProvider.getString("titlealiasmanager.property.artist") + ":"), cc.xy(2, 2));
-        final JTextField artistTf = BasicComponentFactory.createTextField(aliasPm.getBufferedModel("aliasArtist"),
+        final JTextField artistTf = ctx.getComponentFactory().createTextField(aliasPm.getBufferedModel("aliasArtist"),
             false);
         artistTf.setEditable(false);
         aliasPanel.add(artistTf, cc.xy(4, 2));
 
         aliasPanel.add(new JLabel(textProvider.getString("titlealiasmanager.property.title") + ":"), cc.xy(2, 4));
-        final JTextField titleTf = BasicComponentFactory.createTextField(aliasPm.getBufferedModel("aliasName"), false);
+        final JTextField titleTf = ctx.getComponentFactory().createTextField(aliasPm.getBufferedModel("aliasName"), false);
         titleTf.setEditable(false);
         aliasPanel.add(titleTf, cc.xy(4, 4));
 

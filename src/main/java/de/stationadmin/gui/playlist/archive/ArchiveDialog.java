@@ -31,6 +31,7 @@ import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.TextProvider;
+import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.SwingTools;
 
 /**
@@ -65,7 +66,8 @@ public class ArchiveDialog extends JDialog {
 
     this.setTitle(this.textProvider.getString("playlistarchive.title"));
     this.getContentPane().add(new JLabel(this.textProvider.getString("playlistarchive.property.name")), cc.xy(2, 2));
-    JTextField tf = BasicComponentFactory.createTextField(this.nameHolder, false);
+    ComponentFactory componentFactory = new ComponentFactory(textProvider);
+    JTextField tf = componentFactory.createTextField(this.nameHolder, false);
     tf.setColumns(15);
     this.getContentPane().add(tf, cc.xy(4, 2));
 

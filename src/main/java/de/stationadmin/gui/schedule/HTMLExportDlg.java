@@ -102,7 +102,7 @@ public class HTMLExportDlg extends JFrame {
     this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,3dlu,pref:grow,8dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
 
-    JTextArea htmlTf = BasicComponentFactory.createTextArea(html);
+    JTextArea htmlTf = ctx.getComponentFactory().createTextArea(html);
     htmlTf.setRows(15);
     htmlTf.setColumns(40);
     this.getContentPane().add(new JScrollPane(htmlTf), cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));

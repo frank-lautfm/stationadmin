@@ -112,7 +112,7 @@ public class DynamicTagEditor extends JPanel {
 
     // name
     {
-      JTextField tf = BasicComponentFactory.createTextField(model.getBufferedModel("name"));
+      JTextField tf = ctx.getComponentFactory().createTextField(model.getBufferedModel("name"));
 
       panel.add(new JLabel(ctx.getString("titletagmanager.property.name")), cc.xy(2, row));
       panel.add(tf, cc.xy(4, row));
@@ -121,7 +121,7 @@ public class DynamicTagEditor extends JPanel {
 
     // artists
     {
-      JTextArea tf = BasicComponentFactory.createTextArea(model.getBufferedModel("artists"));
+      JTextArea tf = ctx.getComponentFactory().createTextArea(model.getBufferedModel("artists"));
       tf.setToolTipText(ctx.getString("titletagmanager.property.artists.tooltip"));
       tf.setRows(3);
 
@@ -132,7 +132,7 @@ public class DynamicTagEditor extends JPanel {
 
     // titles
     {
-      JTextArea tf = BasicComponentFactory.createTextArea(model.getBufferedModel("titles"));
+      JTextArea tf = ctx.getComponentFactory().createTextArea(model.getBufferedModel("titles"));
       tf.setToolTipText(ctx.getString("titletagmanager.property.titles.tooltip"));
       tf.setRows(3);
 
@@ -143,7 +143,7 @@ public class DynamicTagEditor extends JPanel {
 
     // albums
     {
-      JTextArea tf = BasicComponentFactory.createTextArea(model.getBufferedModel("albums"));
+      JTextArea tf = ctx.getComponentFactory().createTextArea(model.getBufferedModel("albums"));
       tf.setToolTipText(ctx.getString("titletagmanager.property.albums.tooltip"));
       tf.setRows(3);
 

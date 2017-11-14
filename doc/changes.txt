@@ -11,6 +11,7 @@ Version 4.5.0
 -------------
 [+] Shuffeln / Generieren: Neue Option: Jingles generell nicht verschieben
 [#] Playlistgenerator: Bessere Verteilung übergewichteter Tracks
+[+] Kontextmenü mit Cut/Copy/Paste-Actions in Textfeldern
 
 Version 4.4.1
 -------------

@@ -76,7 +76,7 @@ public class StaticTagEditor extends JPanel {
       }
     });
 
-    JTextField tf = BasicComponentFactory.createTextField(model.getBufferedModel("name"));
+    JTextField tf = ctx.getComponentFactory().createTextField(model.getBufferedModel("name"));
 
     this.add(new JLabel(ctx.getString("titletagmanager.property.name")), cc.xy(2, 4));
     this.add(tf, cc.xy(4, 4));

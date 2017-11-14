@@ -37,6 +37,7 @@ import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.loganalyzer.util.SetTimeAction;
 import de.stationadmin.gui.loganalyzer.util.TimeEditor;
 import de.stationadmin.gui.util.AppUtils;
+import de.stationadmin.gui.util.ComponentFactory;
 
 /**
  * @author korf
@@ -73,12 +74,13 @@ public class PlayFilterPanel extends JPanel {
     this.add(new JLabel(textProvider.getString("playsanalyzer.filter.artist") + ":"), cc.xy(1, 3));
 
     JPanel metadataPanel = new JPanel(new FormLayout("pref,8dlu,pref,5dlu,pref,8dlu,pref,5dlu,min(pref;100dlu),8dlu,pref,5dlu,min(pref;100dlu),8dlu,pref", "pref"));
-    JTextField artistTf = BasicComponentFactory.createTextField(filterModel.getModel("artist"));
+    ComponentFactory componentFactory = new ComponentFactory(textProvider);
+    JTextField artistTf = componentFactory.createTextField(filterModel.getModel("artist"));
     artistTf.setColumns(13);
     metadataPanel.add(artistTf, cc.xy(1, 1));
 
     metadataPanel.add(new JLabel(textProvider.getString("playsanalyzer.filter.title") + ":"), cc.xy(3, 1));
-    JTextField titelTf = BasicComponentFactory.createTextField(filterModel.getModel("title"));
+    JTextField titelTf = componentFactory.createTextField(filterModel.getModel("title"));
     titelTf.setColumns(13);
     metadataPanel.add(titelTf, cc.xy(5, 1));
 

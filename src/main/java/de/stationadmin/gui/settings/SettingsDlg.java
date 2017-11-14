@@ -256,7 +256,7 @@ public class SettingsDlg extends JDialog {
     CellConstraints cc = new CellConstraints();
     int row = 2;
 
-    JTextField titleLogTf = BasicComponentFactory.createTextField(model.getBufferedModel("titleLogFile"));
+    JTextField titleLogTf = ctx.getComponentFactory().createTextField(model.getBufferedModel("titleLogFile"));
     titleLogTf.setColumns(30);
 
     panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.titlelogdir")), cc.xy(2, row));
@@ -279,7 +279,7 @@ public class SettingsDlg extends JDialog {
     int row = 2;
 
     {
-      JTextField backupDirTf = BasicComponentFactory.createTextField(model.getBufferedModel("backupDirectory"));
+      JTextField backupDirTf = ctx.getComponentFactory().createTextField(model.getBufferedModel("backupDirectory"));
       backupDirTf.setColumns(30);
 
       panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.backupDirectory")), cc.xy(2, row));
@@ -330,7 +330,7 @@ public class SettingsDlg extends JDialog {
     desc.setLineWrap(true);
     panel.add(desc, cc.xywh(2, 2, 5, 1));
 
-    JTextField playerTf = BasicComponentFactory.createTextField(model.getBufferedModel("mp3Player"));
+    JTextField playerTf = ctx.getComponentFactory().createTextField(model.getBufferedModel("mp3Player"));
     playerTf.setColumns(30);
 
     panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.mp3player")), cc.xy(2, 4));
@@ -350,7 +350,7 @@ public class SettingsDlg extends JDialog {
     desc.setLineWrap(true);
     panel.add(desc, cc.xywh(2, 2, 5, 1));
 
-    JTextField playerTf = BasicComponentFactory.createTextField(model.getBufferedModel("mp3Root"));
+    JTextField playerTf = ctx.getComponentFactory().createTextField(model.getBufferedModel("mp3Root"));
     playerTf.setColumns(30);
 
     panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.mp3Root")), cc.xy(2, 4));
@@ -530,7 +530,7 @@ public class SettingsDlg extends JDialog {
     JTextField statsRefreshTf = BasicComponentFactory.createIntegerField(model.getBufferedModel("statisticsRefreshInterval"), fmt, -1);
     statsRefreshTf.setColumns(3);
 
-    JTextField statsLogTf = BasicComponentFactory.createTextField(model.getBufferedModel("statisticsLogFile"));
+    JTextField statsLogTf = ctx.getComponentFactory().createTextField(model.getBufferedModel("statisticsLogFile"));
     statsLogTf.setColumns(30);
 
     panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.statsrefresh")), cc.xy(2, row));

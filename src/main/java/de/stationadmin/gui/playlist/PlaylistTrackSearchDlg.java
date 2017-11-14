@@ -52,7 +52,7 @@ public class PlaylistTrackSearchDlg extends JFrame {
   private JPanel createSearchPanel() {
     Search search = new Search();
     JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING, 10, 10));
-    JTextField tf = BasicComponentFactory.createTextField(this.query, false);
+    JTextField tf = ctx.getComponentFactory().createTextField(this.query, false);
     tf.setColumns(20);
     tf.addActionListener(search);
     panel.add(tf);

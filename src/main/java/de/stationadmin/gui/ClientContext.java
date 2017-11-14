@@ -17,6 +17,7 @@ import de.stationadmin.base.ErrorHandler;
 import de.stationadmin.base.StationAdminClient;
 import de.stationadmin.gui.upload.UploadWindowManager;
 import de.stationadmin.gui.util.AppUtils;
+import de.stationadmin.gui.util.ComponentFactory;
 
 /**
  * Context object for all classes of the GUI - provides access to relevant objects and resources
@@ -32,11 +33,14 @@ public class ClientContext {
   private ValueHolder radioStatus = new ValueHolder(Boolean.FALSE);
   private UploadWindowManager uploadWindowManager = new UploadWindowManager(this);
   private Desktop desktop;
+  
+  private ComponentFactory componentFactory;
 
   public ClientContext() {
     if (Desktop.isDesktopSupported()) {
       this.desktop = Desktop.getDesktop();
     }
+    this.componentFactory = new ComponentFactory(this.textProvider);
   }
 
   public static String getHomeDir() {
@@ -136,6 +140,10 @@ public class ClientContext {
    */
   public TextProvider getTextProvider() {
     return textProvider;
+  }
+
+  public ComponentFactory getComponentFactory() {
+    return componentFactory;
   }
 
 }

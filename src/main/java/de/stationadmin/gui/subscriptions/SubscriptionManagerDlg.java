@@ -180,7 +180,7 @@ public class SubscriptionManagerDlg extends JFrame {
     panel.add(new JLabel(ctx.getTextProvider().getString("subscription.property.field")), cc.xy(2, 4));
     panel.add(cmb, cc.xy(4, 4));
 
-    final JTextField tf = BasicComponentFactory.createTextField(this.presentationModel.getBufferedModel("query"), false);
+    final JTextField tf = ctx.getComponentFactory().createTextField(this.presentationModel.getBufferedModel("query"), false);
     tf.setColumns(15);
     tf.setEditable(false);
     panel.add(new JLabel(ctx.getTextProvider().getString("subscription.property.query")), cc.xy(2, 6));

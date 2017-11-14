@@ -51,14 +51,15 @@ import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.PlaylistNameCompator;
 import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.tag.TagManager;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
 import de.stationadmin.gui.playlist.SimplePlaylistListCellRender;
 import de.stationadmin.gui.util.AppUtils;
+import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.SwingTools;
 
 /**
@@ -226,14 +227,15 @@ public class TrackViewer extends JDialog {
 
     int row = 3;
 
-    JTextField artistTf = BasicComponentFactory.createTextField(model.getBufferedModel("artist"), false);
+    ComponentFactory componentFactory = ctx.getComponentFactory();
+    JTextField artistTf = componentFactory.createTextField(model.getBufferedModel("artist"), false);
     artistTf.setColumns(20);
     textFields.add(artistTf);
     panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.artist")), cc.xy(2, row));
     panel.add(artistTf, cc.xy(4, row));
     row += 2;
 
-    JTextField titleTf = BasicComponentFactory.createTextField(model.getBufferedModel("title"), false);
+    JTextField titleTf = componentFactory.createTextField(model.getBufferedModel("title"), false);
     titleTf.setColumns(20);
     textFields.add(titleTf);
     panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.title")), cc.xy(2, row));
@@ -248,7 +250,7 @@ public class TrackViewer extends JDialog {
     panel.add(typeCmb, cc.xy(4, row));
     row += 2;
 
-    JTextField albumTf = BasicComponentFactory.createTextField(model.getBufferedModel("album"), false);
+    JTextField albumTf = componentFactory.createTextField(model.getBufferedModel("album"), false);
     albumTf.setColumns(20);
     textFields.add(albumTf);
     panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.album")), cc.xy(2, row));
@@ -268,7 +270,7 @@ public class TrackViewer extends JDialog {
     panel.add(yearTf, cc.xy(4, row));
     row += 2;
 
-    JTextField genreTf = BasicComponentFactory.createTextField(model.getBufferedModel("genre"), false);
+    JTextField genreTf = componentFactory.createTextField(model.getBufferedModel("genre"), false);
     genreTf.setColumns(20);
     textFields.add(genreTf);
     panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.genre")), cc.xy(2, row));

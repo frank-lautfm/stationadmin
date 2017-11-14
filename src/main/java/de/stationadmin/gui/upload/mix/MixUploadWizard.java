@@ -109,7 +109,7 @@ public class MixUploadWizard extends JFrame {
 
     {
       panel.add(new JLabel(this.textProvider.getString("upload.mix.path") + ":"), cc.xy(1, 1));
-      panel.add(BasicComponentFactory.createTextField(this.pathHolder), cc.xy(3, 1));
+      panel.add(ctx.getComponentFactory().createTextField(this.pathHolder), cc.xy(3, 1));
       panel.add(new JButton(new SelectAction()), cc.xy(5, 1));
     }
 

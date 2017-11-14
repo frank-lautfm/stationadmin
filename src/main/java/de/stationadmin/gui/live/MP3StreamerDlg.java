@@ -126,7 +126,7 @@ public class MP3StreamerDlg extends StationAdminFrame {
     JPanel panel = new JPanel(new FormLayout("5dlu,pref,5dlu,pref:grow,pref,5dlu", "5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
 
-    final JTextField sourceTf = BasicComponentFactory.createTextField(this.sourcefile);
+    final JTextField sourceTf = ctx.getComponentFactory().createTextField(this.sourcefile);
     sourceTf.setColumns(25);
     panel.add(new JLabel(this.ctx.getString("mp3streamer.dlg.property.source")), cc.xy(2, 2));
     panel.add(sourceTf, cc.xy(4, 2));
@@ -146,7 +146,7 @@ public class MP3StreamerDlg extends StationAdminFrame {
       }
     });
 
-    final JTextField metaTf = BasicComponentFactory.createTextField(this.metafile);
+    final JTextField metaTf = ctx.getComponentFactory().createTextField(this.metafile);
     metaTf.setColumns(25);
     panel.add(new JLabel(this.ctx.getString("mp3streamer.dlg.property.meta")), cc.xy(2, 4));
     panel.add(metaTf, cc.xy(4, 4));

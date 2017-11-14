@@ -47,7 +47,7 @@ public class TagSetEditor extends JPanel {
         "3dlu,pref,5dlu,pref:grow,3dlu"));
     CellConstraints cc = new CellConstraints();
 
-    JTextField tf = BasicComponentFactory.createTextField(model
+    JTextField tf = ctx.getComponentFactory().createTextField(model
         .getBufferedModel("name"));
 
     this.add(new JLabel(ctx.getString("titletagmanager.property.name")),

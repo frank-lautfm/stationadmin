@@ -26,6 +26,7 @@ import de.stationadmin.base.tools.MP3StreamerTask;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.live.FileSelectionAction;
 import de.stationadmin.gui.tasks.ScheduledTaskEditorComponent;
+import de.stationadmin.gui.util.ComponentFactory;
 
 
 /**
@@ -52,12 +53,13 @@ public class MP3StreamerTaskPanel extends JPanel implements ScheduledTaskEditorC
     this.setLayout(new FormLayout("pref,5dlu,pref:grow,pref", "pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref"));
     CellConstraints cc = new CellConstraints();
 
-    final JTextField nameTf = BasicComponentFactory.createTextField(this.taskName);
+    ComponentFactory componentFactory = new ComponentFactory(textProvider);
+    final JTextField nameTf = componentFactory.createTextField(this.taskName);
     nameTf.setColumns(25);
     this.add(new JLabel(this.textProvider.getString("task.name")), cc.xy(1, 1));
     this.add(nameTf, cc.xywh(3, 1, 2, 1));
 
-    final JTextField sourceTf = BasicComponentFactory.createTextField(this.sourcefile);
+    final JTextField sourceTf = componentFactory.createTextField(this.sourcefile);
     sourceTf.setColumns(25);
     this.add(new JLabel(textProvider.getString("mp3streamer.dlg.property.source")), cc.xy(1, 3));
     this.add(sourceTf, cc.xy(3, 3));
@@ -77,7 +79,7 @@ public class MP3StreamerTaskPanel extends JPanel implements ScheduledTaskEditorC
       }
     });
 
-    final JTextField metaTf = BasicComponentFactory.createTextField(this.metafile);
+    final JTextField metaTf = componentFactory.createTextField(this.metafile);
     metaTf.setColumns(25);
     this.add(new JLabel(textProvider.getString("mp3streamer.dlg.property.meta")), cc.xy(1, 5));
     this.add(metaTf, cc.xy(3, 5));

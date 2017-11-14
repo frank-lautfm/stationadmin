@@ -202,7 +202,7 @@ public class SearchPanel extends JPanel {
 
     NumberFormat fmt = NumberFormat.getIntegerInstance();
     fmt.setGroupingUsed(false);
-    JTextField tf = number ? BasicComponentFactory.createIntegerField(this.model.getModel(property), fmt, 0) : BasicComponentFactory.createTextField(this.model.getModel(property), false);
+    JTextField tf = number ? BasicComponentFactory.createIntegerField(this.model.getModel(property), fmt, 0) : ctx.getComponentFactory().createTextField(this.model.getModel(property), false);
     tf.setColumns(cols);
     // tf.addActionListener(searchAction); // disabled - risk of expensive queries
     panel.add(tf, new CellConstraints(3, 1));
