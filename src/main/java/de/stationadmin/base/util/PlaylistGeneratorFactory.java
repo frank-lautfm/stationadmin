@@ -11,8 +11,10 @@ import de.stationadmin.base.StationAdminClient;
 import de.stationadmin.base.playlist.shuffle.DefaultArtistNormalizer;
 import de.stationadmin.base.playlist.shuffle.PlaylistGenerator;
 import de.stationadmin.base.playlist.shuffle.PlaylistShuffler;
+import de.stationadmin.base.playlist.shuffle.TrackRule;
+import de.stationadmin.base.playlist.shuffle.TrackRuleEngine;
+import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
 import de.stationadmin.base.playlist.shuffle.WeightedTrackPreselector;
-
 
 /**
  * @author korf
@@ -23,8 +25,7 @@ public class PlaylistGeneratorFactory {
   public static PlaylistGenerator createGenerator(StationAdminClient client) {
     Settings settings = client.getSettings();
 
-    PlaylistGenerator generator = new PlaylistGenerator(client.getTagManager(), client.getTrackService()
-        .getTrackRegistry());
+    PlaylistGenerator generator = new PlaylistGenerator(client.getTagManager(), client.getTrackService().getTrackRegistry());
     generator.setProtectFirstJingle(settings.isShuffleProtectFirstJingle());
     generator.setProtectAllJingles(settings.isShuffleProtectAllJingles());
     generator.setJingleInterval(settings.getShuffleJingleInterval());
@@ -59,13 +60,38 @@ public class PlaylistGeneratorFactory {
         }
       }
 
+      TrackRuleEngine trackRuleEngine = createTrackRuleEngine(client);
+      if (trackRuleEngine != null) {
+        generator.addPlaylistEnhancer(trackRuleEngine);
+      }
+
       generator.setArtistTrackPreselector(preselector);
     }
 
     return generator;
 
   }
-  
+
+  private static TrackRuleEngine createTrackRuleEngine(StationAdminClient client) {
+    Settings settings = client.getSettings();
+    TrackRuleEngine engine = null;
+    if (settings.getTrackRules() != null && settings.getTrackRules().size() > 0) {
+      engine = new TrackRuleEngine(client.getTrackService().getTrackRegistry(), client.getTagManager());
+
+      if (settings.getTrackRuleGroups() != null) {
+        for (TrackRuleGroup group : settings.getTrackRuleGroups()) {
+          engine.register(group);
+        }
+      }
+      for (TrackRule rule : settings.getTrackRules()) {
+        engine.register(rule);
+      }
+
+    }
+    return engine;
+
+  }
+
   private static DefaultArtistNormalizer createNormalizer(Settings settings) {
     DefaultArtistNormalizer normalizer = new DefaultArtistNormalizer(settings.getArtistNormalizerSeperators());
     if (settings.getArtistNormalizerAliases() != null) {
@@ -74,9 +100,9 @@ public class PlaylistGeneratorFactory {
       }
     }
     return normalizer;
-    
+
   }
-  
+
   public static PlaylistShuffler createShuffler(StationAdminClient client) {
     PlaylistShuffler shuffler = new PlaylistShuffler();
     shuffler.setProtectFirstJingle(client.getSettings().isShuffleProtectFirstJingle());
@@ -84,8 +110,9 @@ public class PlaylistGeneratorFactory {
     shuffler.setJingleInterval(client.getSettings().getShuffleJingleInterval());
     shuffler.setWordDistribution(client.getSettings().getShuffleWordDistributionStrategy());
     shuffler.setArtistNormalizer(createNormalizer(client.getSettings()));
+    shuffler.setTrackRuleEngine(createTrackRuleEngine(client));
     return shuffler;
-    
+
   }
 
 }

@@ -40,7 +40,6 @@ public class ClientContext {
     if (Desktop.isDesktopSupported()) {
       this.desktop = Desktop.getDesktop();
     }
-    this.componentFactory = new ComponentFactory(this.textProvider);
   }
 
   public static String getHomeDir() {
@@ -143,6 +142,9 @@ public class ClientContext {
   }
 
   public ComponentFactory getComponentFactory() {
+    if(this.componentFactory == null) {
+      this.componentFactory = new ComponentFactory(textProvider);
+    }
     return componentFactory;
   }
 

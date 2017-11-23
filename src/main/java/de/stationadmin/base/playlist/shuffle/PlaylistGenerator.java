@@ -54,6 +54,8 @@ public class PlaylistGenerator {
 
   private ArtistNormalizer artistNormalizer = new DefaultArtistNormalizer();
   private ArtistTrackPreselector artistTrackPreselector = new DefaultTrackPreselector();
+  
+  private List<PlaylistEnhancer> playlistEnhancers = new ArrayList<PlaylistEnhancer>();
 
   private int minRandomValue = 100;
 
@@ -454,7 +456,7 @@ public class PlaylistGenerator {
     }
 
     // build new list
-    ArrayList<BasicTrack> newTrackList = new ArrayList<BasicTrack>();
+    List<BasicTrack> newTrackList = new ArrayList<BasicTrack>();
     {
       int targetLength = maxLength;
       int length = 0;
@@ -545,6 +547,12 @@ public class PlaylistGenerator {
           // System.out.println("Segement " + sIdx);
           segCnt++;
         }
+      }
+    }
+    
+    if(playlistEnhancers.size() > 0) {
+      for(PlaylistEnhancer enhancer : playlistEnhancers) {
+        newTrackList = enhancer.process(newTrackList);
       }
     }
 
@@ -710,6 +718,10 @@ public class PlaylistGenerator {
     }
 
     this.time += (title.getLength() * 1000);
+  }
+  
+  public void addPlaylistEnhancer(PlaylistEnhancer enhancer) {
+    this.playlistEnhancers.add(enhancer);
   }
 
   /**

@@ -13,6 +13,8 @@ import java.util.prefs.Preferences;
 import org.apache.commons.lang.StringUtils;
 
 import de.stationadmin.base.playlist.shuffle.TagWeight;
+import de.stationadmin.base.playlist.shuffle.TrackRule;
+import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
 import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
 import de.stationadmin.base.util.AbstractBean;
 
@@ -39,6 +41,9 @@ public class Settings extends AbstractBean {
 
   private List<String> artistNormalizerSeperators = Arrays.asList(" feat");
   private Map<String, String> artistNormalizerAliases = new HashMap<String, String>();
+  
+  private List<TrackRuleGroup> trackRuleGroups = new ArrayList<TrackRuleGroup>();
+  private List<TrackRule> trackRules = new ArrayList<TrackRule>();
 
   private boolean autoUpdateCheckDisabled = false;
 
@@ -97,6 +102,8 @@ public class Settings extends AbstractBean {
     this.setArtistNormalizerAliases(settings.getArtistNormalizerAliases());
     this.setArtistNormalizerSeperators(settings.getArtistNormalizerSeperators());
     this.setAutoSynchronisation(settings.getAutoSynchronisation());
+    this.setTrackRuleGroups(settings.getTrackRuleGroups());
+    this.setTrackRules(settings.getTrackRules());
   }
 
   public String getTitleLogFile() {
@@ -464,6 +471,26 @@ public class Settings extends AbstractBean {
     boolean old = this.shuffleProtectAllJingles;
     this.shuffleProtectAllJingles = shuffleProtectAllJingles;
     this.firePropertyChange("shuffleProtectAllJingles", old, shuffleProtectAllJingles);
+  }
+
+  public List<TrackRuleGroup> getTrackRuleGroups() {
+    return trackRuleGroups;
+  }
+
+  public void setTrackRuleGroups(List<TrackRuleGroup> trackRuleGroups) {
+    List<TrackRuleGroup> old = this.trackRuleGroups;
+    this.trackRuleGroups = trackRuleGroups;
+    this.firePropertyChange("trackRuleGroups", old, trackRuleGroups);
+  }
+
+  public List<TrackRule> getTrackRules() {
+    return trackRules;
+  }
+
+  public void setTrackRules(List<TrackRule> trackRules) {
+    List<TrackRule> old = this.trackRules;
+    this.trackRules = trackRules;
+    this.firePropertyChange("trackRules", old, trackRules);
   }
 
 }

@@ -291,9 +291,9 @@ public class Playlist extends AbstractBean {
   public int getNumDifferentArtists() {
     HashSet<String> artists = new HashSet<String>();
     for (Entry entry : this.workingEntries) {
-      BasicTrack title = this.trackRegistry.getTrack(entry.getTrackId());
-      if (title != null) {
-        artists.add(title.getArtist().toLowerCase().trim());
+      BasicTrack track = this.trackRegistry.getTrack(entry.getTrackId());
+      if (track != null && track.getArtist() != null) {
+        artists.add(track.getArtist().toLowerCase().trim());
       }
     }
     return artists.size();
@@ -496,8 +496,8 @@ public class Playlist extends AbstractBean {
       if (idx > -1) {
         minIdx = Math.min(idx, minIdx);
         this.workingEntries.remove(idx);
-        BasicTrack title = this.trackRegistry.getTrack(entry.getTrackId());
-        length += title.getLength();
+        BasicTrack track = entry.getTrack();
+        length += track != null ? track.getLength() : 0;
         if (!isUsed(entry.getTrackId())) {
           this.unregister(entry.getTrackId());
         }
