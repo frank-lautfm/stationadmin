@@ -84,7 +84,7 @@ Die Playlists die auf diese Weise generieren werden werden automatisch auch abge
 </p>
 
 <p class="subheading">
-Umgang mit Jingles
+Umgang mit Jingles und Wortbeitr&auml;gen
 </p>
 <img src="../images/einstellungen-playlists.jpg">
 <p>
@@ -95,12 +95,35 @@ Alle in einer Playlist enthaltenen Jingles werden normalerweise beim Generieren 
 <ul>
 <li><span class="menuref">Jingle am Anfang der Playlist nicht verschieben</span> sorgt daf&uuml;r dass wenn eine Playlist mit einem Jingle beginnt dieses Jingle beim Shuffeln nicht verschoben wird. Dies ist sinnvoll f&uuml;r Show-Opener. F&uuml;r Playlists die nicht mit einem Jingle beginnen hat diese Option keinerlei Wirkung.
 <li><span class="menuref">alle [ ] Minuten ein Jingle einstreuen</span> sorgt daf&uuml;r dass in festen Zeitabst&auml;nden Jingles eingestreut werden. Grundlage hierf&uuml;r sind alle in der Playlist enthaltenen Jingles. Wurden alle Jingles einmal verwendet so wird als n&auml;chstes das zuerst verwendete Jingle erneut eingestreut - die Jingles wiederholen sich also. Sind in der Playlist so viele Jingles vorhanden dass eigentlich nicht alle Jingles eingestreut werden k&ouml;nnen werden die verbleibenden Jingles ans Ende der Playlist geh&auml;ngt damit sie nicht verloren gehen.
+<li><span class="menuref">Jingles generell nicht verschieben</span> f&uuml;hrt dazu dass Jingles in der Playlist an den Positionen stehen bleiben an denen sie sind. D. h. es werden in dem Fall auch nur die Jingles herangezogen die schon in der Playlist enthalten sind. Bei Auswahl dieser Option werden die anderen Optionen deaktiviert dies nicht kombinierbar ist.
 </ul>
 </p>
 <p>
-Wortbeitr&auml;ge werden beim Generieren immer zuf&auml;llig verteilt. Die f&uuml;r das Shuffeln verf&uuml;gbaren alternativen Optionen funktionieren beim Generieren nicht.
+Wortbeitr&auml;ge werden beim Generieren entweder zuf&auml;llig verteilt oder bleiben an ihren Positionen stehen. Die f&uuml;r das Shuffeln verf&uuml;gbaren alternativen Optionen zum Binden an vorhergehende oder nachfolgende Titel funktionieren beim Generieren nicht.
 </p>
 
+<p class="subheading">
+Gebundene Jingles oder Wortbeitr&auml;ge
+</p>
+<p>
+Einen Sonderfall stellen Jingles oder Wortbeitr&auml;ge dar die an bestimmte Titel gebunden werden sollen und entweder vor oder nach den entsprechenden Titeln platziert werden sollen. Entsprechende Regeln lassen sich über <span class="menuref">Gebunden Jingles</span> konfigurieren.
+</p>
+<p>
+Die Regeln f&uuml;r gebundene Jingles k&ouml;nnen in Gruppen organisiert werden. F&uuml;r jede Gruppe kann ein Mindestabstand in Minuten konfiguriert werden. Angenommen Du hast mehrere Jingles die jeweils an bestimmte K&uuml;nstler gebunden werden, m&ouml;chtest aber nicht dass zwei solcher Jingles innerhalb einer halben Stunde vorkommen: Dann organisierst Du die Regeln f&uuml;r diese Jingles in einer Gruppe und setzt den Abstand auf 30 Minuten.
+</p>
+<p>
+Eine Regel legt f&uuml;r ein einzelnes Jingle oder einen Wortbeitrag fest an welche Titel es gebunden wird. Folgende Einstellungen sind verf&uuml;gbar:
+<ul>
+<li>Die <span class="menuref">Gruppe</span> zu der eine Regel geh&ouml;rt</li>
+<li>Die <span class="menuref">Position</span> - ob das Jingle oder der Wortbeitrag vor oder nach den entsprechenden Titeln platziert werden soll</li>
+<li>Der <span class="menuref">Typ</span> des Filters der passende Titel festlegt - m&ouml;glich sind K&uuml;nstler, K&uuml;nstler + Titel, Album oder Tag</li>
+<li>Der <span class="menuref">Name</span> des K&uuml;nstlers, Titels, Albums oder Tags an den das Jingle gebunden wird</li>
+<li>Der minimale <span class="menuref">Abstand</span> zwischen zwei Platzierungen dieses Jingles oder Wortbeitrags in Minuten</li>
+</ul>
+</p>
+<p>
+Wenn Regeln f&uuml;r K&uuml;nstler erstellt werden reicht ein Teil des Namens - d. h. eine Regel f&uuml;r &quot;Foo&quot; w&uuml;rde auch &quot;Foo feat. Bar&quot; akzeptieren. F&uuml;r Alben und K&uuml;nstler + Titel muss der gesamte Begriff passen - allerdings werden Gro&szlig;-/Kleinschreibung sowie Leer- und Sonderzeichen ignoriert. 
+</p>
 
 <p class="subheading">
 Best Practices
