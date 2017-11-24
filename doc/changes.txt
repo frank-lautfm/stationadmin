@@ -13,6 +13,7 @@ Version 4.5.0
 [+] Shuffeln / Generieren: Jingles an Artist, Albun oder Tag binden
 [#] Playlistgenerator: Bessere Verteilung übergewichteter Tracks
 [+] Kontextmenü mit Cut/Copy/Paste-Actions in Textfeldern
+[*] Tags mit * im Namen führten zum Abbruch der Synchronisation
 
 Version 4.4.1
 -------------

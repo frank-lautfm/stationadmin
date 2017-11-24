@@ -35,6 +35,7 @@ import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.base.util.AbstractBean;
+import de.stationadmin.base.util.FileUtils;
 import de.stationadmin.lfm.backend.Track;
 
 /**
@@ -183,7 +184,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
   private TagFile getTagFile(String tagname, boolean create) throws IOException {
     StaticTag tag = this.staticTags.get(tagname.toLowerCase());
     if (tag == null && create) {
-      TagFile tagFile = new TagFile(this.ctx.getStationDirectory() + File.separatorChar + tagname.toLowerCase() + ".tag", tagname);
+      TagFile tagFile = new TagFile(this.ctx.getStationDirectory() + File.separatorChar + FileUtils.normalizeFilename(tagname.toLowerCase()) + ".tag", tagname);
       this.staticTags.put(tagname.toLowerCase(), new StaticTag(tagFile));
       this.firePropertyChange("tags", new ArrayList<String>(0), this.getTags());
       return tagFile;
