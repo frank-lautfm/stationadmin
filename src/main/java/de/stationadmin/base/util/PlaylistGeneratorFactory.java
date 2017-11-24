@@ -62,7 +62,7 @@ public class PlaylistGeneratorFactory {
 
       TrackRuleEngine trackRuleEngine = createTrackRuleEngine(client);
       if (trackRuleEngine != null) {
-        generator.addPlaylistEnhancer(trackRuleEngine);
+        generator.setPlaylistEnhancer(trackRuleEngine);
       }
 
       generator.setArtistTrackPreselector(preselector);
@@ -110,7 +110,7 @@ public class PlaylistGeneratorFactory {
     shuffler.setJingleInterval(client.getSettings().getShuffleJingleInterval());
     shuffler.setWordDistribution(client.getSettings().getShuffleWordDistributionStrategy());
     shuffler.setArtistNormalizer(createNormalizer(client.getSettings()));
-    shuffler.setTrackRuleEngine(createTrackRuleEngine(client));
+    shuffler.setPlaylistEnhancer(createTrackRuleEngine(client));
     return shuffler;
 
   }

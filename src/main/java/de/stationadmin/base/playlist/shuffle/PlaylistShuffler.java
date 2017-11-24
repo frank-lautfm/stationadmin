@@ -34,7 +34,7 @@ public class PlaylistShuffler {
 
   private int jingleInterval = 0;
   
-  private TrackRuleEngine trackRuleEngine;
+  private PlaylistEnhancer playlistEnhancer;
 
   /**
    * Builds a map of titles for each artist
@@ -48,12 +48,6 @@ public class PlaylistShuffler {
     int max = 1;
 
     HashSet<Integer> jingleIds = new HashSet<Integer>();
-    HashSet<Integer> ignore = new HashSet<Integer>();
-    if(trackRuleEngine != null && trackRuleEngine.getRules() != null) {
-      for(TrackRule rule : trackRuleEngine.getRules()) {
-        ignore.add(rule.getTrackId());
-      }
-    }
     
 
     for (int pos = 0; pos < entries.size(); pos++) {
@@ -62,7 +56,7 @@ public class PlaylistShuffler {
       if (title == null) {
         throw new IllegalStateException("Title with id " + entry.getTrackId() + " not known");
       }
-      if(ignore.contains(title.getId())) {
+      if(playlistEnhancer != null && playlistEnhancer.excludeFromCorePlaylist(title)) {
         continue;
       }
 
@@ -319,8 +313,8 @@ public class PlaylistShuffler {
       }
     }
     
-    if(this.trackRuleEngine != null) {
-      newTrackList = trackRuleEngine.process(newTrackList);
+    if(this.playlistEnhancer != null) {
+      newTrackList = playlistEnhancer.process(newTrackList);
     }
 
     playlist.setTracks(newTrackList);
@@ -466,12 +460,12 @@ public class PlaylistShuffler {
     this.protectAllJingles = protectAllJingles;
   }
 
-  public TrackRuleEngine getTrackRuleEngine() {
-    return trackRuleEngine;
+  public PlaylistEnhancer getPlaylistEnhancer() {
+    return playlistEnhancer;
   }
 
-  public void setTrackRuleEngine(TrackRuleEngine trackRuleEngine) {
-    this.trackRuleEngine = trackRuleEngine;
+  public void setPlaylistEnhancer(PlaylistEnhancer trackRuleEngine) {
+    this.playlistEnhancer = trackRuleEngine;
   }
 
 }

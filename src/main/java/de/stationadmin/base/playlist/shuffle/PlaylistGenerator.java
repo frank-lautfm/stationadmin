@@ -54,8 +54,8 @@ public class PlaylistGenerator {
 
   private ArtistNormalizer artistNormalizer = new DefaultArtistNormalizer();
   private ArtistTrackPreselector artistTrackPreselector = new DefaultTrackPreselector();
-  
-  private List<PlaylistEnhancer> playlistEnhancers = new ArrayList<PlaylistEnhancer>();
+
+  private PlaylistEnhancer playlistEnhancer;
 
   private int minRandomValue = 100;
 
@@ -88,12 +88,16 @@ public class PlaylistGenerator {
    * @param titleMap
    * @return maximum number of titles per artist
    */
-  private int buildTitleMap(Set<BasicTrack> candidates, GeneratorCtx ctx) {
+  private int buildTrackMap(Set<BasicTrack> candidates, GeneratorCtx ctx) {
     int max = 1;
 
     HashSet<Integer> jingleIds = new HashSet<Integer>();
 
     for (BasicTrack title : candidates) {
+      
+      if(playlistEnhancer != null && playlistEnhancer.excludeFromCorePlaylist(title)) {
+        continue;
+      }
 
       if (title.getType() == BasicTrack.TYPE_MUSIC || (title.getType() == BasicTrack.TYPE_WORD && this.wordDistribution == WordDistributionStrategy.RANDOM)) {
 
@@ -286,7 +290,7 @@ public class PlaylistGenerator {
     if (maxArtistTitles > 3 && maxArtistTitles > playlist.getGenerateLength()) {
       maxArtistTitles = playlist.getGenerateLength();
     }
-    int numSegments = Math.min(maxArtistTitles, this.buildTitleMap(titles, ctx)) * 2;
+    int numSegments = Math.min(maxArtistTitles, this.buildTrackMap(titles, ctx)) * 2;
 
     // initialize segments
     Segment[] segments = new Segment[numSegments];
@@ -549,11 +553,9 @@ public class PlaylistGenerator {
         }
       }
     }
-    
-    if(playlistEnhancers.size() > 0) {
-      for(PlaylistEnhancer enhancer : playlistEnhancers) {
-        newTrackList = enhancer.process(newTrackList);
-      }
+
+    if (playlistEnhancer != null) {
+      newTrackList = playlistEnhancer.process(newTrackList);
     }
 
     if (append) {
@@ -718,10 +720,6 @@ public class PlaylistGenerator {
     }
 
     this.time += (title.getLength() * 1000);
-  }
-  
-  public void addPlaylistEnhancer(PlaylistEnhancer enhancer) {
-    this.playlistEnhancers.add(enhancer);
   }
 
   /**
@@ -1355,6 +1353,14 @@ public class PlaylistGenerator {
 
   public void setProtectAllJingles(boolean protectAllJingles) {
     this.protectAllJingles = protectAllJingles;
+  }
+
+  public PlaylistEnhancer getPlaylistEnhancer() {
+    return playlistEnhancer;
+  }
+
+  public void setPlaylistEnhancer(PlaylistEnhancer playlistEnhancer) {
+    this.playlistEnhancer = playlistEnhancer;
   }
 
 }

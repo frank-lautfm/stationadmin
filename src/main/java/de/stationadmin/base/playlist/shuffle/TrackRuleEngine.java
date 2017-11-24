@@ -19,6 +19,7 @@ public class TrackRuleEngine implements PlaylistEnhancer {
 
   private Map<String, TrackRuleGroup> groups = new HashMap<String, TrackRuleGroup>();
   private List<TrackRuleInstance> rules = new ArrayList<TrackRuleInstance>();
+  private HashSet<Integer> trackIds = new HashSet<Integer>();
 
   private Map<String, Integer> groupTimes = new HashMap<String, Integer>();
 
@@ -30,12 +31,22 @@ public class TrackRuleEngine implements PlaylistEnhancer {
     this.tagManager = tagManager;
   }
 
+  List<TrackRuleInstance> getRules() {
+    return rules;
+  }
+
+  @Override
+  public boolean excludeFromCorePlaylist(BasicTrack track) {
+    return this.trackIds.contains(track.getId());
+  }
+
   public void register(TrackRuleGroup group) {
     this.groups.put(group.getName(), group);
   }
 
   public void register(TrackRule rule) {
     this.rules.add(new TrackRuleInstance(rule));
+    this.trackIds.add(rule.getTrackId());
   }
 
   @Override
@@ -169,8 +180,5 @@ public class TrackRuleEngine implements PlaylistEnhancer {
     }
   }
 
-  List<TrackRuleInstance> getRules() {
-    return rules;
-  }
 
 }
