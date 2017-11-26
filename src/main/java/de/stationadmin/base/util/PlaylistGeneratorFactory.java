@@ -13,6 +13,7 @@ import de.stationadmin.base.playlist.shuffle.PlaylistGenerator;
 import de.stationadmin.base.playlist.shuffle.PlaylistShuffler;
 import de.stationadmin.base.playlist.shuffle.TrackRule;
 import de.stationadmin.base.playlist.shuffle.TrackRuleEngine;
+import de.stationadmin.base.playlist.shuffle.TrackRuleEngine.JingleCollisionStratagy;
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
 import de.stationadmin.base.playlist.shuffle.WeightedTrackPreselector;
 
@@ -60,12 +61,12 @@ public class PlaylistGeneratorFactory {
         }
       }
 
-      TrackRuleEngine trackRuleEngine = createTrackRuleEngine(client);
-      if (trackRuleEngine != null) {
-        generator.setPlaylistEnhancer(trackRuleEngine);
-      }
-
       generator.setArtistTrackPreselector(preselector);
+    }
+
+    TrackRuleEngine trackRuleEngine = createTrackRuleEngine(client);
+    if (trackRuleEngine != null) {
+      generator.setPlaylistEnhancer(trackRuleEngine);
     }
 
     return generator;
@@ -86,7 +87,8 @@ public class PlaylistGeneratorFactory {
       for (TrackRule rule : settings.getTrackRules()) {
         engine.register(rule);
       }
-
+      
+      engine.setJingleCollisionStrategy(settings.getTrackRuleJingleCollsisionStrategy() != null ? settings.getTrackRuleJingleCollsisionStrategy() : JingleCollisionStratagy.KEEP_BOTH);
     }
     return engine;
 

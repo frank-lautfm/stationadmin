@@ -27,6 +27,7 @@ import de.stationadmin.base.Settings;
 import de.stationadmin.base.playlist.shuffle.TrackRule;
 import de.stationadmin.base.playlist.shuffle.TrackRule.FilterType;
 import de.stationadmin.base.playlist.shuffle.TrackRule.TrackPosition;
+import de.stationadmin.base.playlist.shuffle.TrackRuleEngine.JingleCollisionStratagy;
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
@@ -47,7 +48,7 @@ public class TrackRulePanel extends JPanel {
   @SuppressWarnings("unchecked")
   private void init() {
 
-    this.setLayout(new FormLayout("100dlu:grow", "pref,5dlu,50dlu:grow,8dlu,pref,5dlu,50dlu:grow"));
+    this.setLayout(new FormLayout("100dlu:grow", "pref,5dlu,30dlu:grow,8dlu,pref,5dlu,50dlu:grow,8dlu,pref,3dlu,pref"));
     CellConstraints cc = new CellConstraints();
 
     this.add(new JLabel("Gruppen"), cc.xy(1, 1));
@@ -157,6 +158,12 @@ public class TrackRulePanel extends JPanel {
       colDist.setPreferredWidth(50);
       colDist.setMaxWidth(50);
     }
+    
+
+    SelectionInList<JingleCollisionStratagy> jcsSelection = new SelectionInList<JingleCollisionStratagy>(JingleCollisionStratagy.values(), model.getBufferedComponentModel("trackRuleJingleCollsisionStrategy"));
+    JComboBox<JingleCollisionStratagy> jcsCmb = BasicComponentFactory.createComboBox(jcsSelection, new EnumListCellRenderer(this.ctx.getTextProvider(), "settings.playlistgen.table.rule.collission"));
+    this.add(new JLabel(ctx.getString("settings.playlistgen.table.rule.collission")), cc.xy(1, 9));
+    this.add(jcsCmb, cc.xy(1, 11, CellConstraints.LEFT, CellConstraints.CENTER));
 
   }
 

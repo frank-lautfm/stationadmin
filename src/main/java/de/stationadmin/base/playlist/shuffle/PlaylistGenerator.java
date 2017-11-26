@@ -212,9 +212,9 @@ public class PlaylistGenerator {
     if (this.protectFirstJingle && playlist.getEntries().size() > 0 && !this.protectAllJingles) {
       // check if first title is jingle and protect it if so
       Entry entry = playlist.getEntries().get(0);
-      BasicTrack firstTitle = this.trackRegistry.getTrack(entry.getTrackId());
-      if (firstTitle != null && firstTitle.getType() >= 2) {
-        ctx.setFirstJingle(firstTitle);
+      BasicTrack firstTrack = this.trackRegistry.getTrack(entry.getTrackId());
+      if (firstTrack != null && firstTrack.getType() >= 2 && (playlistEnhancer == null || !playlistEnhancer.excludeFromCorePlaylist(firstTrack))) {
+        ctx.setFirstJingle(firstTrack);
       }
     }
 
@@ -554,8 +554,9 @@ public class PlaylistGenerator {
       }
     }
 
-    if (playlistEnhancer != null) {
-      newTrackList = playlistEnhancer.process(newTrackList);
+    if (playlistEnhancer != null && !this.protectAllJingles) {
+      log.info("apply track rules");
+      newTrackList = playlistEnhancer.process(newTrackList, this.protectFirstJingle);
     }
 
     if (append) {

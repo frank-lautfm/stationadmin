@@ -7,19 +7,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import de.stationadmin.base.playlist.shuffle.TrackRule.TrackPosition;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
 
 public class TrackRuleEngine implements PlaylistEnhancer {
+  private static Logger log = Logger.getLogger(TrackRuleEngine.class);
 
   private TrackRegistry trackRegistry;
   private TagManager tagManager;
 
   private Map<String, TrackRuleGroup> groups = new HashMap<String, TrackRuleGroup>();
   private List<TrackRuleInstance> rules = new ArrayList<TrackRuleInstance>();
-  private HashSet<Integer> trackIds = new HashSet<Integer>();
+  private HashSet<Integer> jingleTrackIds = new HashSet<Integer>();
+  private JingleCollisionStratagy jingleCollisionStrategy = JingleCollisionStratagy.KEEP_BOTH;
 
   private Map<String, Integer> groupTimes = new HashMap<String, Integer>();
 
@@ -37,7 +41,7 @@ public class TrackRuleEngine implements PlaylistEnhancer {
 
   @Override
   public boolean excludeFromCorePlaylist(BasicTrack track) {
-    return this.trackIds.contains(track.getId());
+    return this.jingleTrackIds.contains(track.getId());
   }
 
   public void register(TrackRuleGroup group) {
@@ -46,11 +50,11 @@ public class TrackRuleEngine implements PlaylistEnhancer {
 
   public void register(TrackRule rule) {
     this.rules.add(new TrackRuleInstance(rule));
-    this.trackIds.add(rule.getTrackId());
+    this.jingleTrackIds.add(rule.getTrackId());
   }
 
   @Override
-  public List<BasicTrack> process(List<BasicTrack> tracks) {
+  public List<BasicTrack> process(List<BasicTrack> tracks, boolean protectFirstJingle) {
     HashSet<Integer> triggers = new HashSet<Integer>();
     List<BasicTrack> newTracks = new ArrayList<BasicTrack>();
     for (TrackRuleInstance rule : this.rules) {
@@ -60,16 +64,64 @@ public class TrackRuleEngine implements PlaylistEnhancer {
 
     List<BasicTrack> after = new ArrayList<BasicTrack>();
 
-    for (BasicTrack track : tracks) {
+    for (int i = 0; i < tracks.size(); i++) {
+      BasicTrack track = tracks.get(i);
+      boolean skipNext = false;
       if (triggers.contains(track.getId())) {
+        BasicTrack previousTrack = newTracks.size() > 0 ? newTracks.get(newTracks.size() - 1) : null;
+        boolean lastIsJingle = previousTrack != null && previousTrack.getType() == BasicTrack.TYPE_JINGLE && !jingleTrackIds.contains(previousTrack.getId());
+        boolean nextIsJingle = i < tracks.size() - 1 && tracks.get(i + 1).getType() == BasicTrack.TYPE_JINGLE && !jingleTrackIds.contains(tracks.get(i + 1).getId());
         for (TrackRuleInstance rule : this.rules) {
           if (rule.isApplicable(track, time)) {
+            boolean isJingle = rule.getTrack().getType() == BasicTrack.TYPE_JINGLE;
             if (rule.getPosition() == TrackPosition.BEFORE) {
-              newTracks.add(rule.getTrack());
+              if (isJingle && lastIsJingle) {
+                switch (jingleCollisionStrategy) {
+                case KEEP_BOTH:
+                  newTracks.add(rule.getTrack());
+                  rule.markApplied(time);
+                  break;
+                case KEEP_RULE_JINGLE:
+                  if (!protectFirstJingle || newTracks.size() > 1) {
+                    newTracks.remove(newTracks.size() - 1);
+                  }
+                  // else: this is the first jingle and is supposed to be protected - preserve it
+                  newTracks.add(rule.getTrack());
+                  rule.markApplied(time);
+                  break;
+                case KEEP_STANDARD_JINGLE:
+                  // preserve added jingle, don't add
+                  break;
+                }
+
+              } else {
+                // no jingle collision - just add
+                newTracks.add(rule.getTrack());
+                rule.markApplied(time);
+              }
             } else {
-              after.add(rule.getTrack());
+              if (isJingle && nextIsJingle) {
+                switch (jingleCollisionStrategy) {
+                case KEEP_BOTH:
+                  after.add(rule.getTrack());
+                  rule.markApplied(time);
+                  break;
+                case KEEP_RULE_JINGLE:
+                  skipNext = true; // next is jingle - avoid that is will be added
+                  after.add(rule.getTrack());
+                  rule.markApplied(time);
+                  break;
+                case KEEP_STANDARD_JINGLE:
+                  // preserve added jingle, don't add
+                  break;
+                }
+
+              } else {
+                // no jingle collision - just add
+                after.add(rule.getTrack());
+                rule.markApplied(time);
+              }
             }
-            rule.markApplied(time);
           }
         }
       }
@@ -81,6 +133,10 @@ public class TrackRuleEngine implements PlaylistEnhancer {
       }
 
       time += track.getLength();
+
+      if (skipNext) {
+        i++;
+      }
     }
 
     return newTracks;
@@ -142,8 +198,9 @@ public class TrackRuleEngine implements PlaylistEnhancer {
           }
         }
       } catch (Exception e) {
-
+        log.error("error during track rule filtering", e);
       }
+
     }
 
     String normalize(String str) {
@@ -180,5 +237,20 @@ public class TrackRuleEngine implements PlaylistEnhancer {
     }
   }
 
+  /**
+   * What to do if a jingle is supposed to be inserted at a postion where already
+   * a jingle is placed
+   */
+  public enum JingleCollisionStratagy {
+    KEEP_BOTH, KEEP_STANDARD_JINGLE, KEEP_RULE_JINGLE
+  }
+
+  public JingleCollisionStratagy getJingleCollisionStrategy() {
+    return jingleCollisionStrategy;
+  }
+
+  public void setJingleCollisionStrategy(JingleCollisionStratagy jingleCollisionStrategy) {
+    this.jingleCollisionStrategy = jingleCollisionStrategy;
+  }
 
 }

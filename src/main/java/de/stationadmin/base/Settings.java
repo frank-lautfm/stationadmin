@@ -16,6 +16,7 @@ import de.stationadmin.base.playlist.shuffle.TagWeight;
 import de.stationadmin.base.playlist.shuffle.TrackRule;
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
 import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
+import de.stationadmin.base.playlist.shuffle.TrackRuleEngine.JingleCollisionStratagy;
 import de.stationadmin.base.util.AbstractBean;
 
 /**
@@ -44,6 +45,7 @@ public class Settings extends AbstractBean {
   
   private List<TrackRuleGroup> trackRuleGroups = new ArrayList<TrackRuleGroup>();
   private List<TrackRule> trackRules = new ArrayList<TrackRule>();
+  private JingleCollisionStratagy trackRuleJingleCollsisionStrategy = JingleCollisionStratagy.KEEP_BOTH;
 
   private boolean autoUpdateCheckDisabled = false;
 
@@ -104,6 +106,7 @@ public class Settings extends AbstractBean {
     this.setAutoSynchronisation(settings.getAutoSynchronisation());
     this.setTrackRuleGroups(settings.getTrackRuleGroups());
     this.setTrackRules(settings.getTrackRules());
+    this.setTrackRuleJingleCollsisionStrategy(settings.getTrackRuleJingleCollsisionStrategy());
   }
 
   public String getTitleLogFile() {
@@ -491,6 +494,16 @@ public class Settings extends AbstractBean {
     List<TrackRule> old = this.trackRules;
     this.trackRules = trackRules;
     this.firePropertyChange("trackRules", old, trackRules);
+  }
+
+  public JingleCollisionStratagy getTrackRuleJingleCollsisionStrategy() {
+    return trackRuleJingleCollsisionStrategy;
+  }
+
+  public void setTrackRuleJingleCollsisionStrategy(JingleCollisionStratagy trackRuleJingleCollsisionStrategy) {
+    JingleCollisionStratagy old = this.trackRuleJingleCollsisionStrategy;
+    this.trackRuleJingleCollsisionStrategy = trackRuleJingleCollsisionStrategy;
+    this.firePropertyChange("trackRuleJingleCollsisionStrategy", old, trackRuleJingleCollsisionStrategy);
   }
 
 }
