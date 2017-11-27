@@ -232,7 +232,8 @@ public class RegisteredTracksViewer extends JPanel {
       private static final long serialVersionUID = -8240631239175188202L;
 
       /**
-       * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
+       * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList,
+       *      java.lang.Object, int, boolean, boolean)
        */
       @Override
       public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -258,7 +259,8 @@ public class RegisteredTracksViewer extends JPanel {
       private static final long serialVersionUID = 9073187826215399831L;
 
       /**
-       * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
+       * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList,
+       *      java.lang.Object, int, boolean, boolean)
        */
       @Override
       public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -308,7 +310,8 @@ public class RegisteredTracksViewer extends JPanel {
 
     final JPopupMenu exportPopup = new JPopupMenu();
     exportPopup.add(new ExportTracksAction(new FileNameExtensionFilter("CSV", "csv"), "csv", new TrackListCSVExporter()));
-    exportPopup.add(new ExportTracksAction(new FileNameExtensionFilter("Excel", "xls"), "xls", new TrackListExcelExporter(ctx.getAdminClient().getTrackService().getTrackRegistry())));
+    exportPopup
+        .add(new ExportTracksAction(new FileNameExtensionFilter("Excel", "xls"), "xls", new TrackListExcelExporter(ctx.getAdminClient().getTrackService().getTrackRegistry())));
     exportPopup.add(new ExportTracksAction(new FileNameExtensionFilter("Text", "txt"), "txt", new TrackListTxtExporter()));
 
     final JButton exportBtn = new JButton(ctx.getIcon("playlist_export.png"));
@@ -365,8 +368,8 @@ public class RegisteredTracksViewer extends JPanel {
   }
 
   private JComponent createTablePanel() {
-    this.tableModel = new RegisteredTracksTableModel(this.textProvider, this.titleService.getTrackRegistry(), this.titleTagService, this.tagSetHolder, this.tagHolder, this.invertTagHolder,
-        this.uploadFilterHolder);
+    this.tableModel = new RegisteredTracksTableModel(this.textProvider, this.titleService.getTrackRegistry(), this.titleTagService, this.tagSetHolder, this.tagHolder,
+        this.invertTagHolder, this.uploadFilterHolder);
     tableModel.setNumTracks(numTitles);
     tableModel.setLength(this.length);
     table = new JXTable(tableModel) {
@@ -398,6 +401,24 @@ public class RegisteredTracksViewer extends JPanel {
         return super.getCellRenderer(row, column);
       }
 
+      @Override
+      public String getToolTipText(MouseEvent evt) {
+        int col = columnAtPoint(evt.getPoint());
+        if (col > -1) {
+          int row = rowAtPoint(evt.getPoint());
+          col = convertColumnIndexToModel(col);
+          if (row > -1 && col == Column.TAGS.ordinal()) {
+            Object value = getModel().getValueAt(row, col);
+            if(value instanceof String) {
+              return (String)value;
+            }
+          }
+        }
+
+        return super.getToolTipText(evt);
+
+      }
+
     };
     table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LENGTH.ordinal())).setPreferredWidth(70);
     table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LENGTH.ordinal())).setMaxWidth(70);
@@ -413,7 +434,7 @@ public class RegisteredTracksViewer extends JPanel {
     table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.ID.ordinal())).setPreferredWidth(80);
     table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.ID.ordinal())).setMaxWidth(80);
 
-    for (int i = 0; i <= Column.NUM_PLAYLISTS.ordinal(); i++) {
+    for (int i = 0; i <= Column.TAGS.ordinal(); i++) {
       boolean visible = (this.visibleColums & (1 << i)) > 0;
       ((TableColumnExt) table.getColumnModel().getColumn(table.convertColumnIndexToView(i))).setVisible(visible);
     }
@@ -472,7 +493,8 @@ public class RegisteredTracksViewer extends JPanel {
       private static final long serialVersionUID = 8486946874778173755L;
 
       /**
-       * @see javax.swing.TransferHandler#exportToClipboard(javax.swing.JComponent, java.awt.datatransfer.Clipboard, int)
+       * @see javax.swing.TransferHandler#exportToClipboard(javax.swing.JComponent,
+       *      java.awt.datatransfer.Clipboard, int)
        */
       @Override
       public void exportToClipboard(JComponent comp, Clipboard clip, int action) throws IllegalStateException {
@@ -749,7 +771,7 @@ public class RegisteredTracksViewer extends JPanel {
     public void actionPerformed(ActionEvent e) {
 
       int visibleCols = 0;
-      for (int i = 0; i <= Column.NUM_PLAYLISTS.ordinal(); i++) {
+      for (int i = 0; i <= Column.TAGS.ordinal(); i++) {
         int index = table.convertColumnIndexToView(i);
         if (index > -1) {
           boolean visible = ((TableColumnExt) table.getColumnModel().getColumn(index)).isVisible();

@@ -19,6 +19,7 @@ import javax.swing.table.AbstractTableModel;
 import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
 
+import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.tag.TagSet;
 import de.stationadmin.base.track.RegisteredTrack;
@@ -46,10 +47,10 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
   private ValueModel invertTag;
   private ValueModel numTracks = new ValueHolder(0);
   private ValueModel length = new ValueHolder(0);
-  
+  private List<String> tagNames = new ArrayList<String>();
 
-  public RegisteredTracksTableModel(TextProvider textProvidder, TrackRegistry titleRegistry,
-      TagManager titleTagService, ValueModel tagSet, ValueModel tag, ValueModel invertTag, ValueModel updloadedBy) {
+  public RegisteredTracksTableModel(TextProvider textProvidder, TrackRegistry titleRegistry, TagManager titleTagService, ValueModel tagSet, ValueModel tag, ValueModel invertTag,
+      ValueModel updloadedBy) {
     super();
     this.textProvider = textProvidder;
     this.trackRegistry = titleRegistry;
@@ -84,6 +85,28 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
     this.tag.addValueChangeListener(changeListener);
     this.invertTag.addValueChangeListener(changeListener);
     this.uploadedBy.addValueChangeListener(changeListener);
+
+    refreshTagNames();
+    tagManager.addPropertyChangeListener("tags", new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        refreshTagNames();
+      }
+    });
+
+  }
+
+  private void refreshTagNames() {
+    try {
+      tagNames.clear();
+      for (StaticTag tag : tagManager.getStaticTags()) {
+        tagNames.add(tag.getName());
+      }
+      Collections.sort(tagNames);
+    } catch (Exception e) {
+
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -105,12 +128,12 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
     UploadFilter uploadFilter = (UploadFilter) this.uploadedBy.getValue();
     List<RegisteredTrack> filtered = new ArrayList<RegisteredTrack>();
     try {
-      TagSet set = (TagSet)tagSet.getValue();
+      TagSet set = (TagSet) tagSet.getValue();
       BitSet tagSetBits = null;
-      if(set != null) {
+      if (set != null) {
         tagSetBits = tagManager.getTrackIds(set);
       }
-      
+
       BitSet bits = null;
       for (String tag : tags) {
         bits = this.markTitles(tag, bits);
@@ -122,18 +145,18 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
         }
         if (accepted && uploadFilter != null && uploadFilter != UploadFilter.ANYBODY) {
           switch (uploadFilter) {
-            case FOREIGN :
-              accepted = accepted && !title.isOwnTrack();
-              break;
-            case USER_ALL :
-              accepted = accepted && title.isOwnTrack();
-              break;
-            case USER_PRIVATE :
-              accepted = accepted && title.isOwnTrack() && title.isPrivateTrack();
-              break;
-            case USER_PUBLIC :
-              accepted = accepted && title.isOwnTrack() && !title.isPrivateTrack();
-              break;
+          case FOREIGN:
+            accepted = accepted && !title.isOwnTrack();
+            break;
+          case USER_ALL:
+            accepted = accepted && title.isOwnTrack();
+            break;
+          case USER_PRIVATE:
+            accepted = accepted && title.isOwnTrack() && title.isPrivateTrack();
+            break;
+          case USER_PUBLIC:
+            accepted = accepted && title.isOwnTrack() && !title.isPrivateTrack();
+            break;
           }
 
         }
@@ -222,7 +245,7 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
       return null;
     }
   }
-  
+
   public List<RegisteredTrack> getTracks() {
     return new ArrayList<RegisteredTrack>(this.tracks);
   }
@@ -236,42 +259,67 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
     Column col = Column.values()[columnIndex];
 
     switch (col) {
-      case ARTIST :
-        return track.getArtist();
-      case ID:
-        return track.getId();
-      case TITLE :
-        return track.getTitle();
-      case ALBUM :
-        return track.getAlbum();
-      case GENRE :
-        return track.getGenre();
-      case YEAR :
-        return track.getYear();
-      case LENGTH :
-        return TimeFormat.format(track.getLength(), false);
-      case TYPE :
-        return track.getType();
-      case NUM_PLAYLISTS :
-        return track.getPlaylistStatistics();
-      case UPLOAD :
-        return track.getUploadDate();
+    case ARTIST:
+      return track.getArtist();
+    case ID:
+      return track.getId();
+    case TITLE:
+      return track.getTitle();
+    case ALBUM:
+      return track.getAlbum();
+    case GENRE:
+      return track.getGenre();
+    case YEAR:
+      return track.getYear();
+    case LENGTH:
+      return TimeFormat.format(track.getLength(), false);
+    case TYPE:
+      return track.getType();
+    case NUM_PLAYLISTS:
+      return track.getPlaylistStatistics();
+    case UPLOAD:
+      return track.getUploadDate();
+    case TAGS:
+      return getTags(track);
     }
 
     return null;
   }
 
+  private String getTags(RegisteredTrack track) {
+    try {
+      int id = track.getId();
+      int cnt = 0;
+      if (track.getTagCnt() > 0) {
+        StringBuilder buf = new StringBuilder();
+        for (String tag : tagNames) {
+          if (tagManager.isTagged(tag, id)) {
+            if (buf.length() > 0) {
+              buf.append(", ");
+            }
+            buf.append(tag);
+            cnt++;
+            if(cnt == track.getTagCnt()) {
+              break;
+            }
+          }
+        }
+        return buf.toString();
+      }
+    } catch (Exception e) {
+    }
+    return null;
+  }
+
   /**
-   * @param length
-   *          the length to set
+   * @param length the length to set
    */
   protected void setLength(ValueModel length) {
     this.length = length;
   }
 
   /**
-   * @param numTitles
-   *          the numTitles to set
+   * @param numTitles the numTitles to set
    */
   protected void setNumTracks(ValueModel numTitles) {
     this.numTracks = numTitles;
@@ -282,20 +330,23 @@ public class RegisteredTracksTableModel extends AbstractTableModel {
   }
 
   public enum Column {
-    TYPE, ID, ARTIST, TITLE, ALBUM, LENGTH, GENRE, YEAR, UPLOAD, NUM_PLAYLISTS
+    TYPE, ID, ARTIST, TITLE, ALBUM, LENGTH, GENRE, YEAR, UPLOAD, NUM_PLAYLISTS, TAGS
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
    */
   @Override
   public Class<?> getColumnClass(int columnIndex) {
     Column col = Column.values()[columnIndex];
-    switch(col) {
+    switch (col) {
     case ARTIST:
     case TITLE:
     case ALBUM:
     case GENRE:
+    case TAGS:
       return String.class;
     case TYPE:
     case LENGTH:
