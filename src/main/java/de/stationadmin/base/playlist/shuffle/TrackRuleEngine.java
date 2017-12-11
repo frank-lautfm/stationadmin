@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import de.stationadmin.base.playlist.shuffle.TrackRule.TrackPosition;
+import de.stationadmin.base.playlist.shuffle.TrackRuleGroup.MultiMatchSelection;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
@@ -28,15 +30,12 @@ public class TrackRuleEngine implements PlaylistEnhancer {
   private Map<String, Integer> groupTimes = new HashMap<String, Integer>();
 
   private int time = 0;
+  private Random random = new Random();
 
   public TrackRuleEngine(TrackRegistry trackRegistry, TagManager tagManager) {
     super();
     this.trackRegistry = trackRegistry;
     this.tagManager = tagManager;
-  }
-
-  List<TrackRuleInstance> getRules() {
-    return rules;
   }
 
   @Override
@@ -53,6 +52,49 @@ public class TrackRuleEngine implements PlaylistEnhancer {
     this.jingleTrackIds.add(rule.getTrackId());
   }
 
+  /**
+   * Filter rules of more than one rule is applicable for a track.
+   * <p>
+   * If more than one rule of the same group is applicable, use
+   * MultiMatchSelection strategy of group to select rules that are really
+   * applied.
+   * 
+   * @param rules
+   * @return
+   */
+  private List<TrackRuleInstance> filterApplicableRules(List<TrackRuleInstance> rules) {
+    Map<String, List<TrackRuleInstance>> rulesByGroup = new HashMap<String, List<TrackRuleInstance>>();
+    List<String> groupNames = new ArrayList<String>();
+    for (TrackRuleInstance rule : rules) {
+      String groupName = rule.getGroupName() != null ? rule.getGroupName() : "-";
+      List<TrackRuleInstance> rulesOfGroup = rulesByGroup.get(groupName);
+      if (rulesOfGroup == null) {
+        rulesOfGroup = new ArrayList<TrackRuleEngine.TrackRuleInstance>();
+        rulesByGroup.put(groupName, rulesOfGroup);
+        groupNames.add(groupName);
+      }
+      rulesOfGroup.add(rule);
+    }
+
+    List<TrackRuleInstance> filtered = new ArrayList<TrackRuleEngine.TrackRuleInstance>();
+    for (String groupName : groupNames) {
+      List<TrackRuleInstance> rulesOfGroup = rulesByGroup.get(groupName);
+      TrackRuleGroup group = groups.get(groupName);
+      if (group == null || group.getMultiMatchSelection() == MultiMatchSelection.ALL || rulesOfGroup.size() == 1) {
+        filtered.addAll(rulesOfGroup);
+      } else if (group.getMultiMatchSelection() == MultiMatchSelection.FIRST) {
+        // select first
+        filtered.add(rulesOfGroup.get(0));
+      } else {
+        // select any
+        int idx = random.nextInt(rulesOfGroup.size());
+        filtered.add(rulesOfGroup.get(idx));
+      }
+    }
+
+    return filtered;
+  }
+
   @Override
   public List<BasicTrack> process(List<BasicTrack> tracks, boolean protectFirstJingle) {
     HashSet<Integer> triggers = new HashSet<Integer>();
@@ -67,15 +109,31 @@ public class TrackRuleEngine implements PlaylistEnhancer {
     for (int i = 0; i < tracks.size(); i++) {
       BasicTrack track = tracks.get(i);
       boolean skipNext = false;
+      List<TrackRuleInstance> applicableRules = new ArrayList<TrackRuleInstance>();
       if (triggers.contains(track.getId())) {
-        BasicTrack previousTrack = newTracks.size() > 0 ? newTracks.get(newTracks.size() - 1) : null;
-        boolean lastIsJingle = previousTrack != null && previousTrack.getType() == BasicTrack.TYPE_JINGLE && !jingleTrackIds.contains(previousTrack.getId());
-        boolean nextIsJingle = i < tracks.size() - 1 && tracks.get(i + 1).getType() == BasicTrack.TYPE_JINGLE && !jingleTrackIds.contains(tracks.get(i + 1).getId());
+        applicableRules.clear();
         for (TrackRuleInstance rule : this.rules) {
           if (rule.isApplicable(track, time)) {
+            applicableRules.add(rule);
+          }
+        }
+
+        if (applicableRules.size() > 1) {
+          // multiple rules for this track - let's check if we have to kick out some
+          applicableRules = filterApplicableRules(applicableRules);
+        }
+
+        if (applicableRules.size() > 0) {
+          log.info("applicable rules for " + track);
+          ;
+          BasicTrack previousTrack = newTracks.size() > 0 ? newTracks.get(newTracks.size() - 1) : null;
+          boolean lastIsJingle = previousTrack != null && previousTrack.getType() == BasicTrack.TYPE_JINGLE && !jingleTrackIds.contains(previousTrack.getId());
+          boolean nextIsJingle = i < tracks.size() - 1 && tracks.get(i + 1).getType() == BasicTrack.TYPE_JINGLE && !jingleTrackIds.contains(tracks.get(i + 1).getId());
+          for (TrackRuleInstance rule : applicableRules) {
             boolean isJingle = rule.getTrack().getType() == BasicTrack.TYPE_JINGLE;
             if (rule.getPosition() == TrackPosition.BEFORE) {
               if (isJingle && lastIsJingle) {
+                log.info("handle jingle collision");
                 switch (jingleCollisionStrategy) {
                 case KEEP_BOTH:
                   newTracks.add(rule.getTrack());
@@ -96,6 +154,7 @@ public class TrackRuleEngine implements PlaylistEnhancer {
 
               } else {
                 // no jingle collision - just add
+                log.info("add " + rule.getTrack() + " before " + track);
                 newTracks.add(rule.getTrack());
                 rule.markApplied(time);
               }
@@ -151,6 +210,12 @@ public class TrackRuleEngine implements PlaylistEnhancer {
     this.time = 0;
   }
 
+  protected boolean isIgnoreDistance(BasicTrack track) {
+    // base implementation does always return false - might be overridden in
+    // subclass
+    return false;
+  }
+
   class TrackRuleInstance extends TrackRule {
     private static final long serialVersionUID = -9089577319453159769L;
 
@@ -174,6 +239,7 @@ public class TrackRuleEngine implements PlaylistEnhancer {
           }
         } else {
           String term = normalize(getFilter());
+          // log.info("filter for " + term);
           for (BasicTrack track : tracks) {
             boolean match = false;
             if (!checkedTrackIds.contains(track.getId())) {
@@ -196,11 +262,13 @@ public class TrackRuleEngine implements PlaylistEnhancer {
               boundTo.add(track.getId());
             }
           }
+//          if (boundTo.size() > 0) {
+//            log.debug(boundTo.size() + " tracks matching " + getFilterType() + " " + getFilter());
+//          }
         }
       } catch (Exception e) {
         log.error("error during track rule filtering", e);
       }
-
     }
 
     String normalize(String str) {
@@ -213,12 +281,24 @@ public class TrackRuleEngine implements PlaylistEnhancer {
     }
 
     boolean isApplicable(BasicTrack track, int time) {
-      if (track != null && boundTo.contains(track.getId()) && (timeLast == -1 || (time - timeLast) / 60 > getMinDistance())) {
-        TrackRuleGroup group = groups.get(getGroupName());
-        Integer lastGroupTime = groupTimes.get(getGroupName());
-        if (group == null || lastGroupTime == null || (time - lastGroupTime.intValue()) / 60 > group.getMinDistance()) {
-          return true;
+      boolean ignoreDistance = isIgnoreDistance(track);
+      if (track != null && boundTo.contains(track.getId())) {
+        if (ignoreDistance || timeLast == -1 || (time - timeLast) / 60 > getMinDistance()) {
+          TrackRuleGroup group = groups.get(getGroupName());
+          Integer lastGroupTime = groupTimes.get(getGroupName());
+          if (ignoreDistance || group == null || lastGroupTime == null || (time - lastGroupTime.intValue()) / 60 > group.getMinDistance()) {
+            // log.debug(getFilterType() + " " + getFilter() + " is applicable");
+            return true;
+          }
+          // else {
+          // log.info(getFilterType() + " " + getFilter() + " is rejected (group
+          // distance)");
+          // }
         }
+        // else {
+        // log.info(getFilterType() + " " + getFilter() + " is rejected (track
+        // distance)");
+        // }
       }
       return false;
     }
@@ -237,20 +317,28 @@ public class TrackRuleEngine implements PlaylistEnhancer {
     }
   }
 
-  /**
-   * What to do if a jingle is supposed to be inserted at a postion where already
-   * a jingle is placed
-   */
-  public enum JingleCollisionStratagy {
-    KEEP_BOTH, KEEP_STANDARD_JINGLE, KEEP_RULE_JINGLE
-  }
-
   public JingleCollisionStratagy getJingleCollisionStrategy() {
     return jingleCollisionStrategy;
   }
 
   public void setJingleCollisionStrategy(JingleCollisionStratagy jingleCollisionStrategy) {
     this.jingleCollisionStrategy = jingleCollisionStrategy;
+  }
+
+  public List<TrackRule> getRules() {
+    List<TrackRule> rules = new ArrayList<TrackRule>();
+    for (TrackRuleInstance instance : this.rules) {
+      rules.add(instance);
+    }
+    return rules;
+  }
+
+  /**
+   * What to do if a jingle is supposed to be inserted at a postion where already
+   * a jingle is placed
+   */
+  public enum JingleCollisionStratagy {
+    KEEP_BOTH, KEEP_STANDARD_JINGLE, KEEP_RULE_JINGLE
   }
 
 }

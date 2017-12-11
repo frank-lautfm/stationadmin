@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class TrackRuleGroup implements Serializable {
   private static final long serialVersionUID = -2153598585047049570L;
   private String name;
+  private MultiMatchSelection multiMatchSelection = MultiMatchSelection.ALL;
   private int minDistance = 0;
 
   public TrackRuleGroup() {
@@ -14,6 +15,13 @@ public class TrackRuleGroup implements Serializable {
     this.name = name;
     this.minDistance = minDistance;
   }
+  
+  public TrackRuleGroup(String name, MultiMatchSelection multiMatch, int minDistance) {
+    this.name = name;
+    this.multiMatchSelection = multiMatch;
+    this.minDistance = minDistance;
+  }
+
   
   public String getName() {
     return name;
@@ -35,4 +43,18 @@ public class TrackRuleGroup implements Serializable {
   public String toString() {
     return name;
   }
+
+  public MultiMatchSelection getMultiMatchSelection() {
+    return multiMatchSelection != null ? multiMatchSelection : MultiMatchSelection.ALL;
+  }
+
+  public void setMultiMatchSelection(MultiMatchSelection multiMatchSelection) {
+    this.multiMatchSelection = multiMatchSelection;
+  }
+  
+  
+  public enum MultiMatchSelection {
+    ALL, FIRST, RANDOM
+  }
+
 }

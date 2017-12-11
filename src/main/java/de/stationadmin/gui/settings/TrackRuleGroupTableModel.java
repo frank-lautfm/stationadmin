@@ -10,6 +10,7 @@ import javax.swing.table.AbstractTableModel;
 import org.apache.commons.lang.StringUtils;
 
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
+import de.stationadmin.base.playlist.shuffle.TrackRuleGroup.MultiMatchSelection;
 import de.stationadmin.gui.TextProvider;
 
 public class TrackRuleGroupTableModel extends AbstractTableModel {
@@ -28,12 +29,19 @@ public class TrackRuleGroupTableModel extends AbstractTableModel {
 
   @Override
   public Class<?> getColumnClass(int columnIndex) {
-    return columnIndex == 0 ? String.class : Integer.class;
+    switch (columnIndex) {
+    case 1:
+      return MultiMatchSelection.class;
+    case 2:
+      return Integer.class;
+    default:
+      return String.class;
+    }
   }
 
   @Override
   public int getColumnCount() {
-    return 2;
+    return 3;
   }
 
   @Override
@@ -42,6 +50,8 @@ public class TrackRuleGroupTableModel extends AbstractTableModel {
     case 0:
       return this.textProvider.getString("settings.playlistgen.table.rule.name");
     case 1:
+      return this.textProvider.getString("settings.playlistgen.table.rule.selection");
+    case 2:
       return this.textProvider.getString("settings.playlistgen.table.rule.distance");
     default:
       return null;
@@ -60,6 +70,8 @@ public class TrackRuleGroupTableModel extends AbstractTableModel {
     case 0:
       return entry.getName();
     case 1:
+      return entry.getMultiMatchSelection();
+    case 2:
       return entry.getMinDistance();
     }
     return null;
@@ -75,6 +87,9 @@ public class TrackRuleGroupTableModel extends AbstractTableModel {
       pcs.firePropertyChange("name", old, aValue);
       break;
     case 1:
+      entry.setMultiMatchSelection((MultiMatchSelection) aValue);
+      break;
+    case 2:
       try {
         entry.setMinDistance(Integer.parseInt(aValue.toString()));
         break;
@@ -105,7 +120,7 @@ public class TrackRuleGroupTableModel extends AbstractTableModel {
   public boolean isCellEditable(int rowIndex, int columnIndex) {
     return true;
   }
-  
+
   public void addNameChangeListener(PropertyChangeListener listener) {
     pcs.addPropertyChangeListener("name", listener);
   }

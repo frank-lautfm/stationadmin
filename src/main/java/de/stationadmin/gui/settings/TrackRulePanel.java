@@ -29,6 +29,7 @@ import de.stationadmin.base.playlist.shuffle.TrackRule.FilterType;
 import de.stationadmin.base.playlist.shuffle.TrackRule.TrackPosition;
 import de.stationadmin.base.playlist.shuffle.TrackRuleEngine.JingleCollisionStratagy;
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
+import de.stationadmin.base.playlist.shuffle.TrackRuleGroup.MultiMatchSelection;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.util.EnumListCellRenderer;
@@ -66,9 +67,18 @@ public class TrackRulePanel extends JPanel {
     JXTable groupsTable = new JXTable(groupsModel);
     this.add(new JScrollPane(groupsTable), cc.xy(1, 3));
     {
-      TableColumn colDist = groupsTable.getColumnModel().getColumn(1);
+      TableColumn colDist = groupsTable.getColumnModel().getColumn(2);
       colDist.setPreferredWidth(80);
       colDist.setMaxWidth(80);
+    }
+    {
+      TableColumn colSelection = groupsTable.getColumnModel().getColumn(1);
+      JComboBox<MultiMatchSelection> selectionCmb = new JComboBox<MultiMatchSelection>(new MultiMatchSelection[] { MultiMatchSelection.ALL, MultiMatchSelection.FIRST, MultiMatchSelection.RANDOM });
+      selectionCmb.setRenderer(new EnumListCellRenderer(ctx.getTextProvider(), "settings.playlistgen.table.rule.selection"));
+      colSelection.setCellEditor(new DefaultCellEditor(selectionCmb));
+      colSelection.setCellRenderer(new EnumTableCellRenderer(ctx.getTextProvider(), "settings.playlistgen.table.rule.selection"));
+      colSelection.setPreferredWidth(120);
+      colSelection.setMaxWidth(120);
     }
 
 
