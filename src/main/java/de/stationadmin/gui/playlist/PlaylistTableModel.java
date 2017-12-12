@@ -3,6 +3,7 @@ package de.stationadmin.gui.playlist;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -16,6 +17,8 @@ import com.jgoodies.binding.value.ValueModel;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.validation.GVLValidator;
+import de.stationadmin.base.tag.StaticTag;
+import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.BasicTrack;
@@ -40,6 +43,9 @@ public class PlaylistTableModel extends AbstractTableModel {
   private ValueModel hasValidationErrors = new ValueHolder(Boolean.FALSE);
 
   private boolean validationEnabled = true;
+
+  private List<String> tagNames = new ArrayList<String>();
+  private TagManager tagManager;
 
   private ChangeListener changeListener = new ChangeListener() {
 
@@ -75,7 +81,7 @@ public class PlaylistTableModel extends AbstractTableModel {
 
   };
 
-  public PlaylistTableModel(TextProvider textProvider, ValueModel playlistHolder, ValueModel selectionHolder) {
+  public PlaylistTableModel(TextProvider textProvider, ValueModel playlistHolder, ValueModel selectionHolder, TagManager tagManager) {
     super();
     this.textProvider = textProvider;
     this.playlistHolder = playlistHolder;
@@ -89,7 +95,16 @@ public class PlaylistTableModel extends AbstractTableModel {
       }
     });
     this.selectionHolder = selectionHolder;
+    this.tagManager = tagManager;
     registerChangeListener();
+    refreshTagNames();
+    tagManager.addPropertyChangeListener("tags", new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        refreshTagNames();
+      }
+    });
 
   }
 
@@ -179,6 +194,12 @@ public class PlaylistTableModel extends AbstractTableModel {
       } else {
         return 0;
       }
+    case TAGS:
+      if (track instanceof RegisteredTrack) {
+        return getTags((RegisteredTrack)track);
+      } else {
+        return null;
+      }
     }
 
     return null;
@@ -211,7 +232,7 @@ public class PlaylistTableModel extends AbstractTableModel {
   }
 
   public enum Column {
-    ENTRYNO, TYPE, STARTTIME, ARTIST, TITLE, ALBUM, GENRE, YEAR, LENGTH, ADDED, NUMPLAYLISTS
+    ENTRYNO, TYPE, STARTTIME, ARTIST, TITLE, ALBUM, GENRE, YEAR, LENGTH, ADDED, NUMPLAYLISTS, TAGS
   }
 
   /**
@@ -222,8 +243,7 @@ public class PlaylistTableModel extends AbstractTableModel {
   }
 
   /**
-   * @param validate
-   *          the validate to set
+   * @param validate the validate to set
    */
   public void setValidationEnabled(boolean validate) {
     this.validationEnabled = validate;
@@ -237,11 +257,47 @@ public class PlaylistTableModel extends AbstractTableModel {
   }
 
   /**
-   * @param hasValidationErrors
-   *          the hasValidationErrors to set
+   * @param hasValidationErrors the hasValidationErrors to set
    */
   public void setHasValidationErrors(ValueModel hasValidationErrors) {
     this.hasValidationErrors = hasValidationErrors;
+  }
+
+  private void refreshTagNames() {
+    try {
+      tagNames.clear();
+      for (StaticTag tag : tagManager.getStaticTags()) {
+        tagNames.add(tag.getName());
+      }
+      Collections.sort(tagNames);
+    } catch (Exception e) {
+
+    }
+  }
+
+  private String getTags(RegisteredTrack track) {
+    try {
+      int id = track.getId();
+      int cnt = 0;
+      if (track.getTagCnt() > 0) {
+        StringBuilder buf = new StringBuilder();
+        for (String tag : tagNames) {
+          if (tagManager.isTagged(tag, id)) {
+            if (buf.length() > 0) {
+              buf.append(", ");
+            }
+            buf.append(tag);
+            cnt++;
+            if (cnt == track.getTagCnt()) {
+              break;
+            }
+          }
+        }
+        return buf.toString();
+      }
+    } catch (Exception e) {
+    }
+    return null;
   }
 
 }

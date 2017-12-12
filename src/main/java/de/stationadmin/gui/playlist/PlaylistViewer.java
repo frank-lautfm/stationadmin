@@ -302,7 +302,7 @@ public class PlaylistViewer extends JPanel {
 
   private JComponent createTabelPanel() {
 
-    final PlaylistTableModel tableModel = new PlaylistTableModel(this.textProvider, this.playlistHolder, this.entryHolder);
+    final PlaylistTableModel tableModel = new PlaylistTableModel(this.textProvider, this.playlistHolder, this.entryHolder, ctx.getAdminClient().getTagManager());
     tableModel.setHasValidationErrors(this.hasValidationErrors);
     tableModel.addTableModelListener(new TableModelListener() {
       
@@ -316,7 +316,26 @@ public class PlaylistViewer extends JPanel {
     
     final TrackTypeRenderer typeRenderer = new TrackTypeRenderer();
     final DateTableCellRenderer timeRenderer = new DateTableCellRenderer(new SimpleDateFormat(this.ctx.getTextProvider().getString("timeFormat")));
-    this.table = new JXTable(tableModel);
+    this.table = new JXTable(tableModel) {
+      @Override
+      public String getToolTipText(MouseEvent evt) {
+        int col = columnAtPoint(evt.getPoint());
+        if (col > -1) {
+          int row = rowAtPoint(evt.getPoint());
+          col = convertColumnIndexToModel(col);
+          if (row > -1 && col == Column.TAGS.ordinal()) {
+            Object value = getModel().getValueAt(row, col);
+            if(value instanceof String) {
+              return (String)value;
+            }
+          }
+        }
+
+        return super.getToolTipText(evt);
+
+      }
+      
+    };
 
     table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setPreferredWidth(40);
     table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setMaxWidth(40);
@@ -346,6 +365,7 @@ public class PlaylistViewer extends JPanel {
     table.getColumnExt(table.convertColumnIndexToView(Column.GENRE.ordinal())).setVisible(false);
     table.getColumnExt(table.convertColumnIndexToView(Column.ADDED.ordinal())).setVisible(false);
     table.getColumnExt(table.convertColumnIndexToView(Column.NUMPLAYLISTS.ordinal())).setVisible(false);
+    table.getColumnExt(table.convertColumnIndexToView(Column.TAGS.ordinal())).setVisible(false);
 
     if (entryHolder != null) {
       entryHolder.addValueChangeListener(new PropertyChangeListener() {
