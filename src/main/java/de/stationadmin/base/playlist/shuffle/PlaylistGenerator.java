@@ -556,7 +556,7 @@ public class PlaylistGenerator {
 
     if (playlistEnhancer != null && !this.protectAllJingles) {
       log.info("apply track rules");
-      newTrackList = playlistEnhancer.process(newTrackList, this.protectFirstJingle);
+      newTrackList = playlistEnhancer.process(playlist, newTrackList, this.protectFirstJingle, null);
     }
 
     if (append) {

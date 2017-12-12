@@ -1,6 +1,7 @@
 package de.stationadmin.base.playlist.shuffle;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.shuffle.TrackRule.TrackPosition;
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup.MultiMatchSelection;
 import de.stationadmin.base.tag.TagManager;
@@ -96,7 +98,7 @@ public class TrackRuleEngine implements PlaylistEnhancer {
   }
 
   @Override
-  public List<BasicTrack> process(List<BasicTrack> tracks, boolean protectFirstJingle) {
+  public List<BasicTrack> process(Playlist playlist, List<BasicTrack> tracks, boolean protectFirstJingle, Date playlistStartTime) {
     HashSet<Integer> triggers = new HashSet<Integer>();
     List<BasicTrack> newTracks = new ArrayList<BasicTrack>();
     for (TrackRuleInstance rule : this.rules) {
