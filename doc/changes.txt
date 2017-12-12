@@ -6,6 +6,9 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.6.0
+-------------
+[+] Shuffeln / Generieren: Zusätzliche Optionen für gebundene Jingles
 
 Version 4.5.0
 -------------

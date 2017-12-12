@@ -14,9 +14,10 @@ import org.apache.commons.lang.StringUtils;
 
 import de.stationadmin.base.playlist.shuffle.TagWeight;
 import de.stationadmin.base.playlist.shuffle.TrackRule;
-import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
-import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
 import de.stationadmin.base.playlist.shuffle.TrackRuleEngine.JingleCollisionStratagy;
+import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
+import de.stationadmin.base.playlist.shuffle.TrackRuleGroup.MultiMatchSelection;
+import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
 import de.stationadmin.base.util.AbstractBean;
 
 /**
@@ -42,10 +43,11 @@ public class Settings extends AbstractBean {
 
   private List<String> artistNormalizerSeperators = Arrays.asList(" feat");
   private Map<String, String> artistNormalizerAliases = new HashMap<String, String>();
-  
+
   private List<TrackRuleGroup> trackRuleGroups = new ArrayList<TrackRuleGroup>();
   private List<TrackRule> trackRules = new ArrayList<TrackRule>();
   private JingleCollisionStratagy trackRuleJingleCollsisionStrategy = JingleCollisionStratagy.KEEP_BOTH;
+  private MultiMatchSelection trackRuleGroupCollisionStrategy = MultiMatchSelection.ALL;
 
   private boolean autoUpdateCheckDisabled = false;
 
@@ -58,7 +60,7 @@ public class Settings extends AbstractBean {
 
   private boolean logDownloadPermitted = false;
   private boolean logAutodownloadPermitted = false;
-  
+
   private Autosynchronisation autoSynchronisation = Autosynchronisation.NONE;
 
   public int getStatisticsRefreshInterval() {
@@ -107,6 +109,7 @@ public class Settings extends AbstractBean {
     this.setTrackRuleGroups(settings.getTrackRuleGroups());
     this.setTrackRules(settings.getTrackRules());
     this.setTrackRuleJingleCollsisionStrategy(settings.getTrackRuleJingleCollsisionStrategy());
+    this.setTrackRuleGroupCollisionStrategy(settings.getTrackRuleGroupCollisionStrategy());
   }
 
   public String getTitleLogFile() {
@@ -127,8 +130,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param shuffleProtectFirstJingle
-   *          the shuffleProtectFirstJingle to set
+   * @param shuffleProtectFirstJingle the shuffleProtectFirstJingle to set
    */
   public void setShuffleProtectFirstJingle(boolean shuffleProtectFirstJingle) {
     boolean old = this.shuffleProtectFirstJingle;
@@ -144,8 +146,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param shuffleJingleInterval
-   *          the shuffleJingleInterval to set
+   * @param shuffleJingleInterval the shuffleJingleInterval to set
    */
   public void setShuffleJingleInterval(int shuffleJingleInterval) {
     int old = this.shuffleJingleInterval;
@@ -161,8 +162,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param logTitleWithListeners
-   *          the logTitleWithListeners to set
+   * @param logTitleWithListeners the logTitleWithListeners to set
    */
   public void setLogTitleWithListeners(boolean logTitleWithListeners) {
     boolean old = this.logTitleWithListeners;
@@ -178,8 +178,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param autoUpdateCheckDisabled
-   *          the autoUpdateCheckDisabled to set
+   * @param autoUpdateCheckDisabled the autoUpdateCheckDisabled to set
    */
   public void setAutoUpdateCheckEnabled(boolean autoUpdateCheckEnabled) {
     boolean old = !this.autoUpdateCheckDisabled;
@@ -195,8 +194,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param mp3ExplorerMaxFiles
-   *          the mp3ExplorerMaxFiles to set
+   * @param mp3ExplorerMaxFiles the mp3ExplorerMaxFiles to set
    */
   public void setMp3ExplorerMaxFiles(int mp3ExplorerMaxFiles) {
     int old = this.mp3ExplorerMaxFiles;
@@ -212,8 +210,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param mp3Player
-   *          the mp3Player to set
+   * @param mp3Player the mp3Player to set
    */
   public void setMp3Player(String mp3Player) {
     mp3Player = StringUtils.trimToNull(mp3Player);
@@ -230,8 +227,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param mp3Root
-   *          the mp3Root to set
+   * @param mp3Root the mp3Root to set
    */
   public void setMp3Root(String mp3Root) {
     mp3Root = StringUtils.trimToNull(mp3Root);
@@ -248,8 +244,8 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param shuffleWordDistributionStrategy
-   *          the shuffleWordDistributionStrategy to set
+   * @param shuffleWordDistributionStrategy the shuffleWordDistributionStrategy to
+   *        set
    */
   public void setShuffleWordDistributionStrategy(WordDistributionStrategy shuffleWordDistributionStrategy) {
     WordDistributionStrategy old = this.shuffleWordDistributionStrategy;
@@ -275,8 +271,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param backupDirectory
-   *          the backupDirectory to set
+   * @param backupDirectory the backupDirectory to set
    */
   public void setBackupDirectory(String backupDirectory) {
     String old = this.backupDirectory;
@@ -292,8 +287,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param backupFrequency
-   *          the backupFrequency to set
+   * @param backupFrequency the backupFrequency to set
    */
   public void setBackupFrequency(int backupFrequency) {
     int old = this.backupFrequency;
@@ -309,8 +303,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param generateMinRandomValue
-   *          the generateMinRandomValue to set
+   * @param generateMinRandomValue the generateMinRandomValue to set
    */
   public void setGenerateMinRandomValue(int generateMinRandomValue) {
     int old = this.generateMinRandomValue;
@@ -326,8 +319,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param logRank
-   *          the logRank to set
+   * @param logRank the logRank to set
    */
   public void setLogRank(boolean logRank) {
     boolean old = this.logRank;
@@ -365,8 +357,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param generateGlobalTagWeights
-   *          the generateGlobalTagWeights to set
+   * @param generateGlobalTagWeights the generateGlobalTagWeights to set
    */
   public void setGenerateGlobalTagWeights(List<TagWeight> generateGlobalTagWeights) {
     if (generateGlobalTagWeights == null) {
@@ -385,8 +376,8 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param generateArtistPreselectTagWeights
-   *          the generateArtistPreselectTagWeights to set
+   * @param generateArtistPreselectTagWeights the
+   *        generateArtistPreselectTagWeights to set
    */
   public void setGenerateArtistPreselectTagWeights(Map<String, Integer> generateArtistPreselectTagWeights) {
     if (generateArtistPreselectTagWeights == null) {
@@ -405,8 +396,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param generateArtistPreselectLimits
-   *          the generateArtistPreselectLimits to set
+   * @param generateArtistPreselectLimits the generateArtistPreselectLimits to set
    */
   public void setGenerateArtistPreselectLimits(Map<String, Integer> generateArtistPreselectLimits) {
     if (generateArtistPreselectLimits == null) {
@@ -428,8 +418,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param artistNormalizerSeperators
-   *          the artistNormalizerSeperators to set
+   * @param artistNormalizerSeperators the artistNormalizerSeperators to set
    */
   public void setArtistNormalizerSeperators(List<String> artistNormalizerSeperators) {
     this.artistNormalizerSeperators = artistNormalizerSeperators;
@@ -443,8 +432,7 @@ public class Settings extends AbstractBean {
   }
 
   /**
-   * @param artistNormalizerAliass
-   *          the artistNormalizerAliass to set
+   * @param artistNormalizerAliass the artistNormalizerAliass to set
    */
   public void setArtistNormalizerAliases(Map<String, String> artistNormalizerAliass) {
     this.artistNormalizerAliases = artistNormalizerAliass;
@@ -504,6 +492,16 @@ public class Settings extends AbstractBean {
     JingleCollisionStratagy old = this.trackRuleJingleCollsisionStrategy;
     this.trackRuleJingleCollsisionStrategy = trackRuleJingleCollsisionStrategy;
     this.firePropertyChange("trackRuleJingleCollsisionStrategy", old, trackRuleJingleCollsisionStrategy);
+  }
+
+  public MultiMatchSelection getTrackRuleGroupCollisionStrategy() {
+    return trackRuleGroupCollisionStrategy;
+  }
+
+  public void setTrackRuleGroupCollisionStrategy(MultiMatchSelection trackRuleGroupCollsisionStrategy) {
+    MultiMatchSelection old = this.trackRuleGroupCollisionStrategy;
+    this.trackRuleGroupCollisionStrategy = trackRuleGroupCollsisionStrategy;
+    this.firePropertyChange("trackRuleGroupCollisionStrategy", old, trackRuleGroupCollisionStrategy);
   }
 
 }
