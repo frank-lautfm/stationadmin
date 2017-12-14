@@ -201,11 +201,13 @@ public class MP3Explorer extends JFrame {
     });
     panel.add(chooser, cc.xy(2, 1));
 
+    int trackNoWidth = ComponentFactory.getTableFontWidth(7);
+    int sizeWidth = ComponentFactory.getTableFontWidth(10);
     final JXTable table = new JXTable(mp3TableModel);
-    table.getColumn(Column.TRACKNO.ordinal()).setPreferredWidth(40);
-    table.getColumn(Column.TRACKNO.ordinal()).setMaxWidth(40);
-    table.getColumn(Column.SIZE.ordinal()).setPreferredWidth(60);
-    table.getColumn(Column.SIZE.ordinal()).setMaxWidth(60);
+    table.getColumn(Column.TRACKNO.ordinal()).setPreferredWidth(trackNoWidth);
+    table.getColumn(Column.TRACKNO.ordinal()).setMaxWidth(trackNoWidth);
+    table.getColumn(Column.SIZE.ordinal()).setPreferredWidth(sizeWidth);
+    table.getColumn(Column.SIZE.ordinal()).setMaxWidth(sizeWidth);
     table.getColumn(Column.SIZE.ordinal()).setCellRenderer(new SizeRenderer());
     table.getColumnExt(Column.SIZE.ordinal()).setVisible(false);
     table.setSortable(true);

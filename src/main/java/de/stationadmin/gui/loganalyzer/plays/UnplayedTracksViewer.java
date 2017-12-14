@@ -53,6 +53,7 @@ import de.stationadmin.gui.track.DistributeTracksAction;
 import de.stationadmin.gui.track.PlaySnippetAction;
 import de.stationadmin.gui.track.TagMenu;
 import de.stationadmin.gui.track.TrackViewAction;
+import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.TableExportUtils;
 
 /**
@@ -118,8 +119,9 @@ public class UnplayedTracksViewer extends StationAdminFrame {
     {
       this.tableModel = new TrackTableModel(ctx.getTextProvider());
       final JXTable table = new JXTable(this.tableModel);
-      table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(100);
-      table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(100);
+      int timeWidth = ComponentFactory.getTableColumnWidthTime();
+      table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(timeWidth);
+      table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(timeWidth);
       this.getContentPane().add(new JScrollPane(table), cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
 
       final ValueHolder titleHolder = new ValueHolder();

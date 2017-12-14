@@ -36,6 +36,7 @@ import de.stationadmin.base.playlist.PlaylistNameCompator;
 import de.stationadmin.base.schedule.Schedule.Event;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.schedule.ScheduleEventTableModel.Column;
+import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.DateTableCellRenderer;
 import de.stationadmin.gui.util.IntTableCellRenderer;
 
@@ -71,16 +72,18 @@ public class ScheduleEventEditor extends JPanel {
 
       final JXTable table = new JXTable(tableModel);
 
-      table.getColumnModel().getColumn(Column.STARTDATE.ordinal()).setPreferredWidth(110);
-      table.getColumnModel().getColumn(Column.STARTDATE.ordinal()).setMaxWidth(110);
+      int timeWidth = ComponentFactory.getTableColumnWidthTime();
+      int dateWidth = ComponentFactory.getTableColumnWidthDate();
+      table.getColumnModel().getColumn(Column.STARTDATE.ordinal()).setPreferredWidth(dateWidth);
+      table.getColumnModel().getColumn(Column.STARTDATE.ordinal()).setMaxWidth(dateWidth);
       table.getColumn(Column.STARTDATE.ordinal()).setCellRenderer(new DateTableCellRenderer(new SimpleDateFormat(ctx.getTextProvider().getString("extDateFormat"))));
 
-      table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setPreferredWidth(60);
-      table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setMaxWidth(60);
+      table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setPreferredWidth(timeWidth);
+      table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setMaxWidth(timeWidth);
       table.getColumn(Column.STARTTIME.ordinal()).setCellRenderer(new DateTableCellRenderer(new SimpleDateFormat(ctx.getTextProvider().getString("timeOnlyFormat"))));
 
-      table.getColumnModel().getColumn(Column.DURATION.ordinal()).setPreferredWidth(100);
-      table.getColumnModel().getColumn(Column.DURATION.ordinal()).setMaxWidth(100);
+      table.getColumnModel().getColumn(Column.DURATION.ordinal()).setPreferredWidth(timeWidth);
+      table.getColumnModel().getColumn(Column.DURATION.ordinal()).setMaxWidth(timeWidth);
       table.getColumn(Column.DURATION.ordinal()).setCellRenderer(new IntTableCellRenderer(0, " " + ctx.getString("scheduleeditor.event.duration.unit")));
 
       this.add(new JScrollPane(table), cc.xy(2, 2, CellConstraints.FILL, CellConstraints.FILL));

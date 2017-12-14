@@ -130,12 +130,13 @@ public class ForecastDlg extends JFrame {
   private JComponent createListPanel() {
     final JXTable table = new JXTable(this.model);
 
+    int timeWidth = ComponentFactory.getTableColumnWidthTime();
     table.getColumnModel().getColumn(Column.INDEX.ordinal()).setPreferredWidth(30);
     table.getColumnModel().getColumn(Column.INDEX.ordinal()).setMaxWidth(30);
-    table.getColumnModel().getColumn(Column.TIME.ordinal()).setPreferredWidth(70);
-    table.getColumnModel().getColumn(Column.TIME.ordinal()).setMaxWidth(70);
-    table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(70);
-    table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(70);
+    table.getColumnModel().getColumn(Column.TIME.ordinal()).setPreferredWidth(timeWidth);
+    table.getColumnModel().getColumn(Column.TIME.ordinal()).setMaxWidth(timeWidth);
+    table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(timeWidth);
+    table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(timeWidth);
 
     table.addHighlighter(new AbstractHighlighter() {
 

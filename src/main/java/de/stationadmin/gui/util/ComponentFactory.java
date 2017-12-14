@@ -4,15 +4,18 @@
 package de.stationadmin.gui.util;
 
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.Action;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.TransferHandler;
+import javax.swing.UIManager;
 import javax.swing.text.JTextComponent;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
@@ -38,11 +41,48 @@ public class ComponentFactory {
     ComponentFactory.defaultLabelFontSmall = new Font(defaultLabelFont.getFamily(), 0, defaultLabelFont.getSize() - 2);
     ComponentFactory.italicLabelFont = new Font(defaultLabelFont.getFamily(), Font.ITALIC, defaultLabelFont.getSize());
   }
-  
+
   private TextProvider textProvider;
-  
+
   public ComponentFactory(TextProvider textProvider) {
     this.textProvider = textProvider;
+  }
+
+  private static int avgTableFontWidth = -1;
+
+  public static int getTableFontWidth(int numChars) {
+    if (avgTableFontWidth == -1) {
+      Font font = UIManager.getFont("Table.font");
+      JPanel panel = new JPanel();
+      FontMetrics fm = panel.getFontMetrics(font);
+      if (fm != null) {
+        int sum = 0;
+        int cnt = 0;
+        int[] widths = fm.getWidths();
+        for (int i = 58; i <= 90; i++) {
+          sum += widths[i];
+          cnt++;
+        }
+        avgTableFontWidth = sum / cnt;
+      } else {
+        System.out.println("no font metrics available");
+        avgTableFontWidth = 7;
+      }
+    }
+    // System.out.println(numChars + " => " + (avgTableFontWidth * numChars));
+    return avgTableFontWidth * numChars;
+  }
+
+  public static int getTableColumnWidthDate() {
+    return getTableFontWidth(15);
+  }
+
+  public static int getTableColumnWidthDateTine() {
+    return getTableFontWidth(18);
+  }
+
+  public static int getTableColumnWidthTime() {
+    return getTableFontWidth(10);
   }
 
   /**
@@ -98,7 +138,7 @@ public class ComponentFactory {
 
     return tf;
   }
-  
+
   public JTextArea createTextArea(ValueModel valueModel) {
     return createTextArea(valueModel, true);
   }
@@ -113,9 +153,8 @@ public class ComponentFactory {
     return tf;
   }
 
-  
   private void addStandardMenu(final JTextComponent tf) {
-    
+
     Action copyAction = new ClipboardAction(textProvider, tf, TransferHandler.getCopyAction());
     Action cutAction = new ClipboardAction(textProvider, tf, TransferHandler.getCutAction());
     Action pasteAction = new ClipboardAction(textProvider, tf, TransferHandler.getPasteAction());

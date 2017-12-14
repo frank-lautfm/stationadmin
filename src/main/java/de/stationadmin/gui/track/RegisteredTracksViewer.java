@@ -85,6 +85,7 @@ import de.stationadmin.gui.track.RegisteredTracksTableModel.Column;
 import de.stationadmin.gui.track.RegisteredTracksTableModel.UploadFilter;
 import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ClipboardAction;
+import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.DateTableCellRenderer;
 import de.stationadmin.gui.util.IntTableCellRenderer;
 
@@ -420,16 +421,21 @@ public class RegisteredTracksViewer extends JPanel {
       }
 
     };
-    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LENGTH.ordinal())).setPreferredWidth(70);
-    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LENGTH.ordinal())).setMaxWidth(70);
-    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.NUM_PLAYLISTS.ordinal())).setPreferredWidth(70);
-    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.NUM_PLAYLISTS.ordinal())).setMaxWidth(70);
+    int timeWidth = ComponentFactory.getTableColumnWidthTime();
+    int dateWidth = ComponentFactory.getTableFontWidth(17);
+    int yearWidth = ComponentFactory.getTableFontWidth(6);
+    int numPlaylistsWidth = ComponentFactory.getTableFontWidth(8);
+    
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LENGTH.ordinal())).setPreferredWidth(timeWidth);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.LENGTH.ordinal())).setMaxWidth(timeWidth);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.NUM_PLAYLISTS.ordinal())).setPreferredWidth(numPlaylistsWidth);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.NUM_PLAYLISTS.ordinal())).setMaxWidth(numPlaylistsWidth);
     table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.TYPE.ordinal())).setPreferredWidth(30);
     table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.TYPE.ordinal())).setMaxWidth(30);
-    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.UPLOAD.ordinal())).setPreferredWidth(110);
-    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.UPLOAD.ordinal())).setMaxWidth(110);
-    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.YEAR.ordinal())).setPreferredWidth(60);
-    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.YEAR.ordinal())).setMaxWidth(60);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.UPLOAD.ordinal())).setPreferredWidth(dateWidth);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.UPLOAD.ordinal())).setMaxWidth(dateWidth);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.YEAR.ordinal())).setPreferredWidth(yearWidth);
+    table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.YEAR.ordinal())).setMaxWidth(yearWidth);
 
     table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.ID.ordinal())).setPreferredWidth(80);
     table.getColumnModel().getColumn(table.convertColumnIndexToView(Column.ID.ordinal())).setMaxWidth(80);

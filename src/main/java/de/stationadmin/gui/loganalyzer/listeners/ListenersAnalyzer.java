@@ -55,6 +55,7 @@ import de.stationadmin.gui.loganalyzer.util.SetTimeAction;
 import de.stationadmin.gui.loganalyzer.util.TimeEditor;
 import de.stationadmin.gui.playlist.PopupListener;
 import de.stationadmin.gui.util.AppUtils;
+import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.DateTableCellRenderer;
 import de.stationadmin.gui.util.IntTableCellRenderer;
 import de.stationadmin.gui.util.TableExportUtils;
@@ -331,10 +332,12 @@ public class ListenersAnalyzer extends StationAdminFrame {
     table.getColumn(Column.TIME.ordinal()).setCellRenderer(
         new DateTableCellRenderer(new SimpleDateFormat(ctx.getTextProvider().getString("timeOnlyFormat"))));
 
-    table.getColumnModel().getColumn(Column.DATE.ordinal()).setPreferredWidth(110);
-    table.getColumnModel().getColumn(Column.DATE.ordinal()).setMaxWidth(110);
-    table.getColumnModel().getColumn(Column.TIME.ordinal()).setPreferredWidth(60);
-    table.getColumnModel().getColumn(Column.TIME.ordinal()).setMaxWidth(60);
+    int timeWidth = ComponentFactory.getTableColumnWidthTime();
+    int dateWidth = ComponentFactory.getTableColumnWidthDate();
+    table.getColumnModel().getColumn(Column.DATE.ordinal()).setPreferredWidth(dateWidth);
+    table.getColumnModel().getColumn(Column.DATE.ordinal()).setMaxWidth(dateWidth);
+    table.getColumnModel().getColumn(Column.TIME.ordinal()).setPreferredWidth(timeWidth);
+    table.getColumnModel().getColumn(Column.TIME.ordinal()).setMaxWidth(timeWidth);
 
     panel.add(new JScrollPane(table), new CellConstraints(1, 1, CellConstraints.FILL, CellConstraints.FILL));
 

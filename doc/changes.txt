@@ -10,6 +10,7 @@ Version 4.6.0
 -------------
 [+] Shuffeln / Generieren: Zusätzliche Optionen für gebundene Jingles
 [+] Optional: Statische Tags als Spalte im Playlistviewer
+[#] Flexiblere Bestimmung von Spaltenbreiten in Tabellen auf Basis der Fonteigenschaften
 
 Version 4.5.0
 -------------

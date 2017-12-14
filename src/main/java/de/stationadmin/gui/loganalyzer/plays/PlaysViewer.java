@@ -38,6 +38,7 @@ import de.stationadmin.gui.track.DistributeTracksAction;
 import de.stationadmin.gui.track.PlaySnippetAction;
 import de.stationadmin.gui.track.TagMenu;
 import de.stationadmin.gui.track.TrackViewAction;
+import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.DateTableCellRenderer;
 import de.stationadmin.gui.util.LengthTableCellRenderer;
 import de.stationadmin.gui.util.TableExportUtils;
@@ -78,14 +79,17 @@ public class PlaysViewer extends JPanel {
           new DateTableCellRenderer(timeFormat));
       table.getColumn(Column.LENGTH.ordinal()).setCellRenderer(new LengthTableCellRenderer(false));
       
-      table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(70);
-      table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(70);
-      table.getColumnModel().getColumn(Column.START_DATE.ordinal()).setPreferredWidth(110);
-      table.getColumnModel().getColumn(Column.START_DATE.ordinal()).setMaxWidth(110);
-      table.getColumnModel().getColumn(Column.START_TIME.ordinal()).setPreferredWidth(60);
-      table.getColumnModel().getColumn(Column.START_TIME.ordinal()).setMaxWidth(60);
-      table.getColumnModel().getColumn(Column.LISTENERS.ordinal()).setPreferredWidth(50);
-      table.getColumnModel().getColumn(Column.LISTENERS.ordinal()).setMaxWidth(50);
+      int timeWidth = ComponentFactory.getTableColumnWidthTime();
+      int dateWidth = ComponentFactory.getTableColumnWidthDate();
+      int listenersWidth = ComponentFactory.getTableFontWidth(6);
+      table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(timeWidth);
+      table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(timeWidth);
+      table.getColumnModel().getColumn(Column.START_DATE.ordinal()).setPreferredWidth(dateWidth);
+      table.getColumnModel().getColumn(Column.START_DATE.ordinal()).setMaxWidth(dateWidth);
+      table.getColumnModel().getColumn(Column.START_TIME.ordinal()).setPreferredWidth(timeWidth);
+      table.getColumnModel().getColumn(Column.START_TIME.ordinal()).setMaxWidth(timeWidth);
+      table.getColumnModel().getColumn(Column.LISTENERS.ordinal()).setPreferredWidth(listenersWidth);
+      table.getColumnModel().getColumn(Column.LISTENERS.ordinal()).setMaxWidth(listenersWidth);
       table.getColumnExt(table.convertColumnIndexToView(Column.SHOW.ordinal())).setVisible(false);
       table.getColumnExt(table.convertColumnIndexToView(Column.LISTENERS.ordinal())).setVisible(false);
       

@@ -35,6 +35,7 @@ import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.StationAdminFrame;
 import de.stationadmin.gui.logs.LogEntryTableModel.Column;
 import de.stationadmin.gui.util.AppUtils;
+import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.DateTableCellRenderer;
 import de.stationadmin.lfm.backend.LogEntry;
 
@@ -68,13 +69,16 @@ public class LogViewer extends StationAdminFrame {
     JXTable table = new JXTable(model);
     table.setSortable(true);
     
+    int dateWidth = ComponentFactory.getTableColumnWidthDateTine();
+    int levelWidth = ComponentFactory.getTableFontWidth(10);
+    int typeWidth = ComponentFactory.getTableFontWidth(15);
     table.getColumnModel().getColumn(Column.CREATED_AT.ordinal()).setCellRenderer(new DateTableCellRenderer(new SimpleDateFormat(ctx.getTextProvider().getString("timeFormat"))));
-    table.getColumnModel().getColumn(Column.CREATED_AT.ordinal()).setPreferredWidth(130);
-    table.getColumnModel().getColumn(Column.CREATED_AT.ordinal()).setMaxWidth(130);
-    table.getColumnModel().getColumn(Column.LEVEL.ordinal()).setPreferredWidth(70);
-    table.getColumnModel().getColumn(Column.LEVEL.ordinal()).setMaxWidth(70);
-    table.getColumnModel().getColumn(Column.TYPE.ordinal()).setPreferredWidth(80);
-    table.getColumnModel().getColumn(Column.TYPE.ordinal()).setMaxWidth(80);
+    table.getColumnModel().getColumn(Column.CREATED_AT.ordinal()).setPreferredWidth(dateWidth);
+    table.getColumnModel().getColumn(Column.CREATED_AT.ordinal()).setMaxWidth(dateWidth);
+    table.getColumnModel().getColumn(Column.LEVEL.ordinal()).setPreferredWidth(levelWidth);
+    table.getColumnModel().getColumn(Column.LEVEL.ordinal()).setMaxWidth(levelWidth);
+    table.getColumnModel().getColumn(Column.TYPE.ordinal()).setPreferredWidth(typeWidth);
+    table.getColumnModel().getColumn(Column.TYPE.ordinal()).setMaxWidth(typeWidth);
     
     this.getContentPane().setLayout(new FormLayout("3dlu,pref:grow,3dlu","3dlu,pref,2dlu,pref:grow,3dlu"));
     CellConstraints cc = new CellConstraints();

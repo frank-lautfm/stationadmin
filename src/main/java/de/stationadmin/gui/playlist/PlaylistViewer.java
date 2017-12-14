@@ -2,6 +2,9 @@ package de.stationadmin.gui.playlist;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -37,6 +40,7 @@ import javax.swing.JToolBar;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.TransferHandler;
+import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -299,7 +303,7 @@ public class PlaylistViewer extends JPanel {
     }
 	  
   }
-
+  
   private JComponent createTabelPanel() {
 
     final PlaylistTableModel tableModel = new PlaylistTableModel(this.textProvider, this.playlistHolder, this.entryHolder, ctx.getAdminClient().getTagManager());
@@ -337,20 +341,23 @@ public class PlaylistViewer extends JPanel {
       
     };
 
-    table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setPreferredWidth(40);
-    table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setMaxWidth(40);
-    table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setPreferredWidth(70);
-    table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setMaxWidth(70);
-    table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(70);
-    table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(70);
+    int width4Digits = ComponentFactory.getTableFontWidth(6);
+    int timeWidth = ComponentFactory.getTableColumnWidthTime();
+    int dateWidth = ComponentFactory.getTableColumnWidthDate();
+    table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setPreferredWidth(width4Digits);
+    table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setMaxWidth(width4Digits);
+    table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setPreferredWidth(timeWidth);
+    table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setMaxWidth(timeWidth);
+    table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(timeWidth);
+    table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(timeWidth);
     table.getColumnModel().getColumn(Column.TYPE.ordinal()).setPreferredWidth(30);
     table.getColumnModel().getColumn(Column.TYPE.ordinal()).setMaxWidth(30);
-    table.getColumnModel().getColumn(Column.YEAR.ordinal()).setPreferredWidth(40);
-    table.getColumnModel().getColumn(Column.YEAR.ordinal()).setMaxWidth(40);
-    table.getColumnModel().getColumn(Column.ADDED.ordinal()).setPreferredWidth(110);
-    table.getColumnModel().getColumn(Column.ADDED.ordinal()).setMaxWidth(110);
-    table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setMaxWidth(40);
-    table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setPreferredWidth(40);
+    table.getColumnModel().getColumn(Column.YEAR.ordinal()).setPreferredWidth(width4Digits);
+    table.getColumnModel().getColumn(Column.YEAR.ordinal()).setMaxWidth(width4Digits);
+    table.getColumnModel().getColumn(Column.ADDED.ordinal()).setPreferredWidth(dateWidth); // 110
+    table.getColumnModel().getColumn(Column.ADDED.ordinal()).setMaxWidth(dateWidth);
+    table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setMaxWidth(width4Digits); // 40
+    table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setPreferredWidth(width4Digits);
     table.getColumn(Column.TYPE.ordinal()).setCellRenderer(typeRenderer);
     table.getColumn(Column.ADDED.ordinal()).setCellRenderer(timeRenderer);
     table.getColumn(Column.YEAR.ordinal()).setCellRenderer(new IntTableCellRenderer(0));
