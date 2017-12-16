@@ -89,7 +89,7 @@ public class MP3Streamer {
     this.station = station;
     this.ice.setHostName(host);
     this.ice.setPort(port);
-    this.ice.setMountPoint(station + ".live");
+    this.ice.setMountPoint(station);
     this.ice.setUserName(user);
     this.ice.setPassword(password);
     this.ice.setSourceName(station);
