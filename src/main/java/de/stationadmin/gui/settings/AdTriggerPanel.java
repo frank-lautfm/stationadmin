@@ -172,6 +172,12 @@ public class AdTriggerPanel extends JPanel {
           Toolkit.getDefaultToolkit().beep();
         }
 
+        if (pos2 > 59) {
+          model.getBufferedModel("adTriggerPosition2").setValue(59);
+          pos2 = 59;
+          Toolkit.getDefaultToolkit().beep();
+        }
+
         if (pos2 - pos1 < 20) {
           model.getBufferedModel("adTriggerPosition1").setValue(pos2 - 20);
           Toolkit.getDefaultToolkit().beep();
