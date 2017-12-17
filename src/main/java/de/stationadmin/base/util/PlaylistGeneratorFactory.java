@@ -4,13 +4,18 @@
 package de.stationadmin.base.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import de.stationadmin.base.Settings;
 import de.stationadmin.base.StationAdminClient;
+import de.stationadmin.base.playlist.shuffle.AdTriggerEngine;
 import de.stationadmin.base.playlist.shuffle.DefaultArtistNormalizer;
+import de.stationadmin.base.playlist.shuffle.PlaylistEnhancer;
 import de.stationadmin.base.playlist.shuffle.PlaylistGenerator;
 import de.stationadmin.base.playlist.shuffle.PlaylistShuffler;
+import de.stationadmin.base.playlist.shuffle.PlaylistsEnhancerGroup;
 import de.stationadmin.base.playlist.shuffle.TrackRule;
 import de.stationadmin.base.playlist.shuffle.TrackRuleEngine;
 import de.stationadmin.base.playlist.shuffle.TrackRuleEngine.JingleCollisionStratagy;
@@ -65,13 +70,46 @@ public class PlaylistGeneratorFactory {
       generator.setArtistTrackPreselector(preselector);
     }
 
+    List<PlaylistEnhancer> playlistEnhancers = new ArrayList<PlaylistEnhancer>();
     TrackRuleEngine trackRuleEngine = createTrackRuleEngine(client);
     if (trackRuleEngine != null) {
-      generator.setPlaylistEnhancer(trackRuleEngine);
+      // generator.setPlaylistEnhancer(trackRuleEngine);
+      playlistEnhancers.add(trackRuleEngine);
     }
+
+    if (client.getSettings().getAdTriggerPosition1() > -1) {
+      playlistEnhancers.add(createAdTriggerEngine(client));
+    }
+    generator.setPlaylistEnhancer(getPlaylistEnhancer(playlistEnhancers));
 
     return generator;
 
+  }
+
+  private static PlaylistEnhancer getPlaylistEnhancer(List<PlaylistEnhancer> playlistEnhancers) {
+    if (playlistEnhancers.size() == 0) {
+      return null;
+    } else if (playlistEnhancers.size() == 1) {
+      return playlistEnhancers.get(0);
+    } else {
+      PlaylistsEnhancerGroup group = new PlaylistsEnhancerGroup();
+      for (PlaylistEnhancer enhancer : playlistEnhancers) {
+        group.add(enhancer);
+      }
+      return group;
+    }
+  }
+
+  private static AdTriggerEngine createAdTriggerEngine(StationAdminClient client) {
+    Settings settings = client.getSettings();
+    AdTriggerEngine engine = new AdTriggerEngine(client.getTrackService().getTrackRegistry());
+    engine.setAdSeparatorId(settings.getAdSeparatorId());
+    engine.setAdTriggerId(settings.getAdTriggerId());
+    engine.setJingleCollisionStrategy(settings.getAdJingleCollisionStrategy());
+    engine.setPosition1(settings.getAdTriggerPosition1());
+    engine.setPosition2(settings.getAdTriggerPosition2());
+
+    return engine;
   }
 
   private static TrackRuleEngine createTrackRuleEngine(StationAdminClient client) {
@@ -88,8 +126,9 @@ public class PlaylistGeneratorFactory {
       for (TrackRule rule : settings.getTrackRules()) {
         engine.register(rule);
       }
-      
-      engine.setJingleCollisionStrategy(settings.getTrackRuleJingleCollsisionStrategy() != null ? settings.getTrackRuleJingleCollsisionStrategy() : JingleCollisionStratagy.KEEP_BOTH);
+
+      engine.setJingleCollisionStrategy(
+          settings.getTrackRuleJingleCollsisionStrategy() != null ? settings.getTrackRuleJingleCollsisionStrategy() : JingleCollisionStratagy.KEEP_BOTH);
       engine.setGroupCollisionStrategy(settings.getTrackRuleGroupCollisionStrategy() != null ? settings.getTrackRuleGroupCollisionStrategy() : MultiMatchSelection.ALL);
     }
     return engine;
@@ -114,7 +153,17 @@ public class PlaylistGeneratorFactory {
     shuffler.setJingleInterval(client.getSettings().getShuffleJingleInterval());
     shuffler.setWordDistribution(client.getSettings().getShuffleWordDistributionStrategy());
     shuffler.setArtistNormalizer(createNormalizer(client.getSettings()));
-    shuffler.setPlaylistEnhancer(createTrackRuleEngine(client));
+
+    List<PlaylistEnhancer> playlistEnhancers = new ArrayList<PlaylistEnhancer>();
+    TrackRuleEngine trackRuleEngine = createTrackRuleEngine(client);
+    if (trackRuleEngine != null) {
+      playlistEnhancers.add(trackRuleEngine);
+    }
+
+    if (client.getSettings().getAdTriggerPosition1() > -1) {
+      playlistEnhancers.add(createAdTriggerEngine(client));
+    }
+    shuffler.setPlaylistEnhancer(getPlaylistEnhancer(playlistEnhancers));
     return shuffler;
 
   }

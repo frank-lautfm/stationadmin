@@ -12,6 +12,7 @@ import java.util.prefs.Preferences;
 
 import org.apache.commons.lang.StringUtils;
 
+import de.stationadmin.base.playlist.shuffle.AdTriggerEngine.AdJingleCollisionStrategy;
 import de.stationadmin.base.playlist.shuffle.TagWeight;
 import de.stationadmin.base.playlist.shuffle.TrackRule;
 import de.stationadmin.base.playlist.shuffle.TrackRuleEngine.JingleCollisionStratagy;
@@ -60,6 +61,12 @@ public class Settings extends AbstractBean {
 
   private boolean logDownloadPermitted = false;
   private boolean logAutodownloadPermitted = false;
+  
+  private int adTriggerPosition1 = -1;
+  private int adTriggerPosition2 = -1;
+  private int adSeparatorId = -1;
+  private int adTriggerId = 0;
+  private AdJingleCollisionStrategy adJingleCollisionStrategy = AdJingleCollisionStrategy.KEEP_BOTH;
 
   private Autosynchronisation autoSynchronisation = Autosynchronisation.NONE;
 
@@ -110,6 +117,11 @@ public class Settings extends AbstractBean {
     this.setTrackRules(settings.getTrackRules());
     this.setTrackRuleJingleCollsisionStrategy(settings.getTrackRuleJingleCollsisionStrategy());
     this.setTrackRuleGroupCollisionStrategy(settings.getTrackRuleGroupCollisionStrategy());
+    this.setAdJingleCollisionStrategy(settings.getAdJingleCollisionStrategy());
+    this.setAdSeparatorId(settings.getAdSeparatorId());
+    this.setAdTriggerId(settings.getAdTriggerId());
+    this.setAdTriggerPosition1(settings.getAdTriggerPosition2() > 0 ? settings.getAdTriggerPosition1() : -1);
+    this.setAdTriggerPosition2(settings.getAdTriggerPosition2() > 0 ? settings.getAdTriggerPosition2() : -1);
   }
 
   public String getTitleLogFile() {
@@ -502,6 +514,56 @@ public class Settings extends AbstractBean {
     MultiMatchSelection old = this.trackRuleGroupCollisionStrategy;
     this.trackRuleGroupCollisionStrategy = trackRuleGroupCollsisionStrategy;
     this.firePropertyChange("trackRuleGroupCollisionStrategy", old, trackRuleGroupCollisionStrategy);
+  }
+
+  public int getAdTriggerPosition1() {
+    return adTriggerPosition1;
+  }
+
+  public void setAdTriggerPosition1(int adTriggerPosition1) {
+    int old = this.adTriggerPosition1;
+    this.adTriggerPosition1 = adTriggerPosition1;
+    this.firePropertyChange("adTriggerPosition1", old, adTriggerPosition1);
+  }
+
+  public int getAdTriggerPosition2() {
+    return adTriggerPosition2;
+  }
+
+  public void setAdTriggerPosition2(int adTriggerPosition2) {
+    int old = this.adTriggerPosition2;
+    this.adTriggerPosition2 = adTriggerPosition2;
+    this.firePropertyChange("adTriggerPosition2", old, adTriggerPosition2);
+  }
+
+  public int getAdSeparatorId() {
+    return adSeparatorId;
+  }
+
+  public void setAdSeparatorId(int adSeparatorId) {
+    int old = this.adSeparatorId;
+    this.adSeparatorId = adSeparatorId;
+    this.firePropertyChange("adSeparatorId", old, adSeparatorId);
+  }
+
+  public int getAdTriggerId() {
+    return adTriggerId;
+  }
+
+  public void setAdTriggerId(int adTriggerId) {
+    int old = this.adTriggerId;
+    this.adTriggerId = adTriggerId;
+    this.firePropertyChange("adTriggerId", old, adTriggerId);
+  }
+
+  public AdJingleCollisionStrategy getAdJingleCollisionStrategy() {
+    return adJingleCollisionStrategy != null ? adJingleCollisionStrategy : AdJingleCollisionStrategy.KEEP_BOTH;
+  }
+
+  public void setAdJingleCollisionStrategy(AdJingleCollisionStrategy adJingleCollisionStrategy) {
+    AdJingleCollisionStrategy old = adJingleCollisionStrategy;
+    this.adJingleCollisionStrategy = adJingleCollisionStrategy;
+    this.firePropertyChange("adJingleCollisionStrategy", old, adJingleCollisionStrategy);
   }
 
 }

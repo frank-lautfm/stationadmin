@@ -26,6 +26,8 @@ import de.stationadmin.base.util.AbstractBean;
 public class TrackRegistry extends AbstractBean {
   private Map<Integer, RegisteredTrack> tracks = Collections.synchronizedMap(new HashMap<Integer, RegisteredTrack>());
   private Map<String, String> sharedStrings = new HashMap<String, String>();
+  
+  private DetailedTrack standardAdTrigger;
 
   private boolean blockChangsEvts = false;
   private int numTracksBeforeBlock = -1;
@@ -364,5 +366,20 @@ public class TrackRegistry extends AbstractBean {
     } else {
       return null;
     }
+  }
+
+  public DetailedTrack getStandardAdTrigger() {
+    if(this.standardAdTrigger == null) {
+      this.standardAdTrigger = this.getTrack(0);
+      if(this.standardAdTrigger == null) {
+        this.standardAdTrigger = new DetailedTrack();
+        this.standardAdTrigger.setArtist("START_AD_BREAK");
+        this.standardAdTrigger.setTitle("START_AD_BREAK");
+        this.standardAdTrigger.setAlbum("ad");
+        this.standardAdTrigger.setLength(1);
+        this.standardAdTrigger.setYear(2017);;
+      }
+    }
+    return standardAdTrigger;
   }
 }

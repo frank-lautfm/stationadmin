@@ -158,6 +158,7 @@ public class SettingsDlg extends JDialog {
       playlists.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists.weights"), this.createGenerateWeightsPanel())));
       playlists.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists.preselect"), this.createGenerateArtistPreselectPanel())));
       playlists.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists.trackrules"), this.createTrackRulePanel())));
+      playlists.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists.adtrigger"), this.createAdTriggerPanel())));
       
       root.add(playlists);
     }
@@ -479,6 +480,15 @@ public class SettingsDlg extends JDialog {
     JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref:grow,3dlu"));
     panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.gen.trackrules")));
     panel.add(new TrackRulePanel(ctx, model), new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
+    
+    return panel;
+    
+  }
+
+  private JPanel createAdTriggerPanel() {
+    JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref:grow,3dlu"));
+    panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.gen.adtrigger")));
+    panel.add(new AdTriggerPanel(ctx, model), new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
     
     return panel;
     

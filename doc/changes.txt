@@ -8,6 +8,7 @@ Station Admin für laut.fm - Änderungen
 
 Version 4.6.0
 -------------
+[+] Einfügen von Werbetriggern beim Shuffeln oder Generieren
 [+] Shuffeln / Generieren: Zusätzliche Optionen für gebundene Jingles
 [+] Optional: Statische Tags als Spalte im Playlistviewer
 [#] Flexiblere Bestimmung von Spaltenbreiten in Tabellen auf Basis der Fonteigenschaften
