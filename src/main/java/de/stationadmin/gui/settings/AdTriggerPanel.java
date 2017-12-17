@@ -1,6 +1,7 @@
 package de.stationadmin.gui.settings;
 
 import java.awt.Component;
+import java.awt.Toolkit;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class AdTriggerPanel extends JPanel {
         enabledModel.setValue(model.getBean().getAdTriggerPosition1() > -1);
       }
     });
-    
+
     boolean enabled = model.getBean().getAdTriggerPosition1() > -1;
 
     int row = 1;
@@ -103,17 +104,19 @@ public class AdTriggerPanel extends JPanel {
     this.add(triggerCmb, cc.xy(3, row));
     triggerCmb.setEnabled(enabled);
     row += 2;
-    
-    SelectionInList<AdJingleCollisionStrategy> jingleStrategySelection = new SelectionInList<AdTriggerEngine.AdJingleCollisionStrategy>(AdJingleCollisionStrategy.values(), model.getBufferedModel("adJingleCollisionStrategy"));
-    final JComboBox<Integer> jingleCmb = BasicComponentFactory.createComboBox(jingleStrategySelection, new EnumListCellRenderer(ctx.getTextProvider(), "settings.adtrigger.jingle"));
+
+    SelectionInList<AdJingleCollisionStrategy> jingleStrategySelection = new SelectionInList<AdTriggerEngine.AdJingleCollisionStrategy>(AdJingleCollisionStrategy.values(),
+        model.getBufferedModel("adJingleCollisionStrategy"));
+    final JComboBox<Integer> jingleCmb = BasicComponentFactory.createComboBox(jingleStrategySelection,
+        new EnumListCellRenderer(ctx.getTextProvider(), "settings.adtrigger.jingle"));
     this.add(new JLabel(ctx.getString("settings.adtrigger.jingle")), cc.xywh(1, row, 3, 1));
     row += 2;
     this.add(jingleCmb, cc.xywh(1, row, 3, 1));
     jingleCmb.setEnabled(enabled);
     row += 2;
-    
+
     enabledModel.addValueChangeListener(new PropertyChangeListener() {
-      
+
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         boolean enabled = Boolean.TRUE.equals(evt.getNewValue());
@@ -123,17 +126,62 @@ public class AdTriggerPanel extends JPanel {
         triggerCmb.setEnabled(enabled);
         jingleCmb.setEnabled(enabled);
 
-        if(enabled) {
+        if (enabled) {
           model.getBufferedModel("adTriggerPosition1").setValue(20);
           model.getBufferedModel("adTriggerPosition2").setValue(50);
-        }
-        else {
+        } else {
           model.getBufferedModel("adTriggerPosition1").setValue(-1);
         }
-        
+
       }
     });
-    
+
+    model.getBufferedModel("adTriggerPosition1").addValueChangeListener(new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        int pos1 = (Integer) evt.getNewValue();
+        int pos2 = (Integer) model.getBufferedModel("adTriggerPosition2").getValue();
+
+        if (pos1 > 30) {
+          model.getBufferedModel("adTriggerPosition1").setValue(30);
+          pos1 = 30;
+          Toolkit.getDefaultToolkit().beep();
+        }
+
+        if (pos2 - pos1 < 20) {
+          model.getBufferedModel("adTriggerPosition2").setValue(pos1 + 20);
+          Toolkit.getDefaultToolkit().beep();
+        } else if (pos2 - pos1 > 40) {
+          model.getBufferedModel("adTriggerPosition2").setValue(Math.min(59, pos1 + 40));
+          Toolkit.getDefaultToolkit().beep();
+        }
+      }
+    });
+
+    model.getBufferedModel("adTriggerPosition2").addValueChangeListener(new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        int pos2 = (Integer) evt.getNewValue();
+        int pos1 = (Integer) model.getBufferedModel("adTriggerPosition1").getValue();
+
+        if (pos2 < 30) {
+          model.getBufferedModel("adTriggerPosition2").setValue(30);
+          pos2 = 30;
+          Toolkit.getDefaultToolkit().beep();
+        }
+
+        if (pos2 - pos1 < 20) {
+          model.getBufferedModel("adTriggerPosition1").setValue(pos2 - 20);
+          Toolkit.getDefaultToolkit().beep();
+        } else if (pos2 - pos1 > 40) {
+          model.getBufferedModel("adTriggerPosition1").setValue(Math.min(30, pos2 - 40));
+          Toolkit.getDefaultToolkit().beep();
+        }
+      }
+    });
+
   }
 
   private List<Integer> getAdSeparatorOptions() {
@@ -188,15 +236,14 @@ public class AdTriggerPanel extends JPanel {
       super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
       if (value instanceof Integer) {
         int id = (Integer) value;
-        if(id == -1) {
+        if (id == -1) {
           setText("kein Werbetrenner");
-        }
-        else if (id == 0) {
+        } else if (id == 0) {
           setText("Standard");
         } else {
           try {
             DetailedTrack track = ctx.getAdminClient().getTrackService().getTrack(id);
-            if(track != null) {
+            if (track != null) {
               setText(track.toString());
             }
           } catch (Exception e) {
