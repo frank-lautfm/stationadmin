@@ -166,4 +166,18 @@ public class TrackRuleTableModel extends AbstractTableModel {
       fireTableDataChanged();
     }
   }
+
+  public void moveUp(int row) {
+    if (row > 0 && displayedRules.get(row).getTrackId() > 0) {
+      TrackRule rule = displayedRules.remove(row);
+      displayedRules.add(row - 1, rule);
+      updateModel();
+      fireTableDataChanged();
+    }
+  }
+
+  public void moveDown(int row) {
+    moveUp(row + 1);
+  }
+
 }
