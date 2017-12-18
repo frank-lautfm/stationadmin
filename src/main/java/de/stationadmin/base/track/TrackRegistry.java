@@ -373,6 +373,7 @@ public class TrackRegistry extends AbstractBean {
       this.standardAdTrigger = this.getTrack(0);
       if(this.standardAdTrigger == null) {
         this.standardAdTrigger = new DetailedTrack();
+        this.standardAdTrigger.setType(DetailedTrack.TYPE_JINGLE);
         this.standardAdTrigger.setArtist("START_AD_BREAK");
         this.standardAdTrigger.setTitle("START_AD_BREAK");
         this.standardAdTrigger.setAlbum("ad");

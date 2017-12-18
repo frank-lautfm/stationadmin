@@ -126,7 +126,7 @@ public class AdTriggerEngine implements PlaylistEnhancer {
         adCnt++;
         int nextAdBase = adCnt % 2 == 0 ? this.position1 : this.position2;
         nextAdPosition = (nextAdBase * 60) + (adCnt / 2) * 60 * 60;
-        System.out.println("next ad position " + TimeFormat.format(nextAdPosition / 60, true) + " / " + nextAdBase + " / " + adCnt + " / " + (adCnt / 2));
+        // System.out.println("next ad position " + TimeFormat.format(nextAdPosition / 60, true) + " / " + nextAdBase + " / " + adCnt + " / " + (adCnt / 2));
         allowMove = true;
       }
       if (addTrack) {

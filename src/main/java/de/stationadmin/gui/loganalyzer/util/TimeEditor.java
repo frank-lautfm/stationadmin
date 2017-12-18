@@ -4,6 +4,7 @@
 package de.stationadmin.gui.loganalyzer.util;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -27,6 +28,8 @@ public class TimeEditor {
     this.dateChooser = new JDateChooser();
     this.dateChooser.setLocale(textProvider.getLocale());
     this.dateChooser.setDateFormatString(textProvider.getString("dateFormat"));
+    Dimension dim = this.dateChooser.getPreferredSize();
+    this.dateChooser.setPreferredSize(new Dimension((int)dim.getWidth() + 10, (int)dim.getHeight()));
     this.timeFormat = new SimpleDateFormat(textProvider.getString("timeOnlyFormat"));
 
     this.timeTf = new JTextField(5);

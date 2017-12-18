@@ -343,7 +343,7 @@ public class PlaylistViewer extends JPanel {
 
     int width4Digits = ComponentFactory.getTableFontWidth(6);
     int timeWidth = ComponentFactory.getTableColumnWidthTime();
-    int dateWidth = ComponentFactory.getTableColumnWidthDate();
+    int dateTimeWidth = ComponentFactory.getTableColumnWidthDateTine();
     table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setPreferredWidth(width4Digits);
     table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setMaxWidth(width4Digits);
     table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setPreferredWidth(timeWidth);
@@ -354,8 +354,8 @@ public class PlaylistViewer extends JPanel {
     table.getColumnModel().getColumn(Column.TYPE.ordinal()).setMaxWidth(30);
     table.getColumnModel().getColumn(Column.YEAR.ordinal()).setPreferredWidth(width4Digits);
     table.getColumnModel().getColumn(Column.YEAR.ordinal()).setMaxWidth(width4Digits);
-    table.getColumnModel().getColumn(Column.ADDED.ordinal()).setPreferredWidth(dateWidth); // 110
-    table.getColumnModel().getColumn(Column.ADDED.ordinal()).setMaxWidth(dateWidth);
+    table.getColumnModel().getColumn(Column.ADDED.ordinal()).setPreferredWidth(dateTimeWidth); // 110
+    table.getColumnModel().getColumn(Column.ADDED.ordinal()).setMaxWidth(dateTimeWidth);
     table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setMaxWidth(width4Digits); // 40
     table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setPreferredWidth(width4Digits);
     table.getColumn(Column.TYPE.ordinal()).setCellRenderer(typeRenderer);
