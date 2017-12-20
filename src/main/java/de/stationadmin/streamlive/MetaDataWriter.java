@@ -8,11 +8,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-
 
 /**
  * @author korf
@@ -20,13 +21,17 @@ import org.apache.log4j.Logger;
  */
 public class MetaDataWriter {
   private static final Logger log = Logger.getLogger(MetaDataWriter.class);
+  private ExecutorService executor = Executors.newSingleThreadExecutor();
   private List<Long> times = new ArrayList<Long>();
   private List<String> songs = new ArrayList<String>();
   private IcecastServerConnector ice;
   private volatile boolean abort = false;
-  
+
   private volatile String currentSong;
 
+  private int idx = 0;
+  private long next;
+  
   public MetaDataWriter(File source, IcecastServerConnector ice) throws IOException {
     this.ice = ice;
     this.readList(source);
@@ -50,33 +55,20 @@ public class MetaDataWriter {
     in.close();
   }
 
-  /**
-   * Writes the meta data
-   * 
-   * @param startTime
-   *          time at which the stream started
-   */
-  public void write(long startTime) {
-    int idx = 0;
-    while (idx < times.size() && !abort) {
-      long next = startTime + times.get(idx);
-      long diff = next - System.currentTimeMillis();
-      if (next > 0) {
-        try {
-          Thread.sleep(diff);
-        } catch (Exception e) {
-        }
-      }
-      if (!abort) {
-        try {
-          ice.updateSong(songs.get(idx));
-          this.currentSong = songs.get(idx);
-        } catch (IOException e) {
-          log.warn("unable to update live meta data", e);
-        }
-        idx++;
-      }
+
+  public void onStartBroadcasting() {
+    this.idx = 0;
+    this.next = idx < times.size() ? times.get(idx) : Long.MAX_VALUE;
+  }
+
+  public void onTimeChange(double time) {
+    if (time >= next && !abort) {
+      this.currentSong = songs.size() > idx ? songs.get(idx) : "";
+      this.executor.submit(new SongUpdate(currentSong));
+      this.idx++;
+      this.next = this.idx < this.times.size() ? this.times.get(this.idx) : Long.MAX_VALUE;
     }
+
   }
 
   public void abort() {
@@ -128,4 +120,20 @@ public class MetaDataWriter {
     return songs;
   }
 
+  private class SongUpdate implements Runnable {
+    private String song;
+
+    SongUpdate(String song) {
+      this.song = song;
+    }
+
+    public void run() {
+      try {
+        ice.updateSong(song);
+      } catch (IOException e) {
+        log.warn("unable to update live meta data", e);
+      }
+
+    }
+  }
 }

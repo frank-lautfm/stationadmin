@@ -133,8 +133,9 @@ public class MP3Streamer {
 
       int rc = this.ice.connect();
       if (rc == 200) {
-        this.mp3Writer = new MP3Writer(source.getInputStream(), this.ice.getOutStream());
+        this.mp3Writer = new MP3Writer(source.getInputStream(), this.ice.getOutStream(), this.metaWriter);
         this.mp3Writer.setMaxDuration(this.maxDuration);
+        /*
         if (this.metaWriter != null) {
           Thread metaWriterThread = new Thread() {
             public void run() {
@@ -151,6 +152,7 @@ public class MP3Streamer {
           };
           metaWriterThread.start();
         }
+        */
         try {
           this.status = Status.ONLINE;
           this.mp3Writer.write();

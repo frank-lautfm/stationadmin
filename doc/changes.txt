@@ -6,6 +6,10 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.6.1
+-------------
+[#] Präziseres Setzen von Songinfos bei "MP3-Datei live senden"
+
 Version 4.6.0
 -------------
 [+] Einfügen von Werbetriggern beim Shuffeln oder Generieren

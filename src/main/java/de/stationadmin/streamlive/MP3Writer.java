@@ -34,23 +34,30 @@ public class MP3Writer {
   private volatile long startTime;
 
   private volatile boolean abort = false;
+  
+  private MetaDataWriter metaDataWriter;
 
-  public MP3Writer(File source, OutputStream target) throws IOException {
-    this(new FileInputStream(source), target);
+  public MP3Writer(File source, OutputStream target, MetaDataWriter metaDataWriter) throws IOException {
+    this(new FileInputStream(source), target, metaDataWriter);
   }
 
   /**
    * @param source
    * @param target
    */
-  public MP3Writer(InputStream source, OutputStream target) {
+  public MP3Writer(InputStream source, OutputStream target, MetaDataWriter metaDataWriter) {
     super();
     this.source = source;
     this.target = target;
+    this.metaDataWriter = metaDataWriter;
   }
 
   public void write() throws IOException {
     this.startTime = System.currentTimeMillis();
+    
+    if(this.metaDataWriter != null) {
+      this.metaDataWriter.onStartBroadcasting();
+    }
 
     InputStreamWrapper stream = new InputStreamWrapper();
 
@@ -65,6 +72,10 @@ public class MP3Writer {
         time += header.ms_per_frame();
         bitStream.closeFrame();
         header = bitStream.readFrame();
+        
+        if(this.metaDataWriter != null) {
+          this.metaDataWriter.onTimeChange(time);
+        }
 
         boolean wait = false;
         while (startTime + time > System.currentTimeMillis() + this.maxBuffer * 1000) {
@@ -129,6 +140,9 @@ public class MP3Writer {
 
   public void abort() {
     this.abort = true;
+    if(this.metaDataWriter != null) {
+      this.metaDataWriter.abort();
+    }
   }
 
   /**
