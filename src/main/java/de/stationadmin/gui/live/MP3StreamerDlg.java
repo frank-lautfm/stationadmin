@@ -245,11 +245,11 @@ public class MP3StreamerDlg extends StationAdminFrame {
         try {
           final MP3Streamer streamer = new MP3Streamer(source, meta != null && meta.exists() ? meta : null);
           streamer.setMaxDuration((Integer) maxDuration.getValue());
+          LiveAccount account = ctx.getAdminClient().getLiveAccount();
+          streamer.configureServer(account.getServer(), account.getPort(), ctx.getAdminClient().getStation(), account.getUser(), account.getPassword());
           if (insertAdTriggers.booleanValue()) {
             streamer.addAdTriggers(adPosition1.intValue(), adPosition2.intValue());
           }
-          LiveAccount account = ctx.getAdminClient().getLiveAccount();
-          streamer.configureServer(account.getServer(), account.getPort(), ctx.getAdminClient().getStation(), account.getUser(), account.getPassword());
           ctx.getAdminClient().setMp3Streamer(streamer);
           Thread t = new Thread() {
             public void run() {

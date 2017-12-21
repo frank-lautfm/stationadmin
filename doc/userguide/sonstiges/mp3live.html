@@ -1,0 +1,78 @@
+<html>
+	<head>
+		<title>Station Admin: MP3-Dateien live senden</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>MP3-Dateien live senden</h1>
+<p>
+Wenn Deine Station für das Live-Senden freigeschaltet ist kannst Du &uuml;ber Station Admin vorproduzierte Sendungen oder Mixe
+die im MP3-Format vorliegen 'live' senden. Das kann entweder manuell gestartet werden oder als Aufgabe eingerichtet werden und zu
+einem vorgegebenen Zeitpunkt gestartet werden. 
+</p>
+<p class='subheading'>
+	&Uuml;bertragung manuell starten
+</p>
+<img src="../images/mp3live.jpg">
+<p>
+Um eine &Uuml;bertragung manuell zu starten klicke im <span class="menuref">Server</span>-Men&uuml; auf <span class="menuref">MP3-Datei 'live' senden</span>.
+</p>
+<p>
+Folgende Informationen m&uuml;ssen oder k&ouml;nnen angegeben werden:
+<ul>
+	<li><span class="menuref">MP3-Datei</span>: W&auml;hle die Datei aus die Du senden m&ouml;chtest. <b>Wichtig:</b> Achte auf das Format: 128kbps, 44 Mhz </li>
+	<li><span class="menuref">Titelinformationen</span>: W&auml;hle eine Datei aus die Titelinformationen f&uuml;r die MP3-Datei enth&auml;lt. Dies ist optional, die &Uuml;bertragung kann auch ohne Titelinformationen gestartet werden.</li>
+	<li>Aktiviere <span class="menuref">voherigen Titel zu Ende spielen lassen</span> wenn die &Uuml;bertragung erst gestartet werden soll nach dem der aktuelle Titel zu Ende ist.</li>
+</ul>
+</p>
+<p>
+Titelinformationen k&ouml;nnen in einer Textdatei bereitgestellt werden die eine Zeile pro Titel enth&auml;lt. Jeder Eintrag sollte im Format <code>Startzeit Artist - Titel</code> angegeben werden.
+Ein Beispiel:
+<pre style='margin:5px;padding:5px;background:#EEEEEE'>
+0:00 Secret Garden - Lament For A Frozen Flower
+5:02 Oystein Sevag &amp; Lakki Patey - Painful Love
+8:37 James Newton Howard - I'm Listening
+</pre>
+</p>
+<p>
+F&uuml;r Dateien die l&auml;nger als 20 Minuten gehen sollte w&auml;hrden der &Uuml;bertragund der Werbetrigger ausgel&ouml;st werden. Das geschieht in dem
+ein Titel "START_AD_BREAK - START_AD_BREAK" eingetragen wird. Es empfiehlt sich diesen nur f&uuml;r eine Sekunde einzufügen - also den n&auml;chsten regul&auml;ren Titel 
+ganz normal eine Sekunde sp&auml;ter einzutragen. 
+</p>
+<p>
+Alternativ k&ouml;nnen die Werbetrigger auch automatisch eingef&uuml;gt werden. Aktiviere dazu die Checkbox <span class="menuref">Werbetrigger einfügen nach...</span> und 
+gebe zwei Positionen an die mindestens 20, aber h&ouml;chstens 40 Minuten auseinander liegen. Ist Deine Datei l&auml;nger als eine Stunde wiederholen sich die Werbetrigger, also z. B.
+nach 0:20, 0:50, 1:20, 1:50 etc
+</p>
+<p>
+Klicke auf <span class="menuref">Starten</span> um die Übertragung zu beginnen. Eine laufende Übertragung kann jederzeit durch klicken auf 
+<span class="menuref">Stoppen</span> abgebrochen werden. Während eine Übertragung läuft werden im mittleren Bereich einige Informationen
+angezeigt:
+<ul>
+<li><span class="menuref">Status</span>: Mögliche Werte sind 'online', 'offline' und 'warten' (wenn der vorherige Titel noch läuft)</li>
+<li><span class="menuref">Zeit</span>: Zeit seit dem Start der Übertragung. Dies bezieht sich auf den Zeitpunkt ab dem die Daten zu Icecast übertragen wurde - Icecast beginnt erst einige Sekunden später mit der wirklichen Übertragung an Clients.</li>
+<li><span class="menuref">Titel</span>: Insofern eine Datei mit Titelinformationen vorliegt wird hier der aktuelle Titel angezeigt.</li>
+</ul>
+</p>
+<div class='hint'>
+Einige Hinweise:
+<ul>
+<li>Die Dialogbox f&uuml;r die Live&uuml;bertragung kann jederzeit geschlossen und sp&auml;ter wieder ge&ouml;ffnet werden.</li>	
+<li>Station Admin &uuml;bertr&auml;gt bis zu 15 Sekunden im Vorraus an Icecast. D. h. wenn die &Uuml;bertragung gestoppt wird wird Icecast trotzdem noch mindestens 15 Sekunden das Liveprogramm weiter senden.</li>
+<li>Da es einen kurzen Moment dauert bis Icecast nach dem Verbindungsaufbau mit den Senden beginnt wird die &Uuml;bertragung 3 Sekunden vor dem Ende des aktuellen Titels gestartet
+	wenn dieser zu Ende gespielt werden soll. Das hat sich in Tests als guter Wert erwiesen - es kann aber sein dass dem aktuellen Titel doch mal die letzten ein oder zwei Sekunden fehlen.</li>
+</ul>
+</div>
+
+<p class='subheading'>
+	&Uuml;bertragung automatisch starten
+</p>
+<p>
+	Um eine &Uuml;bertragung zu einem vorgegeben Zeitpunkt zu starten lege eine Aufgabe an - das ist <a href="aufgaben.html">hier</a> genauer beschrieben.
+	Die Konfigurationsm&ouml;glichkeiten entsprechen denen beim manuellen Start der &Uuml;bertragung.
+</p>
+
+</body>
+</html>

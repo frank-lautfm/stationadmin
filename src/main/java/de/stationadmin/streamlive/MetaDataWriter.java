@@ -15,6 +15,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import de.stationadmin.base.util.TimeFormat;
+
 /**
  * @author korf
  * 
@@ -113,10 +115,9 @@ public class MetaDataWriter {
       this.songs = newSongs;
     }
 
-    // for (int i = 0; i < times.size(); i++) {
-    // System.out.println(TimeFormat.format((int) (times.get(i) / 1000), true) + " "
-    // + songs.get(i));
-    // }
+    for (int i = 0; i < times.size(); i++) {
+      System.out.println(TimeFormat.format((int) (times.get(i) / 1000), true) + " " + songs.get(i));
+    }
 
     return inserted;
   }
