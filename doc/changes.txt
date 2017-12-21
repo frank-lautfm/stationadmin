@@ -9,6 +9,7 @@ Station Admin für laut.fm - Änderungen
 Version 4.6.1
 -------------
 [#] Präziseres Setzen von Songinfos bei "MP3-Datei live senden"
+[+] Einfügen von Werbetriggern in Trackliste bei "MP3-Datei live senden"
 
 Version 4.6.0
 -------------

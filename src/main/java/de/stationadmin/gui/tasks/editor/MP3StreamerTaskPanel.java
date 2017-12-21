@@ -25,6 +25,7 @@ import de.stationadmin.base.tasks.ScheduledTask;
 import de.stationadmin.base.tools.MP3StreamerTask;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.live.FileSelectionAction;
+import de.stationadmin.gui.live.MP3StreamerAdTriggerPanel;
 import de.stationadmin.gui.tasks.ScheduledTaskEditorComponent;
 import de.stationadmin.gui.util.ComponentFactory;
 
@@ -41,6 +42,10 @@ public class MP3StreamerTaskPanel extends JPanel implements ScheduledTaskEditorC
   private ValueHolder maxDuration = new ValueHolder(0);
   private ValueHolder waitForNextTrack = new ValueHolder(Boolean.FALSE);
 
+  private ValueHolder insertAds = new ValueHolder(Boolean.FALSE);
+  private ValueHolder adPosition1 = new ValueHolder(20);
+  private ValueHolder adPosition2 = new ValueHolder(50);
+
   private ValueHolder lastDir = new ValueHolder();
   private TextProvider textProvider;
 
@@ -50,7 +55,7 @@ public class MP3StreamerTaskPanel extends JPanel implements ScheduledTaskEditorC
   }
 
   private void init() {
-    this.setLayout(new FormLayout("pref,5dlu,pref:grow,pref", "pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref"));
+    this.setLayout(new FormLayout("pref,5dlu,pref:grow,pref", "pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref"));
     CellConstraints cc = new CellConstraints();
 
     ComponentFactory componentFactory = new ComponentFactory(textProvider);
@@ -92,10 +97,13 @@ public class MP3StreamerTaskPanel extends JPanel implements ScheduledTaskEditorC
     durationPanel.add(new JLabel(" " + textProvider.getString("mp3streamer.dlg.property.maxduration.unit")));
     this.add(new JLabel(textProvider.getString("mp3streamer.dlg.property.maxduration")), cc.xy(1, 7));
     this.add(durationPanel, cc.xy(3, 7, CellConstraints.LEFT, CellConstraints.CENTER));
-
     
     final JCheckBox delayCb = BasicComponentFactory.createCheckBox(this.waitForNextTrack, textProvider.getString("mp3streamer.dlg.property.waiting"));
     this.add(delayCb, cc.xywh(1, 9, 4, 1));
+    
+    JPanel adTriggerPanel = new MP3StreamerAdTriggerPanel(textProvider, insertAds, adPosition1, adPosition2);
+    this.add(adTriggerPanel , cc.xywh(1, 11, 4, 1));
+
   }
 
   @Override
@@ -107,6 +115,16 @@ public class MP3StreamerTaskPanel extends JPanel implements ScheduledTaskEditorC
       this.metafile.setValue(mp3StreamerTask.getMetaDataFile());
       this.waitForNextTrack.setValue(mp3StreamerTask.isWaitForTrackChange());
       this.maxDuration.setValue(mp3StreamerTask.getMaxDuration());
+      if(mp3StreamerTask.getAdTriggerPosition1() > -1 && mp3StreamerTask.getAdTriggerPosition2() > 0) {
+        insertAds.setValue(Boolean.TRUE);
+        adPosition1.setValue(mp3StreamerTask.getAdTriggerPosition1());
+        adPosition2.setValue(mp3StreamerTask.getAdTriggerPosition2());
+      }
+      else {
+        insertAds.setValue(Boolean.FALSE);
+        adPosition1.setValue(20);
+        adPosition2.setValue(50);
+      }
     }
   }
 
@@ -119,6 +137,14 @@ public class MP3StreamerTaskPanel extends JPanel implements ScheduledTaskEditorC
       mp3StreamerTask.setMetaDataFile(this.metafile.getString());
       mp3StreamerTask.setWaitForTrackChange(this.waitForNextTrack.booleanValue());
       mp3StreamerTask.setMaxDuration(this.maxDuration.intValue());
+      if(insertAds.booleanValue()) {
+        mp3StreamerTask.setAdTriggerPosition1(adPosition1.intValue());
+        mp3StreamerTask.setAdTriggerPosition2(adPosition2.intValue());
+      }
+      else {
+        mp3StreamerTask.setAdTriggerPosition1(-1);
+        mp3StreamerTask.setAdTriggerPosition2(-1);
+      }
     }
 
   }

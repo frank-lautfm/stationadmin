@@ -31,10 +31,12 @@ public class MetaDataWriter {
 
   private int idx = 0;
   private long next;
-  
+
   public MetaDataWriter(File source, IcecastServerConnector ice) throws IOException {
     this.ice = ice;
-    this.readList(source);
+    if (source != null) {
+      this.readList(source);
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -55,6 +57,69 @@ public class MetaDataWriter {
     in.close();
   }
 
+  public boolean addAdTriggers(String defaultTrackInfo, int position1, int position2) {
+    if (position1 > position2) {
+      int tmp = position1;
+      position1 = position2;
+      position2 = tmp;
+    }
+
+    boolean inserted = false;
+    if (this.times.size() == 0) {
+
+      // just fill in default song infos
+      this.times.add(0l);
+      this.songs.add(defaultTrackInfo);
+
+      for (int i = 0; i < 10; i++) {
+        long p1 = (i * 60 * 60 + position1 * 60) * 1000;
+        long p2 = (i * 60 * 60 + position2 * 60) * 1000;
+        this.times.add(p1);
+        this.songs.add("START_AD_BREAK - START_AD_BREAK");
+        this.times.add(p1 + 1000);
+        this.songs.add(defaultTrackInfo);
+        this.times.add(p2);
+        this.songs.add("START_AD_BREAK - START_AD_BREAK");
+        this.times.add(p2 + 1000);
+        this.songs.add(defaultTrackInfo);
+      }
+      inserted = true;
+
+    } else {
+
+      int adCnt = 0;
+      int nextAdPosition = (position1 * 60 * 1000);
+
+      List<Long> newTimes = new ArrayList<Long>();
+      List<String> newSongs = new ArrayList<String>();
+      for (int i = 0; i < times.size(); i++) {
+        long nextTime = times.get(i);
+        if (nextTime > nextAdPosition) {
+          newTimes.add(nextTime);
+          newSongs.add("START_AD_BREAK - START_AD_BREAK");
+          nextTime += 1000;
+
+          adCnt++;
+          int nextAdBase = adCnt % 2 == 0 ? position1 : position2;
+          nextAdPosition = ((nextAdBase * 60) + (adCnt / 2) * 60 * 60) * 1000;
+          inserted = true;
+        }
+
+        newTimes.add(nextTime);
+        newSongs.add(songs.get(i));
+      }
+
+      this.times = newTimes;
+      this.songs = newSongs;
+    }
+
+    // for (int i = 0; i < times.size(); i++) {
+    // System.out.println(TimeFormat.format((int) (times.get(i) / 1000), true) + " "
+    // + songs.get(i));
+    // }
+
+    return inserted;
+  }
 
   public void onStartBroadcasting() {
     this.idx = 0;

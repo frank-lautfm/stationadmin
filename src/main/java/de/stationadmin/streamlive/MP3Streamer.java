@@ -68,8 +68,9 @@ public class MP3Streamer {
   }
 
   public int getPlayTime() {
-    return this.mp3Writer != null && this.status != Status.OFFLINE && this.mp3Writer.getStartTime() > 0 ? (int) ((System.currentTimeMillis() - this.mp3Writer
-        .getStartTime()) / 1000) : 0;
+    return this.mp3Writer != null && this.status != Status.OFFLINE && this.mp3Writer.getStartTime() > 0
+        ? (int) ((System.currentTimeMillis() - this.mp3Writer.getStartTime()) / 1000)
+        : 0;
   }
 
   public int getNumTracks() {
@@ -77,8 +78,7 @@ public class MP3Streamer {
   }
 
   public int getCurrentTrackIndex() {
-    return this.metaWriter != null && this.metaWriter.getCurrentSong() != null ? this.metaWriter.getSongs().indexOf(this.metaWriter.getCurrentSong())
-        : -1;
+    return this.metaWriter != null && this.metaWriter.getCurrentSong() != null ? this.metaWriter.getSongs().indexOf(this.metaWriter.getCurrentSong()) : -1;
   }
 
   public String getCurrentSong() {
@@ -114,6 +114,17 @@ public class MP3Streamer {
     return rc;
   }
 
+  public boolean addAdTriggers(int pos1, int pos2) {
+    try {
+      if (this.metaWriter == null) {
+        this.metaWriter = new MetaDataWriter(null, ice);
+      }
+      return this.metaWriter.addAdTriggers(station, pos1, pos2);
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
   public void run(boolean waitForTrackChange) throws IOException {
     try {
       if (waitForTrackChange) {
@@ -136,23 +147,12 @@ public class MP3Streamer {
         this.mp3Writer = new MP3Writer(source.getInputStream(), this.ice.getOutStream(), this.metaWriter);
         this.mp3Writer.setMaxDuration(this.maxDuration);
         /*
-        if (this.metaWriter != null) {
-          Thread metaWriterThread = new Thread() {
-            public void run() {
-              try {
-                Thread.sleep(5000); // allow some time to connect to Icecast
-                while (mp3Writer.getStartTime() == 0 && !metaWriter.isAbort()) {
-                  Thread.sleep(500);
-                }
-                metaWriter.write(mp3Writer.getStartTime());
-              } catch (Exception e) {
-                e.printStackTrace();
-              }
-            }
-          };
-          metaWriterThread.start();
-        }
-        */
+         * if (this.metaWriter != null) { Thread metaWriterThread = new Thread() {
+         * public void run() { try { Thread.sleep(5000); // allow some time to connect
+         * to Icecast while (mp3Writer.getStartTime() == 0 && !metaWriter.isAbort()) {
+         * Thread.sleep(500); } metaWriter.write(mp3Writer.getStartTime()); } catch
+         * (Exception e) { e.printStackTrace(); } } }; metaWriterThread.start(); }
+         */
         try {
           this.status = Status.ONLINE;
           this.mp3Writer.write();

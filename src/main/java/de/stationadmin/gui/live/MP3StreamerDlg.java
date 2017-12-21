@@ -63,6 +63,10 @@ public class MP3StreamerDlg extends StationAdminFrame {
 
   private ValueModel lastDir = new ValueHolder();
 
+  private ValueHolder insertAdTriggers = new ValueHolder(Boolean.FALSE);
+  private ValueHolder adPosition1 = new ValueHolder(20);
+  private ValueHolder adPosition2 = new ValueHolder(50);
+
   private Timer timer;
 
   /**
@@ -101,13 +105,12 @@ public class MP3StreamerDlg extends StationAdminFrame {
   private void checkStatus() {
     if (this.ctx.getAdminClient().getMp3Streamer() != null) {
       this.configEnabled.setValue(this.ctx.getAdminClient().getMp3Streamer().getStatus() == Status.OFFLINE);
-      this.status.setValue(ctx.getTextProvider().getString(
-          "mp3streamer.status." + this.ctx.getAdminClient().getMp3Streamer().getStatus().name().toLowerCase()));
+      this.status.setValue(ctx.getTextProvider().getString("mp3streamer.status." + this.ctx.getAdminClient().getMp3Streamer().getStatus().name().toLowerCase()));
       this.time.setValue(TimeFormat.format(this.ctx.getAdminClient().getMp3Streamer().getPlayTime(), false));
       if (this.ctx.getAdminClient().getMp3Streamer().getNumTracks() > 0) {
         if (this.ctx.getAdminClient().getMp3Streamer().getCurrentTrackIndex() > -1) {
-          String progress = " (" + (this.ctx.getAdminClient().getMp3Streamer().getCurrentTrackIndex() + 1) + " / "
-              + this.ctx.getAdminClient().getMp3Streamer().getNumTracks() + ")";
+          String progress = " (" + (this.ctx.getAdminClient().getMp3Streamer().getCurrentTrackIndex() + 1) + " / " + this.ctx.getAdminClient().getMp3Streamer().getNumTracks()
+              + ")";
           this.track.setValue(this.ctx.getAdminClient().getMp3Streamer().getCurrentSong() + progress);
         } else {
           this.track.setValue(this.ctx.getAdminClient().getMp3Streamer().getCurrentSong());
@@ -123,7 +126,7 @@ public class MP3StreamerDlg extends StationAdminFrame {
   }
 
   private JPanel createConfigPanel() {
-    JPanel panel = new JPanel(new FormLayout("5dlu,pref,5dlu,pref:grow,pref,5dlu", "5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
+    JPanel panel = new JPanel(new FormLayout("5dlu,pref,5dlu,pref:grow,pref,5dlu", "5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
 
     final JTextField sourceTf = ctx.getComponentFactory().createTextField(this.sourcefile);
@@ -151,7 +154,7 @@ public class MP3StreamerDlg extends StationAdminFrame {
     panel.add(new JLabel(this.ctx.getString("mp3streamer.dlg.property.meta")), cc.xy(2, 4));
     panel.add(metaTf, cc.xy(4, 4));
     panel.add(new JButton(new FileSelectionAction(this.metafile, this.lastDir, "txt")), cc.xy(5, 4));
-    
+
     final JTextField durationTf = BasicComponentFactory.createIntegerField(this.maxDuration, 0);
     durationTf.setColumns(3);
     JPanel durationPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
@@ -160,9 +163,11 @@ public class MP3StreamerDlg extends StationAdminFrame {
     panel.add(new JLabel(this.ctx.getString("mp3streamer.dlg.property.maxduration")), cc.xy(2, 6));
     panel.add(durationPanel, cc.xy(4, 6, CellConstraints.LEFT, CellConstraints.CENTER));
 
-
     final JCheckBox delayCb = BasicComponentFactory.createCheckBox(this.waitForNextTrack, this.ctx.getString("mp3streamer.dlg.property.waiting"));
     panel.add(delayCb, cc.xywh(2, 8, 4, 1));
+
+    JPanel adTriggerPanel = new MP3StreamerAdTriggerPanel(ctx.getTextProvider(), insertAdTriggers, adPosition1, adPosition2);
+    panel.add(adTriggerPanel, cc.xywh(2, 10, 4, 1));
 
     this.configEnabled.addValueChangeListener(new PropertyChangeListener() {
 
@@ -208,7 +213,7 @@ public class MP3StreamerDlg extends StationAdminFrame {
 
   @Override
   protected Dimension getDefaultSize() {
-    return new Dimension(400, 300);
+    return new Dimension(400, 350);
   }
 
   private class StartAction extends AbstractAction {
@@ -239,10 +244,12 @@ public class MP3StreamerDlg extends StationAdminFrame {
       if (source != null) {
         try {
           final MP3Streamer streamer = new MP3Streamer(source, meta != null && meta.exists() ? meta : null);
-          streamer.setMaxDuration((Integer)maxDuration.getValue());
+          streamer.setMaxDuration((Integer) maxDuration.getValue());
+          if (insertAdTriggers.booleanValue()) {
+            streamer.addAdTriggers(adPosition1.intValue(), adPosition2.intValue());
+          }
           LiveAccount account = ctx.getAdminClient().getLiveAccount();
-          streamer.configureServer(account.getServer(), account.getPort(), ctx.getAdminClient().getStation(), account.getUser(),
-              account.getPassword());
+          streamer.configureServer(account.getServer(), account.getPort(), ctx.getAdminClient().getStation(), account.getUser(), account.getPassword());
           ctx.getAdminClient().setMp3Streamer(streamer);
           Thread t = new Thread() {
             public void run() {

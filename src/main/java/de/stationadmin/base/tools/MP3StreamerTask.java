@@ -28,6 +28,8 @@ public class MP3StreamerTask extends AbstractTask {
   private String sourceFile;
   private String metaDataFile;
   private boolean waitForTrackChange;
+  private int adTriggerPosition1 = -1;
+  private int adTriggerPosition2 = -1;
   private int maxDuration = 0;
 
   /**
@@ -55,6 +57,9 @@ public class MP3StreamerTask extends AbstractTask {
       final MP3Streamer streamer = new MP3Streamer(source, this.metaDataFile != null ? new File(metaDataFile) : null);
       streamer.configureServer(account.getServer(), account.getPort(), client.getStation(), account.getUser(), account.getPassword());
       streamer.setUserAgent("Station Admin " + Version.VERSION + "; " + System.getProperty("os.name"));
+      if(adTriggerPosition1 > -1 && adTriggerPosition2 > 0) {
+        streamer.addAdTriggers(adTriggerPosition1, adTriggerPosition1);
+      }
       client.setMp3Streamer(streamer);
 
       int rc = streamer.testConnect();
@@ -156,6 +161,22 @@ public class MP3StreamerTask extends AbstractTask {
    */
   public void setMaxDuration(int maxDuration) {
     this.maxDuration = maxDuration;
+  }
+
+  public int getAdTriggerPosition1() {
+    return adTriggerPosition1;
+  }
+
+  public void setAdTriggerPosition1(int adTriggerPosition1) {
+    this.adTriggerPosition1 = adTriggerPosition1;
+  }
+
+  public int getAdTriggerPosition2() {
+    return adTriggerPosition2;
+  }
+
+  public void setAdTriggerPosition2(int adTriggerPosition2) {
+    this.adTriggerPosition2 = adTriggerPosition2;
   }
 
 }
