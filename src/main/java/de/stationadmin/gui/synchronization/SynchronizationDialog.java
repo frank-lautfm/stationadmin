@@ -58,7 +58,7 @@ public class SynchronizationDialog extends JDialog {
 
   private void init() {
     this.getContentPane().setLayout(new BorderLayout());
-    this.setTitle("Synchronisierung");
+    this.setTitle("Synchronisierung - " + adminClient.getStation());
 
     JXLabel description = new JXLabel("Es sind Daten auf dem laut.fm-Server verändert worden. Station Admin ist möglicherweise nicht auf dem aktuellen Stand. Was möchtest Du synchronisieren?");
     description.setLineWrap(true);
