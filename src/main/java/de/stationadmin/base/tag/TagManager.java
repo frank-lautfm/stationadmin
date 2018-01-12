@@ -21,6 +21,7 @@ import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
@@ -36,6 +37,7 @@ import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.base.util.AbstractBean;
 import de.stationadmin.base.util.FileUtils;
+import de.stationadmin.lfm.backend.ResourceNotFoundException;
 import de.stationadmin.lfm.backend.Track;
 
 /**
@@ -98,7 +100,8 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
   }
 
   /**
-   * Deletes the tag with the given name completely - all tagging information gets lost
+   * Deletes the tag with the given name completely - all tagging information gets
+   * lost
    * 
    * @param tag
    */
@@ -107,7 +110,8 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
   }
 
   /**
-   * Deletes the tag with the given name completely - all tagging information gets lost
+   * Deletes the tag with the given name completely - all tagging information gets
+   * lost
    * 
    * @param tag
    */
@@ -278,7 +282,8 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
 
         ArrayList<Integer> ids = new ArrayList<Integer>();
         for (BasicTrack title : this.trackRegistry.getAllTracks()) {
-          if (tag.contains(title) && (plays == null || tag.isPlayedWithinInverse() != plays.contains(title.getId())) && (playlists == null || playlists.contains(title.getId())) && (tags == null || tags.contains(title.getId()))) {
+          if (tag.contains(title) && (plays == null || tag.isPlayedWithinInverse() != plays.contains(title.getId())) && (playlists == null || playlists.contains(title.getId()))
+              && (tags == null || tags.contains(title.getId()))) {
             ids.add(title.getId());
           }
         }
@@ -446,7 +451,8 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
       if (dtag != null) {
         boolean match = dtag.contains(this.trackRegistry.getTrack(titleId));
         if (match && dtag.getPlayedWithin() > 0) {
-          match = dtag.isPlayedWithinInverse() != this.getPlaysWithin(dtag.getPlayedWithin(), dtag.getPlayedWithinMinHour(), dtag.getPlayedWithinMaxHour(), dtag.getPlayedWithinPlaylist()).contains(titleId);
+          match = dtag.isPlayedWithinInverse() != this
+              .getPlaysWithin(dtag.getPlayedWithin(), dtag.getPlayedWithinMinHour(), dtag.getPlayedWithinMaxHour(), dtag.getPlayedWithinPlaylist()).contains(titleId);
         }
         if (match && dtag.getPlaylistIds() != null) {
           match = this.getTracksOfPlaylists(dtag.getPlaylistIds()).contains(titleId);
@@ -587,53 +593,58 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
     for (String tag : ctx.getServer().getTags(ctx.getStationId())) {
       this.ctx.updateStatus("getTag", tag);
 
-      oldTags.remove(tag.toLowerCase());
+      try {
+        int[] ids = this.ctx.getServer().getTaggedTracks(ctx.getStationId(), tag);
 
-      int[] ids = this.ctx.getServer().getTaggedTracks(ctx.getStationId(), tag);
-      Tag tagObj = this.getTag(tag);
-      StaticTag sTag = null;
-      if (tagObj == null) {
-        sTag = new StaticTag();
-        sTag.setName(tag);
-        this.saveStaticTag(sTag);
-      } else if (tagObj instanceof StaticTag) {
-        sTag = (StaticTag) tagObj;
-      }
-      if (sTag != null) {
+        oldTags.remove(tag.toLowerCase());
 
-        // unregister tag in all old tags
-        for (int id : getTagFile(tag, true).getIds()) {
-          RegisteredTrack t = this.trackRegistry.getTrack(id);
-          if (t != null) {
-            t.tagCountDec();
-          }
+        Tag tagObj = this.getTag(tag);
+        StaticTag sTag = null;
+        if (tagObj == null) {
+          sTag = new StaticTag();
+          sTag.setName(tag);
+          this.saveStaticTag(sTag);
+        } else if (tagObj instanceof StaticTag) {
+          sTag = (StaticTag) tagObj;
         }
+        if (sTag != null) {
 
-        int[] missing = new int[ids.length];
-        int missingIdx = 0;
-        this.getTagFile(tag, true).set(ids);
-        for (int id : ids) {
-          RegisteredTrack t = this.trackRegistry.getTrack(id);
-          if (t != null) {
-            // register tag
-            t.tagCountInc();
-          } else {
-            // mark as missing - will be loaded below
-            missing[missingIdx++] = id;
-          }
-        }
-
-        if (missingIdx > 0) {
-          // retrieve missing tracks
-          for (Track track : this.ctx.getServer().getTracks(ctx.getStationId(), missing)) {
-            if (trackRegistry.getTrack(track.getId()) == null) {
-              RegisteredTrack t = new RegisteredTrack(track);
-              t.tagCountInc();
-              this.trackRegistry.add(t);
+          // unregister tag in all old tags
+          for (int id : getTagFile(tag, true).getIds()) {
+            RegisteredTrack t = this.trackRegistry.getTrack(id);
+            if (t != null) {
+              t.tagCountDec();
             }
           }
-        }
 
+          int[] missing = new int[ids.length];
+          int missingIdx = 0;
+          this.getTagFile(tag, true).set(ids);
+          for (int id : ids) {
+            RegisteredTrack t = this.trackRegistry.getTrack(id);
+            if (t != null) {
+              // register tag
+              t.tagCountInc();
+            } else {
+              // mark as missing - will be loaded below
+              missing[missingIdx++] = id;
+            }
+          }
+
+          if (missingIdx > 0) {
+            // retrieve missing tracks
+            for (Track track : this.ctx.getServer().getTracks(ctx.getStationId(), missing)) {
+              if (trackRegistry.getTrack(track.getId()) == null) {
+                RegisteredTrack t = new RegisteredTrack(track);
+                t.tagCountInc();
+                this.trackRegistry.add(t);
+              }
+            }
+          }
+
+        }
+      } catch (ResourceNotFoundException e) {
+        Logger.getLogger(TagManager.class).warn("unable to retrieve tracks for " + tag);
       }
     }
 
@@ -679,7 +690,8 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
   }
 
   /**
-   * Tags tracks on server based on the content of the local file - used during backup
+   * Tags tracks on server based on the content of the local file - used during
+   * backup
    * 
    * @param tag
    * @throws IOException
@@ -721,7 +733,8 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
   }
 
   /**
-   * Should be called if tracks are deleted - removes the tracks from the static tag file
+   * Should be called if tracks are deleted - removes the tracks from the static
+   * tag file
    * 
    * @param trackIds
    * @throws IOException
