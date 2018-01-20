@@ -28,9 +28,11 @@ public class TagMenu extends JMenu {
   private boolean tag = true;
   private List<TrackTagAction> actions = new ArrayList<TrackTagAction>();
   private int[] titleIds = null;
+  private TextProvider textProvider;
 
   public TagMenu(TextProvider textProvider, TagManager tagManager, boolean tag) {
     super(textProvider.getString("action." + (tag ? "tag" : "untag")));
+    this.textProvider = textProvider;
     this.tag = tag;
     this.tagManager = tagManager;
     this.rebuild();
@@ -59,7 +61,7 @@ public class TagMenu extends JMenu {
     for (String tagName : tagManager.getTags()) {
       Tag tag = this.tagManager.getTag(tagName);
       if (tag instanceof StaticTag) {
-        TrackTagAction action = new TrackTagAction(this.tagManager, tagName, this.tag);
+        TrackTagAction action = new TrackTagAction(this.tagManager, textProvider, tagName, this.tag);
         actions.add(action);
         String group = tag.getGroup();
         JMenu menu = group != null ? groupsMenus.get(group) : null;
@@ -73,7 +75,7 @@ public class TagMenu extends JMenu {
     if (tag) {
       this.addSeparator();
       {
-        TrackTagAction action = new TrackTagAction(this.tagManager, null, this.tag);
+        TrackTagAction action = new TrackTagAction(this.tagManager, textProvider, null, this.tag);
         actions.add(action);
         this.add(action);
       }

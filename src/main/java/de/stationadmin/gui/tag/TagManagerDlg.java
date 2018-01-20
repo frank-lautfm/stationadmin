@@ -189,7 +189,7 @@ public class TagManagerDlg extends JFrame {
     public void actionPerformed(ActionEvent evt) {
       if (staticTag) {
         StaticTag tag = new StaticTag();
-        tag.setName("Neu");
+        tag.setName(StaticTagEditor.NAME_NEW);
         selection.setValue(tag);
       } else {
         DynamicTag tag = new DynamicTag();
@@ -214,7 +214,17 @@ public class TagManagerDlg extends JFrame {
         if (currentEditor instanceof StaticTagEditor) {
           ((StaticTagEditor) currentEditor).getModel().triggerCommit();
           StaticTag tag = ((StaticTagEditor) currentEditor).getModel().getBean();
-          tagManager.saveStaticTag(tag);
+          if(tag.getName().trim().length() == 0) {
+            ErrorInfo errorInfo = ctx.createErrorInfo(null, "titletagmanager.action.save.illegalname.empty");
+            JXErrorPane.showDialog(TagManagerDlg.this, errorInfo);
+          }
+          else if(tag.getName().contains("/")) {
+            ErrorInfo errorInfo = ctx.createErrorInfo(null, "titletagmanager.action.save.illegalname.slash");
+            JXErrorPane.showDialog(TagManagerDlg.this, errorInfo);
+          }
+          else {
+            tagManager.saveStaticTag(tag);
+          }
         } else if (currentEditor instanceof DynamicTagEditor) {
           ((DynamicTagEditor) currentEditor).getModel().triggerCommit();
           DynamicTag tag = ((DynamicTagEditor) currentEditor).getModel().getBean();

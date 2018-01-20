@@ -10,6 +10,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 
 import de.stationadmin.base.tag.TagManager;
+import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.tag.TagNameDlg;
 
 /**
@@ -23,6 +24,7 @@ public class TrackTagAction extends AbstractAction {
   private String tagName;
   private int[] titleIds;
   private boolean tag;
+  private TextProvider textProvider;
 
   /**
    * Constructor
@@ -30,11 +32,12 @@ public class TrackTagAction extends AbstractAction {
    * @param tagName name of the tag
    * @param tag <code>true</code> to add tag, <code>false</code> to remove tag
    */
-  public TrackTagAction(TagManager tagManager, String tagName, boolean tag) {
+  public TrackTagAction(TagManager tagManager, TextProvider textProvider, String tagName, boolean tag) {
     super();
     this.tagManager = tagManager;
     this.tagName = tagName;
     this.tag = tag;
+    this.textProvider = textProvider;
     if (tagName != null) {
       this.putValue(Action.NAME, tagName);
     } else {
@@ -50,7 +53,7 @@ public class TrackTagAction extends AbstractAction {
     if (this.titleIds != null) {
       String tagName = this.tagName;
       if (tagName == null) {
-        TagNameDlg dlg = new TagNameDlg();
+        TagNameDlg dlg = new TagNameDlg(textProvider);
         dlg.setModal(true);
         dlg.setVisible(true);
         if (dlg.isAccepted() && dlg.getTagName() != null) {

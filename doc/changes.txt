@@ -6,6 +6,14 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.6.2
+-------------
+[#] Stationsnamen im Synchronisierungsdialog
+[*] Bessere Fehlerbehandlung für ungültige Tagnamen
+[#] Leere Tagnamen und Tagnamen mit / werden nicht mehr akzeptiert
+[*] Namen existierender statischer Tags sind nicht mehr editierbar 
+
+
 Version 4.6.1
 -------------
 [#] Präziseres Setzen von Songinfos bei "MP3-Datei live senden"

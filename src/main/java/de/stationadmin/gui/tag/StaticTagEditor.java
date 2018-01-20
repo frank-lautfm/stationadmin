@@ -15,8 +15,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.jgoodies.binding.PresentationModel;
-import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -30,6 +31,7 @@ import de.stationadmin.gui.util.NonObservingPresentationModel;
  */
 public class StaticTagEditor extends JPanel {
   private static final long serialVersionUID = 1267493346283823161L;
+  public static final String NAME_NEW = "Neu";
   private ClientContext ctx;
   private PresentationModel<StaticTag> model = new NonObservingPresentationModel<StaticTag>((StaticTag) null);
 
@@ -76,7 +78,15 @@ public class StaticTagEditor extends JPanel {
       }
     });
 
-    JTextField tf = ctx.getComponentFactory().createTextField(model.getBufferedModel("name"));
+    final JTextField tf = ctx.getComponentFactory().createTextField(model.getBufferedModel("name"));
+    model.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
+      
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        String newName = model.getBean().getName();
+        tf.setEditable(StringUtils.isEmpty(newName) || newName.equals(NAME_NEW));
+      }
+    });
 
     this.add(new JLabel(ctx.getString("titletagmanager.property.name")), cc.xy(2, 4));
     this.add(tf, cc.xy(4, 4));

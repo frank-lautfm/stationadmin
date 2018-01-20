@@ -166,6 +166,7 @@ public class LautfmAdminService {
       throw new AuthenticationException();
     case 404:
       log.info(response.getStatusLine().getStatusCode());
+      this.client = createClient();
       throw new ResourceNotFoundException();
     }
   }
@@ -545,6 +546,9 @@ public class LautfmAdminService {
   }
 
   public int[] getTaggedTracks(int stationId, String tag) throws IOException {
+    if(tag.length() == 0) {
+      return new int[0];
+    }
     tag = URLEncoder.encode(tag, "UTF-8");
     tag = StringUtils.replace(tag, "+", "%20");
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/tracks/tags/" + tag);
