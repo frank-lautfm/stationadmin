@@ -39,6 +39,9 @@ public class GVLValidator implements PlaylistValidator {
   }
 
   public boolean validate(Playlist playlist, List<Entry> violations, boolean checkRollover) {
+    if(playlist.isShuffle()) {
+      return true;
+    }
     Map<String, List<TitleEntry>> artistTitleMap = this.buildArtistTitleMap(playlist);
     List<TitleEntry> titleViolationEntries;
     if(playlist.isShuffle()) {

@@ -12,6 +12,7 @@ Version 4.6.2
 [*] Bessere Fehlerbehandlung für ungültige Tagnamen
 [#] Leere Tagnamen und Tagnamen mit / werden nicht mehr akzeptiert
 [*] Namen existierender statischer Tags sind nicht mehr editierbar 
+[#] Kein GVL-Regelcheck mehr auf Playlists die durch laut.fm geshuffelt werden
 
 
 Version 4.6.1
