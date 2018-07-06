@@ -557,7 +557,7 @@ public class PlaylistViewer extends JPanel {
             BitSet bs = (BitSet) taggedTitlesHolder.getValue();
             if (title != null && bs.get(title.getId())) {
               if (!adapter.isSelected()) {
-                comp.setBackground(new Color(240, 240, 240));
+                comp.setBackground(new Color(210, 210, 210));
               }
             }
           }

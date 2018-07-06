@@ -6,6 +6,11 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.6.3
+-------------
+
+[#] Playlistviewer: Deutlichere Hervorhebung von getaggten Titeln
+
 Version 4.6.2
 -------------
 [#] Stationsnamen im Synchronisierungsdialog
