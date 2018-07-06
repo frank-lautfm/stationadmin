@@ -10,6 +10,7 @@ Version 4.6.3
 -------------
 
 [#] Playlistviewer: Deutlichere Hervorhebung von getaggten Titeln
+[#] Einstellungen / Normaliesieren von Künstlernamen: Label "Umbenennen in" geändert in "Gleichsetzen mit" 
 
 Version 4.6.2
 -------------
