@@ -75,7 +75,7 @@ public class LogAnalyzerService implements Service {
       @Override
       public void run() {
         // make sure statistics of past 6 days are downloaded
-        for (int i = 6; i > 0; i--) {
+        for (int i = 31; i > 0; i--) {
           long time = System.currentTimeMillis() - i * 24 * 60 * 60 * 1000l;
           Date day = new Date(time);
           try {
@@ -115,7 +115,7 @@ public class LogAnalyzerService implements Service {
     Calendar calEntry = Calendar.getInstance();
     calDay.setTime(day);
 
-    if (day.getTime() > System.currentTimeMillis() - DAY_IN_MS * 8) {
+    if (day.getTime() > System.currentTimeMillis() - (DAY_IN_MS * 32l)) {
 
       SimpleDateFormat timeFmt = new SimpleDateFormat(TIME_FORMAT);
 
@@ -123,28 +123,35 @@ public class LogAnalyzerService implements Service {
       log.info("download " + type + " for " + date);
 
       int numDays = (int) ((System.currentTimeMillis() - day.getTime()) / DAY_IN_MS) + 2;
-      if(numDays > 7) {
+      if (numDays > 7) {
         numDays = 7;
       }
 
       TrackStatsEntry[] stats = null;
 
-      if (bufferedEntries != null && bufferedEntriesDays >= numDays && !isToday(day)) {
-        stats = bufferedEntries;
-      } else {
-        stats = this.ctx.getServer().getTrackStatistics(this.ctx.getStationId(), numDays);
-        Arrays.sort(stats, new Comparator<TrackStatsEntry>() {
+      // try get by day
+      stats = this.ctx.getServer().getTrackStatisticsByDate(this.ctx.getStationId(), day);
 
-          @Override
-          public int compare(TrackStatsEntry o1, TrackStatsEntry o2) {
-            long d1 = o1.getStartedAt() != null ? o1.getStartedAt().getTime() : Long.MAX_VALUE;
-            long d2 = o2.getStartedAt() != null ? o2.getStartedAt().getTime() : Long.MAX_VALUE;
-            return Long.compare(d1, d2);
-          }
-        });
+      // on failure: try get from recent stats
+      if (stats == null || stats.length == 0) {
 
-        bufferedEntries = stats;
-        bufferedEntriesDays = numDays;
+        if (bufferedEntries != null && bufferedEntriesDays >= numDays && !isToday(day)) {
+          stats = bufferedEntries;
+        } else {
+          stats = this.ctx.getServer().getTrackStatistics(this.ctx.getStationId(), numDays);
+          Arrays.sort(stats, new Comparator<TrackStatsEntry>() {
+
+            @Override
+            public int compare(TrackStatsEntry o1, TrackStatsEntry o2) {
+              long d1 = o1.getStartedAt() != null ? o1.getStartedAt().getTime() : Long.MAX_VALUE;
+              long d2 = o2.getStartedAt() != null ? o2.getStartedAt().getTime() : Long.MAX_VALUE;
+              return Long.compare(d1, d2);
+            }
+          });
+
+          bufferedEntries = stats;
+          bufferedEntriesDays = numDays;
+        }
       }
       StringBuilder buf = new StringBuilder();
       for (TrackStatsEntry entry : stats) {
@@ -355,8 +362,8 @@ public class LogAnalyzerService implements Service {
             listeners = Integer.parseInt(keyValue[1]);
           } else if (keyValue[0].equals("duration")) {
             duration = Integer.parseInt(keyValue[1]);
-            if(cal.getTimeInMillis() > 1481806854618l) {
-              duration = duration * 60; 
+            if (cal.getTimeInMillis() > 1481806854618l) {
+              duration = duration * 60;
             }
             // else: Stats from Station Admin 3 have been in minutes anyway
           } else if (keyValue[0].equals("avg")) {
@@ -381,12 +388,11 @@ public class LogAnalyzerService implements Service {
             int diffMs = (int) (startNext - entry.getTime().getTime());
             double minutes = Math.round((double) diffMs / 60000);
             tlm += minutes * entry.getListeners();
-          }
-          else {
+          } else {
             tlm += 3 * entry.getListeners();
           }
         }
-        return new DailySummary(cal.getTime(), (int)tlm);
+        return new DailySummary(cal.getTime(), (int) tlm);
       }
     }
 
@@ -487,7 +493,7 @@ public class LogAnalyzerService implements Service {
               // might happen during start up - just ignore the event
               return;
             }
-            if(titleId > 0) {
+            if (titleId > 0) {
               playsToday.add(new Play(new Date(System.currentTimeMillis()), titleRegistry.getTrack(titleId)));
             }
           } catch (Exception e) {
@@ -515,35 +521,31 @@ public class LogAnalyzerService implements Service {
     if (this.ctx.getStationStatus().getListenersYesterday() == 0) {
       return;
     }
-    
+
     Statistics stats = ctx.getServer().getStatistics(ctx.getStationId());
-    
+
     Calendar cal = Calendar.getInstance();
     cal.setTimeInMillis(System.currentTimeMillis());
 
-
-    for(int i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++) {
       cal.add(Calendar.DAY_OF_MONTH, -1);
       String date = new SimpleDateFormat(DATE_FORMAT).format(cal.getTime());
       String filename = this.logCacheDir + "station_dailysummary" + "-" + date + ".log";
-      
+
       if (!new File(filename).exists() && stats.getTlhLog().containsKey(date)) {
         StringBuilder buf = new StringBuilder();
-        
+
         Integer listeners = stats.getSwitchonsLog().get(date);
         Integer hours = stats.getTlhLog().get(date);
         int avg = listeners != null ? hours.intValue() * 60 / listeners.intValue() : 0;
-        
+
         buf.append("listeners\t" + (listeners != null ? listeners.intValue() : 0) + "\n");
         buf.append("duration\t" + hours + "\n");
         buf.append("avg\t" + avg + "\n");
         FileUtils.writeStringToFile(new File(filename), buf.toString());
       }
 
-      
     }
-
-
 
   }
 

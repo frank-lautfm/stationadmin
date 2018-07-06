@@ -9,6 +9,7 @@ Station Admin für laut.fm - Änderungen
 Version 4.6.3
 -------------
 
+[#] Anpassung an neue Track-Stats-API
 [#] Playlistviewer: Deutlichere Hervorhebung von getaggten Titeln
 [#] Einstellungen / Normaliesieren von Künstlernamen: Label "Umbenennen in" geändert in "Gleichsetzen mit" 
 

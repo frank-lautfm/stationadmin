@@ -10,8 +10,10 @@ import java.net.SocketException;
 import java.net.URLEncoder;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -261,6 +263,17 @@ public class LautfmAdminService {
       response.close();
     }
   }
+  
+  public TrackStatsEntry[] getTrackStatisticsByDate(int stationId, Date date) throws IOException {
+    SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
+    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/tracks/stats/" + dateFmt.format(date));
+    try {
+      return deserializeJson(response, TrackStatsEntry[].class);
+    } finally {
+      response.close();
+    }
+  }
+
 
   public void start(int stationId) throws IOException {
     HashMap<String, Object> args = new HashMap<String, Object>();
