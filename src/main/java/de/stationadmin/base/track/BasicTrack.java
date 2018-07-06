@@ -75,13 +75,13 @@ public class BasicTrack {
    */
   public static boolean isArtistEqual(String artist1, String artist2) {
     if (artist1 != null) {
-      artist1 = artist1.replaceAll("\\&", "and");
+      artist1 = artist1.replaceAll("\\&", "and").trim();
       if(artist1.toLowerCase().startsWith("the ")) {
         artist1 = artist1.substring(4);
       }
     }
     if (artist2 != null) {
-      artist2 = artist2.replaceAll("\\&", "and");
+      artist2 = artist2.replaceAll("\\&", "and").trim();
       if(artist2.toLowerCase().startsWith("the ")) {
         artist2 = artist2.substring(4);
       }
@@ -96,6 +96,8 @@ public class BasicTrack {
     if ((str1 == null && str2 != null) || (str2 != null && str2 == null)) {
       return false;
     }
+    str1 = str1.trim();
+    str2 = str2.trim();
     if (str1.length() != str2.length()) {
       return false;
     }
