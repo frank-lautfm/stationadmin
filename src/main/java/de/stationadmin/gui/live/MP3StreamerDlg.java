@@ -106,7 +106,7 @@ public class MP3StreamerDlg extends StationAdminFrame {
     if (this.ctx.getAdminClient().getMp3Streamer() != null) {
       this.configEnabled.setValue(this.ctx.getAdminClient().getMp3Streamer().getStatus() == Status.OFFLINE);
       this.status.setValue(ctx.getTextProvider().getString("mp3streamer.status." + this.ctx.getAdminClient().getMp3Streamer().getStatus().name().toLowerCase()));
-      this.time.setValue(TimeFormat.format(this.ctx.getAdminClient().getMp3Streamer().getPlayTime(), false));
+      this.time.setValue(TimeFormat.format(this.ctx.getAdminClient().getMp3Streamer().getPlayTime(), true));
       if (this.ctx.getAdminClient().getMp3Streamer().getNumTracks() > 0) {
         if (this.ctx.getAdminClient().getMp3Streamer().getCurrentTrackIndex() > -1) {
           String progress = " (" + (this.ctx.getAdminClient().getMp3Streamer().getCurrentTrackIndex() + 1) + " / " + this.ctx.getAdminClient().getMp3Streamer().getNumTracks()

@@ -10,8 +10,9 @@ Version 4.6.3
 -------------
 
 [#] Anpassung an neue Track-Stats-API
-[#] Playlistviewer: Deutlichere Hervorhebung von getaggten Titeln
+[#] Playlistviewer: Deutlicherer Kontrast beim Hervorheben von getaggten Titeln
 [#] Einstellungen / Normaliesieren von Künstlernamen: Label "Umbenennen in" geändert in "Gleichsetzen mit" 
+[*] MP3-Datei live senden: Zeitanzeige mit Stunden
 
 Version 4.6.2
 -------------
