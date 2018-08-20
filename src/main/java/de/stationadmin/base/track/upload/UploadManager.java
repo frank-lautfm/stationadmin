@@ -3,11 +3,15 @@
  */
 package de.stationadmin.base.track.upload;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,25 +54,83 @@ public class UploadManager extends AbstractBean {
   public boolean add(File file) {
     return add(file, false);
   }
-  
+
   public boolean add(File file, boolean forcePrivate) {
-    if (file.exists() && !file.isDirectory() && file.getName().toLowerCase().endsWith("mp3") && file.length() < 1024 * 1024 * 65) {
-      int oldRemaining = this.getNumberOfRemainingFiles();
-      QueuedTrack track = new QueuedTrack(file);
-      if(forcePrivate) {
-        track.getFile().setPrivateTrack(true);
+    if (file.exists() && !file.isDirectory()) {
+      if (file.getName().toLowerCase().endsWith("mp3") && file.length() < 1024 * 1024 * 65) {
+        int oldRemaining = this.getNumberOfRemainingFiles();
+        QueuedTrack track = new QueuedTrack(file);
+        if (forcePrivate) {
+          track.getFile().setPrivateTrack(true);
+        }
+        this.queue.add(track);
+
+        this.progressListener.add(file);
+        this.firePropertyChange("numberOfRemainingFiles", oldRemaining, this.getNumberOfRemainingFiles());
+        this.saveQueue();
+        return true;
+      } else if (file.getName().toLowerCase().endsWith(".m3u")) {
+        boolean success = false;
+        try {
+          List<File> files = readM3u(file, null);
+          for (File mp3File : files) {
+            if (add(mp3File, forcePrivate)) {
+              success = true;
+            }
+          }
+        } catch (IOException e) {
+        }
+        return success;
+
       }
-      this.queue.add(track);
-      
-      this.progressListener.add(file);
-      this.firePropertyChange("numberOfRemainingFiles", oldRemaining, this.getNumberOfRemainingFiles());
-      this.saveQueue();
-      return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
+  private List<File> readM3u(File file, String enc) throws IOException {
+    File dir = file.getParentFile();
+    String drive = "";
+    if (dir.getAbsolutePath().charAt(1) == ':') {
+      drive = dir.getAbsolutePath().substring(0, 2);
+    }
+
+    Reader reader = null;
+    if (enc != null) {
+      reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), enc), 1024 * 8);
+    } else {
+      reader = new BufferedReader(new FileReader(file), 1024 * 8);
+    }
+    StringBuffer text = new StringBuffer();
+    char[] buffer = new char[1024 * 8];
+    int chars = 0;
+    do {
+      chars = reader.read(buffer);
+      if (chars > 0) {
+        text.append(buffer, 0, chars);
+      }
+    } while (chars > 0);
+    reader.close();
+
+    List<File> files = new ArrayList<File>();
+    String[] lines = StringUtils.split(text.toString(), "\n\r");
+    for (String line : lines) {
+      line = line.trim();
+      if (line.length() > 1 && line.charAt(0) != '#') {
+        String entryFilename = line;
+        if (entryFilename.charAt(0) != '\\' && entryFilename.charAt(0) != '/' && entryFilename.charAt(1) != ':') {
+          // entry is relative to m3u file
+          entryFilename = dir.getAbsolutePath() + File.separatorChar + entryFilename;
+        } else if (drive.length() > 0 && entryFilename.charAt(1) != ':') {
+          entryFilename = drive + entryFilename;
+        }
+        File mp3File = new File(entryFilename);
+        files.add(mp3File);
+      }
+    }
+
+    return files;
+
+  }
 
   public boolean removeFile(File file) {
     if (this.currentIndex < this.queue.size() && this.queue.get(currentIndex).getFile().getFile().getAbsolutePath().equals(file.getAbsolutePath())) {
@@ -90,6 +152,7 @@ public class UploadManager extends AbstractBean {
 
   /**
    * Number of files that still need to be uploaded
+   * 
    * @return
    */
   public int getNumberOfRemainingFiles() {
@@ -111,10 +174,9 @@ public class UploadManager extends AbstractBean {
           entry.setStatus(UploadStatus.UPLOADING);
           fireTrackStatusUpdate();
           entry.setResponse(this.trackService.upload(entry.getFile(), progressListener));
-          if(progressListener.isAbortCurrent()) {
+          if (progressListener.isAbortCurrent()) {
             entry.setStatus(UploadStatus.ABORTED);
-          }
-          else {
+          } else {
             entry.setStatus(UploadStatus.PROCESSING);
           }
           this.numberOfTracksProcessing++;
@@ -244,7 +306,7 @@ public class UploadManager extends AbstractBean {
         if (entry.getResponse() != null) {
           try {
             DetailedTrack track = trackService.getTrack(entry.getResponse().getId());
-            if(track == null) {
+            if (track == null) {
               log.error("No track retrieved for " + entry.getResponse().getId() + " - upload failed");
               entry.setStatus(UploadStatus.ABORTED); // not the nicest thing, but we need to get rid of this entry
               toBeRemoved.add(entry);
@@ -264,39 +326,37 @@ public class UploadManager extends AbstractBean {
         }
       }
     }
-    if(toBeRemoved.size() > 0) {
+    if (toBeRemoved.size() > 0) {
       int oldRemaining = this.getNumberOfRemainingFiles();
-      for(QueuedTrack track : toBeRemoved) {
+      for (QueuedTrack track : toBeRemoved) {
         this.queue.remove(track);
         this.progressListener.remove(track.getFile().getFile());
       }
       this.firePropertyChange("numberOfRemainingFiles", oldRemaining, this.getNumberOfRemainingFiles());
       this.saveQueue();
     }
-    
-    if(tracksCompleted) {
+
+    if (tracksCompleted) {
       fireTrackCompleted();
-      if(remaining == 0 && this.getNumberOfRemainingFiles() == 0) {
+      if (remaining == 0 && this.getNumberOfRemainingFiles() == 0) {
         try {
           trackService.saveTracks();
-        } catch(Exception e) {
+        } catch (Exception e) {
         }
       }
     }
-    
-    
-    
+
     this.numberOfTracksProcessing = remaining;
     return remaining;
   }
 
   private void addToProcessed(QueuedTrack track) {
     int numProcessed = this.processedTracks.size();
-    processedTracks.add(track); 
+    processedTracks.add(track);
     this.firePropertyChange("numProcessedTracks", numProcessed, this.processedTracks.size());
- 
+
   }
-  
+
   /**
    * Clears the list of processed tracks
    */
@@ -305,7 +365,7 @@ public class UploadManager extends AbstractBean {
     this.processedTracks.clear();
     this.firePropertyChange("numProcessedTracks", numProcessed, this.processedTracks.size());
   }
-  
+
   private void fireTrackStatusUpdate() {
     this.firePropertyChange("trackStatusUpdate", false, true);
   }

@@ -6,6 +6,12 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+
+Version 4.7.0
+-------------
+[+] m3u-Support beim Upload
+[*] Fehler beim Synchronisieren von Tags mit "?" im Namen behoben
+
 Version 4.6.3
 -------------
 
