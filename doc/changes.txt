@@ -10,6 +10,8 @@ Station Admin für laut.fm - Änderungen
 Version 4.7.0
 -------------
 [+] m3u-Support beim Upload
+[+] Gültigkeistprüfung für Ad-Trigger
+[+] Einfügen von Ad-Triggern per Knopfdruck
 [*] Fehler beim Synchronisieren von Tags mit "?" im Namen behoben
 
 Version 4.6.3

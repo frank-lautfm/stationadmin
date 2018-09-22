@@ -330,7 +330,7 @@ public class StationAdminWindow extends StationAdminFrame {
   }
 
   private void initTray() {
-    if (SystemTray.isSupported() && !SystemUtils.IS_OS_MAC_OSX && !SystemUtils.IS_OS_LINUX) {
+    if (!SystemUtils.IS_OS_MAC_OSX && !SystemUtils.IS_OS_LINUX && SystemTray.isSupported()) {
       this.minimizesToTray = true;
       Icon icon = ctx.getIcon("trayicon.png");
       Image img = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_4BYTE_ABGR);

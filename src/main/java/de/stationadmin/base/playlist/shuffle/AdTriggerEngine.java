@@ -24,6 +24,8 @@ public class AdTriggerEngine implements PlaylistEnhancer {
   private int adSeparatorId = -1;
   private int adTriggerId = 0;
   private AdJingleCollisionStrategy jingleCollisionStrategy = AdJingleCollisionStrategy.KEEP_BOTH;
+  
+  private boolean clearExistingTriggers;
 
   public AdTriggerEngine(TrackRegistry trackRegistry) {
     this.trackRegistry = trackRegistry;
@@ -95,6 +97,12 @@ public class AdTriggerEngine implements PlaylistEnhancer {
 
     boolean allowMove = true;
     for (int i = 0; i < tracks.size(); i++) {
+      if(clearExistingTriggers) {
+        if(tracks.get(i).getId() == adTriggerId || tracks.get(i).getId() == 0 || tracks.get(i).getId() == adSeparatorId) {
+          continue;
+        }
+      }
+      
       boolean addTrigger = currentPosition > nextAdPosition;
       boolean addTrack = true;
 
@@ -175,5 +183,13 @@ public class AdTriggerEngine implements PlaylistEnhancer {
 
   public void setTrackRegistry(TrackRegistry trackRegistry) {
     this.trackRegistry = trackRegistry;
+  }
+
+  public boolean isClearExistingTriggers() {
+    return clearExistingTriggers;
+  }
+
+  public void setClearExistingTriggers(boolean clearExistingTriggers) {
+    this.clearExistingTriggers = clearExistingTriggers;
   }
 }

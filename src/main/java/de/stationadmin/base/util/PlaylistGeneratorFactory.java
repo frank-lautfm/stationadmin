@@ -100,7 +100,7 @@ public class PlaylistGeneratorFactory {
     }
   }
 
-  private static AdTriggerEngine createAdTriggerEngine(StationAdminClient client) {
+  public static AdTriggerEngine createAdTriggerEngine(StationAdminClient client) {
     Settings settings = client.getSettings();
     AdTriggerEngine engine = new AdTriggerEngine(client.getTrackService().getTrackRegistry());
     engine.setAdSeparatorId(settings.getAdSeparatorId());

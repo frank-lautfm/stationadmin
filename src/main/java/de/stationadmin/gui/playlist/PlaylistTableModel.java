@@ -16,12 +16,13 @@ import com.jgoodies.binding.value.ValueModel;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
+import de.stationadmin.base.playlist.validation.AdTriggerValidator;
 import de.stationadmin.base.playlist.validation.GVLValidator;
 import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.tag.TagManager;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.TextProvider;
 
@@ -41,11 +42,14 @@ public class PlaylistTableModel extends AbstractTableModel {
   private Playlist playlist;
   private List<Entry> gvlValidationErrors = new ArrayList<Entry>();
   private ValueModel hasValidationErrors = new ValueHolder(Boolean.FALSE);
+  private ValueModel warningMessage = new ValueHolder(null);
 
   private boolean validationEnabled = true;
 
   private List<String> tagNames = new ArrayList<String>();
   private TagManager tagManager;
+
+  private AdTriggerValidator adTriggerValidator = new AdTriggerValidator();
 
   private ChangeListener changeListener = new ChangeListener() {
 
@@ -54,10 +58,11 @@ public class PlaylistTableModel extends AbstractTableModel {
     public void stateChanged(ChangeEvent e) {
       Object oldSelection = selectionHolder.getValue();
       gvlValidationErrors.clear();
-      if (playlist != null && playlist.isGvlCheck() && validationEnabled) {
-        if (!playlist.isShuffle()) {
+      if (playlist != null && !playlist.isShuffle()) {
+        if (playlist.isGvlCheck() && validationEnabled) {
           new GVLValidator().validate(playlist, gvlValidationErrors);
         }
+        checkAdTriggers();
       }
       hasValidationErrors.setValue(gvlValidationErrors.size() > 0 ? Boolean.TRUE : Boolean.FALSE);
       fireTableDataChanged();
@@ -106,6 +111,18 @@ public class PlaylistTableModel extends AbstractTableModel {
       }
     });
 
+  }
+
+  void checkAdTriggers() {
+    if (playlist != null && !playlist.isShuffle()) {
+      if (!this.adTriggerValidator.validate(playlist, new ArrayList<Playlist.Entry>())) {
+        warningMessage.setValue(textProvider.getString("playlistviewer.msg.adtrigger"));
+      } else {
+        warningMessage.setValue(null);
+      }
+    } else {
+      warningMessage.setValue(null);
+    }
   }
 
   @Override
@@ -196,7 +213,7 @@ public class PlaylistTableModel extends AbstractTableModel {
       }
     case TAGS:
       if (track instanceof RegisteredTrack) {
-        return getTags((RegisteredTrack)track);
+        return getTags((RegisteredTrack) track);
       } else {
         return null;
       }
@@ -221,6 +238,7 @@ public class PlaylistTableModel extends AbstractTableModel {
     if (this.playlist != null && playlist.isGvlCheck() && validationEnabled) {
       new GVLValidator().validate(playlist, this.gvlValidationErrors);
     }
+    checkAdTriggers();
     this.hasValidationErrors.setValue(this.gvlValidationErrors.size() > 0 ? Boolean.TRUE : Boolean.FALSE);
     this.fireTableDataChanged();
   }
@@ -298,6 +316,10 @@ public class PlaylistTableModel extends AbstractTableModel {
     } catch (Exception e) {
     }
     return null;
+  }
+
+  public ValueModel getWarningMessage() {
+    return warningMessage;
   }
 
 }

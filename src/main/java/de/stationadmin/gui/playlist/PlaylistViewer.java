@@ -2,9 +2,6 @@ package de.stationadmin.gui.playlist;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -40,7 +37,6 @@ import javax.swing.JToolBar;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.TransferHandler;
-import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -55,6 +51,7 @@ import org.jdesktop.swingx.decorator.AbstractHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 
 import com.jgoodies.binding.PresentationModel;
+import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -67,6 +64,7 @@ import de.stationadmin.base.playlist.exporter.PlaylistBackupExporter;
 import de.stationadmin.base.playlist.exporter.PlaylistCSVExporter;
 import de.stationadmin.base.playlist.exporter.PlaylistExcelExporter;
 import de.stationadmin.base.playlist.exporter.PlaylistTxtExporter;
+import de.stationadmin.base.playlist.shuffle.AdTriggerEngine;
 import de.stationadmin.base.playlist.shuffle.PlaylistGenerator;
 import de.stationadmin.base.playlist.shuffle.PlaylistShuffler;
 import de.stationadmin.base.playlist.trackimport.TrackImportHandler;
@@ -124,6 +122,7 @@ public class PlaylistViewer extends JPanel {
   private ValueModel taggedTitlesHolder = new ValueHolder();
   private ValueModel hasValidationErrors = new ValueHolder(Boolean.FALSE);
   private ValueModel highlightedTrackHolder = new ValueHolder(new HashSet<Integer>(), true);
+  private ValueModel warningMessage;
 
   private JLabel statisticsLabel = new JLabel("");
 
@@ -214,41 +213,28 @@ public class PlaylistViewer extends JPanel {
       }
     });
 
-    
+    final JLabel warningLabel = BasicComponentFactory.createLabel(warningMessage);
+    warningLabel.setForeground(Color.RED);
+
     this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-          if (evt.getNewValue() instanceof Playlist) {
-            Playlist playlist = (Playlist) evt.getNewValue();
-            updateStatsLabel(playlist);
-          }
-        }
-      });
-    this.taggedTitlesHolder.addValueChangeListener(new PropertyChangeListener() {
-		
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-            Playlist playlist = (Playlist) playlistHolder.getValue();
-            updateStatsLabel(playlist);
-			
-		}
-	});
-
-    // if the playlist is modified, remove statistics text - it is not longer up
-    // to date
-    /*
-    this.presentationModel.getModel("modified").addValueChangeListener(new PropertyChangeListener() {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getNewValue() instanceof Boolean && evt.getNewValue().equals(Boolean.TRUE)) {
-          statisticsLabel.setText("");
+        if (evt.getNewValue() instanceof Playlist) {
+          Playlist playlist = (Playlist) evt.getNewValue();
+          updateStatsLabel(playlist);
         }
       }
-
     });
-    */
+    this.taggedTitlesHolder.addValueChangeListener(new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        Playlist playlist = (Playlist) playlistHolder.getValue();
+        updateStatsLabel(playlist);
+
+      }
+    });
 
     final JLabel type = new JLabel("");
     this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
@@ -277,47 +263,52 @@ public class PlaylistViewer extends JPanel {
     JXStatusBar.Constraint shuffleConst = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
     statusBar.add(shuffleLabel, shuffleConst);
 
+    JXStatusBar.Constraint warningConst = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
+    statusBar.add(warningLabel, warningConst);
+
     return statusBar;
   }
-  
+
   private void updateStatsLabel(Playlist playlist) {
-	if(playlist != null) {
-      int numSelectedForTag = taggedTitlesHolder.getValue() != null ?  ((BitSet) taggedTitlesHolder.getValue()).cardinality() : 0;
+    if (playlist != null) {
+      int numSelectedForTag = taggedTitlesHolder.getValue() != null ? ((BitSet) taggedTitlesHolder.getValue()).cardinality() : 0;
       int numTagged = 0;
-      if(numSelectedForTag > 0) {
-      	BitSet bs = (BitSet) taggedTitlesHolder.getValue();
-      	for(Entry entry : playlist.getEntries()) {
-      		if(bs.get(entry.getTrackId())) {
-      			numTagged++;
-      		}
-      	}
+      if (numSelectedForTag > 0) {
+        BitSet bs = (BitSet) taggedTitlesHolder.getValue();
+        for (Entry entry : playlist.getEntries()) {
+          if (bs.get(entry.getTrackId())) {
+            numTagged++;
+          }
+        }
       }
-      if(numTagged > 0) {
-          statisticsLabel.setText(textProvider.getString("playlistviewer.statistics.highlighted", Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists()), Integer.toString(numTagged)));
-      }
-      else {
-        statisticsLabel.setText(textProvider.getString("playlistviewer.statistics", Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists())));
+      if (numTagged > 0) {
+        statisticsLabel.setText(textProvider.getString("playlistviewer.statistics.highlighted", Integer.toString(playlist.getEntries().size()),
+            Integer.toString(playlist.getNumDifferentArtists()), Integer.toString(numTagged)));
+      } else {
+        statisticsLabel
+            .setText(textProvider.getString("playlistviewer.statistics", Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists())));
       }
     } else {
       statisticsLabel.setText("");
     }
-	  
+
   }
-  
+
   private JComponent createTabelPanel() {
 
     final PlaylistTableModel tableModel = new PlaylistTableModel(this.textProvider, this.playlistHolder, this.entryHolder, ctx.getAdminClient().getTagManager());
     tableModel.setHasValidationErrors(this.hasValidationErrors);
+    warningMessage = tableModel.getWarningMessage();
     tableModel.addTableModelListener(new TableModelListener() {
-      
+
       @Override
       public void tableChanged(TableModelEvent e) {
-        if(playlistHolder.getValue() instanceof Playlist) {
-          updateStatsLabel((Playlist)playlistHolder.getValue());
+        if (playlistHolder.getValue() instanceof Playlist) {
+          updateStatsLabel((Playlist) playlistHolder.getValue());
         }
       }
     });
-    
+
     final TrackTypeRenderer typeRenderer = new TrackTypeRenderer();
     final DateTableCellRenderer timeRenderer = new DateTableCellRenderer(new SimpleDateFormat(this.ctx.getTextProvider().getString("timeFormat")));
     this.table = new JXTable(tableModel) {
@@ -329,8 +320,8 @@ public class PlaylistViewer extends JPanel {
           col = convertColumnIndexToModel(col);
           if (row > -1 && col == Column.TAGS.ordinal()) {
             Object value = getModel().getValueAt(row, col);
-            if(value instanceof String) {
-              return (String)value;
+            if (value instanceof String) {
+              return (String) value;
             }
           }
         }
@@ -338,7 +329,7 @@ public class PlaylistViewer extends JPanel {
         return super.getToolTipText(evt);
 
       }
-      
+
     };
 
     int width4Digits = ComponentFactory.getTableFontWidth(6);
@@ -361,7 +352,7 @@ public class PlaylistViewer extends JPanel {
     table.getColumn(Column.TYPE.ordinal()).setCellRenderer(typeRenderer);
     table.getColumn(Column.ADDED.ordinal()).setCellRenderer(timeRenderer);
     table.getColumn(Column.YEAR.ordinal()).setCellRenderer(new IntTableCellRenderer(0));
-    
+
     table.setDropMode(DropMode.INSERT_ROWS);
     table.setDragEnabled(true);
     table.setTransferHandler(new PlaylistTableTransferHandler(ctx, table));
@@ -629,6 +620,7 @@ public class PlaylistViewer extends JPanel {
     toolbar.add(new SortAction());
     toolbar.add(new ShuffleAction());
     toolbar.add(new GenerateAction());
+    toolbar.add(new AdTriggerInsertAction());
     toolbar.addSeparator();
     toolbar.add(new ArchiveDialogOpenAction(this.ctx, this.playlistHolder));
 
@@ -860,7 +852,8 @@ public class PlaylistViewer extends JPanel {
       Playlist playlist = (Playlist) playlistHolder.getValue();
       if (playlist != null) {
         if (e instanceof PlaylistValidationException) {
-          JXErrorPane.showDialog(null, textProvider.createErrorInfo(e, "playlist.validationerror." + ((PlaylistValidationException) e).getError().name().toLowerCase(), playlist.getDisplayName()));
+          JXErrorPane.showDialog(null,
+              textProvider.createErrorInfo(e, "playlist.validationerror." + ((PlaylistValidationException) e).getError().name().toLowerCase(), playlist.getDisplayName()));
         } else {
           JXErrorPane.showDialog(null, textProvider.createErrorInfo(e, "action.playlist.save.error", playlist.getDisplayName()));
         }
@@ -875,8 +868,8 @@ public class PlaylistViewer extends JPanel {
           List<Entry> violations = new ArrayList<Entry>();
           new GVLValidator().validate(playlist, violations);
           if (violations.size() > 0) {
-            return JOptionPane.showConfirmDialog(ctx.getRootWindow(), textProvider.getString("action.playlist.save.msg.validationerror", playlist.getName()), null, JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION;
+            return JOptionPane.showConfirmDialog(ctx.getRootWindow(), textProvider.getString("action.playlist.save.msg.validationerror", playlist.getName()), null,
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION;
           }
         }
       }
@@ -903,8 +896,8 @@ public class PlaylistViewer extends JPanel {
       Playlist playlist = (Playlist) playlistHolder.getValue();
       if (playlist != null) {
         if (playlist.isShuffle()) {
-          if (JOptionPane.showOptionDialog(ctx.getRootWindow(), ctx.getTextProvider().getString("playlistviewer.shuffle.msg.confirm"), null, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
-              null, null, null) == JOptionPane.NO_OPTION) {
+          if (JOptionPane.showOptionDialog(ctx.getRootWindow(), ctx.getTextProvider().getString("playlistviewer.shuffle.msg.confirm"), null, JOptionPane.YES_NO_OPTION,
+              JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.NO_OPTION) {
             return;
           }
         }
@@ -941,8 +934,8 @@ public class PlaylistViewer extends JPanel {
       Playlist playlist = (Playlist) playlistHolder.getValue();
       if (playlist != null) {
         if (playlist.isShuffle()) {
-          if (JOptionPane.showOptionDialog(ctx.getRootWindow(), ctx.getTextProvider().getString("playlistviewer.generate.msg.confirm"), null, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
-              null, null, null) == JOptionPane.NO_OPTION) {
+          if (JOptionPane.showOptionDialog(ctx.getRootWindow(), ctx.getTextProvider().getString("playlistviewer.generate.msg.confirm"), null, JOptionPane.YES_NO_OPTION,
+              JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.NO_OPTION) {
             return;
           }
         }
@@ -961,6 +954,45 @@ public class PlaylistViewer extends JPanel {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
       setEnabled(evt.getNewValue() != null && StringUtils.isNotEmpty(((Playlist) evt.getNewValue()).getGenerateTags()) && ((Playlist) evt.getNewValue()).getGenerateLength() > 0);
+    }
+
+  }
+
+  protected class AdTriggerInsertAction extends AbstractAction implements PropertyChangeListener {
+    private static final long serialVersionUID = -8236527305347914482L;
+
+    public AdTriggerInsertAction() {
+      this.putValue(Action.SMALL_ICON, AppUtils.getIcon("coins.png"));
+      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.adtrigger.tooltip"));
+      setEnabled(false);
+      presentationModel.getBeanChannel().addValueChangeListener(this);
+    }
+
+    /**
+     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     */
+    @Override
+    public void actionPerformed(ActionEvent evt) {
+      Playlist playlist = (Playlist) playlistHolder.getValue();
+      if (playlist != null) {
+        AdTriggerEngine engine = PlaylistGeneratorFactory.createAdTriggerEngine(ctx.getAdminClient());
+        engine.setClearExistingTriggers(true);;
+        ArrayList<BasicTrack> tracks = new ArrayList<BasicTrack>();
+        for (Entry entry : playlist.getEntries()) {
+          if (entry.getTrack() != null) {
+            tracks.add(entry.getTrack());
+          }
+        }
+        playlist.setTracks(engine.process(playlist, tracks, false, null));
+      }
+    }
+
+    /**
+     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+     */
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+      setEnabled(evt.getNewValue() != null && !((Playlist) evt.getNewValue()).isShuffle());
     }
 
   }
@@ -1093,8 +1125,7 @@ public class PlaylistViewer extends JPanel {
     }
 
     /**
-     * @param button
-     *          the button to set
+     * @param button the button to set
      */
     void setButton(JToggleButton button) {
       this.button = button;
@@ -1103,7 +1134,8 @@ public class PlaylistViewer extends JPanel {
   }
 
   /**
-   * Gets a value model that holds the ids of titles that are currently requested for highlighting because they are selected in the search panel.
+   * Gets a value model that holds the ids of titles that are currently requested
+   * for highlighting because they are selected in the search panel.
    * 
    * @return the highlightedTitleHolder
    */
