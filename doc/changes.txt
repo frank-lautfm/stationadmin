@@ -13,6 +13,7 @@ Version 4.7.0
 [+] Gültigkeistprüfung für Ad-Trigger
 [+] Einfügen von Ad-Triggern per Knopfdruck
 [*] Fehler beim Synchronisieren von Tags mit "?" im Namen behoben
+[*] Probleme mit Verankerung von Jingles / Wortbeiträge mit Option "nicht verschieben" beim Generieren behoben 
 
 Version 4.6.3
 -------------

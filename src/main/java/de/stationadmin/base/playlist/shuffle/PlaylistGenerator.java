@@ -94,8 +94,8 @@ public class PlaylistGenerator {
     HashSet<Integer> jingleIds = new HashSet<Integer>();
 
     for (BasicTrack title : candidates) {
-      
-      if(playlistEnhancer != null && playlistEnhancer.excludeFromCorePlaylist(title)) {
+
+      if (playlistEnhancer != null && playlistEnhancer.excludeFromCorePlaylist(title)) {
         continue;
       }
 
@@ -186,11 +186,17 @@ public class PlaylistGenerator {
   }
 
   private void extractProtectedTracks(Playlist playlist, GeneratorCtx ctx) {
+    int position = 0;
     if (this.wordDistribution == WordDistributionStrategy.PROTECT || this.protectAllJingles) {
       for (int i = 0; i < playlist.getEntries().size(); i++) {
-        if ((this.wordDistribution == WordDistributionStrategy.PROTECT && playlist.getEntries().get(i).getTrack().getType() == BasicTrack.TYPE_WORD)
-            || (this.protectAllJingles && playlist.getEntries().get(i).getTrack().getType() == BasicTrack.TYPE_JINGLE)) {
-          ctx.addProtectedTrack(i, playlist.getEntries().get(i).getTrack());
+        if (playlist.getEntry(i).getTrack().getType() == BasicTrack.TYPE_MUSIC) {
+          position++;
+        } else {
+          if ((this.wordDistribution == WordDistributionStrategy.PROTECT && playlist.getEntries().get(i).getTrack().getType() == BasicTrack.TYPE_WORD)
+              || (this.protectAllJingles && playlist.getEntries().get(i).getTrack().getType() == BasicTrack.TYPE_JINGLE)) {
+            ctx.addProtectedTrack(position, playlist.getEntries().get(i).getTrack());
+            position++;
+          }
         }
       }
     }
@@ -478,11 +484,15 @@ public class PlaylistGenerator {
       int sIdx = 0, segCnt = 1;
       HashSet<Segment> emptySegments = new HashSet<Segment>();
 
+      int posCnt = 0;
       while (length < targetLength && emptySegments.size() < segments.length) {
         Segment seg = segments[sIdx];
+        
+        boolean incPosCnt = false;
 
-        if (ctx.getProtectedTrackAt(newTrackList.size()) != null) {
-          newTrackList.add(ctx.getProtectedTrackAt(newTrackList.size()));
+        if (ctx.getProtectedTrackAt(posCnt) != null) {
+          newTrackList.add(ctx.getProtectedTrackAt(posCnt));
+          incPosCnt = true;
         } else if (seg.getTracks().size() > 0) {
 
           // select a title from the current segment
@@ -511,6 +521,9 @@ public class PlaylistGenerator {
           newTrackList.add(title);
           length += title.getLength();
           this.register(title);
+          if(title.getType() == BasicTrack.TYPE_MUSIC) {
+            incPosCnt = true;
+          }
 
           boolean addJingle = false;
           if (!this.protectAllJingles && distributeJingles && length < targetLength) {
@@ -551,6 +564,11 @@ public class PlaylistGenerator {
           // System.out.println("Segement " + sIdx);
           segCnt++;
         }
+        
+        if(incPosCnt) {
+          posCnt++;
+        }
+
       }
     }
 
@@ -1025,8 +1043,8 @@ public class PlaylistGenerator {
 
     private List<Advice> advices = new ArrayList<Advice>();
 
-    public void addProtectedTrack(int pos, BasicTrack title) {
-      this.protectedTracks.put(pos, title);
+    public void addProtectedTrack(int pos, BasicTrack track) {
+        this.protectedTracks.put(pos, track);
     }
 
     public BasicTrack getProtectedTrackAt(int pos) {
