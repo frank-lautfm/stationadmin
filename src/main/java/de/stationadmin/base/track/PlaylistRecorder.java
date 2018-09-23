@@ -5,6 +5,7 @@ package de.stationadmin.base.track;
 
 import java.util.Date;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import de.stationadmin.base.StationStatus;
@@ -59,24 +60,25 @@ public class PlaylistRecorder extends Thread {
 
     boolean first = true;
     int failures = 0;
-    int lastTrack = -1;
+    Song lastTrack = null;
     while (!stopRequested) {
       try {
         Song curr = this.lfmService.getCurrentSong(this.station);
         if (this.stationStatus != null) {
           int currTrackId = curr.getId();
-          if(this.titleRegistry.getTrack(currTrackId) == null) {
-            RegisteredTrack track = this.titleRegistry.getByLegacyId(currTrackId);
-            if(track != null) {
-              currTrackId = track.getId();
-            }
+          
+          String label = curr.getArtist() != null  ? curr.getArtist().getName() : "";
+          if(StringUtils.isNotEmpty(curr.getTitle())) {
+            label += " - " + curr.getTitle();
           }
           
+          
           this.stationStatus.setCurrentTrackId(currTrackId);
+          this.stationStatus.setCurrentTrackLabel(label);
           this.stationStatus.setCurrentTrackEndTime(curr.getEndsAt().getTime() + timeDiff);
         }
         if (!first) {
-          if (curr.getId() != lastTrack) {
+          if (lastTrack == null || !lastTrack.equals(curr)) {
             if (this.titleRegistry != null && this.titleRegistry.getTrack(curr.getId()) != null) {
               collector.add(this.titleRegistry.getTrack(curr.getId()));
             } else {
@@ -88,7 +90,7 @@ public class PlaylistRecorder extends Thread {
               collector.add(title);
             }
           }
-          lastTrack = curr.getId();
+          lastTrack = curr;
         }
         // else: We don't know when title started - avoid adding it
         first = false;

@@ -22,6 +22,12 @@ public class StationStatus extends AbstractBean {
   private int durationToday;
   private int durationYesterday;
   private int currentTrackId;
+  private String currentTrackLabel;
+  
+  public String getCurrentTrackLabel() {
+    return currentTrackLabel;
+  }
+
   private long currentTrackEndTime;
   private int currentPlaylistId;
 
@@ -73,6 +79,12 @@ public class StationStatus extends AbstractBean {
     int old = this.currentTrackId;
     this.currentTrackId = currentTitleId;
     this.firePropertyChange("currentTrackId", old, currentTitleId);
+  }
+
+  public void setCurrentTrackLabel(String currentTrackLabel) {
+    String old = this.currentTrackLabel;
+    this.currentTrackLabel = currentTrackLabel;
+    this.firePropertyChange("currentTrackLabel", old, currentTrackLabel);
   }
 
   public void setListenersToday(int listenersPerDay) {

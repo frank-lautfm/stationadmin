@@ -12,6 +12,7 @@ Version 4.7.0
 [+] m3u-Support beim Upload
 [+] Gültigkeistprüfung für Ad-Trigger
 [+] Einfügen von Ad-Triggern per Knopfdruck
+[+] Unterstützung für live gesendete Titel in "Letzte Titel" und der Anzeige des aktuellen Titels
 [*] Fehler beim Synchronisieren von Tags mit "?" im Namen behoben
 [*] Probleme mit Verankerung von Jingles / Wortbeiträge mit Option "nicht verschieben" beim Generieren behoben 
 

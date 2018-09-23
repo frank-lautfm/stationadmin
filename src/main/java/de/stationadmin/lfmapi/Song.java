@@ -132,5 +132,19 @@ public class Song implements Serializable {
   public void setType(String type) {
     this.type = type;
   }
+  
+  public boolean equals(Object obj) {
+    if(obj instanceof Song) {
+      Song song = (Song)obj;
+      if(song.getId() != 0) {
+        return this.id == song.getId();
+      }
+      else {
+        return this.toString().equals(song.toString());
+      }
+      
+    }
+    return false;
+  }
 
 }

@@ -252,7 +252,7 @@ public class StationAdminWindow extends StationAdminFrame {
         };
         updateTitle(titleLabel);
         titleLabel.setToolTipText(ctx.getTextProvider().getString("currentTitle.tooltip"));
-        statusModel.getModel("currentTrackId").addValueChangeListener(new PropertyChangeListener() {
+        statusModel.getModel("currentTrackLabel").addValueChangeListener(new PropertyChangeListener() {
 
           @Override
           public void propertyChange(PropertyChangeEvent evt) {
@@ -393,7 +393,7 @@ public class StationAdminWindow extends StationAdminFrame {
     if (title != null) {
       label.setText(title.getArtist() + " - " + title.getTitle());
     } else {
-      label.setText("");
+      label.setText(ctx.getAdminClient().getStationStatus().getCurrentTrackLabel());
     }
   }
 

@@ -41,7 +41,7 @@ public class TrackHistoryPanel extends TitledPanel {
     super(ctx.getTextProvider().getString("titlehistory.title"), toScrollPane(new JPanel()));
     this.ctx = ctx;
     this.ctx.getAdminClient().getStationStatus()
-        .addPropertyChangeListener("currentTrackId", new PropertyChangeListener() {
+        .addPropertyChangeListener("currentTrackLabel", new PropertyChangeListener() {
 
           @Override
           public void propertyChange(PropertyChangeEvent evt) {
