@@ -24,8 +24,10 @@ import de.stationadmin.base.AccessDeniedException;
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.Version;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackRegistry;
+import de.stationadmin.base.track.TrackService;
 import de.stationadmin.lfm.backend.Statistics;
 import de.stationadmin.lfm.backend.TrackStatsEntry;
 
@@ -38,9 +40,9 @@ public class LogAnalyzerService implements Service {
   private static final Logger log = Logger.getLogger(LogAnalyzerService.class);
   private static final String DATE_FORMAT = "yyyy-MM-dd";
   private static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-  // private String apiURL = "http://stationadmin.emjoy.net/api/";
   private SessionCtx ctx;
-  private TrackRegistry titleRegistry;
+  private TrackService trackService;
+  private TrackRegistry trackRegistry;
   private String logCacheDir;
 
   private DefaultHttpClient client;
@@ -51,9 +53,10 @@ public class LogAnalyzerService implements Service {
   private TrackStatsEntry[] bufferedEntries;
   private int bufferedEntriesDays = 0;
 
-  public LogAnalyzerService(SessionCtx ctx, TrackRegistry titleRegistry) {
+  public LogAnalyzerService(SessionCtx ctx, TrackService trackService) {
     this.ctx = ctx;
-    this.titleRegistry = titleRegistry;
+    this.trackService = trackService;
+    this.trackRegistry = trackService.getTrackRegistry();
     this.logCacheDir = ctx.getStationDirectory() + "log" + File.separatorChar;
 
     this.client = new DefaultHttpClient();
@@ -115,6 +118,8 @@ public class LogAnalyzerService implements Service {
     Calendar calEntry = Calendar.getInstance();
     calDay.setTime(day);
 
+    int numLiveTracksBefore = this.trackRegistry.getNumLiveTracks();
+
     if (day.getTime() > System.currentTimeMillis() - (DAY_IN_MS * 32l)) {
 
       SimpleDateFormat timeFmt = new SimpleDateFormat(TIME_FORMAT);
@@ -156,19 +161,33 @@ public class LogAnalyzerService implements Service {
       StringBuilder buf = new StringBuilder();
       for (TrackStatsEntry entry : stats) {
         calEntry.setTime(entry.getStartedAt());
-        if (entry.getId() > 0 && calDay.get(Calendar.DAY_OF_MONTH) == calEntry.get(Calendar.DAY_OF_MONTH) && calDay.get(Calendar.MONTH) == calEntry.get(Calendar.MONTH)) {
+        if ((entry.isLive() || entry.getId() > 0) && calDay.get(Calendar.DAY_OF_MONTH) == calEntry.get(Calendar.DAY_OF_MONTH)
+            && calDay.get(Calendar.MONTH) == calEntry.get(Calendar.MONTH)) {
 
           buf.append(timeFmt.format(entry.getStartedAt()));
           buf.append('\t');
           if (type.equals("station_listeners")) {
             buf.append(entry.getListeners());
           } else {
-            buf.append(entry.getId());
+            if (!entry.isLive()) {
+              buf.append(entry.getId());
+            } else {
+              int id = this.trackRegistry.registerLiveTrack(entry.getArtistName(), entry.getTitle());
+              buf.append("L" + id);
+            }
           }
           buf.append('\n');
         }
       }
       String content = buf.toString();
+
+      if (this.trackRegistry.getNumLiveTracks() > numLiveTracksBefore) {
+        try {
+          this.trackService.saveLiveTracks();
+        } catch (Exception e) {
+          log.error("Error while saving live tracks: ", e);
+        }
+      }
 
       if (!isToday(day)) {
         // write data to cache
@@ -176,7 +195,9 @@ public class LogAnalyzerService implements Service {
       }
 
       return content;
-    } else {
+    } else
+
+    {
       return "";
     }
   }
@@ -210,10 +231,11 @@ public class LogAnalyzerService implements Service {
       if (cols.length == 2) {
         try {
           Date date = fmt.parse(cols[0]);
-          int trackId = Integer.parseInt(cols[1]);
-          DetailedTrack track = this.titleRegistry.getTrack(trackId);
+          boolean isLiveTrack = cols[1].length() > 1 && cols[1].charAt(0) == 'L';
+          int trackId = isLiveTrack ? Integer.parseInt(cols[1].substring(1)) : Integer.parseInt(cols[1]);
+          BasicTrack track = isLiveTrack ? this.trackRegistry.getLiveTrack(trackId) : this.trackRegistry.getTrack(trackId);
           if (track == null) {
-            track = this.titleRegistry.getByLegacyId(trackId);
+            track = this.trackRegistry.getByLegacyId(trackId);
           }
           if (track == null) {
             track = new DetailedTrack();
@@ -494,7 +516,7 @@ public class LogAnalyzerService implements Service {
               return;
             }
             if (titleId > 0) {
-              playsToday.add(new Play(new Date(System.currentTimeMillis()), titleRegistry.getTrack(titleId)));
+              playsToday.add(new Play(new Date(System.currentTimeMillis()), trackRegistry.getTrack(titleId)));
             }
           } catch (Exception e) {
             log.error(e);
@@ -542,7 +564,7 @@ public class LogAnalyzerService implements Service {
         buf.append("listeners\t" + (listeners != null ? listeners.intValue() : 0) + "\n");
         buf.append("duration\t" + hours + "\n");
         buf.append("avg\t" + avg + "\n");
-        FileUtils.writeStringToFile(new File(filename), buf.toString());
+        FileUtils.writeStringToFile(new File(filename), buf.toString(), "UTF-8");
       }
 
     }

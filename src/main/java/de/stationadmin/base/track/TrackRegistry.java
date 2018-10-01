@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.util.AbstractBean;
@@ -25,8 +25,9 @@ import de.stationadmin.base.util.AbstractBean;
  */
 public class TrackRegistry extends AbstractBean {
   private Map<Integer, RegisteredTrack> tracks = Collections.synchronizedMap(new HashMap<Integer, RegisteredTrack>());
+  private Map<Integer, LiveTrack> liveTracks = Collections.synchronizedMap(new HashMap<Integer, LiveTrack>());
   private Map<String, String> sharedStrings = new HashMap<String, String>();
-  
+
   private DetailedTrack standardAdTrigger;
 
   private boolean blockChangsEvts = false;
@@ -62,6 +63,11 @@ public class TrackRegistry extends AbstractBean {
   public int getNumTracks() {
     return this.tracks.size();
   }
+  
+  public int getNumLiveTracks() {
+    return this.liveTracks.size();
+  }
+
 
   /**
    * Registers a title for a playlist
@@ -98,7 +104,9 @@ public class TrackRegistry extends AbstractBean {
   }
 
   /**
-   * Registers an alias for a given title. Should be used rather than using {@link RegisteredTrack#addAlias(String, String)} directly because this version replaces the artist by a shared string.
+   * Registers an alias for a given title. Should be used rather than using
+   * {@link RegisteredTrack#addAlias(String, String)} directly because this
+   * version replaces the artist by a shared string.
    * 
    * @param titleId
    * @param artist
@@ -134,6 +142,28 @@ public class TrackRegistry extends AbstractBean {
     }
   }
 
+  public int registerLiveTrack(String artist, String title) {
+    String key = StringUtils.trimToEmpty(artist.toLowerCase()) + " - " + StringUtils.trimToEmpty(title.toLowerCase());
+    int id = key.hashCode();
+    if (!liveTracks.containsKey(id)) {
+      LiveTrack track = new LiveTrack();
+      track.setId(id);
+      track.setArtist(artist);
+      track.setTitle(title);
+      liveTracks.put(id, track);
+      fireNumLiveTracksEvent();
+    }
+    return id;
+  }
+  
+  public LiveTrack getLiveTrack(int id) {
+    return liveTracks.get(id);
+  }
+  
+  public List<LiveTrack> getLiveTracks() {
+    return new ArrayList<LiveTrack>(this.liveTracks.values());
+  }
+
   protected void setOwnTracks(List<RegisteredTrack> ownTitles) {
     if (tracks.size() > 0) {
       throw new IllegalStateException();
@@ -152,7 +182,8 @@ public class TrackRegistry extends AbstractBean {
   }
 
   /**
-   * Removes the ownTitle flag from all registered titles and removes those titles from the registry that are not assigned to any playlist
+   * Removes the ownTitle flag from all registered titles and removes those titles
+   * from the registry that are not assigned to any playlist
    */
   public void resetOwnTitles() {
     Collection<RegisteredTrack> titles = new ArrayList<RegisteredTrack>(this.tracks.values());
@@ -213,7 +244,9 @@ public class TrackRegistry extends AbstractBean {
   /**
    * Adds a registered title - should only be used for import of persisted data
    * <p>
-   * Notice that this method does not fire property change events for numTracks - this would slow down the GUI application too much. Use {@link #firenumTracksEvent()} after all titles have been added.
+   * Notice that this method does not fire property change events for numTracks -
+   * this would slow down the GUI application too much. Use
+   * {@link #firenumTracksEvent()} after all titles have been added.
    * 
    * @param title
    */
@@ -221,6 +254,16 @@ public class TrackRegistry extends AbstractBean {
     RegisteredTrack rtitle = title instanceof RegisteredTrack ? (RegisteredTrack) title : new RegisteredTrack(title);
     this.tracks.put(title.getId(), this.assignSharedStrings(rtitle));
   }
+  
+  /**
+   * Adds a registered live track - should only be used for import of persisted data
+   * @param track
+   */
+  public void add(LiveTrack track) {
+    track.setArtist(getSharedString(track.getArtist()));
+    this.liveTracks.put(track.getId(), track);
+  }
+
 
   private String getSharedString(String str) {
     String result;
@@ -256,6 +299,11 @@ public class TrackRegistry extends AbstractBean {
   protected void fireNumTracksEvent() {
     this.firePropertyChange("numTracks", 0, this.tracks.size());
   }
+  
+  protected void fireNumLiveTracksEvent() {
+    this.firePropertyChange("numLiveTracks", 0, this.liveTracks.size());
+  }
+
 
   /**
    * Gets a title by its id
@@ -369,16 +417,17 @@ public class TrackRegistry extends AbstractBean {
   }
 
   public DetailedTrack getStandardAdTrigger() {
-    if(this.standardAdTrigger == null) {
+    if (this.standardAdTrigger == null) {
       this.standardAdTrigger = this.getTrack(0);
-      if(this.standardAdTrigger == null) {
+      if (this.standardAdTrigger == null) {
         this.standardAdTrigger = new DetailedTrack();
         this.standardAdTrigger.setType(DetailedTrack.TYPE_JINGLE);
         this.standardAdTrigger.setArtist("START_AD_BREAK");
         this.standardAdTrigger.setTitle("START_AD_BREAK");
         this.standardAdTrigger.setAlbum("ad");
         this.standardAdTrigger.setLength(1);
-        this.standardAdTrigger.setYear(2017);;
+        this.standardAdTrigger.setYear(2017);
+        ;
       }
     }
     return standardAdTrigger;

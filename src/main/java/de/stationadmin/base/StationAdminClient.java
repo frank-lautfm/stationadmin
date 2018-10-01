@@ -92,7 +92,7 @@ public class StationAdminClient {
     this.trackService = new TrackService(this.sessionCtx, titleRegistry, this.settings);
     this.playlistService = new PlaylistService(this.sessionCtx, titleRegistry, playlistRegistry);
     this.schedule = new Schedule(sessionCtx, playlistRegistry);
-    this.logAnalyzerService = new LogAnalyzerService(this.sessionCtx, titleRegistry);
+    this.logAnalyzerService = new LogAnalyzerService(this.sessionCtx, this.trackService);
     this.tagManager = new TagManager(this.sessionCtx, this.trackService, this.playlistService.getPlaylistRegistry(), logAnalyzerService, this.schedule);
     this.statisticsService = new StatisticsService(this.sessionCtx, this.settings);
     this.subscriptionService = new SubscriptionService(this.sessionCtx, titleRegistry);

@@ -9,12 +9,16 @@ Station Admin für laut.fm - Änderungen
 
 Version 4.7.0
 -------------
+[*] Kompatibilitätsprobleme mit Java 11 behoben
 [+] m3u-Support beim Upload
 [+] Gültigkeistprüfung für Ad-Trigger
 [+] Einfügen von Ad-Triggern per Knopfdruck
-[+] Unterstützung für live gesendete Titel in "Letzte Titel" und der Anzeige des aktuellen Titels
+[+] Unterstützung für live gesendete Titel in "Letzte Titel", der Anzeige des aktuellen Titels und Analyze / Gespielte Titel
 [*] Fehler beim Synchronisieren von Tags mit "?" im Namen behoben
-[*] Probleme mit Verankerung von Jingles / Wortbeiträge mit Option "nicht verschieben" beim Generieren behoben 
+[*] Generieren von Playlists: Probleme mit Verankerung von Jingles / Wortbeiträge mit Option "nicht verschieben" behoben 
+[*] Generieren von Playlists: Verankerte Wortbeiträge wurde nicht in die Länge der generierten Playlist eingerechnet
+[*] Generieren von Playlists: Shuffeln von Jingles funktionierte nicht
+[*] Generieren von Playlists: Jingles werden bei Gewichtung "gar nicht" nicht mehr mit ausgeschlossen
 
 Version 4.6.3
 -------------

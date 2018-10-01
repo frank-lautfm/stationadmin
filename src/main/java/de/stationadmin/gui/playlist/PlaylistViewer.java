@@ -929,7 +929,6 @@ public class PlaylistViewer extends JPanel {
     /**
      * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
-    @Override
     public void actionPerformed(ActionEvent evt) {
       Playlist playlist = (Playlist) playlistHolder.getValue();
       if (playlist != null) {

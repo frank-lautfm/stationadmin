@@ -25,6 +25,10 @@ public class TrackStatsEntry {
   @JsonProperty("started_at")
   @JsonDeserialize(using = CustomJsonDateDeserializer.class)
   private Date startedAt;
+  
+  private boolean live = false;
+  private String title;
+  private Artist artist;
 
   /**
    * @return the id
@@ -69,6 +73,34 @@ public class TrackStatsEntry {
    */
   public void setStartedAt(Date startedAt) {
     this.startedAt = startedAt;
+  }
+
+  public boolean isLive() {
+    return live;
+  }
+
+  public void setLive(boolean live) {
+    this.live = live;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  public Artist getArtist() {
+    return artist;
+  }
+
+  public void setArtist(Artist artist) {
+    this.artist = artist;
+  }
+  
+  public String getArtistName() {
+    return this.artist != null ? this.artist.getName() : null;
   }
 
 }

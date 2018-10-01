@@ -5,7 +5,7 @@ package de.stationadmin.base.loganalyzer;
 
 import java.util.Date;
 
-import de.stationadmin.base.track.DetailedTrack;
+import de.stationadmin.base.track.BasicTrack;
 
 /**
  * Represents a single play of a title in the past
@@ -13,9 +13,9 @@ import de.stationadmin.base.track.DetailedTrack;
  */
 public class Play {
   private long startTime;
-  private DetailedTrack track;
+  private BasicTrack track;
 
-  public Play(Date startTime, DetailedTrack track) {
+  public Play(Date startTime, BasicTrack track) {
     super();
     this.startTime = startTime.getTime();
     this.track = track;
@@ -25,7 +25,7 @@ public class Play {
     return new Date(startTime);
   }
 
-  public DetailedTrack getTrack() {
+  public BasicTrack getTrack() {
     return track;
   }
 

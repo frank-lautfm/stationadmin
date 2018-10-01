@@ -11,7 +11,7 @@ import javax.swing.table.AbstractTableModel;
 
 import de.stationadmin.base.loganalyzer.ItemFrequency;
 import de.stationadmin.base.loganalyzer.PlayStatistics;
-import de.stationadmin.base.track.DetailedTrack;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.TextProvider;
 
 /**
@@ -22,7 +22,7 @@ public class FrequentTracksTableModel extends AbstractTableModel {
 
   private static final long serialVersionUID = 6709327008918771272L;
   private TextProvider textProvider;
-  private List<ItemFrequency<DetailedTrack>> items;
+  private List<ItemFrequency<BasicTrack>> items;
 
   public FrequentTracksTableModel(TextProvider textProvider, PlayStatistics stats) {
     super();
@@ -33,7 +33,7 @@ public class FrequentTracksTableModel extends AbstractTableModel {
       @Override
       @SuppressWarnings("unchecked")
       public void propertyChange(PropertyChangeEvent evt) {
-        items = (List<ItemFrequency<DetailedTrack>>) evt.getNewValue();
+        items = (List<ItemFrequency<BasicTrack>>) evt.getNewValue();
         fireTableDataChanged();
 
       }
@@ -52,7 +52,7 @@ public class FrequentTracksTableModel extends AbstractTableModel {
 
   @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
-    ItemFrequency<DetailedTrack> item = this.items.get(rowIndex);
+    ItemFrequency<BasicTrack> item = this.items.get(rowIndex);
     switch (columnIndex) {
     case 0:
       return item.getFrequency();

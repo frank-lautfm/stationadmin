@@ -39,7 +39,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXStatusBar;
 

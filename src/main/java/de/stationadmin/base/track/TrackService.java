@@ -47,7 +47,8 @@ import de.stationadmin.lfmapi.Song;
 public class TrackService implements Service {
   private static final Logger log = Logger.getLogger(TrackService.class);
   private static final String PROP_SYNCTILL = "synchronizedOwnTill";
-  public static final String FILENAME_TITLES = "tracks.tsv";
+  public static final String FILENAME_TRACKS = "tracks.tsv";
+  public static final String FILENAME_LIVETRACKS = "livetracks.tsv";
   public static final String FILENAME_ALIASES = "aliases.tsv";
   private ExtendedTrackFormat fmt = new ExtendedTrackFormat(true);
   private SessionCtx ctx;
@@ -122,14 +123,12 @@ public class TrackService implements Service {
   }
 
   /**
-   * Searchs a title that matches the given {@link TrackMatcher}. If multiple results exist, only the first one is returned
+   * Searchs a title that matches the given {@link TrackMatcher}. If multiple
+   * results exist, only the first one is returned
    * 
-   * @param text
-   *          text to search for
-   * @param ownTracks
-   *          <code>true</code> to search only in own tracks
-   * @param matcher
-   *          matcher that decides wich titles are really accepted
+   * @param text text to search for
+   * @param ownTracks <code>true</code> to search only in own tracks
+   * @param matcher matcher that decides wich titles are really accepted
    * @return first matching title or <code>null</code> if no title matches
    * @throws IOException
    * @throws JSONException
@@ -277,16 +276,16 @@ public class TrackService implements Service {
       this.loadAliases();
     }
     this.loadLegacyIds();
+    this.loadLiveTracks();
     this.ctx.updateStatus(null);
   }
 
-  @SuppressWarnings("unchecked")
   public void loadAliases() throws IOException {
     log.info("load title aliases");
     File file = new File(this.ctx.getStationDirectory() + FILENAME_ALIASES);
     if (file.exists()) {
-      FileInputStream in = new FileInputStream(file);
-      try {
+
+      try (FileInputStream in = new FileInputStream(file)) {
         List<String> lines = (List<String>) IOUtils.readLines(in, "UTF-8");
         for (String line : lines) {
           String[] parts = StringUtils.split(line, "\t");
@@ -299,21 +298,17 @@ public class TrackService implements Service {
             }
           }
         }
-      } finally {
-        IOUtils.closeQuietly(in);
       }
     }
   }
 
-  @SuppressWarnings("unchecked")
   public void loadTracks() throws IOException {
     log.info("load titles");
-    File file = new File(this.ctx.getStationDirectory() + FILENAME_TITLES);
+    File file = new File(this.ctx.getStationDirectory() + FILENAME_TRACKS);
     if (file.exists()) {
       HashMap<String, String> props = new HashMap<String, String>();
       Pattern pattern = Pattern.compile("#.*?(\\w+)\\s*=\\s*(.*?)\\s*");
-      FileInputStream in = new FileInputStream(file);
-      try {
+      try (FileInputStream in = new FileInputStream(file)) {
         List<String> lines = (List<String>) IOUtils.readLines(in, "UTF-8");
         for (String line : lines) {
           if (line.startsWith("#")) {
@@ -336,18 +331,34 @@ public class TrackService implements Service {
           try {
             this.synchronizedOwnTill = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(syncTill);
           } catch (Exception e) {
-            e.printStackTrace(); // TODO
           }
         }
 
-      } finally {
-        IOUtils.closeQuietly(in);
+      }
+    }
+  }
+
+  public void loadLiveTracks() throws IOException {
+    log.debug("load live tracks");
+    File file = new File(this.ctx.getStationDirectory() + FILENAME_LIVETRACKS);
+    if (file.exists()) {
+      try (FileInputStream in = new FileInputStream(file)) {
+        List<String> lines = (List<String>) IOUtils.readLines(in, "UTF-8");
+        for (String line : lines) {
+          LiveTrack track = new LiveTrack(line);
+          if (track.getId() > 0) {
+            this.trackRegistry.add(track);
+          }
+        }
+        this.trackRegistry.fireNumLiveTracksEvent();
+
       }
     }
   }
 
   /**
-   * Completely reloads all own titles. This should be used for initial loading and if files have been removed with another instance / via radioadmin
+   * Completely reloads all own titles. This should be used for initial loading
+   * and if files have been removed with another instance / via radioadmin
    * 
    * @throws IOException
    * @throws JSONException
@@ -405,9 +416,8 @@ public class TrackService implements Service {
   public void saveAliases() throws IOException {
     log.info("save title aliases");
     FileOutputStream out = new FileOutputStream(ctx.getStationDirectory() + FILENAME_ALIASES);
-    OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
 
-    try {
+    try (OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8")) {
       for (RegisteredTrack title : this.trackRegistry.getAllTracks()) {
         if (title.getAliases() != null) {
           for (TrackAlias alias : title.getAliases()) {
@@ -416,11 +426,7 @@ public class TrackService implements Service {
           }
         }
       }
-    } finally {
-      writer.flush();
-      IOUtils.closeQuietly(out);
     }
-
   }
 
   /**
@@ -429,11 +435,9 @@ public class TrackService implements Service {
    * @throws IOException
    */
   public void saveTracks() throws IOException {
-    log.info("save tracks");
-    FileOutputStream out = new FileOutputStream(ctx.getStationDirectory() + FILENAME_TITLES);
-    OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8");
-
-    try {
+    log.debug("save tracks");
+    FileOutputStream out = new FileOutputStream(ctx.getStationDirectory() + FILENAME_TRACKS);
+    try (OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8")) {
       if (this.synchronizedOwnTill != null) {
         writer.write("# " + PROP_SYNCTILL + " = " + new SimpleDateFormat("yyyy-MM-dd HH:mm").format(this.synchronizedOwnTill) + "\n");
       }
@@ -441,9 +445,25 @@ public class TrackService implements Service {
       for (RegisteredTrack title : this.trackRegistry.getAllTracks()) {
         writer.write(fmt.toString(title) + "\n");
       }
-    } finally {
-      writer.flush();
-      IOUtils.closeQuietly(out);
+    }
+  }
+
+  public void saveLiveTracks() throws IOException {
+    List<LiveTrack> liveTracks = trackRegistry.getLiveTracks();
+    File file = new File(ctx.getStationDirectory() + FILENAME_LIVETRACKS);
+    if (liveTracks.size() > 0) {
+      log.debug("save live tracks");
+      FileOutputStream out = new FileOutputStream(file);
+      try (OutputStreamWriter writer = new OutputStreamWriter(out, "UTF-8")) {
+        for (LiveTrack liveTrack : liveTracks) {
+          writer.write(liveTrack.toFullString() + "\n");
+        }
+      }
+    } else if (file.exists()) {
+      try {
+        file.delete();
+      } catch (Exception e) {
+      }
     }
   }
 
@@ -504,6 +524,7 @@ public class TrackService implements Service {
 
   /**
    * Reloads a track from the server and updates the entry in the track registry
+   * 
    * @param trackId
    * @return
    * @throws IOException
@@ -514,8 +535,7 @@ public class TrackService implements Service {
       Track track = this.ctx.getServer().getTrack(ctx.getStationId(), trackId);
       if (track != null) {
         registeredTrack.update(track);
-      }
-      else {
+      } else {
         throw new ResourceNotFoundException();
       }
       return registeredTrack;
@@ -570,10 +590,8 @@ public class TrackService implements Service {
   /**
    * Uploads an mp3 file to the laut.fm server
    * 
-   * @param file
-   *          file to upload
-   * @param progressListener
-   *          progress listener - may be <code>null</code>
+   * @param file file to upload
+   * @param progressListener progress listener - may be <code>null</code>
    * @return <code>true</code> on success
    * @throws IOException
    */

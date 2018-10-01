@@ -24,14 +24,14 @@ public class PlayStatistics extends AbstractBean {
   private int numArtists;
   private int score;
   
-  private List<ItemFrequency<DetailedTrack>> frequentTracks;
+  private List<ItemFrequency<BasicTrack>> frequentTracks;
   private List<ItemFrequency<String>> frequentArtists;
 
   public List<ItemFrequency<String>> getFrequentArtists() {
     return frequentArtists;
   }
 
-  public List<ItemFrequency<DetailedTrack>> getFrequentTracks() {
+  public List<ItemFrequency<BasicTrack>> getFrequentTracks() {
     return frequentTracks;
   }
 
@@ -53,8 +53,8 @@ public class PlayStatistics extends AbstractBean {
     this.firePropertyChange("frequentArtists", old, frequentArtists);
   }
 
-  public void setFrequentTracks(List<ItemFrequency<DetailedTrack>> frequentTitles) {
-    List<ItemFrequency<DetailedTrack>> old = this.frequentTracks;
+  public void setFrequentTracks(List<ItemFrequency<BasicTrack>> frequentTitles) {
+    List<ItemFrequency<BasicTrack>> old = this.frequentTracks;
     this.frequentTracks = frequentTitles;
     this.firePropertyChange("frequentTracks", old, frequentTitles);
   }
@@ -85,12 +85,12 @@ public class PlayStatistics extends AbstractBean {
 
   public void update(List<Play> plays) {
     
-    HashMap<Integer,ItemFrequency<DetailedTrack>> tracks = new HashMap<Integer, ItemFrequency<DetailedTrack>>();
+    HashMap<Integer,ItemFrequency<BasicTrack>> tracks = new HashMap<Integer, ItemFrequency<BasicTrack>>();
     HashMap<String,ItemFrequency<String>> artists = new HashMap<String, ItemFrequency<String>>();
     for(Play play : plays) {
-      ItemFrequency<DetailedTrack> tf = tracks.get(play.getTrack().getId());
+      ItemFrequency<BasicTrack> tf = tracks.get(play.getTrack().getId());
       if(tf == null) {
-        tf = new ItemFrequency<DetailedTrack>(play.getTrack(), 1);
+        tf = new ItemFrequency<BasicTrack>(play.getTrack(), 1);
         tracks.put(play.getTrack().getId(), tf);
       }
       else {
@@ -111,7 +111,7 @@ public class PlayStatistics extends AbstractBean {
     this.setNumTracks(tracks.size());
     this.setNumArtists(artists.size());
     
-    List<ItemFrequency<DetailedTrack>> titleList = new ArrayList<ItemFrequency<DetailedTrack>>(tracks.values());
+    List<ItemFrequency<BasicTrack>> titleList = new ArrayList<ItemFrequency<BasicTrack>>(tracks.values());
     Collections.sort(titleList);
     this.setFrequentTracks(titleList);
     List<ItemFrequency<String>> artistList = new ArrayList<ItemFrequency<String>>(artists.values());
