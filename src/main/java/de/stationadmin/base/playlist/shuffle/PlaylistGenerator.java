@@ -461,7 +461,7 @@ public class PlaylistGenerator {
         ctx.getJingles().remove(ctx.getFirstJingle());
       }
 
-      randomize(ctx.getJingles());
+      ctx.setJingles(randomize(ctx.getJingles()));
 
     }
 
@@ -492,6 +492,7 @@ public class PlaylistGenerator {
 
         if (ctx.getProtectedTrackAt(posCnt) != null) {
           newTrackList.add(ctx.getProtectedTrackAt(posCnt));
+          length += ctx.getProtectedTrackAt(posCnt).getLength();
           incPosCnt = true;
         } else if (seg.getTracks().size() > 0) {
 
@@ -594,7 +595,7 @@ public class PlaylistGenerator {
         for (int titleId : titleIds) {
           BasicTrack title = this.trackRegistry.getTrack(titleId);
           if (title != null && titles.contains(title)) {
-            if (pushFactor < -3) {
+            if (pushFactor < -3 && title.getType() != BasicTrack.TYPE_JINGLE) {
               titles.remove(title);
             } else {
               log.trace("push " + title + " " + pushFactor);
@@ -1064,6 +1065,11 @@ public class PlaylistGenerator {
     public List<BasicTrack> getJingles() {
       return jingles;
     }
+    
+    void setJingles(List<BasicTrack> jingles) {
+      this.jingles = jingles;
+    }
+
 
     /**
      * @return the titleMap
