@@ -23,6 +23,7 @@ import de.stationadmin.base.loganalyzer.Play;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.schedule.Schedule.Entry;
 import de.stationadmin.base.schedule.Schedule.Weekday;
+import de.stationadmin.base.track.LiveTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 
@@ -134,7 +135,7 @@ public class PlaysTableModel extends AbstractTableModel {
     case TITLE:
       return play.getTrack().getTitle();
     case LENGTH:
-      return play.getTrack().getLength();
+      return play.getTrack() instanceof LiveTrack ? -1 : play.getTrack().getLength();
     case LISTENERS:
       if (this.listeners == null) {
         this.resolveListeners();
