@@ -6,6 +6,7 @@ package de.stationadmin.gui.track;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +98,7 @@ public class PlaySnippetAction extends AbstractAction {
   }
 
   @SuppressWarnings("unchecked")
-  public void playSnippetInternal() {
+  public void playSnippetInternal() throws IOException {
     if (selectionHolder.getValue() != null) {
       List<BasicTrack> titles = (List<BasicTrack>) selectionHolder.getValue();
       if (titles.size() > 0) {
@@ -108,14 +109,9 @@ public class PlaySnippetAction extends AbstractAction {
         }
 
         for (int i = 0; i < titles.size() && i < 20; i++) {
-          try {
-            String url = this.titleService.getSnippetURL(titles.get(i).getId());
-            if (url != null) {
-              snippets.add(new Snippet(titles.get(i), new URL(url)));
-            }
-          } catch (Exception e) {
-            e.printStackTrace();
-
+          String url = this.titleService.getSnippetURL(titles.get(i).getId());
+          if (url != null) {
+            snippets.add(new Snippet(titles.get(i), new URL(url)));
           }
         }
         if (snippets.size() > 0) {

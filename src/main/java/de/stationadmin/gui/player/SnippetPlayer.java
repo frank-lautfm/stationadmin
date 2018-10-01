@@ -29,8 +29,7 @@ import javax.swing.Timer;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import javazoom.jl.decoder.JavaLayerException;
-import javazoom.jl.player.Player;
+import org.apache.log4j.Logger;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.list.IndirectListModel;
@@ -46,6 +45,8 @@ import de.stationadmin.gui.playlist.PopupListener;
 import de.stationadmin.gui.track.CopyTracksAction;
 import de.stationadmin.gui.track.DistributeTracksAction;
 import de.stationadmin.gui.track.TagMenu;
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.Player;
 
 /**
  * @author korf
@@ -73,7 +74,7 @@ public class SnippetPlayer extends StationAdminFrame {
 
   private void init(List<Snippet> snippets) {
     this.setTitle(ctx.getString("snippetplayer.title"));
-    
+
     this.getContentPane().setLayout(new FormLayout("5dlu,100dlu:grow,5dlu", "5dlu,10dlu:grow,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
 
@@ -108,7 +109,6 @@ public class SnippetPlayer extends StationAdminFrame {
           copyAction.setTitles(titles);
           distributeAction.setTitles(titles);
         }
-        
 
       }
     });
@@ -144,9 +144,7 @@ public class SnippetPlayer extends StationAdminFrame {
     });
     tb.add(stop);
     ctrlPanel.add(tb, cc.xy(7, 1));
-    
-    
-    
+
     final JPopupMenu popup = new JPopupMenu();
     popup.add(tagMenu);
     popup.add(untagMenu);
@@ -156,9 +154,8 @@ public class SnippetPlayer extends StationAdminFrame {
 
     list.addMouseListener(new PopupListener(list, popup));
 
-
     this.getContentPane().add(ctrlPanel, cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
-    
+
     this.addWindowListener(new WindowAdapter() {
 
       @Override
@@ -216,7 +213,7 @@ public class SnippetPlayer extends StationAdminFrame {
       this.timeRefresher.start();
 
     } catch (Exception e) {
-      e.printStackTrace();
+      Logger.getLogger(SnippetPlayer.class).error("Play of " + snippet + " failed", e);
     }
   }
 
@@ -245,7 +242,6 @@ public class SnippetPlayer extends StationAdminFrame {
     private volatile boolean stopped = false;
 
     PlayerThread(Snippet snippet) throws IOException, JavaLayerException {
-      System.out.println(snippet);
       this.snippet = snippet;
       InputStream stream = snippet.getUrl().openConnection().getInputStream();
       this.player = new Player(stream);
@@ -254,9 +250,8 @@ public class SnippetPlayer extends StationAdminFrame {
     public void run() {
       try {
         this.player.play();
-        System.out.println("return from play");
       } catch (Exception e) {
-        System.out.println(snippet + " interrupted: " + e.toString());
+        Logger.getLogger(SnippetPlayer.class).error("Play of " + snippet + " failed", e);
       }
       if (!stopped) {
         playNext();

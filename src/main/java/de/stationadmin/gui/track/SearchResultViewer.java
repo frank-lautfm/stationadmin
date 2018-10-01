@@ -5,7 +5,6 @@ package de.stationadmin.gui.track;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Event;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
@@ -18,7 +17,6 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -36,6 +34,7 @@ import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.AbstractHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.error.ErrorInfo;
 import org.jdesktop.swingx.table.TableColumnExt;
 
 import com.jgoodies.binding.PresentationModel;
@@ -48,7 +47,6 @@ import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackQuery;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.track.SearchResultTableModel.Column;
-import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.IntTableCellRenderer;
 
@@ -180,7 +178,12 @@ public class SearchResultViewer extends JPanel {
       public void mouseClicked(MouseEvent e) {
         this.checkPopup(e);
         if (e.getClickCount() == 2) {
-          playSnippetAction.playSnippetInternal();
+          try {
+            playSnippetAction.playSnippetInternal();
+          } catch (Exception ex) {
+            ErrorInfo info = ctx.createErrorInfo(ex, "action.playsnippet.msg.error");
+            JXErrorPane.showDialog(ctx.getRootWindow(), info);
+          }
         }
       }
 
@@ -280,8 +283,7 @@ public class SearchResultViewer extends JPanel {
       public void actionPerformed(ActionEvent e) {
         if (table.getSelectedRow() == 0) {
           searchAction.actionPerformed(e);
-        }
-        else if(selectionEnterAction != null) {
+        } else if (selectionEnterAction != null) {
           selectionEnterAction.actionPerformed(e);
         }
       }
