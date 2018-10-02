@@ -115,7 +115,6 @@ public class PlayFilterPanel extends JPanel {
       colIdx += 2;
       metadataPanel.add(tagCmb, cc.xy(colIdx, 1));
       colIdx += 2;
-      System.out.println((System.currentTimeMillis() - t) + " ms");
     }
 
     JCheckBox musicOnlyCb = BasicComponentFactory.createCheckBox(filterModel.getModel("musicOnly"), textProvider.getString("playsanalyzer.filter.musiconly"));
