@@ -25,11 +25,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.apache.log4j.Logger;
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.list.IndirectListModel;
@@ -47,6 +50,7 @@ import de.stationadmin.gui.track.DistributeTracksAction;
 import de.stationadmin.gui.track.TagMenu;
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
+import sun.swing.SwingUtilities2;
 
 /**
  * @author korf
@@ -214,6 +218,7 @@ public class SnippetPlayer extends StationAdminFrame {
 
     } catch (Exception e) {
       Logger.getLogger(SnippetPlayer.class).error("Play of " + snippet + " failed", e);
+      displayErrorInEDT(e);
     }
   }
 
@@ -229,6 +234,17 @@ public class SnippetPlayer extends StationAdminFrame {
       this.list.setSelectedIndex(0);
     }
 
+  }
+  
+  void displayErrorInEDT(final Exception e) {
+    SwingUtilities.invokeLater(new Runnable() {
+      
+      @Override
+      public void run() {
+        ErrorInfo info = ctx.createErrorInfo(e, "action.playsnippet.msg.error");
+        JXErrorPane.showDialog(ctx.getRootWindow(), info);
+      }
+    });
   }
 
   enum State {
@@ -251,6 +267,7 @@ public class SnippetPlayer extends StationAdminFrame {
       try {
         this.player.play();
       } catch (Exception e) {
+        displayErrorInEDT(e);
         Logger.getLogger(SnippetPlayer.class).error("Play of " + snippet + " failed", e);
       }
       if (!stopped) {
