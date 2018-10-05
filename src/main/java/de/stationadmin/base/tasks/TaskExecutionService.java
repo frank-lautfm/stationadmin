@@ -53,10 +53,8 @@ public class TaskExecutionService extends AbstractBean implements Service {
       log.info("loading scheduled tasks");
       for (File file : files) {
         if (file.getName().endsWith(".task")) {
-          try {
-            FileInputStream in = new FileInputStream(file);
+          try (FileInputStream in = new FileInputStream(file)) {
             ScheduledTask stask = this.load(in);
-            IOUtils.closeQuietly(in);
             this.scheduledTasks.add(stask);
           } catch (Exception e) {
             log.error("unable to load task from " + file.getName(), e);
@@ -66,11 +64,11 @@ public class TaskExecutionService extends AbstractBean implements Service {
       log.info("found " + this.scheduledTasks.size() + " scheduled tasks");
     }
   }
-  
+
   public ScheduledTask load(InputStream stream) throws IOException {
     return (ScheduledTask) this.xstream.fromXML(stream);
   }
-  
+
   public List<File> getTaskFiles() {
     List<File> taskFiles = new ArrayList<File>();
     File dir = new File(this.getTaskDir());
@@ -176,9 +174,9 @@ public class TaskExecutionService extends AbstractBean implements Service {
 
   private void save(ScheduledTask task) throws IOException {
     String filename = this.getTaskDir() + task.getId() + ".task";
-    FileOutputStream out = new FileOutputStream(filename);
-    this.xstream.toXML(task, out);
-    IOUtils.closeQuietly(out);
+    try (FileOutputStream out = new FileOutputStream(filename)) {
+      this.xstream.toXML(task, out);
+    }
   }
 
   private void launchDueTasks() {

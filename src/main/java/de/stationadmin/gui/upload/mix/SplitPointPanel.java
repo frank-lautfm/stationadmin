@@ -35,16 +35,14 @@ import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXTable;
 
-import au.com.bytecode.opencsv.CSVParser;
-import au.com.bytecode.opencsv.CSVWriter;
-
 import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
+import au.com.bytecode.opencsv.CSVParser;
+import au.com.bytecode.opencsv.CSVWriter;
 import de.stationadmin.base.mp3splitter.DJMixTitleListParser;
-import de.stationadmin.base.mp3splitter.MixcloudTitleListReader;
 import de.stationadmin.base.mp3splitter.SplitPoint;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
@@ -187,13 +185,6 @@ public class SplitPointPanel extends JPanel {
             if (string.indexOf('\n') > 0) {
               List<SplitPoint> titles = DJMixTitleListParser.parse(string);
               ((SplitPointTableModel) this.table.getModel()).insert(row >= 0 ? row : 0, titles);
-            } else if (string.indexOf("www.mixcloud.com") > 0) {
-              try {
-                List<SplitPoint> titles = MixcloudTitleListReader.read(string);
-                ((SplitPointTableModel) this.table.getModel()).insert(row >= 0 ? row : 0, titles);
-              } catch (Exception e) {
-                e.printStackTrace();
-              }
             } else {
               table.getModel().setValueAt(string, row >= 0 ? row : 0, col >= 0 ? col : 0);
             }

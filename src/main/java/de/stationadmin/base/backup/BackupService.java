@@ -39,10 +39,10 @@ import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.Settings;
 import de.stationadmin.base.playlist.Playlist;
-import de.stationadmin.base.playlist.PlaylistRegistry;
-import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
+import de.stationadmin.base.playlist.PlaylistRegistry;
+import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.exporter.PlaylistBackupExporter;
 import de.stationadmin.base.playlist.trackimport.TrackImportHandler;
 import de.stationadmin.base.playlist.validation.PlaylistValidationException;
@@ -81,8 +81,8 @@ public class BackupService implements Service {
    * @param titleTagManager
    * @param schedule
    */
-  public BackupService(SessionCtx sessionCtx, PlaylistService playlistService, TrackService titleService, TagManager titleTagManager, Schedule schedule, TaskExecutionService taskService,
-      Settings settings) {
+  public BackupService(SessionCtx sessionCtx, PlaylistService playlistService, TrackService titleService, TagManager titleTagManager, Schedule schedule,
+      TaskExecutionService taskService, Settings settings) {
     super();
     this.sessionCtx = sessionCtx;
     this.playlistService = playlistService;
@@ -121,7 +121,8 @@ public class BackupService implements Service {
   }
 
   /**
-   * Checks for which of the currently registered playlist a backup is available in the given backup file
+   * Checks for which of the currently registered playlist a backup is available
+   * in the given backup file
    * 
    * @param file
    * @return
@@ -145,63 +146,59 @@ public class BackupService implements Service {
   }
 
   public void createBackup(File file) throws IOException {
-    FileOutputStream out = new FileOutputStream(file);
-    ZipOutputStream zip = new ZipOutputStream(out);
+    try (FileOutputStream out = new FileOutputStream(file)) {
 
-    try {
-      // create playlist backups
-      PlaylistBackupExporter exporter = new PlaylistBackupExporter();
-      for (Playlist playlist : this.playlistRegistry.getAllPlaylists()) {
-        String playlistStr = exporter.toString(playlist);
-        ZipEntry entry = new ZipEntry(getFilename(playlist));
-        zip.putNextEntry(entry);
-        zip.write(playlistStr.getBytes("UTF-8"));
-      }
-
-      // create tag backups
-      for (File tagFile : this.trackManager.getFiles()) {
-        ZipEntry entry = new ZipEntry("tags/" + tagFile.getName());
-        zip.putNextEntry(entry);
-        FileInputStream in = new FileInputStream(tagFile);
-        byte[] data = IOUtils.toByteArray(in);
-        in.close();
-        zip.write(data);
-      }
-
-      // create schedule backup
-      {
-        if (schedule.getEntries().size() > 1) {
-          ZipEntry entry = new ZipEntry("schedule/schedule.xml");
+      try (ZipOutputStream zip = new ZipOutputStream(out)) {
+        // create playlist backups
+        PlaylistBackupExporter exporter = new PlaylistBackupExporter();
+        for (Playlist playlist : this.playlistRegistry.getAllPlaylists()) {
+          String playlistStr = exporter.toString(playlist);
+          ZipEntry entry = new ZipEntry(getFilename(playlist));
           zip.putNextEntry(entry);
-          ByteArrayOutputStream scheduleOut = new ByteArrayOutputStream();
-          schedule.save(scheduleOut);
-          zip.write(scheduleOut.toByteArray());
+          zip.write(playlistStr.getBytes("UTF-8"));
         }
-      }
 
-      // create task backup
-      {
-        for (File taskFile : this.taskService.getTaskFiles()) {
-          ZipEntry entry = new ZipEntry("tasks/" + taskFile.getName());
+        // create tag backups
+        for (File tagFile : this.trackManager.getFiles()) {
+          ZipEntry entry = new ZipEntry("tags/" + tagFile.getName());
           zip.putNextEntry(entry);
-          FileInputStream in = new FileInputStream(taskFile);
+          FileInputStream in = new FileInputStream(tagFile);
           byte[] data = IOUtils.toByteArray(in);
           in.close();
           zip.write(data);
         }
 
-      }
+        // create schedule backup
+        {
+          if (schedule.getEntries().size() > 1) {
+            ZipEntry entry = new ZipEntry("schedule/schedule.xml");
+            zip.putNextEntry(entry);
+            ByteArrayOutputStream scheduleOut = new ByteArrayOutputStream();
+            schedule.save(scheduleOut);
+            zip.write(scheduleOut.toByteArray());
+          }
+        }
 
-    } finally {
-      zip.close();
-      out.close();
+        // create task backup
+        {
+          for (File taskFile : this.taskService.getTaskFiles()) {
+            ZipEntry entry = new ZipEntry("tasks/" + taskFile.getName());
+            zip.putNextEntry(entry);
+            FileInputStream in = new FileInputStream(taskFile);
+            byte[] data = IOUtils.toByteArray(in);
+            in.close();
+            zip.write(data);
+          }
+
+        }
+      }
     }
   }
 
   public List<String> getArchivePlaylists(File file) throws IOException {
     List<String> names = new ArrayList<String>();
-    ZipFile zip = new ZipFile(file);
-    try {
+    ;
+    try (ZipFile zip = new ZipFile(file)) {
       Enumeration<? extends ZipEntry> entries = zip.entries();
       while (entries.hasMoreElements()) {
         ZipEntry entry = entries.nextElement();
@@ -212,8 +209,6 @@ public class BackupService implements Service {
         }
       }
       return names;
-    } finally {
-      closeQuietly(zip);
     }
   }
 
@@ -296,8 +291,7 @@ public class BackupService implements Service {
   }
 
   public boolean restoreArchivePlaylist(File file, String name) throws IOException, PlaylistValidationException {
-    ZipFile zip = new ZipFile(file);
-    try {
+    try (ZipFile zip = new ZipFile(file)) {
       ZipEntry entry = zip.getEntry(PATH_PLAYLIST_ARCHIVE + name + ".lfm");
       if (entry != null) {
         String content = IOUtils.toString(zip.getInputStream(entry), "UTF-8");
@@ -305,8 +299,6 @@ public class BackupService implements Service {
       }
 
       return false;
-    } finally {
-      closeQuietly(zip);
     }
   }
 
@@ -314,8 +306,7 @@ public class BackupService implements Service {
    * Restores an online playlist from the backup file
    * 
    * @param file
-   * @param playlistId
-   * @return.
+   * @param playlistId @return.
    * @throws IOException
    * @throws JSONException
    * @throws PlaylistValidationException
@@ -325,8 +316,7 @@ public class BackupService implements Service {
   }
 
   public boolean restorePlaylist(File file, int playlistId, boolean legacy) throws IOException, JSONException, PlaylistValidationException {
-    ZipFile zip = new ZipFile(file);
-    try {
+    try (ZipFile zip = new ZipFile(file)) {
       Playlist playlist = this.playlistRegistry.getPlaylist(playlistId);
       if (playlist != null) {
         ZipEntry entry = zip.getEntry(this.getFilename(playlist));
@@ -346,18 +336,6 @@ public class BackupService implements Service {
         }
       }
       return false;
-    } finally {
-      closeQuietly(zip);
-    }
-  }
-
-  private static void closeQuietly(ZipFile zip) {
-    if (zip == null)
-      return;
-    try {
-      zip.close();
-    } catch (Exception e) {
-
     }
   }
 
@@ -397,14 +375,12 @@ public class BackupService implements Service {
       // restore timestamp map
       Map<Integer, Long> timestampMap = null;
       if (tsMapBuffer.length() > 0) {
-        try {
-          ByteArrayInputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(tsMapBuffer.toString()));
-          ObjectInputStream objIn = new ObjectInputStream(in);
-          timestampMap = (Map<Integer, Long>) objIn.readObject();
-          IOUtils.closeQuietly(objIn);
-          IOUtils.closeQuietly(in);
+        try (ByteArrayInputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(tsMapBuffer.toString()))) {
+          try (ObjectInputStream objIn = new ObjectInputStream(in)) {
+            timestampMap = (Map<Integer, Long>) objIn.readObject();
+          }
         } catch (Exception e) {
-          e.printStackTrace();
+          log.error("unable to restore timestampes for playlist " + playlist.getName(), e);
         }
       }
 

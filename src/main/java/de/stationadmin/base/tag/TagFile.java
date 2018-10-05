@@ -321,9 +321,9 @@ public class TagFile {
 
   public void writeRaw(InputStream stream) throws IOException {
     new File(this.filename).delete();
-    FileOutputStream out = new FileOutputStream(this.filename);
-    IOUtils.copyLarge(stream, out);
-    out.close();
+    try ( FileOutputStream out = new FileOutputStream(this.filename)) {
+      IOUtils.copyLarge(stream, out);
+    }
     this.open();
   }
 

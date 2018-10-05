@@ -133,11 +133,11 @@ public class PlaylistService implements Service {
   }
 
   protected void loadPlaylist(File file, PlaylistType type) throws IOException {
-    FileInputStream stream = new FileInputStream(file);
-    String content = IOUtils.toString(stream, "UTF-8");
-    IOUtils.closeQuietly(stream);
-    String name = FilenameUtils.getBaseName(file.getName());
-    this.loadPlaylist(content, name, type);
+    try ( FileInputStream stream = new FileInputStream(file)) {
+      String content = IOUtils.toString(stream, "UTF-8");
+      String name = FilenameUtils.getBaseName(file.getName());
+      this.loadPlaylist(content, name, type);
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -165,14 +165,12 @@ public class PlaylistService implements Service {
     // restore timestamp map
     Map<Integer, Long> timestampMap = null;
     if (tsMapBuffer.length() > 0) {
-      try {
-        ByteArrayInputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(tsMapBuffer.toString()));
-        ObjectInputStream objIn = new ObjectInputStream(in);
-        timestampMap = (Map<Integer, Long>) objIn.readObject();
-        IOUtils.closeQuietly(objIn);
-        IOUtils.closeQuietly(in);
+      try (ByteArrayInputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(tsMapBuffer.toString()))) {
+        try (ObjectInputStream objIn = new ObjectInputStream(in)) {
+          timestampMap = (Map<Integer, Long>) objIn.readObject();
+        }
       } catch (Exception e) {
-        e.printStackTrace();
+        log.error("unable to restore timestampes for playlist " + name, e);
       }
     }
 
@@ -230,10 +228,9 @@ public class PlaylistService implements Service {
 
   public void importArchivedPlaylist(String filename, String content) throws IOException {
     File file = new File(this.dirArchive + filename);
-    FileOutputStream out = new FileOutputStream(file);
-    IOUtils.write(content, out);
-    out.close();
-
+    try ( FileOutputStream out = new FileOutputStream(file)) {
+      IOUtils.write(content, out, "UTF-8");
+    }
     this.loadPlaylist(file, PlaylistType.ARCHIVED);
   }
 

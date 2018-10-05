@@ -111,10 +111,10 @@ public class DynamicTag implements Tag {
 
 	void load() throws IOException {
 		// verflixte Frickelei - ich brauch 'ne Datenbank :-(
-		FileInputStream input = new FileInputStream(new File(this.filename));
-		@SuppressWarnings("unchecked")
-		List<String> lines = (List<String>) IOUtils.readLines(input, "UTF-8");
-		input.close();
+	  List<String> lines;
+	  try (FileInputStream input = new FileInputStream(new File(this.filename))) {
+	    lines = IOUtils.readLines(input, "UTF-8");
+	  }
 
 		for (String line : lines) {
 			int eq = line.indexOf('=');
@@ -246,9 +246,9 @@ public class DynamicTag implements Tag {
 
 		}
 
-		FileOutputStream out = new FileOutputStream(new File(this.filename));
-		IOUtils.write(buf.toString(), out, "UTF-8");
-		out.close();
+		try( FileOutputStream out = new FileOutputStream(new File(this.filename))) {
+	    IOUtils.write(buf.toString(), out, "UTF-8");
+		}
 	}
 
 	/**

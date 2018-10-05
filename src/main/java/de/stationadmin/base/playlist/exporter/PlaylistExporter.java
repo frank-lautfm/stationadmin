@@ -67,10 +67,10 @@ public abstract class PlaylistExporter {
    * @throws IOException
    */
   public void toFile(Playlist playlist, File file) throws IOException {
-    FileOutputStream out = new FileOutputStream(file);
-    IOUtils.write(this.toString(playlist), out, "UTF-8");
-    out.flush();
-    out.close();
+    try (FileOutputStream out = new FileOutputStream(file)) {
+      IOUtils.write(this.toString(playlist), out, "UTF-8");
+      out.flush();
+    }
   }
 
   protected String getHeadData(Playlist playlist) {

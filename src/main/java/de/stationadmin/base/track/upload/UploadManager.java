@@ -204,23 +204,18 @@ public class UploadManager extends AbstractBean {
       list.add(entry.getFile().getFile().getAbsolutePath() + "\t" + (entry.getFile().isPrivateTrack() ? "1" : "0"));
     }
     String filename = this.sessionCtx.getStationDirectory() + "uploadqueue.txt";
-    try {
-      FileOutputStream out = new FileOutputStream(new File(filename));
+    try (FileOutputStream out = new FileOutputStream(new File(filename))) {
       IOUtils.writeLines(list, null, out, "UTF-8");
-      IOUtils.closeQuietly(out);
     } catch (IOException e) {
       log.error("unable to write upload queue file", e);
     }
   }
 
-  @SuppressWarnings("unchecked")
   private void loadQueue() {
     String filename = this.sessionCtx.getStationDirectory() + "uploadqueue.txt";
     if (new File(filename).exists()) {
-      try {
-        FileInputStream in = new FileInputStream(filename);
+      try (FileInputStream in = new FileInputStream(filename) ){
         List<String> lines = (List<String>) IOUtils.readLines(in, "UTF-8");
-        IOUtils.closeQuietly(in);
         int old = this.queue.size();
         for (String line : lines) {
           String[] parts = StringUtils.split(line, "\t");
