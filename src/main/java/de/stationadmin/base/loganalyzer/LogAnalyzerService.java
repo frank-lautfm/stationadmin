@@ -17,13 +17,11 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 
 import de.stationadmin.base.AccessDeniedException;
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
-import de.stationadmin.base.Version;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackRegistry;
@@ -45,8 +43,6 @@ public class LogAnalyzerService implements Service {
   private TrackRegistry trackRegistry;
   private String logCacheDir;
 
-  private DefaultHttpClient client;
-
   private List<ListenersEntry> listenersToday;
   private List<Play> playsToday;
 
@@ -59,8 +55,6 @@ public class LogAnalyzerService implements Service {
     this.trackRegistry = trackService.getTrackRegistry();
     this.logCacheDir = ctx.getStationDirectory() + "log" + File.separatorChar;
 
-    this.client = new DefaultHttpClient();
-    client.getParams().setParameter("http.useragent", "Mozilla/4.0 (compatible; Station Admin " + Version.VERSION + "; " + System.getProperty("os.name") + ")");
 
   }
 

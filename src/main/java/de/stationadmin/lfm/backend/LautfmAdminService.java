@@ -67,7 +67,7 @@ public class LautfmAdminService {
     this.client = createClient();
   }
 
-  private CloseableHttpClient createClient() {
+  public CloseableHttpClient createClient() {
     try {
       SSLContextBuilder builder = new SSLContextBuilder();
       builder.loadTrustMaterial(null, new TrustStrategy() {
@@ -94,6 +94,7 @@ public class LautfmAdminService {
       throw new RuntimeException(e);
     }
   }
+  
 
   private <T> T deserializeJson(CloseableHttpResponse response, Class<T> type) throws IOException, JsonMappingException {
     ObjectMapper mapper = new ObjectMapper();

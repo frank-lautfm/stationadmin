@@ -30,6 +30,9 @@ import javax.swing.Timer;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.log4j.Logger;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
@@ -50,7 +53,6 @@ import de.stationadmin.gui.track.DistributeTracksAction;
 import de.stationadmin.gui.track.TagMenu;
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
-import sun.swing.SwingUtilities2;
 
 /**
  * @author korf
@@ -66,6 +68,7 @@ public class SnippetPlayer extends StationAdminFrame {
   private JList list;
   private Timer timeRefresher;
   private volatile State state = State.STARTING;
+  CloseableHttpClient client;
 
   /**
    * @param ctx
@@ -73,6 +76,7 @@ public class SnippetPlayer extends StationAdminFrame {
    */
   public SnippetPlayer(ClientContext ctx, List<Snippet> snippets) throws HeadlessException {
     super(ctx, "snippetplayer");
+    this.client = ctx.getAdminClient().getSessionCtx().getServer().createClient();
     this.init(snippets);
   }
 
@@ -235,10 +239,10 @@ public class SnippetPlayer extends StationAdminFrame {
     }
 
   }
-  
+
   void displayErrorInEDT(final Exception e) {
     SwingUtilities.invokeLater(new Runnable() {
-      
+
       @Override
       public void run() {
         ErrorInfo info = ctx.createErrorInfo(e, "action.playsnippet.msg.error");
@@ -256,11 +260,14 @@ public class SnippetPlayer extends StationAdminFrame {
     private volatile Player player;
     private volatile Snippet snippet;
     private volatile boolean stopped = false;
+    private CloseableHttpResponse response;
 
     PlayerThread(Snippet snippet) throws IOException, JavaLayerException {
       this.snippet = snippet;
-      InputStream stream = snippet.getUrl().openConnection().getInputStream();
-      this.player = new Player(stream);
+
+      HttpGet request = new HttpGet(snippet.getUrl().toString());
+      response = client.execute(request);
+      this.player = new Player(response.getEntity().getContent());
     }
 
     public void run() {
@@ -269,6 +276,11 @@ public class SnippetPlayer extends StationAdminFrame {
       } catch (Exception e) {
         displayErrorInEDT(e);
         Logger.getLogger(SnippetPlayer.class).error("Play of " + snippet + " failed", e);
+      } finally {
+        try {
+          response.close();
+        } catch (Exception e) {
+        }
       }
       if (!stopped) {
         playNext();
