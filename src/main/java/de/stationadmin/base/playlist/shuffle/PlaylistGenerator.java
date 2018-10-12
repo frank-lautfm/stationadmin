@@ -219,7 +219,7 @@ public class PlaylistGenerator {
       // check if first title is jingle and protect it if so
       Entry entry = playlist.getEntries().get(0);
       BasicTrack firstTrack = this.trackRegistry.getTrack(entry.getTrackId());
-      if (firstTrack != null && firstTrack.getType() >= 2 && (playlistEnhancer == null || !playlistEnhancer.excludeFromCorePlaylist(firstTrack))) {
+      if (firstTrack != null && firstTrack.getType() == BasicTrack.TYPE_JINGLE && (playlistEnhancer == null || !playlistEnhancer.excludeFromCorePlaylist(firstTrack))) {
         ctx.setFirstJingle(firstTrack);
       }
     }

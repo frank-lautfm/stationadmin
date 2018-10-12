@@ -7,6 +7,12 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
+Version 4.7.1
+-------------
+
+[*] "Jingle am Anfang der Playlist nicht verschieben" wird nicht mehr auf Wortbeiträge angewendet
+
+
 Version 4.7.0
 -------------
 [*] Kompatibilitätsprobleme mit Java 11 behoben
