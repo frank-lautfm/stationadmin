@@ -22,49 +22,55 @@ import com.jgoodies.binding.value.ValueModel;
  *
  */
 public class TitledPanel extends JXTitledPanel {
-	private static final long serialVersionUID = 1174481124130086654L;
+  private static final long serialVersionUID = 1174481124130086654L;
+  private static Color startColor = new Color(51, 90, 183);
+  private static Color endColor = new Color(233, 233, 233);
 
-	/**
-	 * @param title
-	 * @param content
-	 */
-	public TitledPanel(String title, Container content) {
-		super(title != null ? title : " ", content);
-		this.setTitlePainter(new Painter<Component>() {
-		  private Color startColor = new Color(51, 90, 183);
-		  private Color endColor = new Color(233, 233, 233);
+  public static void setUp(Color startColor, Color endColor) {
+    TitledPanel.startColor = startColor;
+    TitledPanel.endColor = endColor;
+  }
 
-			@Override
-			public void paint(Graphics2D graphics, Component c, int width, int height) {
-		    Graphics2D g = (Graphics2D) graphics;
+  /**
+   * @param title
+   * @param content
+   */
+  public TitledPanel(String title, Container content) {
+    super(title != null ? title : " ", content);
 
-		    GradientPaint gradient = new GradientPaint(0, 0, this.startColor, c.getWidth(), 0, this.endColor);
-		    g.setPaint(gradient);
-		    g.fill(new Rectangle2D.Double(0, 0, c.getWidth(), 20));
-				
-			}
-			
-		});
-		this.setTitleFont(ComponentFactory.boldLabelFont);
-		this.setTitleForeground(Color.WHITE);
-	}
+    this.setTitlePainter(new Painter<Component>() {
+      private Color startColor = TitledPanel.startColor;
+      private Color endColor = TitledPanel.endColor;
 
-	public TitledPanel(ValueModel titleHolder, Container content) {
-		this((String)titleHolder.getValue(), content);
-		titleHolder.addValueChangeListener(new PropertyChangeListener() {
+      @Override
+      public void paint(Graphics2D graphics, Component c, int width, int height) {
+        Graphics2D g = (Graphics2D) graphics;
 
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				if(evt.getNewValue() instanceof String) {
-					setTitle((String)evt.getNewValue());
-				}
-				else {
-					setTitle(" ");
-				}
-			}
-			
-			
-		});
-	}
+        GradientPaint gradient = new GradientPaint(0, 0, this.startColor, c.getWidth(), 0, this.endColor);
+        g.setPaint(gradient);
+        g.fill(new Rectangle2D.Double(0, 0, c.getWidth(), 20));
+
+      }
+
+    });
+    this.setTitleFont(ComponentFactory.boldLabelFont);
+    this.setTitleForeground(new Color(254,254,254));
+  }
+
+  public TitledPanel(ValueModel titleHolder, Container content) {
+    this((String) titleHolder.getValue(), content);
+    titleHolder.addValueChangeListener(new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getNewValue() instanceof String) {
+          setTitle((String) evt.getNewValue());
+        } else {
+          setTitle(" ");
+        }
+      }
+
+    });
+  }
 
 }

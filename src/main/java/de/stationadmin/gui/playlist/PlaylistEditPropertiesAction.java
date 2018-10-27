@@ -57,7 +57,7 @@ class PlaylistEditPropertiesAction extends AbstractAction implements PropertyCha
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
     Playlist playlist = (Playlist) this.playlistHolder.getValue();
-    setEnabled(evt.getNewValue() != null && playlist != null && playlist.getType() == PlaylistType.ONLINE);
+    setEnabled(evt.getNewValue() != null && playlist != null);
   }
 
 }

@@ -461,14 +461,8 @@ public class PlaylistSelector extends JPanel {
     });
   }
 
-  public void enableContextMenu() {
+  public void enableContextMenu(JPopupMenu popup) {
 
-    final JPopupMenu popup = new JPopupMenu();
-    popup.add(new PlaylistNewAction(ctx, playlistSelectionHolder));
-    popup.add(new PlaylistDuplicateAction(ctx, playlistSelectionHolder));
-    popup.add(new PlaylistDeleteAction(playlistSelectionHolder, ctx.getAdminClient().getPlaylistService(), ctx.getTextProvider(), false));
-    popup.addSeparator();
-    popup.add(new PlaylistEditPropertiesAction(ctx, playlistSelectionHolder, false));
 
     list.addMouseListener(new MouseAdapter() {
 

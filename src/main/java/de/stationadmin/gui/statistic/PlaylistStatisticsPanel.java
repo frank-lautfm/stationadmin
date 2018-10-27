@@ -19,6 +19,7 @@ import de.stationadmin.base.playlist.PlaylistRegistry;
 import de.stationadmin.base.schedule.Schedule;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.util.AppUtils;
 
 /**
  *
@@ -28,6 +29,7 @@ import de.stationadmin.gui.ClientContext;
 public class PlaylistStatisticsPanel extends JPanel {
   private static final long serialVersionUID = 5752235067680615947L;
   private ClientContext ctx;
+  private Color background = AppUtils.getTextBackgroundColor();
 
   public PlaylistStatisticsPanel(ClientContext ctx) {
     super();
@@ -46,7 +48,7 @@ public class PlaylistStatisticsPanel extends JPanel {
     ValueModel numTitlesUsedModel = new BeanAdapter<Schedule>(ctx.getAdminClient().getSchedule(), true).getValueModel("numTracks");
 
     int row = 2;
-    this.setBackground(Color.WHITE);
+    this.setBackground(background);
 
     NumberFormat nf = NumberFormat.getInstance();
     nf.setGroupingUsed(false);

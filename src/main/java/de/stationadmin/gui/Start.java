@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -21,6 +20,7 @@ import org.jdesktop.swingx.JXErrorPane;
 
 import de.stationadmin.base.StationAdminClient;
 import de.stationadmin.base.util.AbstractBean;
+import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.lfm.backend.LautfmAdminService;
 import de.stationadmin.lfm.backend.Station;
 
@@ -61,7 +61,8 @@ public class Start {
 
     final Start admin = new Start();
     try {
-      UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+      String laf = Preferences.userRoot().get("stationadmin.lookandfeel", null);
+      AppUtils.setLookAndFeel(laf);
     } catch (Exception e) {
     }
 

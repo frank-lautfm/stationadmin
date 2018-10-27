@@ -25,8 +25,8 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.schedule.Schedule;
 import de.stationadmin.base.schedule.Schedule.Entry;
-import de.stationadmin.base.schedule.Schedule.Weekday;
 import de.stationadmin.gui.JumpHandler;
+import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.JumpLabel;
 
@@ -39,13 +39,14 @@ public class ScheduleTodayPanel extends JPanel {
   private static final long serialVersionUID = 896809155860392655L;
   private JumpHandler jumpHandler;
   private Schedule schedule;
+  private Color background = AppUtils.getTextBackgroundColor();
 
   public ScheduleTodayPanel(Schedule schedule, JumpHandler jumpHandler) {
     super();
     this.schedule = schedule;
     this.jumpHandler = jumpHandler;
     this.setLayout(new FormLayout("pref", "50dlu:grow"));
-    this.setBackground(Color.WHITE);
+    this.setBackground(background);
     this.setOpaque(true);
     this.rebuild();
 
@@ -61,7 +62,7 @@ public class ScheduleTodayPanel extends JPanel {
     this.removeAll();
 
     JPanel schedulePanel = new JPanel(new GridBagLayout());
-    schedulePanel.setBackground(Color.WHITE);
+    schedulePanel.setBackground(background);
     schedulePanel.setOpaque(true);
 
     List<Schedule.Entry> entries = this.schedule.getEffectiveEntriesOfToday();

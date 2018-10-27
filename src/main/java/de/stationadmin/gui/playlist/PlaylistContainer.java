@@ -6,6 +6,7 @@ package de.stationadmin.gui.playlist;
 import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 
@@ -36,10 +37,24 @@ public class PlaylistContainer extends JPanel {
 
   private void init() {
     final ValueHolder playlistSelectionHolder = new ValueHolder(null, true);
+
     final PlaylistSelector selectorOnline = new PlaylistSelector(this.ctx, PlaylistType.ONLINE, playlistSelectionHolder);
-    selectorOnline.enableContextMenu();
+    final JPopupMenu popupOnline = new JPopupMenu();
+    popupOnline.add(new PlaylistNewAction(ctx, playlistSelectionHolder));
+    popupOnline.add(new PlaylistDuplicateAction(ctx, playlistSelectionHolder));
+    popupOnline.add(new PlaylistDeleteAction(playlistSelectionHolder, ctx.getAdminClient().getPlaylistService(), ctx.getTextProvider(), false));
+    popupOnline.add(new PlaylistToArchiveAction(ctx, playlistSelectionHolder));
+    popupOnline.addSeparator();
+    popupOnline.add(new PlaylistEditPropertiesAction(ctx, playlistSelectionHolder, false));
+    selectorOnline.enableContextMenu(popupOnline);
+    
+    
     final PlaylistSelector selectorArchive = new PlaylistSelector(this.ctx, PlaylistType.ARCHIVED, playlistSelectionHolder);
-    selectorArchive.enableContextMenu();
+    final JPopupMenu popupArchive = new JPopupMenu();
+    popupArchive.add(new PlaylistDeleteAction(playlistSelectionHolder, ctx.getAdminClient().getPlaylistService(), ctx.getTextProvider(), false));
+    popupArchive.addSeparator();
+    popupArchive.add(new PlaylistEditPropertiesAction(ctx, playlistSelectionHolder, false));
+    selectorArchive.enableContextMenu(popupArchive);
     final PlaylistViewer viewer = new PlaylistViewer(this.ctx, playlistSelectionHolder);
     selectorArchive.addHighlightedTitlesHolder(viewer.getHighlightedTrackHolder());
     selectorOnline.addHighlightedTitlesHolder(viewer.getHighlightedTrackHolder());

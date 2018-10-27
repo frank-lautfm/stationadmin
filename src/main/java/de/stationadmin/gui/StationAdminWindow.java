@@ -69,6 +69,7 @@ import de.stationadmin.gui.playlist.PlaylistContainer;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
 import de.stationadmin.gui.playlist.PlaylistNewAction;
 import de.stationadmin.gui.playlist.PlaylistTrackSearchOpenAction;
+import de.stationadmin.gui.playlist.PlaylistsToArchiveAction;
 import de.stationadmin.gui.playlist.ResetModifiedPlaylistsAction;
 import de.stationadmin.gui.playlist.SaveModifiedPlaylistsAction;
 import de.stationadmin.gui.playlist.forecast.ForecastDisplayAction;
@@ -456,6 +457,7 @@ public class StationAdminWindow extends StationAdminFrame {
       if (!djOnly) {
         menuPlaylists.add(new ForecastDisplayAction(this.ctx));
       }
+      menuPlaylists.add(new PlaylistsToArchiveAction(this.ctx));
       menuBar.add(menuPlaylists);
     }
 

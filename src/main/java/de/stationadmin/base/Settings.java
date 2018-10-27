@@ -274,6 +274,17 @@ public class Settings extends AbstractBean {
     Preferences.userRoot().putBoolean("autologin", autologin);
     this.firePropertyChange("autologin", old, autologin);
   }
+  
+  public String getLookAndFeel() {
+    return Preferences.userRoot().get("stationadmin.lookandfeel", "system");
+  }
+
+  public void setLookAndFeel(String lookAndFeel) {
+    String old = this.getLookAndFeel();
+    Preferences.userRoot().put("stationadmin.lookandfeel", lookAndFeel);
+    this.firePropertyChange("lookAndFeel", old, lookAndFeel);
+  }
+
 
   /**
    * @return the backupDirectory

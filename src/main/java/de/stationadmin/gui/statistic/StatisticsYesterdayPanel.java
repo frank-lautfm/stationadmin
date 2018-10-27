@@ -20,6 +20,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.StationStatus;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
+import de.stationadmin.gui.util.AppUtils;
 
 /**
  * 
@@ -30,6 +31,7 @@ public class StatisticsYesterdayPanel extends JPanel {
   private static final long serialVersionUID = 5107968984351221173L;
   private ClientContext ctx;
   private PresentationModel<StationStatus> model;
+  private Color background = AppUtils.getTextBackgroundColor();
 
   public StatisticsYesterdayPanel(ClientContext ctx) {
     super();
@@ -48,7 +50,7 @@ public class StatisticsYesterdayPanel extends JPanel {
     this.setLayout(new FormLayout("5dlu,pref,10dlu:grow,pref,5dlu", rowSpec.toString()));
     CellConstraints cc = new CellConstraints();
     int row = 2;
-    this.setBackground(Color.WHITE);
+    this.setBackground(background);
 
     NumberFormat nf = NumberFormat.getInstance();
     nf.setGroupingUsed(false);
@@ -56,13 +58,11 @@ public class StatisticsYesterdayPanel extends JPanel {
     TextProvider txtProvider = ctx.getTextProvider();
 
     this.add(new JLabel(txtProvider.getString("statistics.property.listenersYesterday")), cc.xy(2, row));
-    this.add(BasicComponentFactory.createLabel(this.model.getModel("listenersYesterday"), nf),
-        cc.xy(4, row, CellConstraints.RIGHT, CellConstraints.CENTER));
+    this.add(BasicComponentFactory.createLabel(this.model.getModel("listenersYesterday"), nf), cc.xy(4, row, CellConstraints.RIGHT, CellConstraints.CENTER));
     row += 2;
 
     this.add(new JLabel(txtProvider.getString("statistics.property.avgListeningTimeYesterday")), cc.xy(2, row));
-    this.add(BasicComponentFactory.createLabel(this.model.getModel("avgListeningTimeYesterday"), nf),
-        cc.xy(4, row, CellConstraints.RIGHT, CellConstraints.CENTER));
+    this.add(BasicComponentFactory.createLabel(this.model.getModel("avgListeningTimeYesterday"), nf), cc.xy(4, row, CellConstraints.RIGHT, CellConstraints.CENTER));
     row += 2;
 
     this.add(new JLabel(txtProvider.getString("statistics.property.tlh")), cc.xy(2, row));

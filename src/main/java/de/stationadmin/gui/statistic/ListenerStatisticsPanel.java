@@ -17,6 +17,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.StationStatus;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
+import de.stationadmin.gui.util.AppUtils;
 
 /**
  * 
@@ -27,6 +28,7 @@ public class ListenerStatisticsPanel extends JPanel {
   private static final long serialVersionUID = 5107968984351221173L;
   private ClientContext ctx;
   private PresentationModel<StationStatus> model;
+  private Color background = AppUtils.getTextBackgroundColor();
 
   public ListenerStatisticsPanel(ClientContext ctx) {
     super();
@@ -46,7 +48,7 @@ public class ListenerStatisticsPanel extends JPanel {
     this.setLayout(new FormLayout("5dlu,pref,10dlu:grow,pref,5dlu", rowSpec.toString()));
     CellConstraints cc = new CellConstraints();
     int row = 2;
-    this.setBackground(Color.WHITE);
+    this.setBackground(background);
 
     NumberFormat nf = NumberFormat.getInstance();
     nf.setGroupingUsed(false);

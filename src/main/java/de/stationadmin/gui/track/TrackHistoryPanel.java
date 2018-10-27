@@ -26,6 +26,7 @@ import de.stationadmin.base.track.TrackHistory.Entry;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
+import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.TitledPanel;
 
@@ -34,6 +35,7 @@ public class TrackHistoryPanel extends TitledPanel {
   private SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyy HH:mm");
   private ClientContext ctx;
   private JPanel historyContainer = new JPanel(new GridBagLayout());
+  private Color background = AppUtils.getTextBackgroundColor();
 
   // private JProgressBar titleProgressBar;
 
@@ -50,7 +52,8 @@ public class TrackHistoryPanel extends TitledPanel {
         });
     this.refresh();
     JPanel contentContainer = (JPanel) ((JScrollPane) this.getContentContainer()).getViewport().getView();
-    contentContainer.setBackground(Color.WHITE);
+    // contentContainer.setBackground(Color.WHITE);
+    contentContainer.setBackground(background);
     contentContainer.setOpaque(true);
     contentContainer.setLayout(new FormLayout("5dlu,pref:grow,5dlu,", "5dlu,pref:grow,5dlu"));
     contentContainer.add(this.historyContainer, new CellConstraints(2, 2, CellConstraints.LEFT, CellConstraints.TOP));
@@ -64,7 +67,7 @@ public class TrackHistoryPanel extends TitledPanel {
 
   protected void refresh() {
     this.historyContainer.removeAll();
-    this.historyContainer.setBackground(Color.WHITE);
+    this.historyContainer.setBackground(background);
     this.historyContainer.setOpaque(true);
 
     // heading
@@ -97,7 +100,6 @@ public class TrackHistoryPanel extends TitledPanel {
       Entry entry = entries.get(i);
 
       // Color color = (i % 2 == 1) ? new Color(245, 245, 255) : Color.WHITE;
-      Color color = Color.WHITE;
 
       boolean isCurrrentTitle = (entry.getTitle().getId() == this.ctx.getAdminClient().getStationStatus()
           .getCurrentTrackId());
@@ -107,7 +109,7 @@ public class TrackHistoryPanel extends TitledPanel {
 
       JPanel entryPanel = new JPanel(new GridLayout(entryRows, 1));
       entryPanel.putClientProperty("entry", entry);
-      entryPanel.setBackground(color);
+      entryPanel.setBackground(background);
       JLabel dateLabel = new JLabel(dateFormat.format(entry.getDate()));
       dateLabel.setFont(ComponentFactory.defaultLabelFontSmall);
       entryPanel.add(dateLabel);
@@ -167,7 +169,7 @@ public class TrackHistoryPanel extends TitledPanel {
       cc.insets = new Insets(2, 0, bottomSpace, 10);
 
       JPanel listenerPanel = new JPanel(new FormLayout("pref:grow", "pref:grow"));
-      listenerPanel.setBackground(color);
+      listenerPanel.setBackground(background);
       listenerPanel.setOpaque(true);
       if (listeners > -1) {
         listenerPanel.add(new JLabel(Integer.toString(listeners)), new CellConstraints(1, 1, CellConstraints.RIGHT,

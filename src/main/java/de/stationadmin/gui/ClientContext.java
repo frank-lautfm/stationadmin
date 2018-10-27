@@ -20,7 +20,8 @@ import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ComponentFactory;
 
 /**
- * Context object for all classes of the GUI - provides access to relevant objects and resources
+ * Context object for all classes of the GUI - provides access to relevant
+ * objects and resources
  * 
  * @author Frank Korf
  */
@@ -33,7 +34,7 @@ public class ClientContext {
   private ValueHolder radioStatus = new ValueHolder(Boolean.FALSE);
   private UploadWindowManager uploadWindowManager = new UploadWindowManager(this);
   private Desktop desktop;
-  
+
   private ComponentFactory componentFactory;
 
   public ClientContext() {
@@ -142,7 +143,7 @@ public class ClientContext {
   }
 
   public ComponentFactory getComponentFactory() {
-    if(this.componentFactory == null) {
+    if (this.componentFactory == null) {
       this.componentFactory = new ComponentFactory(textProvider);
     }
     return componentFactory;

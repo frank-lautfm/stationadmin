@@ -35,6 +35,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.PlaylistService;
+import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
@@ -77,17 +78,20 @@ public class PlaylistConfigurationDialog extends JDialog {
     CellConstraints cc = new CellConstraints();
     int row = 2;
 
+    boolean archive = model.getBean().getType() == PlaylistType.ARCHIVED;
+    
     Font tfFont = null;
     Color tfBackground = null;
     // name
     {
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.name")), cc.xy(2, row));
       JTextField tf = ctx.getComponentFactory().createTextField(this.model.getBufferedModel("name"));
+      tfBackground = tf.getBackground();
       tf.setColumns(20);
       tfFont = tf.getFont();
-      tfBackground = tf.getBackground();
       panel.add(tf, cc.xy(4, row, CellConstraints.FILL, CellConstraints.FILL));
       row += 2;
+      tf.setEditable(!archive);
     }
 
     // description
@@ -95,6 +99,7 @@ public class PlaylistConfigurationDialog extends JDialog {
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.description")), cc.xy(2, row));
       JTextArea tf = ctx.getComponentFactory().createTextArea(this.model.getBufferedModel("description"));
       tf.setWrapStyleWord(true);
+      tf.setEditable(true);
       tf.setLineWrap(true);
       tf.setRows(2);
       tf.setColumns(20);
@@ -128,10 +133,12 @@ public class PlaylistConfigurationDialog extends JDialog {
     {
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.shuffle")), cc.xy(2, row));
       JCheckBox cbLaut = BasicComponentFactory.createCheckBox(this.model.getBufferedModel("shuffle"), this.textProvider.getString("playlistcfg.property.shuffle.laut"));
+      cbLaut.setEnabled(!archive);
       panel.add(cbLaut, cc.xy(4, row));
       row += 2;
 
       JCheckBox cbLocal = BasicComponentFactory.createCheckBox(this.model.getBufferedModel("localShuffleAllowed"), this.textProvider.getString("playlistcfg.property.shuffle.local"));
+      cbLocal.setEnabled(!archive);
       panel.add(cbLocal, cc.xy(4, row));
       row += 2;
     }
@@ -140,6 +147,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     {
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.tags")), cc.xy(2, row, CellConstraints.LEFT, CellConstraints.TOP));
       JTextArea tf = ctx.getComponentFactory().createTextArea(this.model.getBufferedModel("tags"));
+      tf.setEditable(!archive);
       tf.setToolTipText(this.textProvider.getString("playlistcfg.property.tags.tooltip"));
       tf.setRows(5);
       tf.setColumns(20);
@@ -215,8 +223,8 @@ public class PlaylistConfigurationDialog extends JDialog {
     tab.addTab(textProvider.getString("playlistcfg.tab.generate.advice"), new PlaylistGeneratorAdviceConfigurationPanel(ctx, model));
     
     boolean hasTags = ctx.getAdminClient().getTagManager().getTags().size() > 0;
-    tab.setEnabledAt(1, !this.model.getBean().isShuffle() && hasTags);
-    tab.setEnabledAt(2, !this.model.getBean().isShuffle() && hasTags);
+    tab.setEnabledAt(1, !this.model.getBean().isShuffle() && hasTags && model.getBean().getType() != PlaylistType.ARCHIVED);
+    tab.setEnabledAt(2, !this.model.getBean().isShuffle() && hasTags && model.getBean().getType() != PlaylistType.ARCHIVED);
 
     this.getContentPane().add(tab, cc.xy(2, 4));
 

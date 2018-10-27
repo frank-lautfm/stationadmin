@@ -21,6 +21,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistSelector;
@@ -48,6 +49,7 @@ public class PlaylistSettingsCopyAction extends AbstractAction {
     this.model = model;
     this.putValue(Action.SMALL_ICON, ctx.getIcon("editcopy.png"));
     this.putValue(Action.SHORT_DESCRIPTION, "Einstellung von anderer Playlists kopieren");
+    this.setEnabled(model.getBean().getType() == PlaylistType.ONLINE);
   }
 
   @Override
