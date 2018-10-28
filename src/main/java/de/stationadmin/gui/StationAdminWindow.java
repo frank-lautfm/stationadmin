@@ -38,6 +38,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.jdesktop.swingx.JXErrorPane;
@@ -45,6 +46,8 @@ import org.jdesktop.swingx.JXStatusBar;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
+import com.jgoodies.binding.value.ValueHolder;
+import com.jgoodies.binding.value.ValueModel;
 
 import de.stationadmin.base.StationStatus;
 import de.stationadmin.base.Status;
@@ -69,7 +72,6 @@ import de.stationadmin.gui.playlist.PlaylistContainer;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
 import de.stationadmin.gui.playlist.PlaylistNewAction;
 import de.stationadmin.gui.playlist.PlaylistTrackSearchOpenAction;
-import de.stationadmin.gui.playlist.PlaylistsToArchiveAction;
 import de.stationadmin.gui.playlist.ResetModifiedPlaylistsAction;
 import de.stationadmin.gui.playlist.SaveModifiedPlaylistsAction;
 import de.stationadmin.gui.playlist.forecast.ForecastDisplayAction;
@@ -176,28 +178,51 @@ public class StationAdminWindow extends StationAdminFrame {
       final JXStatusBar statusBar = new JXStatusBar();
       statusBar.setOpaque(false);
 
-      JPanel stationPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 0));
-      stationPanel.add(this.createStatusBarLabel("station"));
-      JLabel stationLabel = new JLabel(ctx.getAdminClient().getStation());
-      stationLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
-      stationPanel.add(stationLabel);
-      statusBar.add(stationPanel, new JXStatusBar.Constraint());
+      // Station
+      {
+        JPanel stationPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 0));
+        stationPanel.add(this.createStatusBarLabel("station"));
+        JLabel stationLabel = new JLabel(ctx.getAdminClient().getStation());
+        stationLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+        stationPanel.add(stationLabel);
+        statusBar.add(stationPanel, new JXStatusBar.Constraint());
+      }
+
+      // Streaming server
+      {
+        final ValueHolder streamingServerHolder = new ValueHolder(ctx.getTextProvider().getString("unknown"));
+        JPanel serverPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 0));
+        serverPanel.add(this.createStatusBarLabel("streamingserver"));
+        JLabel serverLabel = BasicComponentFactory.createLabel(streamingServerHolder);
+        serverLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+        serverPanel.add(serverLabel);
+        statusBar.add(serverPanel, new JXStatusBar.Constraint());
+
+        StreamingServerResolverThread t = new StreamingServerResolverThread(streamingServerHolder);
+        t.start();
+      }
 
       PresentationModel<StationStatus> statusModel = new PresentationModel<StationStatus>(this.ctx.getAdminClient().getStationStatus());
 
-      JPanel listenersPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 0));
-      listenersPanel.add(this.createStatusBarLabel("currentListeners"));
-      JLabel listenersLabel = BasicComponentFactory.createLabel(statusModel.getModel("currentListeners"), NumberFormat.getIntegerInstance());
-      listenersLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
-      listenersPanel.add(listenersLabel);
-      statusBar.add(listenersPanel, new JXStatusBar.Constraint());
+      // Listeners
+      {
+        JPanel listenersPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 0));
+        listenersPanel.add(this.createStatusBarLabel("currentListeners"));
+        JLabel listenersLabel = BasicComponentFactory.createLabel(statusModel.getModel("currentListeners"), NumberFormat.getIntegerInstance());
+        listenersLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+        listenersPanel.add(listenersLabel);
+        statusBar.add(listenersPanel, new JXStatusBar.Constraint());
+      }
 
-      JPanel rankPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 0));
-      rankPanel.add(this.createStatusBarLabel("rank"));
-      JLabel rankLabel = BasicComponentFactory.createLabel(statusModel.getModel("rank"), NumberFormat.getIntegerInstance());
-      rankLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
-      rankPanel.add(rankLabel);
-      statusBar.add(rankPanel, new JXStatusBar.Constraint());
+      // Rank
+      {
+        JPanel rankPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 0));
+        rankPanel.add(this.createStatusBarLabel("rank"));
+        JLabel rankLabel = BasicComponentFactory.createLabel(statusModel.getModel("rank"), NumberFormat.getIntegerInstance());
+        rankLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+        rankPanel.add(rankLabel);
+        statusBar.add(rankPanel, new JXStatusBar.Constraint());
+      }
 
       {
         JPanel playlistPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 0));
@@ -301,7 +326,8 @@ public class StationAdminWindow extends StationAdminFrame {
     JToolBar toolbar = new JToolBar();
 
     toolbar.add(asToolbarAction(new SynchronizeFullAction(ctx.getTextProvider(), ctx.getAdminClient()), "synchronize.png"));
-    toolbar.add(asToolbarAction(new SaveModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getSchedule()), "save_all.png"));
+    toolbar.add(
+        asToolbarAction(new SaveModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getSchedule()), "save_all.png"));
     toolbar.add(asToolbarAction(new ResetModifiedPlaylistsAction(ctx.getTextProvider(), ctx.getAdminClient().getPlaylistService()), "undo.png"));
     toolbar.add(asToolbarAction(new UploadAction(this.ctx), "upload.png"));
     if (!djOnly) {
@@ -520,8 +546,7 @@ public class StationAdminWindow extends StationAdminFrame {
   }
 
   /**
-   * @param exitOnClose
-   *          the exitOnClose to set
+   * @param exitOnClose the exitOnClose to set
    */
   public void setExitOnClose(boolean exitOnClose) {
     this.exitOnClose = exitOnClose;
@@ -587,6 +612,27 @@ public class StationAdminWindow extends StationAdminFrame {
 
   }
 
+  private class StreamingServerResolverThread extends Thread {
+    ValueModel holder;
+
+    StreamingServerResolverThread(ValueHolder holder) {
+      this.holder = holder;
+    }
+
+    public void run() {
+      final String server = ctx.getAdminClient().getStreamingServer();
+      if (server != null) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+          @Override
+          public void run() {
+            holder.setValue("stream" + server);
+          }
+        });
+      }
+    }
+  }
+
   /**
    * @return the multiWindow
    */
@@ -595,8 +641,7 @@ public class StationAdminWindow extends StationAdminFrame {
   }
 
   /**
-   * @param multiWindow
-   *          the multiWindow to set
+   * @param multiWindow the multiWindow to set
    */
   public void setMultiWindow(boolean multiWindow) {
     this.multiWindow = multiWindow;

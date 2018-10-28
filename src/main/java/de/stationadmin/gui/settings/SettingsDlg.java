@@ -233,7 +233,7 @@ public class SettingsDlg extends JDialog {
     panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.laf")));
 
     Vector<Option> options = new Vector<>();
-    options.add(new Option("system", "Standard"));
+    options.add(new Option("system", "System"));
 
 
     options.add(new Option("com.jtattoo.plaf.acryl.AcrylLookAndFeel", "Acryl"));

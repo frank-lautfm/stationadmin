@@ -27,6 +27,7 @@ import de.stationadmin.base.statistics.StatisticsService;
 import de.stationadmin.base.subscription.SubscriptionService;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.tasks.TaskExecutionService;
+import de.stationadmin.base.tools.StreamingServerResolver;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.TrackService;
@@ -217,6 +218,14 @@ public class StationAdminClient {
    */
   public StationStatus getStationStatus() {
     return this.sessionCtx.getStationStatus();
+  }
+
+  /**
+   * Gets the streaming server on which this station is running
+   * @return streaming server
+   */
+  public String getStreamingServer() {
+    return StreamingServerResolver.getStreamingServer(this.sessionCtx.getStation());
   }
 
   /**

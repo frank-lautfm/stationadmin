@@ -12,6 +12,7 @@ Version 4.8
 
 [#] Lizenz: Wechsel von LGPL auf GPL v3
 [+] Austauschbares Erscheinungsbild (Look and Feel)
+[+] Anzeige des Streamingservers in der Statusbar des Hauptfensters
 [+] Menüpunkt "Ins Archiv kopieren" im Kontextmenü von Online-Playlists
 [+] Einige Einstellungen von Archiv-Playlists editierbar (z. B. Farbe)
 [*] "Jingle am Anfang der Playlist nicht verschieben" wird nicht mehr auf Wortbeiträge angewendet
