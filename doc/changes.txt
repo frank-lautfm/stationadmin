@@ -7,9 +7,13 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
-Version 4.7.1
--------------
+Version 4.8
+-----------
 
+[#] Lizenz: Wechsel von LGPL auf GPL v3
+[+] Austauschbares Erscheinungsbild (Look and Feel)
+[+] Menüpunkt "Ins Archiv kopieren" im Kontextmenü von Online-Playlists
+[+] Einige Einstellungen von Archiv-Playlists editierbar (z. B. Farbe)
 [*] "Jingle am Anfang der Playlist nicht verschieben" wird nicht mehr auf Wortbeiträge angewendet
 
 

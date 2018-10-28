@@ -457,7 +457,7 @@ public class StationAdminWindow extends StationAdminFrame {
       if (!djOnly) {
         menuPlaylists.add(new ForecastDisplayAction(this.ctx));
       }
-      menuPlaylists.add(new PlaylistsToArchiveAction(this.ctx));
+      // menuPlaylists.add(new PlaylistsToArchiveAction(this.ctx));
       menuBar.add(menuPlaylists);
     }
 
