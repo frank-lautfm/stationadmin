@@ -52,6 +52,7 @@ public class PlaylistContainer extends JPanel {
     final PlaylistSelector selectorArchive = new PlaylistSelector(this.ctx, PlaylistType.ARCHIVED, playlistSelectionHolder);
     final JPopupMenu popupArchive = new JPopupMenu();
     popupArchive.add(new PlaylistDeleteAction(playlistSelectionHolder, ctx.getAdminClient().getPlaylistService(), ctx.getTextProvider(), false));
+    popupArchive.add(new PlaylistToOnlineAction(ctx, playlistSelectionHolder));
     popupArchive.addSeparator();
     popupArchive.add(new PlaylistEditPropertiesAction(ctx, playlistSelectionHolder, false));
     selectorArchive.enableContextMenu(popupArchive);

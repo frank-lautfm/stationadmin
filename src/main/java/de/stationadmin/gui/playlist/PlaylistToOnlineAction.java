@@ -34,15 +34,15 @@ import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.util.SwingTools;
 
-public class PlaylistToArchiveAction extends AbstractAction {
+public class PlaylistToOnlineAction extends AbstractAction {
   private static final long serialVersionUID = 1405117014362903492L;
 
   private ClientContext ctx;
   private ValueModel playlistHolder;
 
-  public PlaylistToArchiveAction(ClientContext ctx, ValueModel playlistHolder) {
+  public PlaylistToOnlineAction(ClientContext ctx, ValueModel playlistHolder) {
     super();
-    this.putValue(Action.NAME, ctx.getTextProvider().getString("action.playlist.archive"));
+    this.putValue(Action.NAME, ctx.getTextProvider().getString("action.playlist.online"));
     this.ctx = ctx;
     this.playlistHolder = playlistHolder;
 
@@ -51,7 +51,7 @@ public class PlaylistToArchiveAction extends AbstractAction {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        setEnabled(evt.getNewValue() instanceof Playlist && ((Playlist) evt.getNewValue()).getType() == PlaylistType.ONLINE);
+        setEnabled(evt.getNewValue() instanceof Playlist && ((Playlist) evt.getNewValue()).getType() == PlaylistType.ARCHIVED);
       }
     });
 
@@ -64,10 +64,11 @@ public class PlaylistToArchiveAction extends AbstractAction {
 
     String name = source.getName();
     HashSet<String> names = new HashSet<>();
-    for (Playlist pl : ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylists(PlaylistType.ARCHIVED)) {
+    for (Playlist pl : ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE)) {
       names.add(pl.getName().toUpperCase());
     }
 
+    boolean tracksOnly = false;
     if (names.contains(name.toUpperCase())) {
 
       int suffix = 2;
@@ -85,6 +86,7 @@ public class PlaylistToArchiveAction extends AbstractAction {
       if (name == null) {
         return;
       }
+      tracksOnly = dlg.isTracksOnly();
     }
 
     Playlist copy = null;
@@ -92,7 +94,7 @@ public class PlaylistToArchiveAction extends AbstractAction {
     boolean isNew = false;
     if (names.contains(name.toUpperCase())) {
       // find existing playlist to overwrite
-      for (Playlist pl : ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylists(PlaylistType.ARCHIVED)) {
+      for (Playlist pl : ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE)) {
         if (pl.getName().equals(name)) {
           copy = pl;
           copy.removeEntries(new ArrayList<>(copy.getEntries()));
@@ -102,12 +104,14 @@ public class PlaylistToArchiveAction extends AbstractAction {
     }
     if (copy == null) {
       // create new playlist
-      copy = new Playlist(source.getTrackRegistry(), PlaylistType.ARCHIVED);
+      copy = new Playlist(source.getTrackRegistry(), PlaylistType.ONLINE);
       isNew = true;
     }
-    List<String> properties = source.getProperties();
-    properties.removeIf(p -> p.contains("type") || p.contains("shuffle") || p.startsWith("name"));
-    copy.setProperties(properties, true);
+    if (!tracksOnly) {
+      List<String> properties = source.getProperties();
+      properties.removeIf(p -> p.contains("type") || p.contains("shuffle") || p.startsWith("name"));
+      copy.setProperties(properties, true);
+    }
     copy.setName(name);
     for (Entry entry : source.getEntries()) {
       copy.addTrack(entry.getTrack());
@@ -128,8 +132,9 @@ public class PlaylistToArchiveAction extends AbstractAction {
     private static final long serialVersionUID = 6973571957505201652L;
     private String originalName;
     private ValueHolder suggestedName = new ValueHolder();
-    private ValueHolder overwrite = new ValueHolder(Boolean.TRUE);
+    private ValueHolder overwrite = new ValueHolder(1);
     private String acceptedName;
+    private boolean tracksOnly = false;
 
     NameDecisionDialog(String originalName, String suggestedName) {
       this.originalName = originalName;
@@ -143,26 +148,28 @@ public class PlaylistToArchiveAction extends AbstractAction {
     }
 
     private void init() {
-      this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,pref,5dlu,pref,3dlu,pref,5dlu,pref,5dlu"));
+      this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,3dlu,pref,3dlu,pref,3dlu,pref,3dlu,pref,5dlu,pref,5dlu"));
       CellConstraints cc = new CellConstraints();
 
       TextProvider textProvider = ctx.getTextProvider();
-      String msgText = textProvider.getString("action.playlist.archive.msg.overwrite", originalName);
+      String msgText = textProvider.getString("action.playlist.online.msg.overwrite", originalName);
       getContentPane().add(new JLabel(msgText), cc.xy(2, 2));
 
-      JRadioButton btnOverwrite = BasicComponentFactory.createRadioButton(this.overwrite, Boolean.TRUE, textProvider.getString("action.playlist.archive.option.overwrite"));
+      JRadioButton btnOverwrite = BasicComponentFactory.createRadioButton(this.overwrite, 1, textProvider.getString("action.playlist.online.option.overwrite"));
       getContentPane().add(btnOverwrite, cc.xy(2, 4));
-      JRadioButton btnRename = BasicComponentFactory.createRadioButton(this.overwrite, Boolean.FALSE, textProvider.getString("action.playlist.archive.option.rename"));
-      getContentPane().add(btnRename, cc.xy(2, 6));
+      JRadioButton btnOverwriteFull = BasicComponentFactory.createRadioButton(this.overwrite, 2, textProvider.getString("action.playlist.online.option.overwrite.full"));
+      getContentPane().add(btnOverwriteFull, cc.xy(2, 6));
+      JRadioButton btnRename = BasicComponentFactory.createRadioButton(this.overwrite, 3, textProvider.getString("action.playlist.online.option.rename"));
+      getContentPane().add(btnRename, cc.xy(2, 8));
       final JTextField tfName = BasicComponentFactory.createTextField(suggestedName);
       tfName.setEditable(false);
-      getContentPane().add(tfName, cc.xy(2, 8));
+      getContentPane().add(tfName, cc.xy(2, 10));
 
       overwrite.addValueChangeListener(new PropertyChangeListener() {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-          tfName.setEditable(overwrite.getValue().equals(Boolean.FALSE));
+          tfName.setEditable(overwrite.getValue().equals(3));
         }
       });
 
@@ -172,10 +179,12 @@ public class PlaylistToArchiveAction extends AbstractAction {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-          if (overwrite.getValue() == Boolean.TRUE) {
+          if (overwrite.getValue().equals(1) || overwrite.getValue().equals(2)) {
             acceptedName = originalName;
+            tracksOnly = overwrite.getValue().equals(1);
           } else {
             acceptedName = (String) suggestedName.getValue();
+            tracksOnly = false;
           }
           dispose();
         }
@@ -192,11 +201,15 @@ public class PlaylistToArchiveAction extends AbstractAction {
       btnPanel.add(okBtn);
       btnPanel.add(cancelBtn);
 
-      getContentPane().add(btnPanel, cc.xy(2, 10, CellConstraints.CENTER, CellConstraints.CENTER));
+      getContentPane().add(btnPanel, cc.xy(2, 12, CellConstraints.CENTER, CellConstraints.CENTER));
 
       Dimension dim = this.getPreferredSize();
       this.setSize((int) dim.getWidth() + 20, (int) dim.getHeight() + 50);
 
+    }
+
+    public boolean isTracksOnly() {
+      return tracksOnly;
     }
 
   }

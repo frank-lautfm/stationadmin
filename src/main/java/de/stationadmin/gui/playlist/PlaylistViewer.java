@@ -952,7 +952,8 @@ public class PlaylistViewer extends JPanel {
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(evt.getNewValue() != null && StringUtils.isNotEmpty(((Playlist) evt.getNewValue()).getGenerateTags()) && ((Playlist) evt.getNewValue()).getGenerateLength() > 0);
+      setEnabled(evt.getNewValue() != null && StringUtils.isNotEmpty(((Playlist) evt.getNewValue()).getGenerateTags()) && ((Playlist) evt.getNewValue()).getGenerateLength() > 0
+          && ((Playlist) evt.getNewValue()).getType() == PlaylistType.ONLINE);
     }
 
   }
@@ -975,7 +976,8 @@ public class PlaylistViewer extends JPanel {
       Playlist playlist = (Playlist) playlistHolder.getValue();
       if (playlist != null) {
         AdTriggerEngine engine = PlaylistGeneratorFactory.createAdTriggerEngine(ctx.getAdminClient());
-        engine.setClearExistingTriggers(true);;
+        engine.setClearExistingTriggers(true);
+        ;
         ArrayList<BasicTrack> tracks = new ArrayList<BasicTrack>();
         for (Entry entry : playlist.getEntries()) {
           if (entry.getTrack() != null) {
@@ -991,7 +993,7 @@ public class PlaylistViewer extends JPanel {
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(evt.getNewValue() != null && !((Playlist) evt.getNewValue()).isShuffle());
+      setEnabled(evt.getNewValue() != null && !((Playlist) evt.getNewValue()).isShuffle() && ((Playlist) evt.getNewValue()).getType() == PlaylistType.ONLINE);
     }
 
   }
