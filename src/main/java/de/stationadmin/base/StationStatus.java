@@ -20,6 +20,7 @@ public class StationStatus extends AbstractBean {
   private int avgListeningTimeToday;
   private int avgListeningTimeYesterday;
   private int durationToday;
+  private int durationTodayCalculated;
   private int durationYesterday;
   private int currentTrackId;
   private String currentTrackLabel;
@@ -204,6 +205,16 @@ public class StationStatus extends AbstractBean {
     int old = this.peakRank;
     this.peakRank = peakRank;
     this.firePropertyChange("peakRank", old, peakRank);
+  }
+
+  public int getDurationTodayCalculated() {
+    return durationTodayCalculated;
+  }
+
+  public void setDurationTodayCalculated(int durationTodayCalculated) {
+    int old = this.durationTodayCalculated;
+    this.durationTodayCalculated = durationTodayCalculated;
+    this.firePropertyChange("durationTodayCalculated", old, durationTodayCalculated);
   }
 
 }

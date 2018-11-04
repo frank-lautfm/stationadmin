@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimerTask;
 
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +19,9 @@ import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.Settings;
 import de.stationadmin.base.StationStatus;
+import de.stationadmin.base.loganalyzer.ListenersEntry;
+import de.stationadmin.base.loganalyzer.LogAnalyzerService;
+import de.stationadmin.base.statistics.ListenerStatsHistory.Entry;
 import de.stationadmin.lfm.backend.Statistics;
 
 /**
@@ -31,13 +35,15 @@ public class StatisticsService implements Service {
   private TimerTask statsRefresherTask = null;
   private Settings settings;
   private PropertyChangeListener onTitleChangeRefresher;
+  private LogAnalyzerService logAnalyzerService;
 
   /**
    * @param ctx
    */
-  public StatisticsService(SessionCtx ctx, Settings settings) {
+  public StatisticsService(SessionCtx ctx, Settings settings, LogAnalyzerService logAnalyzerService) {
     this.sessionCtx = ctx;
     this.settings = settings;
+    this.logAnalyzerService = logAnalyzerService;
 
     this.listenerStatsHistory.setLogRank(settings.isLogRank());
     settings.addPropertyChangeListener("logRank", new PropertyChangeListener() {
@@ -138,6 +144,10 @@ public class StatisticsService implements Service {
    */
   @Override
   public void load() throws IOException {
+    for(ListenersEntry entry : this.logAnalyzerService.getListenersOf(new Date())) {
+      this.listenerStatsHistory.addFromHistory(entry.getTime().getTime(), entry.getListeners());
+    }
+    this.listenerStatsHistory.sortEntries();
   }
 
   /**
@@ -155,6 +165,10 @@ public class StatisticsService implements Service {
     DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
     Calendar cal = Calendar.getInstance();
     cal.setTimeInMillis(System.currentTimeMillis());
+    cal.set(Calendar.HOUR_OF_DAY, 0);
+    cal.set(Calendar.MINUTE, 0);
+    cal.set(Calendar.SECOND, 0);
+    long todayStartTime = cal.getTimeInMillis();
     String today = fmt.format(cal.getTime());
     cal.add(Calendar.DAY_OF_MONTH, -1);
     String yesterday = fmt.format(cal.getTime());
@@ -171,6 +185,19 @@ public class StatisticsService implements Service {
     stationStatus.setListenersToday(listenersToday);
     stationStatus.setDurationToday(tlhToday);
     stationStatus.setDurationYesterday(tlhYesterday);
+    
+    // calculate duration today
+    cal = Calendar.getInstance();
+    double tlm = 0;
+    long lastTs = todayStartTime;
+    for(Entry entry : this.listenerStatsHistory.getEntries(todayStartTime)) {
+      double seconds = (entry.getTime() - lastTs) / 1000; 
+      tlm += (seconds * entry.getNumberOfListeners()) / 60;
+      lastTs = entry.getTime();
+    }
+   
+    stationStatus.setDurationTodayCalculated((int)(tlm / 60));
+    
 
     // add current listeners to history
     this.listenerStatsHistory.add(stats.getListenersNow(), stats.getPositionNow());

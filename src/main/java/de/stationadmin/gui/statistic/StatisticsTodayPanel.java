@@ -4,6 +4,9 @@
 package de.stationadmin.gui.statistic;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
@@ -21,6 +24,7 @@ import de.stationadmin.base.StationStatus;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.util.AppUtils;
+import de.stationadmin.gui.util.ThreadedAction;
 
 /**
  * 
@@ -32,6 +36,7 @@ public class StatisticsTodayPanel extends JPanel {
   private ClientContext ctx;
   private PresentationModel<StationStatus> model;
   private Color background = AppUtils.getTextBackgroundColor();
+  private boolean displayCalculatedTLH = false;
 
   public StatisticsTodayPanel(ClientContext ctx) {
     super();
@@ -58,13 +63,11 @@ public class StatisticsTodayPanel extends JPanel {
     TextProvider txtProvider = ctx.getTextProvider();
 
     this.add(new JLabel(txtProvider.getString("statistics.property.listenersToday")), cc.xy(2, row));
-    this.add(BasicComponentFactory.createLabel(this.model.getModel("listenersToday"), nf),
-        cc.xy(4, row, CellConstraints.RIGHT, CellConstraints.CENTER));
+    this.add(BasicComponentFactory.createLabel(this.model.getModel("listenersToday"), nf), cc.xy(4, row, CellConstraints.RIGHT, CellConstraints.CENTER));
     row += 2;
 
     this.add(new JLabel(txtProvider.getString("statistics.property.avgListeningTimeToday")), cc.xy(2, row));
-    this.add(BasicComponentFactory.createLabel(this.model.getModel("avgListeningTimeToday"), nf),
-        cc.xy(4, row, CellConstraints.RIGHT, CellConstraints.CENTER));
+    this.add(BasicComponentFactory.createLabel(this.model.getModel("avgListeningTimeToday"), nf), cc.xy(4, row, CellConstraints.RIGHT, CellConstraints.CENTER));
     row += 2;
 
     this.add(new JLabel(txtProvider.getString("statistics.property.tlh")), cc.xy(2, row));
@@ -74,15 +77,60 @@ public class StatisticsTodayPanel extends JPanel {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getPropertyName().equals("durationToday")) {
-          int hours = model.getBean().getDurationToday();
-          tlhT.setValue(hours);
+        if (displayCalculatedTLH) {
+          if (evt.getPropertyName().equals("durationTodayCalculated")) {
+            int hours = model.getBean().getDurationTodayCalculated();
+            tlhT.setValue(hours);
+          }
+
+        } else {
+          if (evt.getPropertyName().equals("durationToday")) {
+            int hours = model.getBean().getDurationToday();
+            tlhT.setValue(hours);
+          }
         }
       }
 
     });
-    this.add(BasicComponentFactory.createLabel(tlhT, nf), cc.xy(4, row, CellConstraints.RIGHT, CellConstraints.CENTER));
+    JLabel durationLabel = BasicComponentFactory.createLabel(tlhT, nf);
+    durationLabel.addMouseListener(new MouseAdapter() {
+
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        displayCalculatedTLH = !displayCalculatedTLH;
+        int hours = displayCalculatedTLH ? model.getBean().getDurationTodayCalculated() : model.getBean().getDurationToday();
+        tlhT.setValue(hours);
+        displaySwitchMessage();
+      }
+
+    });
+    this.add(durationLabel, cc.xy(4, row, CellConstraints.RIGHT, CellConstraints.CENTER));
     row += 2;
+  }
+
+  void displaySwitchMessage() {
+    ThreadedAction action = new ThreadedAction() {
+      private static final long serialVersionUID = -2208579286697232739L;
+
+      @Override
+      protected void showError(Exception e) {
+      }
+      
+      @Override
+      protected void performAction() throws Exception {
+        Thread.sleep(1200);
+        
+      }
+      
+      @Override
+      protected String getStatus() {
+        String key = "statistics.property.tlh.msg." + (displayCalculatedTLH ? "calculated" : "standard");
+        return ctx.getString(key);
+      }
+    };
+    
+    action.actionPerformed(new ActionEvent(this, 0, "show"));
+
   }
 
 }

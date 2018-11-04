@@ -6,6 +6,7 @@ package de.stationadmin.base.statistics;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,12 +23,28 @@ public class ListenerStatsHistory extends History {
   private List<Entry> entries = new LinkedList<Entry>();
   private boolean logRank = false;
 
+  public void addFromHistory(long time, int listeners) {
+    this.entries.add(new Entry(time, listeners, 0));
+  }
+  
+  void sortEntries() {
+    this.entries.sort(new Comparator<Entry>() {
+
+      @Override
+      public int compare(Entry o1, Entry o2) {
+        return o1.compareTo(o2);
+      }
+    });
+  }
+
   public void add(int listeners, int rank) {
     this.entries.add(new Entry(listeners, rank));
 
     // append to log file
-    String log = dateFormat.format(new Date()) + "\t" + listeners + (this.logRank ? "\t" + rank : "") +  System.getProperty("line.separator");
-    this.logToFile(log);
+    if (rank > 0) {
+      String log = dateFormat.format(new Date()) + "\t" + listeners + (this.logRank ? "\t" + rank : "") + System.getProperty("line.separator");
+      this.logToFile(log);
+    }
   }
 
   /**
@@ -64,10 +81,15 @@ public class ListenerStatsHistory extends History {
     return best != null ? best.getNumberOfListeners() : -1;
   }
 
-  public static class Entry {
+  public static class Entry implements Comparable<Entry>{
     long time = System.currentTimeMillis();
     int numberOfListeners;
     int rank;
+
+    public Entry(long time, int numberOfListeners, int rank) { 
+      this(numberOfListeners, rank);
+      this.time = time;
+    }
 
     public Entry(int numberOfListeners, int rank) {
       super();
@@ -88,6 +110,11 @@ public class ListenerStatsHistory extends History {
      */
     public int getRank() {
       return rank;
+    }
+
+    @Override
+    public int compareTo(Entry o) {
+      return Long.compare(this.time, o.time);
     }
 
   }
