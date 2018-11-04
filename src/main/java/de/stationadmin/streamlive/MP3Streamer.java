@@ -60,13 +60,6 @@ public class MP3Streamer {
     }
   }
 
-  public void configureServer(String station, String password) {
-    this.ice.setMountPoint(station + ".live");
-    this.ice.setPassword(password);
-    this.ice.setSourceName(station);
-    this.ice.setSourceDescription(station);
-  }
-
   public int getPlayTime() {
     return this.mp3Writer != null && this.status != Status.OFFLINE && this.mp3Writer.getStartTime() > 0
         ? (int) ((System.currentTimeMillis() - this.mp3Writer.getStartTime()) / 1000)
