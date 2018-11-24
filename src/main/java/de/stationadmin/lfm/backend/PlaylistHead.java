@@ -4,6 +4,7 @@
 package de.stationadmin.lfm.backend;
 
 import java.util.Date;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -33,6 +34,8 @@ public class PlaylistHead {
   private Date createdAt;
   @JsonProperty("updated_at")
   private Date updatedAt;
+  @JsonProperty("shuffle_opts")
+  private Map<String,Object> shuffleOpts;
   
   
   public int getId() {
@@ -117,6 +120,14 @@ public class PlaylistHead {
 
   public void setCreatedAt(Date createdAt) {
     this.createdAt = createdAt;
+  }
+
+  public Map<String, Object> getShuffleOpts() {
+    return shuffleOpts;
+  }
+
+  public void setShuffleOpts(Map<String, Object> shuffleOpts) {
+    this.shuffleOpts = shuffleOpts;
   }
 
 }

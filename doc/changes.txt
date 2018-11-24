@@ -7,6 +7,12 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
+Version 4.9
+-----------
+[+] Shuffeln auf dem Server
+[#} Überarbeiteter Dialog für Playlistkonfiguration
+
+
 Version 4.8
 -----------
 

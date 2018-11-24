@@ -14,11 +14,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import com.thoughtworks.xstream.XStream;
 
-import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.BasicTrack;
+import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.util.AbstractBean;
 import de.stationadmin.base.util.XStreamFactory;
@@ -48,6 +49,9 @@ public class Playlist extends AbstractBean {
   private ExtendedPlaylistData localData;
   private ArrayList<Entry> entries = new ArrayList<Entry>();
   private PlaylistType type = PlaylistType.ONLINE;
+
+  private String shuffleType;
+  private Map<String, Object> shuffleOpts;
 
   private transient boolean metaDataModified = false;
 
@@ -95,8 +99,7 @@ public class Playlist extends AbstractBean {
   /**
    * Adds a title
    * 
-   * @param title
-   *          title
+   * @param title title
    */
   public void addTrack(BasicTrack title) {
     this.addTrack(title, null);
@@ -316,6 +319,17 @@ public class Playlist extends AbstractBean {
     properties.add("shuffle = " + Boolean.toString(this.shuffle));
     properties.add("createdAt = " + (this.createdAt != null ? this.createdAt.getTime() : new Date().getTime()));
     properties.add("updatedAt = " + (this.updatedAt != null ? this.updatedAt.getTime() : new Date().getTime()));
+    if (this.shuffleOpts != null) {
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        properties.add("shuffleOpts = " + mapper.writeValueAsString(this.shuffleOpts));
+      } catch (Exception e) {
+      }
+    }
+    if (this.shuffleType != null) {
+      properties.add("shuffleType = " + shuffleType);
+
+    }
 
     return properties;
   }
@@ -398,7 +412,7 @@ public class Playlist extends AbstractBean {
       } else {
         int start;
         if (trackPos < this.workingEntries.size()) {
-          start =  this.workingEntries.get(trackPos).getStart();
+          start = this.workingEntries.get(trackPos).getStart();
         } else {
           Entry last = this.workingEntries.get(this.workingEntries.size() - 1);
           start = last.getStart() + last.getTrack().getLength();
@@ -549,8 +563,7 @@ public class Playlist extends AbstractBean {
   }
 
   /**
-   * @param color
-   *          the color to set
+   * @param color the color to set
    */
   public void setColor(String color) {
     if (!StringUtils.equals(this.color, color)) {
@@ -606,8 +619,8 @@ public class Playlist extends AbstractBean {
   /**
    * Configures if / which titles can be repeated when generating a playlist.
    * 
-   * @param level
-   *          -1 = no repeats (default), 0 = any title, 1 - 3 corrosponds to the push factor
+   * @param level -1 = no repeats (default), 0 = any title, 1 - 3 corrosponds to
+   *        the push factor
    */
   public void setGenerateTitleRepeatLevel(int level) {
     this.ensureLocalDataExists();
@@ -636,11 +649,12 @@ public class Playlist extends AbstractBean {
   }
 
   /**
-   * Specifies whether or not repeating of artists shall be minimized. If repeats are minimized the generator will select titles from all other artists before repeating an artist. If repeats are not
-   * minimized it will only select one hour of music from other artists before an artist is repeated.
+   * Specifies whether or not repeating of artists shall be minimized. If repeats
+   * are minimized the generator will select titles from all other artists before
+   * repeating an artist. If repeats are not minimized it will only select one
+   * hour of music from other artists before an artist is repeated.
    * 
-   * @param minimize
-   *          <code>true</code> to minimize artist repeats (default)
+   * @param minimize <code>true</code> to minimize artist repeats (default)
    */
   public void setGenerateMinimizeArtistRepeats(boolean minimize) {
     this.ensureLocalDataExists();
@@ -664,8 +678,7 @@ public class Playlist extends AbstractBean {
   }
 
   /**
-   * @param localData
-   *          the localData to set
+   * @param localData the localData to set
    */
   protected void setLocalData(ExtendedPlaylistData localData) {
     this.localData = localData;
@@ -709,6 +722,7 @@ public class Playlist extends AbstractBean {
     this.setProperties(properties, false);
   }
 
+  @SuppressWarnings("unchecked")
   public void setProperties(List<String> properties, boolean preserveId) {
     Map<String, String> map = new HashMap<String, String>();
     for (String property : properties) {
@@ -745,12 +759,27 @@ public class Playlist extends AbstractBean {
     if (map.containsKey("type")) {
       this.type = PlaylistType.valueOf(map.get("type"));
     }
+    if (map.containsKey("shuffleOpts")) {
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<Object, Object> rawOpts = mapper.readValue(map.get("shuffleOpts"), Map.class);
+        this.shuffleOpts = new HashMap<>();
+        for (java.util.Map.Entry<Object, Object> entry : rawOpts.entrySet()) {
+          shuffleOpts.put(entry.getKey().toString(), entry.getValue());
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+    if (map.containsKey("shuffleType")) {
+      this.shuffleType = map.get("shuffleType");
+    }
   }
 
   public void setShuffle(boolean shuffle) {
     boolean old = this.shuffle;
     this.shuffle = shuffle;
-    if(old != shuffle) {
+    if (old != shuffle) {
       this.metaDataModified = true;
     }
     getPcs().firePropertyChange("shuffle", old, shuffle);
@@ -781,8 +810,7 @@ public class Playlist extends AbstractBean {
   /**
    * Replaces the current playlist entries with the given titles
    * 
-   * @param titles
-   *          new titles
+   * @param titles new titles
    */
   public void setTracks(List<BasicTrack> titles) {
     this.unregisterFromTitleRegistry(entries);
@@ -1017,5 +1045,29 @@ public class Playlist extends AbstractBean {
 
   public boolean isMetaDataModified() {
     return metaDataModified;
+  }
+
+  public Map<String, Object> getShuffleOpts() {
+    return shuffleOpts;
+  }
+
+  public void setShuffleOpts(Map<String, Object> shuffleOpts) {
+    if (this.shuffleOpts == null || !this.shuffleOpts.equals(shuffleOpts)) {
+      this.shuffleOpts = shuffleOpts;
+      this.metaDataModified = true;
+    }
+  }
+
+  public String getShuffleType() {
+    return shuffleType != null ? shuffleType : "basic_v1";
+  }
+
+  public void setShuffleType(String shuffleType) {
+    if (!org.apache.commons.lang3.StringUtils.equals(shuffleType, this.shuffleType)) {
+      String old = this.shuffleType;
+      this.shuffleType = shuffleType;
+      this.metaDataModified = true;
+      this.firePropertyChange("shuffleType", old, shuffleType);
+    }
   }
 }

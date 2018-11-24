@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.stationadmin.lfm.backend.AuthenticationException;
+import de.stationadmin.lfm.backend.ExtendedPlaylistHead;
 import de.stationadmin.lfm.backend.LautfmAdminService;
 import de.stationadmin.lfm.backend.Playlist;
 import de.stationadmin.lfm.backend.PlaylistHead;
@@ -78,7 +79,7 @@ public class TestAdminService {
     List<Station> stations = this.service.getStations();
     int stationId = stations.get(0).getId();
 
-    List<PlaylistHead> playlists = this.service.getPlaylists(stationId);
+    List<ExtendedPlaylistHead> playlists = this.service.getPlaylists(stationId);
     log.info("found " + playlists.size() + " playlists");
 
     log.info("create a new playlist");

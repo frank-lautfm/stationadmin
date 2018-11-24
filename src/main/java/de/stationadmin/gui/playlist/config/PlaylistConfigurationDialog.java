@@ -4,6 +4,7 @@
 package de.stationadmin.gui.playlist.config;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -14,12 +15,16 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -30,17 +35,19 @@ import javax.swing.JToolBar;
 import org.jdesktop.swingx.JXErrorPane;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
+import com.jgoodies.binding.list.SelectionInList;
 import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
+import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
 import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.DisposeAction;
+import de.stationadmin.gui.util.EnumListCellRenderer;
 import de.stationadmin.gui.util.SwingTools;
 
 /**
@@ -49,6 +56,7 @@ import de.stationadmin.gui.util.SwingTools;
  * @author Frank Korf
  */
 public class PlaylistConfigurationDialog extends JDialog {
+
   private static final long serialVersionUID = 3125298975653805674L;
   private ClientContext ctx;
   private PlaylistService playlistService;
@@ -63,6 +71,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     this.init();
   }
 
+  @SuppressWarnings("unchecked")
   private JPanel createBasePanel() {
     StringBuilder rowSpec = new StringBuilder();
     rowSpec.append("5dlu,");
@@ -79,7 +88,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     int row = 2;
 
     boolean archive = model.getBean().getType() == PlaylistType.ARCHIVED;
-    
+
     Font tfFont = null;
     Color tfBackground = null;
     // name
@@ -131,16 +140,58 @@ public class PlaylistConfigurationDialog extends JDialog {
 
     // shuffle
     {
-      panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.shuffle")), cc.xy(2, row));
-      JCheckBox cbLaut = BasicComponentFactory.createCheckBox(this.model.getBufferedModel("shuffle"), this.textProvider.getString("playlistcfg.property.shuffle.laut"));
-      cbLaut.setEnabled(!archive);
-      panel.add(cbLaut, cc.xy(4, row));
+
+      panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.trackOrder")), cc.xy(2, row));
+      SelectionInList<TrackOrderOption> trackOrderSelection = new SelectionInList<>(TrackOrderOption.values(), model.getTrackOrderType());
+      JComboBox<TrackOrderOption> trackOrderCmb = BasicComponentFactory.createComboBox(trackOrderSelection,
+          new EnumListCellRenderer(ctx.getTextProvider(), "playlistcfg.property.trackOrder"));
+      panel.add(trackOrderCmb, cc.xy(4, row));
       row += 2;
 
-      JCheckBox cbLocal = BasicComponentFactory.createCheckBox(this.model.getBufferedModel("localShuffleAllowed"), this.textProvider.getString("playlistcfg.property.shuffle.local"));
-      cbLocal.setEnabled(!archive);
-      panel.add(cbLocal, cc.xy(4, row));
+      List<String> shuffleFuncOptions = new ArrayList<>();
+      if (model.getBean().getShuffleType() == null) {
+        shuffleFuncOptions.add(null);
+      }
+      shuffleFuncOptions.add(PlaylistConfigurationModel.SHUFFLE_CLASSIC);
+      shuffleFuncOptions.add(PlaylistConfigurationModel.SHUFFLE_BUCKET);
+      shuffleFuncOptions.add(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN);
+
+      panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.shuffleFunc")), cc.xy(2, row));
+      SelectionInList<String> shuffleFuncSelection = new SelectionInList<>(shuffleFuncOptions, model.getBufferedModel("shuffleType"));
+      final JComboBox<String> shuffleFuncCmb = BasicComponentFactory.createComboBox(shuffleFuncSelection, new DefaultListCellRenderer() {
+        private static final long serialVersionUID = 666514488594966718L;
+
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+          super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+          if (value == null) {
+            setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.custom"));
+          } else if (value.equals(PlaylistConfigurationModel.SHUFFLE_CLASSIC)) {
+            setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.classic"));
+          } else if (value.equals(PlaylistConfigurationModel.SHUFFLE_BUCKET)) {
+            setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.bucket"));
+          } else if (value.equals(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN)) {
+            setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.stationadmin"));
+          }
+
+          return this;
+        }
+
+      });
+      
+      shuffleFuncCmb.setEnabled(model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER));
+      this.model.getTrackOrderType().addValueChangeListener(new PropertyChangeListener() {
+        
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          shuffleFuncCmb.setEnabled(evt.getNewValue().equals(TrackOrderOption.SHUFFLE_SERVER));
+        }
+      });
+      
+      panel.add(shuffleFuncCmb, cc.xy(4, row));
       row += 2;
+
     }
 
     // tags
@@ -176,22 +227,21 @@ public class PlaylistConfigurationDialog extends JDialog {
     int red = 255;
     int green = 255;
     int blue = 255;
-    if(color == null) {
+    if (color == null) {
       color = "#FFFFFF";
     }
     if (color.startsWith("#") && color.length() > 1) {
       color = color.substring(1);
     }
-    
-    if(color.length() > 6) {
+
+    if (color.length() > 6) {
       color = color.substring(0, 6);
-    }
-    else if(color.length() < 6) {
-      for(int i = color.length(); i < 6; i++) {
+    } else if (color.length() < 6) {
+      for (int i = color.length(); i < 6; i++) {
         color += "0";
       }
     }
-    
+
     if (color.length() == 6) {
       try {
         red = Integer.parseInt(color.substring(0, 2), 16);
@@ -206,27 +256,55 @@ public class PlaylistConfigurationDialog extends JDialog {
 
   }
 
+  private boolean checkIfShuffleOptsEnabled() {
+    return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER)
+        && (model.getBufferedModel("shuffleType").getString().equals(PlaylistConfigurationModel.SHUFFLE_BUCKET) || model.getBufferedModel("shuffleType").getString().equals(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN))
+        && model.getBean().getType() != PlaylistType.ARCHIVED;
+  }
+
+  private boolean checkIfGenerateEnabled() {
+    return model.getTrackOrderType().getValue().equals(TrackOrderOption.GENERATE) && model.getBean().getType() != PlaylistType.ARCHIVED;
+  }
+
   private void init() {
 
     this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "1dlu,pref,0dlu,pref:grow,3dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
-    
+
     JToolBar toolbar = new JToolBar();
     toolbar.setFloatable(false);
     toolbar.add(new PlaylistSettingsCopyAction(ctx, model));
     this.getContentPane().add(toolbar, cc.xy(2, 2));
-    
 
-    JTabbedPane tab = new JTabbedPane();
-    tab.addTab(textProvider.getString("playlistcfg.tab.base"), this.createBasePanel());
-    tab.addTab(textProvider.getString("playlistcfg.tab.generate.base"), new PlaylistGeneratorBaseConfigurationPanel(ctx, model));
-    tab.addTab(textProvider.getString("playlistcfg.tab.generate.advice"), new PlaylistGeneratorAdviceConfigurationPanel(ctx, model));
-    
-    boolean hasTags = ctx.getAdminClient().getTagManager().getTags().size() > 0;
-    tab.setEnabledAt(1, !this.model.getBean().isShuffle() && hasTags && model.getBean().getType() != PlaylistType.ARCHIVED);
-    tab.setEnabledAt(2, !this.model.getBean().isShuffle() && hasTags && model.getBean().getType() != PlaylistType.ARCHIVED);
+    final JTabbedPane tabPane = new JTabbedPane();
+    tabPane.addTab(textProvider.getString("playlistcfg.tab.base"), this.createBasePanel());
+    tabPane.addTab(textProvider.getString("playlistcfg.tab.shuffleopts"), new ShuffleOptionsPanel(ctx, model));
+    tabPane.addTab(textProvider.getString("playlistcfg.tab.generate.base"), new PlaylistGeneratorBaseConfigurationPanel(ctx, model));
+    tabPane.addTab(textProvider.getString("playlistcfg.tab.generate.advice"), new PlaylistGeneratorAdviceConfigurationPanel(ctx, model));
 
-    this.getContentPane().add(tab, cc.xy(2, 4));
+    tabPane.setEnabledAt(1, checkIfShuffleOptsEnabled());
+    tabPane.setEnabledAt(2, checkIfGenerateEnabled());
+    tabPane.setEnabledAt(3, checkIfGenerateEnabled());
+
+    model.getTrackOrderType().addValueChangeListener(new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        tabPane.setEnabledAt(1, checkIfShuffleOptsEnabled());
+        tabPane.setEnabledAt(2, checkIfGenerateEnabled());
+        tabPane.setEnabledAt(3, checkIfGenerateEnabled());
+      }
+    });
+
+    model.getBufferedModel("shuffleType").addPropertyChangeListener(new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        tabPane.setEnabledAt(1, checkIfShuffleOptsEnabled());
+      }
+    });
+
+    this.getContentPane().add(tabPane, cc.xy(2, 4));
 
     // buttons
     {
@@ -281,9 +359,9 @@ public class PlaylistConfigurationDialog extends JDialog {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-          String str = (String)evt.getNewValue();
+          String str = (String) evt.getNewValue();
           Color c = parseColor(str);
-          if(!toHex(c).equals(str)) {
+          if (!toHex(c).equals(str)) {
             ColorButton.this.colorModel.setValue(toHex(c));
           }
           setBackground(c);
@@ -305,7 +383,7 @@ public class PlaylistConfigurationDialog extends JDialog {
         colorModel.setValue(hex);
       }
     }
-    
+
     private String toHex(Color color) {
       String hex = "#" + pad(Integer.toHexString(color.getRed())) + pad(Integer.toHexString(color.getGreen())) + pad(Integer.toHexString(color.getBlue()));
       return hex;

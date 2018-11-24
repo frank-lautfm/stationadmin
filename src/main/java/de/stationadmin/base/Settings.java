@@ -61,7 +61,7 @@ public class Settings extends AbstractBean {
 
   private boolean logDownloadPermitted = false;
   private boolean logAutodownloadPermitted = false;
-  
+
   private int adTriggerPosition1 = -1;
   private int adTriggerPosition2 = -1;
   private int adSeparatorId = -1;
@@ -274,7 +274,7 @@ public class Settings extends AbstractBean {
     Preferences.userRoot().putBoolean("autologin", autologin);
     this.firePropertyChange("autologin", old, autologin);
   }
-  
+
   public String getLookAndFeel() {
     return Preferences.userRoot().get("stationadmin.lookandfeel", "system");
   }
@@ -284,7 +284,6 @@ public class Settings extends AbstractBean {
     Preferences.userRoot().put("stationadmin.lookandfeel", lookAndFeel);
     this.firePropertyChange("lookAndFeel", old, lookAndFeel);
   }
-
 
   /**
    * @return the backupDirectory
@@ -444,7 +443,9 @@ public class Settings extends AbstractBean {
    * @param artistNormalizerSeperators the artistNormalizerSeperators to set
    */
   public void setArtistNormalizerSeperators(List<String> artistNormalizerSeperators) {
+    List<String> old = this.artistNormalizerSeperators;
     this.artistNormalizerSeperators = artistNormalizerSeperators;
+    this.firePropertyChange("artistNormalizerSeperators", old, artistNormalizerSeperators);
   }
 
   /**
@@ -458,7 +459,9 @@ public class Settings extends AbstractBean {
    * @param artistNormalizerAliass the artistNormalizerAliass to set
    */
   public void setArtistNormalizerAliases(Map<String, String> artistNormalizerAliass) {
+    Map<String, String> old = this.artistNormalizerAliases;
     this.artistNormalizerAliases = artistNormalizerAliass;
+    this.firePropertyChange("artistNormalizerAliases", old, artistNormalizerAliases);
   }
 
   /**

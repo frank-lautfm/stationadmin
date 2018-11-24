@@ -13,7 +13,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement(name = "Playlist")
-public class Playlist extends PlaylistHead {
+public class Playlist extends ExtendedPlaylistHead {
   private TrackRef[] entries;
 
   public TrackRef[] getEntries() {

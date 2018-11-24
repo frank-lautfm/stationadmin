@@ -292,7 +292,7 @@ public class StationAdminWindow extends StationAdminFrame {
         statusBar.add(titlePanel, new JXStatusBar.Constraint());
 
       }
-
+      
       this.getContentPane().add(statusBar, BorderLayout.SOUTH);
     }
 

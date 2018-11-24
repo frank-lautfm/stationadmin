@@ -37,6 +37,7 @@
   -->
 	<property name="src.dir.java" value="${basedir}/src/main/java" />
 	<property name="src.dir.resources" value="${basedir}/src/main/resources" />
+	<property name="src.dir.javascript" value="${basedir}/src/main/javascript" />
 	<property name="buildbase" value="${basedir}" />
 	<property name="build.dir" value="${buildbase}/build" />
 	<property name="dist.dir" value="${basedir}/dist" />
@@ -71,6 +72,9 @@
 		<!-- copy resources -->
 		<copy todir="${build.dir}">
 			<fileset dir="${src.dir.resources}" excludes="*.vm stationadmin-default.conf trackmapping" />
+		</copy>
+		<copy todir="${build.dir}">
+			<fileset dir="${src.dir.javascript}"  />
 		</copy>
 
 	</target>

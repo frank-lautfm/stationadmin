@@ -8,6 +8,7 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,9 @@ import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
 
+import de.stationadmin.base.Settings;
 import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.shuffle.Advice;
 import de.stationadmin.base.playlist.shuffle.TagSequenceAdvice;
 import de.stationadmin.base.playlist.shuffle.TitleNameLimitAdvice;
@@ -37,6 +40,9 @@ import de.stationadmin.base.tag.TagManager;
  */
 @SuppressWarnings("unchecked")
 public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
+  public static final String SHUFFLE_CLASSIC = PlaylistService.SHUFFLE_CLASSIC;
+  public static final String SHUFFLE_BUCKET = PlaylistService.SHUFFLE_BUCKET;
+  public static final String SHUFFLE_STATIONADMIN = PlaylistService.SHUFFLE_STATIONADMIN;
   private static final long serialVersionUID = 4865584693941336972L;
   private static final Logger log = Logger.getLogger(PlaylistConfigurationModel.class);
   private AbstractValueModel tags;
@@ -45,16 +51,20 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   private ValueModel advices = new ValueHolder(null, true);
   private TagManager tagManager;
   private ValueHolder titleNameAdviceLimit = new ValueHolder(0);
+  private ValueModel trackOrderType = new ValueHolder(TrackOrderOption.MANUAL);
+  private Settings settings;
 
   /**
    * @param bean
    */
-  public PlaylistConfigurationModel(Playlist playlist, TagManager tagManager) {
+  public PlaylistConfigurationModel(Playlist playlist, TagManager tagManager, Settings settings) {
     super(playlist);
+    this.settings = settings;
     this.tags = new TagsModel();
     this.generateTags = new TrackTagsModel();
     this.tagManager = tagManager;
     this.initAdvices(playlist);
+    this.initTrackOrderType(playlist);
 
     PropertyChangeListener adviceUpdater = new PropertyChangeListener() {
 
@@ -84,6 +94,67 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
     this.advices.addValueChangeListener(adviceUpdater);
     this.titleNameAdviceLimit.addValueChangeListener(adviceUpdater);
 
+    // init shuffle opts
+    // - create a copy we can work on
+    HashMap<String, Object> shuffleOpts = playlist.getShuffleOpts() != null ? new HashMap<>(playlist.getShuffleOpts()) : new HashMap<>();
+    this.getBufferedModel("shuffleOpts").setValue(shuffleOpts);
+    
+    this.getBufferedModel("shuffleType").addPropertyChangeListener(new PropertyChangeListener() {
+      
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        if(evt.getNewValue().equals(SHUFFLE_BUCKET)) {
+          getBufferedModel("shuffleOpts").setValue(new HashMap<>());
+        }
+        else if(evt.getNewValue().equals(SHUFFLE_STATIONADMIN)) {
+          HashMap<String, Object> opts = new HashMap<>();
+          PlaylistService.updateGlobalShuffleOpts(opts, settings);
+          getBufferedModel("shuffleOpts").setValue(opts);
+        }
+      }
+    });
+
+  }
+
+  private void initTrackOrderType(Playlist playlist) {
+    TrackOrderOption trackOrder = TrackOrderOption.MANUAL;
+    if (playlist.isShuffle()) {
+      trackOrder = TrackOrderOption.SHUFFLE_SERVER;
+    } else if (playlist.isGenerate()) {
+      trackOrder = TrackOrderOption.GENERATE;
+    } else if (playlist.isLocalShuffleAllowed()) {
+      trackOrder = TrackOrderOption.SHUFFLE_LOCAL;
+    }
+    this.trackOrderType.setValue(trackOrder);
+    this.trackOrderType.addValueChangeListener(new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        TrackOrderOption option = (TrackOrderOption) evt.getNewValue();
+        switch (option) {
+        case MANUAL:
+          getBufferedModel("shuffle").setValue(false);
+          getBufferedModel("localShuffleAllowed").setValue(false);
+          getBufferedModel("generateTags").setValue(null);
+          break;
+        case GENERATE:
+          getBufferedModel("shuffle").setValue(false);
+          getBufferedModel("localShuffleAllowed").setValue(false);
+          break;
+        case SHUFFLE_LOCAL:
+          getBufferedModel("shuffle").setValue(false);
+          getBufferedModel("localShuffleAllowed").setValue(true);
+          getBufferedModel("generateTags").setValue(null);
+          break;
+        case SHUFFLE_SERVER:
+          getBufferedModel("shuffle").setValue(true);
+          getBufferedModel("localShuffleAllowed").setValue(false);
+          getBufferedModel("generateTags").setValue(null);
+          break;
+        }
+
+      }
+    });
   }
 
   static String tagsToString(Set<String> tagSet) {
@@ -144,7 +215,8 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   }
 
   /**
-   * @see com.jgoodies.binding.PresentationModel#getModel(java.lang.String, java.lang.String, java.lang.String)
+   * @see com.jgoodies.binding.PresentationModel#getModel(java.lang.String,
+   *      java.lang.String, java.lang.String)
    */
   @Override
   public AbstractValueModel getModel(String propertyName, String getterName, String setterName) {
@@ -281,7 +353,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
       case 1:
         if (aValue instanceof String) {
           try {
-            aValue = new Integer((String) aValue);
+            aValue = Integer.parseInt((String)aValue);
           } catch (NumberFormatException e) {
           }
         }
@@ -429,16 +501,14 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
     }
 
     /**
-     * @param tag
-     *          the tag to set
+     * @param tag the tag to set
      */
     public void setTag(String tag) {
       this.tag = tag;
     }
 
     /**
-     * @param weight
-     *          the weight to set
+     * @param weight the weight to set
      */
     public void setWeight(int weight) {
       this.weight = weight;
@@ -460,6 +530,10 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
 
   public ValueHolder getTitleNameAdviceLimit() {
     return titleNameAdviceLimit;
+  }
+
+  public ValueModel getTrackOrderType() {
+    return trackOrderType;
   }
 
 }

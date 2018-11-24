@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +16,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -28,18 +31,20 @@ import com.thoughtworks.xstream.XStream;
 
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
+import de.stationadmin.base.Settings;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.exporter.PlaylistBackupExporter;
 import de.stationadmin.base.playlist.validation.PlaylistValidationException;
 import de.stationadmin.base.playlist.validation.PlaylistValidationException.Reason;
 import de.stationadmin.base.playlist.validation.PlaylistValidator;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
 import de.stationadmin.base.util.XStreamFactory;
+import de.stationadmin.lfm.backend.ExtendedPlaylistHead;
 import de.stationadmin.lfm.backend.PlaylistHead;
 import de.stationadmin.lfm.backend.Track;
 import de.stationadmin.lfm.backend.TrackRef;
@@ -50,6 +55,12 @@ import de.stationadmin.lfm.backend.TrackRef;
  */
 public class PlaylistService implements Service {
   private static final Logger log = Logger.getLogger(PlaylistService.class);
+  private static final Pattern shuffleKeyPattern = Pattern.compile("key.\\s*([\\w|_]+)", Pattern.MULTILINE | Pattern.DOTALL);
+
+  public static final String SHUFFLE_CLASSIC = "basic_v1";
+  public static final String SHUFFLE_BUCKET = "bucket_v1_1";
+  public static final String SHUFFLE_STATIONADMIN = "StationAdmin_v1";
+
   private SessionCtx ctx;
   private TrackRegistry trackRegistry;
   private PlaylistRegistry playlistRegistry;
@@ -80,8 +91,8 @@ public class PlaylistService implements Service {
     if (!playlist.getType().isDeleteSupported()) {
       throw new IllegalArgumentException("Playlists of type " + playlist.getType() + " cannot be deleted");
     }
-    
-    if(playlist.getType() == PlaylistType.ONLINE && playlist.getId() > -1) {
+
+    if (playlist.getType() == PlaylistType.ONLINE && playlist.getId() > -1) {
       File file = new File(this.dir + File.separatorChar + playlist.getId() + ".lfm");
       if (!file.delete()) {
         throw new IOException("Unable to delete " + file);
@@ -129,11 +140,11 @@ public class PlaylistService implements Service {
   }
 
   public void initPlaylistModificationDetection() {
-    this.ctx.getTimer().schedule(this.playlistModificationDetector.getCheckTask(), 1000, 1000 * 60 * 30); 
+    this.ctx.getTimer().schedule(this.playlistModificationDetector.getCheckTask(), 1000, 1000 * 60 * 30);
   }
 
   protected void loadPlaylist(File file, PlaylistType type) throws IOException {
-    try ( FileInputStream stream = new FileInputStream(file)) {
+    try (FileInputStream stream = new FileInputStream(file)) {
       String content = IOUtils.toString(stream, "UTF-8");
       String name = FilenameUtils.getBaseName(file.getName());
       this.loadPlaylist(content, name, type);
@@ -228,7 +239,7 @@ public class PlaylistService implements Service {
 
   public void importArchivedPlaylist(String filename, String content) throws IOException {
     File file = new File(this.dirArchive + filename);
-    try ( FileOutputStream out = new FileOutputStream(file)) {
+    try (FileOutputStream out = new FileOutputStream(file)) {
       IOUtils.write(content, out, "UTF-8");
     }
     this.loadPlaylist(file, PlaylistType.ARCHIVED);
@@ -364,9 +375,8 @@ public class PlaylistService implements Service {
    * Stores the given playlist on the laut.fm server
    * 
    * @param playlist
-   * @throws PlaylistValidationException
-   *           if the playlist didn't pass the assigned
-   *           {@link PlaylistValidator}
+   * @throws PlaylistValidationException if the playlist didn't pass the assigned
+   *         {@link PlaylistValidator}
    * @throws IOException
    * @throws JSONException
    */
@@ -374,8 +384,8 @@ public class PlaylistService implements Service {
     if (playlist.getType() != PlaylistType.ONLINE) {
       throw new IllegalArgumentException("Only playlists of type ONLINE can be saved to the server");
     }
-    
-    if(StringUtils.isEmpty(playlist.getName())) {
+
+    if (StringUtils.isEmpty(playlist.getName())) {
       throw new PlaylistValidationException(Reason.MISSING_NAME);
     }
 
@@ -385,17 +395,27 @@ public class PlaylistService implements Service {
       head.setDescription(playlist.getDescription());
       head.setTitle(playlist.getName());
       head.setShuffled(playlist.isShuffle());
+      head.setShuffleOpts(playlist.getShuffleOpts());
       if (playlist.getId() > -1) {
         head.setId(playlist.getId());
         this.ctx.getServer().updatePlaylist(ctx.getStationId(), head);
         playlist.setUpdatedAt(head.getUpdatedAt());
-      }
-      else {
+      } else {
         head = this.ctx.getServer().createPlaylist(ctx.getStationId(), head);
         playlist.setId(head.getId());
         playlist.setCreatedAt(head.getCreatedAt());
         playlist.setUpdatedAt(head.getUpdatedAt());
         playlistRegistry.register(playlist);
+      }
+      if (playlist.isShuffle() && playlist.getShuffleType() != null) {
+        String shuffleFunc = playlist.getShuffleType();
+        if (shuffleFunc.startsWith("StationAdmin")) {
+          try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream("shuffle/" + shuffleFunc + ".js")) {
+            shuffleFunc = IOUtils.toString(stream, "UTF-8");
+          }
+        }
+
+        this.ctx.getServer().setPlaylistShuffleFunction(ctx.getStationId(), playlist.getId(), shuffleFunc);
       }
     }
 
@@ -416,8 +436,7 @@ public class PlaylistService implements Service {
   }
 
   /**
-   * @param playlistValidator
-   *          the playlistValidator to set
+   * @param playlistValidator the playlistValidator to set
    */
   public void setPlaylistValidator(PlaylistValidator playlistValidator) {
     this.playlistValidator = playlistValidator;
@@ -434,10 +453,10 @@ public class PlaylistService implements Service {
     this.playlistRegistry.clear();
 
     this.ctx.updateStatus("getAllPlaylists");
-    List<PlaylistHead> playlistInfos = this.ctx.getServer().getPlaylists(this.ctx.getStationId());
+    List<ExtendedPlaylistHead> playlistInfos = this.ctx.getServer().getPlaylists(this.ctx.getStationId());
 
     Set<Integer> refreshed = new HashSet<Integer>(); // ids of tracks that have been updated in track registry
-    for (PlaylistHead playlistInfo : playlistInfos) {
+    for (ExtendedPlaylistHead playlistInfo : playlistInfos) {
 
       // prepare basic information
       Playlist playlist = new Playlist(this.trackRegistry, PlaylistType.ONLINE);
@@ -482,8 +501,7 @@ public class PlaylistService implements Service {
           if (regTrack == null) {
             this.trackRegistry.add(new RegisteredTrack(track));
             refreshed.add(track.getId());
-          }
-          else if(!refreshed.contains(track.getId())){
+          } else if (!refreshed.contains(track.getId())) {
             regTrack.update(track);
             refreshed.add(track.getId());
           }
@@ -513,10 +531,10 @@ public class PlaylistService implements Service {
     }
 
     this.ctx.updateStatus("getAllPlaylists");
-    List<PlaylistHead> playlistInfos = this.ctx.getServer().getPlaylists(ctx.getStationId());
+    List<ExtendedPlaylistHead> playlistInfos = this.ctx.getServer().getPlaylists(ctx.getStationId());
 
     Set<Integer> refreshed = new HashSet<Integer>(); // tracks that have been updated in track registry
-    for (PlaylistHead playlistInfo : playlistInfos) {
+    for (ExtendedPlaylistHead playlistInfo : playlistInfos) {
       if (ids.contains(playlistInfo.getId())) {
 
         // prepare basic information
@@ -544,16 +562,32 @@ public class PlaylistService implements Service {
     this.trackRegistry.removeUnused();
 
   }
-  
-  private static void updateMetaData(PlaylistHead head, Playlist playlist) {
+
+  private static String getShuffleType(ExtendedPlaylistHead head) {
+    if (head.getShuffleFunction() != null) {
+      Matcher matcher = shuffleKeyPattern.matcher(head.getShuffleFunction());
+      if (matcher.find()) {
+        String match = matcher.group(1);
+        // limit to supported types
+        if (match.startsWith("basic") || match.startsWith("bucket") || match.startsWith("StationAdmin")) {
+          return match;
+        }
+      }
+    }
+    return null;
+  }
+
+  private static void updateMetaData(ExtendedPlaylistHead head, Playlist playlist) {
     playlist.setColor(head.getColor());
     playlist.setCreatedAt(head.getCreatedAt());
     playlist.setDescription(head.getDescription());
     playlist.setName(head.getTitle());
     playlist.setUpdatedAt(head.getUpdatedAt());
+    playlist.setShuffleOpts(head.getShuffleOpts());
+    playlist.setShuffleType(getShuffleType(head));
   }
 
-  private void initOnlinePlaylist(Playlist playlist, PlaylistHead playlistInfo) {
+  private void initOnlinePlaylist(Playlist playlist, ExtendedPlaylistHead playlistInfo) {
     playlist.setId(playlistInfo.getId());
     playlist.setName(playlistInfo.getTitle());
     playlist.setDescription(playlistInfo.getDescription());
@@ -562,6 +596,8 @@ public class PlaylistService implements Service {
     playlist.setColor(playlistInfo.getColor());
     playlist.setCreatedAt(playlistInfo.getCreatedAt());
     playlist.setUpdatedAt(playlist.getUpdatedAt());
+    playlist.setShuffleOpts(playlistInfo.getShuffleOpts());
+    playlist.setShuffleType(getShuffleType(playlistInfo));
   }
 
   /**
@@ -579,6 +615,104 @@ public class PlaylistService implements Service {
   @Override
   public void initBackgroundTasks() {
     this.initPlaylistModificationDetection();
+  }
+
+  
+  /**
+   * Patches the global shuffle options of all playlists that are shuffled on server with
+   * Station Admin shuffle
+   * @param settings
+   * @throws IOException
+   */
+  public void updateGlobalShuffleOpts(Settings settings) throws IOException {
+    for (Playlist pl : playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
+      if (pl.isShuffle() && pl.getShuffleType().equals(SHUFFLE_STATIONADMIN)) {
+        Map<String, Object> opts = pl.getShuffleOpts();
+        boolean modified = pl.isMetaDataModified();
+        if (opts == null) {
+          opts = new HashMap<>();
+          pl.setShuffleOpts(opts);
+        }
+        updateGlobalShuffleOpts(opts, settings);
+        if (!modified) {
+          this.savePlaylistAs(pl, Integer.toString(pl.getId()));
+          this.ctx.getServer().updatePlaylistShuffleOpts(ctx.getStationId(), pl.getId(), opts);
+        }
+      }
+    }
+
+  }
+
+  public static void updateGlobalShuffleOpts(Map<String, Object> opts, Settings settings) {
+
+    // jingles
+    opts.put("preserveAllJingles", settings.isShuffleProtectAllJingles() ? 1 : 0);
+    if (!settings.isShuffleProtectAllJingles()) {
+      opts.put("jingleInterval", settings.getShuffleJingleInterval());
+      opts.put("jingleOrder", "shuffle_repeat"); // TODO replace by setting if available
+      opts.put("protectFirstJingle", settings.isShuffleProtectFirstJingle() ? 1 : 0);
+    } else {
+      opts.remove("jingleInterval");
+      opts.remove("jingleOrder");
+      opts.remove("protectFirstJingle");
+    }
+
+    // words
+    switch (settings.getShuffleWordDistributionStrategy()) {
+    case RANDOM:
+      opts.put("wordDistribution", "random");
+      break;
+    case PROTECT:
+      opts.put("wordDistribution", "preserve");
+      break;
+    case PREDECESSOR_COUPLING:
+      opts.put("wordDistribution", "link_previous");
+      break;
+    case SUCCESSOR_COUPLING:
+      opts.put("wordDistribution", "link_next");
+      break;
+    }
+
+    // artist alias
+    if (settings.getArtistNormalizerSeperators() != null && settings.getArtistNormalizerSeperators().size() > 0) {
+      opts.put("artistSeparators", settings.getArtistNormalizerSeperators());
+    } else {
+      opts.remove("artistSeparators");
+    }
+    if (settings.getArtistNormalizerAliases() != null && settings.getArtistNormalizerAliases().size() > 0) {
+      opts.put("artistAliases", settings.getArtistNormalizerAliases());
+    } else {
+      opts.remove("artistAliases");
+    }
+
+    // ad triggers
+    if (settings.getAdTriggerPosition1() > -1) {
+      opts.put("adTrigger", settings.getAdTriggerId());
+      if (settings.getAdSeparatorId() > 0) {
+        opts.put("adSeparator", settings.getAdSeparatorId());
+      } else {
+        opts.remove("adSeparator");
+      }
+      opts.put("adPositions", new int[] { settings.getAdTriggerPosition1(), settings.getAdTriggerPosition2() });
+      switch (settings.getAdJingleCollisionStrategy()) {
+      case KEEP_BOTH:
+        opts.put("adJingleCollisionStrategy", "keep_both");
+        break;
+      case MOVE_ADTRIGGER:
+        opts.put("adJingleCollisionStrategy", "move_adtrigger");
+        break;
+      case REMOVE_JINGLE:
+        opts.put("adJingleCollisionStrategy", "remove_jingle");
+        break;
+      }
+
+    } else {
+      opts.remove("adTrigger");
+      opts.remove("adSeparator");
+      opts.remove("adPositions");
+      opts.remove("adJingleCollisionStrategy");
+    }
+
   }
 
 }

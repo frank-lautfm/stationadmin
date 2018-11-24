@@ -15,6 +15,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.util.HashSet;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -60,8 +61,12 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.Autosynchronisation;
 import de.stationadmin.base.Settings;
 import de.stationadmin.base.backup.BackupFrequency;
+import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.base.playlist.Playlist.PlaylistType;
+import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.playlist.GlobalShuffleOptsUpdateAction;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.Option;
 import de.stationadmin.gui.util.SwingTools;
@@ -117,10 +122,31 @@ public class SettingsDlg extends JDialog {
 
       @Override
       public void actionPerformed(ActionEvent evt) {
-        model.triggerCommit();
+        boolean shuffleOptsChanged = false;
+        boolean hasShufflePlaylists = false;
+        for (Playlist pl : ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE)) {
+          if (pl.isShuffle() && pl.getShuffleType().equals(PlaylistService.SHUFFLE_STATIONADMIN)) {
+            hasShufflePlaylists = true;
+            break;
+          }
+        }
+        if (hasShufflePlaylists) {
+          ShuffleOptsUpdateDetector detector = new ShuffleOptsUpdateDetector();
+          ctx.getAdminClient().getSettings().addPropertyChangeListener(detector);
+          model.triggerCommit();
+          shuffleOptsChanged = detector.isChanged();
+          ctx.getAdminClient().getSettings().removePropertyChangeListener(detector);
+        } else {
+          model.triggerCommit();
+        }
+
         try {
           ctx.getAdminClient().saveSettings();
           dispose();
+          if (shuffleOptsChanged) {
+            GlobalShuffleOptsUpdateAction action = new GlobalShuffleOptsUpdateAction(ctx);
+            action.actionPerformed(evt);
+          }
         } catch (IOException e) {
           JXErrorPane.showDialog(e);
         }
@@ -235,7 +261,6 @@ public class SettingsDlg extends JDialog {
     Vector<Option> options = new Vector<>();
     options.add(new Option("system", "System"));
 
-
     options.add(new Option("com.jtattoo.plaf.acryl.AcrylLookAndFeel", "Acryl"));
     options.add(new Option("com.jtattoo.plaf.aero.AeroLookAndFeel", "Aero"));
     options.add(new Option("com.jtattoo.plaf.aluminium.AluminiumLookAndFeel", "Aluminium"));
@@ -271,12 +296,12 @@ public class SettingsDlg extends JDialog {
     });
 
     panel.add(cmb, new CellConstraints(2, 2));
-    
+
     JLabel hint = new JLabel(ctx.getString("settings.laf.hint"));
     hint.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
     hint.setBackground(new Color(0xFF, 0xFF, 0xCC));
     hint.setOpaque(true);
-    
+
     panel.add(hint, new CellConstraints(2, 4));
 
     return panel;
@@ -733,5 +758,35 @@ public class SettingsDlg extends JDialog {
     public JPanel getPanel() {
       return panel;
     }
+  }
+
+  private class ShuffleOptsUpdateDetector implements PropertyChangeListener {
+    private boolean changed = false;
+    HashSet<String> properties = new HashSet<>();
+
+    private ShuffleOptsUpdateDetector() {
+      this.properties.add("shuffleJingleInterval");
+      this.properties.add("shuffleProtectAllJingles");
+      this.properties.add("shuffleProtectFirstJingle");
+      this.properties.add("shuffleWordDistributionStrategy");
+      this.properties.add("adTriggerId");
+      this.properties.add("adSeparatorId");
+      this.properties.add("adTriggerPosition1");
+      this.properties.add("adTriggerPosition2");
+      this.properties.add("artistNormalizerSeperators");
+      this.properties.add("artistNormalizerAliases");
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+      if (this.properties.contains(evt.getPropertyName())) {
+        changed = true;
+      }
+    }
+
+    public boolean isChanged() {
+      return changed;
+    }
+
   }
 }

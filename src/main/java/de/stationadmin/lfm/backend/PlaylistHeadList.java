@@ -12,13 +12,13 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlaylistHeadList {
   
-  private PlaylistHead[] playlists;
+  private ExtendedPlaylistHead[] playlists;
 
-  public PlaylistHead[] getPlaylists() {
+  public ExtendedPlaylistHead[] getPlaylists() {
     return playlists;
   }
 
-  public void setPlaylists(PlaylistHead[] playlists) {
+  public void setPlaylists(ExtendedPlaylistHead[] playlists) {
     this.playlists = playlists;
   }
 

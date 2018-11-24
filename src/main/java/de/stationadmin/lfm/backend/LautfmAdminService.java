@@ -94,7 +94,6 @@ public class LautfmAdminService {
       throw new RuntimeException(e);
     }
   }
-  
 
   private <T> T deserializeJson(CloseableHttpResponse response, Class<T> type) throws IOException, JsonMappingException {
     ObjectMapper mapper = new ObjectMapper();
@@ -264,7 +263,7 @@ public class LautfmAdminService {
       response.close();
     }
   }
-  
+
   public TrackStatsEntry[] getTrackStatisticsByDate(int stationId, Date date) throws IOException {
     SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/tracks/stats/" + dateFmt.format(date));
@@ -275,7 +274,6 @@ public class LautfmAdminService {
     }
   }
 
-
   public void start(int stationId) throws IOException {
     HashMap<String, Object> args = new HashMap<String, Object>();
     args.put("station_id", stationId);
@@ -283,7 +281,7 @@ public class LautfmAdminService {
     response.close();
   }
 
-  public List<PlaylistHead> getPlaylists(int stationId) throws IOException {
+  public List<ExtendedPlaylistHead> getPlaylists(int stationId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/playlists");
     PlaylistHeadList list = deserializeJson(response, PlaylistHeadList.class);
     response.close();
@@ -407,6 +405,24 @@ public class LautfmAdminService {
   public Playlist setPlaylistTracks(int stationId, int playlistId, int[] trackIds) throws IOException {
     Map<String, Object> map = new HashMap<String, Object>();
     map.put("entries", trackIds);
+    CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/playlists/" + playlistId, map);
+    Playlist playlist = deserializeJson(response, Playlist.class);
+    response.close();
+    return playlist;
+  }
+
+  public Playlist setPlaylistShuffleFunction(int stationId, int playlistId, String src) throws IOException {
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put("shuffle_function", src);
+    CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/playlists/" + playlistId, map);
+    Playlist playlist = deserializeJson(response, Playlist.class);
+    response.close();
+    return playlist;
+  }
+
+  public Playlist updatePlaylistShuffleOpts(int stationId, int playlistId, Map<String, Object> opts) throws IOException {
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put("shuffle_opts", opts);
     CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/playlists/" + playlistId, map);
     Playlist playlist = deserializeJson(response, Playlist.class);
     response.close();
@@ -560,7 +576,7 @@ public class LautfmAdminService {
   }
 
   public int[] getTaggedTracks(int stationId, String tag) throws IOException {
-    if(tag.length() == 0) {
+    if (tag.length() == 0) {
       return new int[0];
     }
     tag = URLEncoder.encode(tag, "UTF-8");
