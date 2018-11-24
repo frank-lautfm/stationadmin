@@ -19,7 +19,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import org.apache.poi.ss.usermodel.Cell;
+import org.apache.commons.lang3.StringUtils;
 import org.jdesktop.swingx.JXTable;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
@@ -67,7 +67,76 @@ public class ShuffleOptionsPanel extends JPanel {
   }
 
   private JPanel createBucketOptsPanel() {
-    return new JPanel();
+    JPanel panel = new JPanel(new FormLayout("5dlu,pref:grow,5dlu", "8dlu,pref,5dlu,pref,5dlu"));
+
+    CellConstraints cc = new CellConstraints();
+    int row = 2;
+
+    final ValueHolder sequence = new ValueHolder();
+
+    sequence.addPropertyChangeListener(new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        String[] tags = (String[]) sequence.getValue();
+        StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < tags.length; i++) {
+          if(tags[i].indexOf(',') > -1) {
+            continue;
+          }
+          if (buf.length() > 0) {
+            buf.append(",");
+          }
+          buf.append(tags[i]);
+        }
+        if (buf.length() > 0) {
+          getOptions().put("pattern", buf.toString());
+        } else {
+          getOptions().remove("pattern");
+        }
+      }
+    });
+
+    updatePatternModel(sequence);
+
+    List<String> tags = new ArrayList<>();
+    tags.add("song");
+    tags.add("jingle");
+    tags.add("moderation");
+
+    List<StaticTag> staticTags = ctx.getAdminClient().getTagManager().getStaticTags();
+    Collections.sort(staticTags, (c1, c2) -> c1.getName().compareTo(c2.getName()));
+    staticTags.forEach(t -> tags.add(t.getName()));
+
+    TagSequenceEditor editor = new TagSequenceEditor(tags.toArray(new String[tags.size()]), sequence, true);
+
+    panel.add(new JLabel(this.ctx.getTextProvider().getString("playlistcfg.property.tagSequence")), cc.xy(2, row));
+    row += 2;
+    panel.add(editor, cc.xy(2, row));
+
+    model.getBufferedModel("shuffleOpts").addValueChangeListener(new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        updatePatternModel(sequence);
+      }
+    });
+
+    return panel;
+  }
+
+  private void updatePatternModel(ValueHolder sequence) {
+    if (getOptions().containsKey("pattern")) {
+      String pattern = (String) getOptions().get("pattern");
+      String[] tags = StringUtils.split(pattern, ',');
+      for (int i = 0; i < tags.length; i++) {
+        tags[i] = tags[i].trim();
+      }
+      sequence.setValue(tags);
+    } else {
+      sequence.setValue(new String[0]);
+    }
+
   }
 
   @SuppressWarnings("unchecked")
@@ -80,7 +149,6 @@ public class ShuffleOptionsPanel extends JPanel {
     JPanel panel = new JPanel(new FormLayout("5dlu,pref,5dlu,pref:grow,5dlu", "8dlu,pref,10dlu,pref,5dlu,70dlu,5dlu"));
     CellConstraints cc = new CellConstraints();
     int row = 2;
-
 
     // Max tracks per artist
     final ValueHolder maxArtistTracksHolder = new ValueHolder(getOptions().containsKey("maxTracksPerArtist") ? getOptions().get("maxTracksPerArtist") : 0);
@@ -250,16 +318,16 @@ public class ShuffleOptionsPanel extends JPanel {
         entry.setWeight((Integer) aValue);
         break;
       }
-      
+
       // update opts entry
-      Map<String,Integer> newWeights = new HashMap<>();
-      for(ShuffleTagWeight e : entries) {
-        if(e.getTag() != null && e.getWeight() != 0) {
+      Map<String, Integer> newWeights = new HashMap<>();
+      for (ShuffleTagWeight e : entries) {
+        if (e.getTag() != null && e.getWeight() != 0) {
           newWeights.put(e.getTag(), e.getWeight());
         }
       }
       getOptions().put("tagWeights", newWeights);
-      
+
       if (this.entries.get(this.entries.size() - 1).getTag() != null) {
         this.entries.add(new ShuffleTagWeight(null, 0));
         this.fireTableRowsInserted(this.entries.size() - 1, this.entries.size() - 1);
