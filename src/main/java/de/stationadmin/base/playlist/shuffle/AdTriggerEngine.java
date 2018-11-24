@@ -13,7 +13,7 @@ import de.stationadmin.base.util.TimeFormat;
 
 public class AdTriggerEngine implements PlaylistEnhancer {
   private Logger log = Logger.getLogger(AdTriggerEngine.class);
-
+  
   public enum AdJingleCollisionStrategy {
     KEEP_BOTH, REMOVE_JINGLE, MOVE_ADTRIGGER
   }
@@ -22,7 +22,7 @@ public class AdTriggerEngine implements PlaylistEnhancer {
   private int position1 = 0;
   private int position2 = 30;
   private int adSeparatorId = -1;
-  private int adTriggerId = 0;
+  private int adTriggerId = TrackRegistry.STANDARD_AD_TRIGGER_ID;
   private AdJingleCollisionStrategy jingleCollisionStrategy = AdJingleCollisionStrategy.KEEP_BOTH;
   
   private boolean clearExistingTriggers;
@@ -33,7 +33,7 @@ public class AdTriggerEngine implements PlaylistEnhancer {
 
   @Override
   public boolean excludeFromCorePlaylist(BasicTrack track) {
-    return track.getId() == adSeparatorId || track.getId() == adTriggerId || track.getId() == 0;
+    return track.getId() == adSeparatorId || track.getId() == adTriggerId || track.getId() == TrackRegistry.STANDARD_AD_TRIGGER_ID;
   }
 
   public int getAdSeparatorId() {

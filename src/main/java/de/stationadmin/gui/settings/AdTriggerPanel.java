@@ -30,6 +30,7 @@ import de.stationadmin.base.playlist.shuffle.AdTriggerEngine;
 import de.stationadmin.base.playlist.shuffle.AdTriggerEngine.AdJingleCollisionStrategy;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
+import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.util.EnumListCellRenderer;
 
@@ -222,7 +223,7 @@ public class AdTriggerPanel extends JPanel {
 
   private List<Integer> getAdTriggerOptions() {
     ArrayList<Integer> triggers = new ArrayList<Integer>();
-    triggers.add(0);
+    triggers.add(TrackRegistry.STANDARD_AD_TRIGGER_ID);
 
     for (BasicTrack track : ctx.getAdminClient().getTrackService().getTrackRegistry().getAllTracks()) {
       if (track.getType() == BasicTrack.TYPE_JINGLE && track.getId() > 0 && (track.getArtist().equals("START_AD_BREAK") || track.getTitle().equals("START_AD_BREAK"))) {
