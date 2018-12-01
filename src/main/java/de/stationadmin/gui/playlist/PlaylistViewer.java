@@ -123,6 +123,7 @@ public class PlaylistViewer extends JPanel {
   private ValueModel hasValidationErrors = new ValueHolder(Boolean.FALSE);
   private ValueModel highlightedTrackHolder = new ValueHolder(new HashSet<Integer>(), true);
   private ValueModel warningMessage;
+  private boolean readOnly;
 
   private JLabel statisticsLabel = new JLabel("");
 
@@ -132,8 +133,17 @@ public class PlaylistViewer extends JPanel {
     this(ctx, playlistHolder, new ValueHolder());
   }
 
+  public PlaylistViewer(ClientContext ctx, ValueModel playlistHolder, boolean readOnly) {
+    this(ctx, playlistHolder, new ValueHolder(), readOnly);
+  }
+
   public PlaylistViewer(ClientContext ctx, ValueModel playlistHolder, ValueModel entryHolder) {
+    this(ctx, playlistHolder, entryHolder, false);
+  }
+
+  public PlaylistViewer(ClientContext ctx, ValueModel playlistHolder, ValueModel entryHolder, boolean readOnly) {
     super();
+    this.readOnly = readOnly;
     this.ctx = ctx;
     this.textProvider = ctx.getTextProvider();
     this.playlistHolder = playlistHolder;
@@ -354,8 +364,8 @@ public class PlaylistViewer extends JPanel {
     table.getColumn(Column.YEAR.ordinal()).setCellRenderer(new IntTableCellRenderer(0));
 
     table.setDropMode(DropMode.INSERT_ROWS);
-    table.setDragEnabled(true);
-    table.setTransferHandler(new PlaylistTableTransferHandler(ctx, table));
+    table.setDragEnabled(!readOnly);
+    table.setTransferHandler(new PlaylistTableTransferHandler(ctx, table, readOnly));
 
     table.setColumnControlVisible(true);
     table.getColumnExt(table.convertColumnIndexToView(Column.ALBUM.ordinal())).setVisible(false);
@@ -421,13 +431,17 @@ public class PlaylistViewer extends JPanel {
 
     });
 
-    table.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
-    table.getActionMap().put("delete", new TitleDeleteAction());
+    if (!readOnly) {
+      table.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
+      table.getActionMap().put("delete", new TitleDeleteAction());
+    }
 
     final JPopupMenu popup = new JPopupMenu();
-    popup.add(new ClipboardAction(ctx, table, this.entryHolder, TransferHandler.getCutAction()));
+    if (!readOnly)
+      popup.add(new ClipboardAction(ctx, table, this.entryHolder, TransferHandler.getCutAction()));
     popup.add(new ClipboardAction(ctx, table, this.entryHolder, TransferHandler.getCopyAction()));
-    popup.add(new ClipboardAction(ctx, table, this.entryHolder, TransferHandler.getPasteAction()));
+    if (!readOnly)
+      popup.add(new ClipboardAction(ctx, table, this.entryHolder, TransferHandler.getPasteAction()));
     popup.addSeparator();
     final TagMenu tagMenu = new TagMenu(this.ctx.getTextProvider(), ctx.getAdminClient().getTagManager(), true);
     final TagMenu untagMenu = new TagMenu(this.ctx.getTextProvider(), ctx.getAdminClient().getTagManager(), false);
@@ -471,16 +485,20 @@ public class PlaylistViewer extends JPanel {
       }
 
     });
-    popup.add(tagMenu);
-    popup.add(untagMenu);
+    if (!readOnly) {
+      popup.add(tagMenu);
+      popup.add(untagMenu);
+    }
     popup.add(tagHighlightMenu);
     popup.addSeparator();
     popup.add(copyAction);
     popup.add(distributeAction);
     popup.add(followAction);
     popup.addSeparator();
-    popup.add(new TitleDeleteAction());
-    popup.addSeparator();
+    if (!readOnly) {
+      popup.add(new TitleDeleteAction());
+      popup.addSeparator();
+    }
     popup.add(viewAction);
     popup.add(new PlaySnippetAction(ctx, titleHolder));
 
@@ -578,50 +596,52 @@ public class PlaylistViewer extends JPanel {
 
   private JToolBar createToolBar() {
     JToolBar toolbar = new JToolBar();
-    toolbar.add(new NewPlaylistAction());
-    toolbar.addSeparator();
-    toolbar.add(new SaveAction(ctx));
-    toolbar.add(new ResetAction());
-    toolbar.add(new PlaylistDeleteAction(this.playlistHolder, this.ctx.getAdminClient().getPlaylistService(), this.textProvider, true));
-    ValidationErrorFilterAction vAction = new ValidationErrorFilterAction();
-    JToggleButton validationErrorFilterBtn = new JToggleButton(vAction);
-    vAction.setButton(validationErrorFilterBtn); // ouch
-    toolbar.add(validationErrorFilterBtn);
-    toolbar.addSeparator();
-    toolbar.add(new PlaylistEditPropertiesAction(ctx, playlistHolder, true));
-    toolbar.addSeparator();
-    final JToggleButton searchBtn = new JToggleButton(AppUtils.getIcon("searching.png"));
-    searchBtn.setToolTipText(ctx.getString("action.search.tooltip"));
-    searchBtn.addActionListener(new ActionListener() {
+    if (!readOnly) {
+      toolbar.add(new NewPlaylistAction());
+      toolbar.addSeparator();
+      toolbar.add(new SaveAction(ctx));
+      toolbar.add(new ResetAction());
+      toolbar.add(new PlaylistDeleteAction(this.playlistHolder, this.ctx.getAdminClient().getPlaylistService(), this.textProvider, true));
+      ValidationErrorFilterAction vAction = new ValidationErrorFilterAction();
+      JToggleButton validationErrorFilterBtn = new JToggleButton(vAction);
+      vAction.setButton(validationErrorFilterBtn); // ouch
+      toolbar.add(validationErrorFilterBtn);
+      toolbar.addSeparator();
+      toolbar.add(new PlaylistEditPropertiesAction(ctx, playlistHolder, true));
+      toolbar.addSeparator();
+      final JToggleButton searchBtn = new JToggleButton(AppUtils.getIcon("searching.png"));
+      searchBtn.setToolTipText(ctx.getString("action.search.tooltip"));
+      searchBtn.addActionListener(new ActionListener() {
 
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        searchPanel.setVisible(searchBtn.isSelected());
-        if (!searchBtn.isSelected()) {
-          highlightedTrackHolder.setValue(null);
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          searchPanel.setVisible(searchBtn.isSelected());
+          if (!searchBtn.isSelected()) {
+            highlightedTrackHolder.setValue(null);
+          }
         }
-      }
-    });
+      });
 
-    toolbar.add(searchBtn);
+      toolbar.add(searchBtn);
 
-    final JToggleButton subscriptionBtn = new JToggleButton(AppUtils.getIcon("subscriptions.png"));
-    subscriptionBtn.setToolTipText(ctx.getString("action.subscription.tooltip"));
-    subscriptionBtn.addActionListener(new ActionListener() {
+      final JToggleButton subscriptionBtn = new JToggleButton(AppUtils.getIcon("subscriptions.png"));
+      subscriptionBtn.setToolTipText(ctx.getString("action.subscription.tooltip"));
+      subscriptionBtn.addActionListener(new ActionListener() {
 
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        subscriptionPanel.setVisible(subscriptionBtn.isSelected());
-      }
-    });
-    toolbar.add(subscriptionBtn);
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          subscriptionPanel.setVisible(subscriptionBtn.isSelected());
+        }
+      });
+      toolbar.add(subscriptionBtn);
 
-    toolbar.add(new ImportAction());
-    toolbar.add(new SortAction());
-    toolbar.add(new ShuffleAction());
-    toolbar.add(new GenerateAction());
-    toolbar.add(new AdTriggerInsertAction());
-    toolbar.addSeparator();
+      toolbar.add(new ImportAction());
+      toolbar.add(new SortAction());
+      toolbar.add(new ShuffleAction());
+      toolbar.add(new GenerateAction());
+      toolbar.add(new AdTriggerInsertAction());
+      toolbar.addSeparator();
+    }
     toolbar.add(new ArchiveDialogOpenAction(this.ctx, this.playlistHolder));
 
     final JPopupMenu exportMenu = new JPopupMenu();
@@ -763,7 +783,7 @@ public class PlaylistViewer extends JPanel {
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(evt.getNewValue() != null);
+      setEnabled(!readOnly && evt.getNewValue() != null);
     }
 
   }
@@ -911,7 +931,7 @@ public class PlaylistViewer extends JPanel {
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(evt.getNewValue() != null && ((Playlist) evt.getNewValue()).isLocalShuffleAllowed());
+      setEnabled(!readOnly && evt.getNewValue() != null && ((Playlist) evt.getNewValue()).isLocalShuffleAllowed());
     }
 
   }
@@ -952,8 +972,8 @@ public class PlaylistViewer extends JPanel {
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(evt.getNewValue() != null && StringUtils.isNotEmpty(((Playlist) evt.getNewValue()).getGenerateTags()) && ((Playlist) evt.getNewValue()).getGenerateLength() > 0
-          && ((Playlist) evt.getNewValue()).getType() == PlaylistType.ONLINE);
+      setEnabled(!readOnly && evt.getNewValue() != null && StringUtils.isNotEmpty(((Playlist) evt.getNewValue()).getGenerateTags())
+          && ((Playlist) evt.getNewValue()).getGenerateLength() > 0 && ((Playlist) evt.getNewValue()).getType() == PlaylistType.ONLINE);
     }
 
   }
@@ -993,7 +1013,7 @@ public class PlaylistViewer extends JPanel {
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(evt.getNewValue() != null && !((Playlist) evt.getNewValue()).isShuffle() && ((Playlist) evt.getNewValue()).getType() == PlaylistType.ONLINE);
+      setEnabled(!readOnly && evt.getNewValue() != null && !((Playlist) evt.getNewValue()).isShuffle() && ((Playlist) evt.getNewValue()).getType() == PlaylistType.ONLINE);
     }
 
   }
@@ -1006,7 +1026,7 @@ public class PlaylistViewer extends JPanel {
       this.putValue(Action.NAME, null);
       this.putValue(Action.SMALL_ICON, AppUtils.getIcon("filenew.png"));
       this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.new.tooltip"));
-      setEnabled(true);
+      setEnabled(!readOnly);
     }
 
     /**
@@ -1049,7 +1069,7 @@ public class PlaylistViewer extends JPanel {
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(evt.getNewValue() != null);
+      setEnabled(!readOnly && evt.getNewValue() != null);
     }
 
   }
@@ -1059,6 +1079,7 @@ public class PlaylistViewer extends JPanel {
 
     public TitleDeleteAction() {
       this.putValue(Action.NAME, textProvider.getString("action.playlist.titledelete"));
+      this.setEnabled(!readOnly);
     }
 
     /**

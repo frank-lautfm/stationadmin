@@ -29,6 +29,7 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.Settings;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.util.HintLabel;
 
 
 /**
@@ -54,7 +55,7 @@ public class ArtistLimitPanel extends JPanel {
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private void init() {
-    this.setLayout(new FormLayout("100dlu:grow", "pref,5dlu,pref,5dlu,60dlu:grow,8dlu,pref,5dlu,60dlu:grow"));
+    this.setLayout(new FormLayout("100dlu:grow", "pref,5dlu,pref,5dlu,60dlu:grow,8dlu,pref,5dlu,60dlu:grow,5dlu,pref"));
     CellConstraints cc = new CellConstraints();
 
     final ArtistLimitTableModel tableModel = new ArtistLimitTableModel(ctx.getTextProvider(), new HashMap<String, Integer>(this.model.getBean()
@@ -165,6 +166,9 @@ public class ArtistLimitPanel extends JPanel {
         tagWeightTable.setEnabled(tableModel.getDefaultLimit().intValue() > 0);
       }
     });
+
+    JLabel hint = new HintLabel(ctx.getString("settings.shuffle.hint.generate"));
+    this.add(hint,  cc.xy(1,  11));
 
   }
 }

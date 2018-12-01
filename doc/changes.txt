@@ -10,6 +10,7 @@ Station Admin für laut.fm - Änderungen
 Version 4.9
 -----------
 [+] Shuffeln auf dem Server
+[+] Anzeige der aktuell exportieren Playlist
 [#} Überarbeiteter Dialog für Playlistkonfiguration
 
 

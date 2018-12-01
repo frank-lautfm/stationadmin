@@ -75,9 +75,11 @@ import de.stationadmin.gui.playlist.PlaylistTrackSearchOpenAction;
 import de.stationadmin.gui.playlist.ResetModifiedPlaylistsAction;
 import de.stationadmin.gui.playlist.SaveModifiedPlaylistsAction;
 import de.stationadmin.gui.playlist.forecast.ForecastDisplayAction;
+import de.stationadmin.gui.playlist.tools.CurrentPlaylistDisplayAction;
 import de.stationadmin.gui.playlist.tools.DupeFinderDisplayAction;
 import de.stationadmin.gui.playlist.tools.MultiPlaylistShuffleDisplayAction;
 import de.stationadmin.gui.playlist.tools.TempPlaylistDisplayAction;
+import de.stationadmin.gui.playlist.tools.UpdateShuffleFuncsAction;
 import de.stationadmin.gui.radioctrl.StartRadioAction;
 import de.stationadmin.gui.schedule.ScheduleEditorDisplayAction;
 import de.stationadmin.gui.settings.SettingsDisplayAction;
@@ -292,7 +294,7 @@ public class StationAdminWindow extends StationAdminFrame {
         statusBar.add(titlePanel, new JXStatusBar.Constraint());
 
       }
-      
+
       this.getContentPane().add(statusBar, BorderLayout.SOUTH);
     }
 
@@ -476,6 +478,7 @@ public class StationAdminWindow extends StationAdminFrame {
     {
       JMenu menuPlaylists = new JMenu(this.ctx.getTextProvider().getString("menu.playlist"));
       menuPlaylists.add(new PlaylistNewAction(this.ctx, null));
+      menuPlaylists.add(new CurrentPlaylistDisplayAction(this.ctx));
       menuPlaylists.add(new TempPlaylistDisplayAction(this.ctx));
       menuPlaylists.add(new MultiPlaylistShuffleDisplayAction(this.ctx));
       menuPlaylists.add(new PlaylistTrackSearchOpenAction(this.ctx));
@@ -513,6 +516,8 @@ public class StationAdminWindow extends StationAdminFrame {
         menuBackup.addSeparator();
         menuBackup.add(new BackupCreateAction(ctx.getTextProvider(), ctx.getAdminClient()));
         menuBackup.add(new BackupRestoreAction(this.ctx));
+        menuBackup.addSeparator();
+        menuBackup.add(new UpdateShuffleFuncsAction(this.ctx));
         menuBackup.addSeparator();
       }
       menuBackup.add(new SettingsDisplayAction(this.ctx));

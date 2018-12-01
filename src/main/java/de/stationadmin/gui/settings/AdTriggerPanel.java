@@ -33,6 +33,7 @@ import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.util.EnumListCellRenderer;
+import de.stationadmin.gui.util.HintLabel;
 
 public class AdTriggerPanel extends JPanel {
   private static final long serialVersionUID = -2219654738032680709L;
@@ -57,7 +58,8 @@ public class AdTriggerPanel extends JPanel {
     rowSpec.append("pref,5dlu,"); // ad separator
     rowSpec.append("pref,5dlu,"); // ad trigger
     rowSpec.append("pref,5dlu,"); // jingle collision strategy
-    rowSpec.append("pref,4dlu"); // jingle collision strategy
+    rowSpec.append("pref,4dlu:grow,"); // jingle collision strategy
+    rowSpec.append("pref,4dlu");
 
     this.setLayout(new FormLayout("pref,5dlu,180dlu", rowSpec.toString()));
     CellConstraints cc = new CellConstraints();
@@ -188,6 +190,9 @@ public class AdTriggerPanel extends JPanel {
         }
       }
     });
+
+    JLabel hint = new HintLabel(ctx.getString("settings.shuffle.hint"));
+    this.add(hint, cc.xywh(1, row, 3, 1));
 
   }
 

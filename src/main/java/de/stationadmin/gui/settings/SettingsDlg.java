@@ -68,6 +68,7 @@ import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.playlist.GlobalShuffleOptsUpdateAction;
 import de.stationadmin.gui.util.DisposeAction;
+import de.stationadmin.gui.util.HintLabel;
 import de.stationadmin.gui.util.Option;
 import de.stationadmin.gui.util.SwingTools;
 import de.stationadmin.lfm.backend.LautfmAdminService;
@@ -180,10 +181,10 @@ public class SettingsDlg extends JDialog {
 
     // Playlists
     {
-      JPanel logPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref,5dlu"));
-      logPanel.add(this.createShufflePanel(), cc.xy(2, 2));
+      JPanel shufflePanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref:grow,5dlu"));
+      shufflePanel.add(this.createShufflePanel(), cc.xy(2, 2, CellConstraints.FILL, CellConstraints.FILL));
 
-      DefaultMutableTreeNode playlists = new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists"), logPanel));
+      DefaultMutableTreeNode playlists = new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists"), shufflePanel));
       playlists.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists.normalize"), this.createArtistNormalizePanel())));
       playlists.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists.weights"), this.createGenerateWeightsPanel())));
       playlists.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists.preselect"), this.createGenerateArtistPreselectPanel())));
@@ -297,10 +298,7 @@ public class SettingsDlg extends JDialog {
 
     panel.add(cmb, new CellConstraints(2, 2));
 
-    JLabel hint = new JLabel(ctx.getString("settings.laf.hint"));
-    hint.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-    hint.setBackground(new Color(0xFF, 0xFF, 0xCC));
-    hint.setOpaque(true);
+    JLabel hint = new HintLabel(ctx.getString("settings.laf.hint"));
 
     panel.add(hint, new CellConstraints(2, 4));
 
@@ -445,7 +443,7 @@ public class SettingsDlg extends JDialog {
   }
 
   private JPanel createShufflePanel() {
-    JPanel panel = new JPanel(new FormLayout("3dlu,60dlu,5dlu,pref,2dlu,pref,pref,pref:grow,3dlu", "3dlu,pref,3dlu,pref,3dlu,pref,3dlu,pref,10dlu,pref,3dlu"));
+    JPanel panel = new JPanel(new FormLayout("3dlu,60dlu,5dlu,pref,2dlu,pref,pref,pref:grow,3dlu", "3dlu,pref,3dlu,pref,3dlu,pref,3dlu,pref,10dlu:grow,pref,3dlu"));
     panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.shuffle")));
     CellConstraints cc = new CellConstraints();
 
@@ -526,10 +524,7 @@ public class SettingsDlg extends JDialog {
     panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.shuffleWordDistribution")), cc.xy(2, 8));
     panel.add(wordDistCmb, cc.xywh(4, 8, 5, 1));
 
-    JLabel hint = new JLabel(ctx.getString("settings.shuffle.hint"));
-    hint.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-    hint.setBackground(new Color(0xFF, 0xFF, 0xCC));
-    hint.setOpaque(true);
+    JLabel hint = new HintLabel(ctx.getString("settings.shuffle.hint"));
     panel.add(hint, cc.xywh(2, 10, 7, 1));
 
     return panel;
@@ -573,7 +568,7 @@ public class SettingsDlg extends JDialog {
   }
 
   private JPanel createGenerateWeightsPanel() {
-    JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref,3dlu,pref,8dlu,pref,5dlu,pref:grow,3dlu"));
+    JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref,3dlu,pref,8dlu,pref,5dlu,pref:grow,5dlu,pref,3dlu"));
     panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.gen.weight")));
     CellConstraints cc = new CellConstraints();
 
@@ -598,6 +593,9 @@ public class SettingsDlg extends JDialog {
 
     panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.generateWeightTags")), cc.xy(2, 6));
     panel.add(new TagWeightPanel(ctx, this.model), cc.xy(2, 8, CellConstraints.FILL, CellConstraints.FILL));
+
+    JLabel hint = new HintLabel(ctx.getString("settings.shuffle.hint.generate"));
+    panel.add(hint,  cc.xy(2,  10));
 
     return panel;
   }

@@ -41,6 +41,7 @@ import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.util.EnumListCellRenderer;
 import de.stationadmin.gui.util.EnumTableCellRenderer;
+import de.stationadmin.gui.util.HintLabel;
 
 public class TrackRulePanel extends JPanel {
   private static final long serialVersionUID = 7997929549512395824L;
@@ -56,7 +57,7 @@ public class TrackRulePanel extends JPanel {
   @SuppressWarnings("unchecked")
   private void init() {
 
-    this.setLayout(new FormLayout("100dlu:grow", "pref,5dlu,30dlu:grow,8dlu,pref,5dlu,50dlu:grow,8dlu,pref,3dlu,pref,8dlu,pref,3dlu,pref"));
+    this.setLayout(new FormLayout("100dlu:grow", "pref,5dlu,30dlu:grow,8dlu,pref,5dlu,50dlu:grow,8dlu,pref,3dlu,pref,8dlu,pref,3dlu,pref,5dlu,pref"));
     CellConstraints cc = new CellConstraints();
 
     this.add(new JLabel("Gruppen"), cc.xy(1, 1));
@@ -190,6 +191,9 @@ public class TrackRulePanel extends JPanel {
         new EnumListCellRenderer(this.ctx.getTextProvider(), "settings.playlistgen.table.rule.collission"));
     this.add(new JLabel(ctx.getString("settings.playlistgen.table.rule.collission")), cc.xy(1, 13));
     this.add(jcsCmb, cc.xy(1, 15, CellConstraints.LEFT, CellConstraints.CENTER));
+
+    JLabel hint = new HintLabel(ctx.getString("settings.shuffle.hint.shufflegenerate"));
+    this.add(hint,  cc.xy(1,  17));
 
     final JPopupMenu popup = new JPopupMenu();
     final MoveUpAction moveUpAction = new MoveUpAction(rulesModel);

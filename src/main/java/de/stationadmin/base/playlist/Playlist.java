@@ -49,6 +49,9 @@ public class Playlist extends AbstractBean {
   private ExtendedPlaylistData localData;
   private ArrayList<Entry> entries = new ArrayList<Entry>();
   private PlaylistType type = PlaylistType.ONLINE;
+  
+  private Object rawData;
+  
 
   private String shuffleType;
   private Map<String, Object> shuffleOpts;
@@ -1069,5 +1072,13 @@ public class Playlist extends AbstractBean {
       this.metaDataModified = true;
       this.firePropertyChange("shuffleType", old, shuffleType);
     }
+  }
+
+  public Object getRawData() {
+    return rawData;
+  }
+
+  public void setRawData(Object rawData) {
+    this.rawData = rawData;
   }
 }

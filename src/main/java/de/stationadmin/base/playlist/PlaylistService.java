@@ -44,6 +44,7 @@ import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
 import de.stationadmin.base.util.XStreamFactory;
+import de.stationadmin.lfm.backend.CurrentPlaylist;
 import de.stationadmin.lfm.backend.ExtendedPlaylistHead;
 import de.stationadmin.lfm.backend.PlaylistHead;
 import de.stationadmin.lfm.backend.Track;
@@ -113,6 +114,25 @@ public class PlaylistService implements Service {
     playlist.commit();
     // unregister from playlist registry
     this.playlistRegistry.unregister(playlist);
+  }
+
+  public Playlist getCurrentPlaylist() throws IOException {
+    CurrentPlaylist source = this.ctx.getServer().getCurrentPlaylist(this.ctx.getStationId());
+
+    Playlist playlist = new Playlist(this.trackRegistry, PlaylistType.TEMPORARY);
+    playlist.setName(source.getPlaylistInfo().getTitle());
+    playlist.setRawData(source);
+
+    for (Track t : source.getTracks()) {
+      BasicTrack track = this.trackRegistry.getTrack(t.getId());
+      if (track == null) {
+        track = new BasicTrack();
+        track.update(t);
+      }
+      playlist.addTrack(track);
+    }
+
+    return playlist;
   }
 
   /**
@@ -434,6 +454,23 @@ public class PlaylistService implements Service {
     playlist.commit();
 
   }
+  
+  public void updateShuffleFunctions() throws IOException {
+    for(Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
+      if(playlist.isShuffle()) {
+        String shuffleFunc = playlist.getShuffleType();
+        if (shuffleFunc.startsWith("StationAdmin")) {
+          if(shuffleFunc.contains("dev")) {
+            shuffleFunc = "StationAdmin_v1";
+          }
+          try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream("shuffle/" + shuffleFunc + ".js")) {
+            shuffleFunc = IOUtils.toString(stream, "UTF-8");
+          }
+        }
+        this.ctx.getServer().setPlaylistShuffleFunction(ctx.getStationId(), playlist.getId(), shuffleFunc);
+      }
+    }
+  }
 
   /**
    * @param playlistValidator the playlistValidator to set
@@ -617,10 +654,10 @@ public class PlaylistService implements Service {
     this.initPlaylistModificationDetection();
   }
 
-  
   /**
-   * Patches the global shuffle options of all playlists that are shuffled on server with
-   * Station Admin shuffle
+   * Patches the global shuffle options of all playlists that are shuffled on
+   * server with Station Admin shuffle
+   * 
    * @param settings
    * @throws IOException
    */

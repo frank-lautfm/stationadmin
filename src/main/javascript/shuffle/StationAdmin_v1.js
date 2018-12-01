@@ -1,15 +1,19 @@
 // key: StationAdmin_v1
-( function( tracks, opts ){
+( function( tracks, opts, trackStats ){
 	var maxTracksPerArtist = 0; 
 	var tagWeights;
 	var artistSeparators = [' feat'];
 	var artistAliases;
 	var wordDistribution = 'random';
 	var preserveAllJingles = 0;
+	var duration = 64800;
+	var avoidRepeat = 2;
 	
 	var firstJingle;
 	var artists = [];
 	var jingles = [];
+	var lastPlays = {};
+	var recentArtists = {}; // last artists of history / previous iteration
 	var preservedTracks = [];
 	var hasLinkedTracks = false;
 	var tracksAfter = {};
@@ -37,8 +41,8 @@
 		for(var i = 0; i < artistSeparators.length; i++) {
 			var pos = artistName.indexOf(artistSeparators[i]);
 			if(pos > 1) {
+				var old = artistName;
 				artistName = artistName.substring(0, pos).trim();
-				break;
 			}
 		}
 		if(artistAliases != null) {
@@ -70,7 +74,7 @@
 			}
 			if(minWeight == -4) {
 				// not at all
-				track.score = 999;
+				track.score = 999999;
 				return;
 			}
 			var weight = maxWeight + minWeight;
@@ -86,47 +90,58 @@
 				track.score = track.score * p;
 			}
 		}
+		if (track.id in lastPlays && lastPlays[track.id] < 60 * avoidRepeat) {
+			var penalty = 500 - 250 * lastPlays[track.id] / (60 * avoidRepeat);
+			track.score += penalty;
+			track.penalty = Math.floor(penalty / 50);
+		}
+		else {
+			track.penalty = 0;
+		}
 	}
 	
-	function initTracksAndArtists() {
+	function initTracksAndArtists(remainingDuration, iteration) {
 		
 		var artistMap = {};
 		var tracksDuration = 0;
 		
 		for(var i = 0; i < tracks.length; i++) {
+			
 			if(tracks[i].title.indexOf('START_AD_BREAK') > -1) {
 				adTrigger = tracks[i];
 				continue;
 			}
 			if(tracks[i].type == 'jingle') {
-				if(tracks[i].id == 0 || tracks[i].id == opts.adTrigger) {
-					adTrigger = tracks[i];
-				}
-				else if(tracks[i].id == opts.adSeparator) {
-					adSeparator = tracks[i];
-				}
-				else if(preserveAllJingles) {
-					preservedTracks[i] = tracks[i];
-				}
-				else if(i == 0 && 'protectFirstJingle' in opts && opts.protectFirstJingle) {
-					firstJingle = tracks[i];
-				}
-				else  {
-					jingles.push(tracks[i]);
+				if(iteration == 0) {
+					if(tracks[i].id == 0 || tracks[i].id == opts.adTrigger) {
+						adTrigger = tracks[i];
+					}
+					else if(tracks[i].id == opts.adSeparator) {
+						adSeparator = tracks[i];
+					}
+					else if(preserveAllJingles) {
+						preservedTracks[i] = tracks[i];
+					}
+					else if(i == 0 && 'protectFirstJingle' in opts && opts.protectFirstJingle) {
+						firstJingle = tracks[i];
+					}
+					else  {
+						jingles.push(tracks[i]);
+					}
 				}
 				continue;
 			}
 			else if(tracks[i].type == 'moderation') {
-				if(wordDistribution == 'preserve') {
+				if(wordDistribution == 'preserve' && iteration == 0) {
 					preservedTracks[i] = tracks[i];
 					continue;
 				}
-				else if(wordDistribution == 'link_next' && i < tracks.length - 1) {
+				else if(wordDistribution == 'link_next' && i < tracks.length - 1 && iteration == 0) {
 					hasLinkedTracks = true;
 					tracksBefore[tracks[i+1].id] = tracks[i];
 					continue;
 				}
-				else if(wordDistribution == 'link_previous' && i > 0) {
+				else if(wordDistribution == 'link_previous' && i > 0  && iteration == 0) {
 					hasLinkedTracks = true;
 					tracksAfter[tracks[i-1].id] = tracks[i];
 					continue;
@@ -148,6 +163,7 @@
 			}
 			else {
 				artist = {};
+				artist.name = artistName;
 				artist.tracks = [];
 				artist.score = tracks[i].score;
 				artistMap[artistName] = artist;
@@ -161,26 +177,29 @@
 		}
 		artists.sort(function(a, b) { return a.score - b.score });
 		
-		if(tracksDuration > opts.duration) {
-			var candidates = [];
-			for(var i = 0; i < artists.length; i++) {
-				for(var j = 0; j < artists[i].tracks.length && j < maxTracksPerArtist; j++) {
-					candidates.push(artists[i].tracks[j]);
-				}
-			}
-			candidates.sort(function(a, b) { return a.score - b.score });
-			var cDuration = 0;
-			var cIdx = 0;
-			while(cDuration < opts.duration && cIdx < candidates.length) {
-				cDuration += candidates[cIdx].duration;
-				candidates[cIdx].use = true;
-				cIdx++;
+		if(remainingDuration / (60 * 60) < maxTracksPerArtist) {
+			maxTracksPerArtist = Math.floor(remainingDuration / (60 * 60));
+		}
+		
+		var tracksDurationHours = Math.floor(tracksDuration / (60 * 60));
+		if(tracksDurationHours < maxTracksPerArtist && tracksDurationHours > 0) {
+			// iteration will produce shorter list that required - need to set a stricter limit
+			maxTracksPerArtist = tracksDurationHours < 3 ? tracksDurationHours : tracksDurationHours - 1;
+		}
+		
+		var candidates = [];
+		for(var i = 0; i < artists.length; i++) {
+			for(var j = 0; j < artists[i].tracks.length && j < maxTracksPerArtist; j++) {
+				candidates.push(artists[i].tracks[j]);
 			}
 		}
-		else {
-			for(var i = 0; i < tracks.length; i++) {
-				tracks[i].use = true;
-			}
+		candidates.sort(function(a, b) { return a.score - b.score });
+		var cDuration = 0;
+		var cIdx = 0;
+		while(cDuration < remainingDuration && cIdx < candidates.length) {
+			cDuration += candidates[cIdx].duration;
+			candidates[cIdx].use = true;
+			cIdx++;
 		}
 	}
 	
@@ -207,17 +226,14 @@
 			if(artistTracks.length == 0) {
 				continue;
 			}
-
-			if(artistTracks.length > 1) {
-				shuffle(artistTracks);
-			}
 			
 			var artistSegments = Math.floor(numSegments / artistTracks.length);
 
 		    // find least filled segment that can act as first segment for this artist
-			var currentSegment = 0;
+			var minSegment = artist.name in recentArtists ? 1 : 0;
+			var currentSegment = minSegment;
 			var minDuration = segments[0].duration;
-			for(var s = 0; s < artistSegments; s++) {
+			for(var s = minSegment + 1; s < artistSegments; s++) {
 				if(segments[s].duration < minDuration) {
 					currentSegment = s;
 					minDuration = segments[s].duration;
@@ -236,6 +252,8 @@
 		for(var s = 0; s < segments.length; s++) {
 			var segmentTracks = segments[s].tracks;
 			shuffle(segmentTracks);
+			segmentTracks.sort(function(a, b) { return a.penalty - b.penalty });
+			
 			for(var t = 0; t < segmentTracks.length; t++) {
 				if(typeof preservedTracks[playlistTracks.length] != 'undefined') {
 					playlistTracks.push(preservedTracks[playlistTracks.length]);
@@ -276,7 +294,7 @@
 		}
 		if(jingleInterval == 0) {
 			var numJingles = firstJingle != null ? jingles.length + 1 : jingles.length;
-			jingleInterval = Math.floor((opts.duration / numJingles) / 60);
+			jingleInterval = Math.floor((duration / numJingles) / 60);
 		}
 		
 		if(firstJingle != null) {
@@ -406,18 +424,20 @@
 		}
 		return newTracks;
 	}
-
+	
 	// Main code
 	
 	/* Configuration */
 	
-	if('maxTracksPerArtist' in opts) {
-		maxTracksPerArtist = opts.maxTracksPerArtist;
-	}
-	else {
-		maxTracksPerArtist = Math.floor(opts.duration / (60 * 60));
+	if('duration' in opts) {
+		duration = opts.duration < 64800 ? opts.duration : 64800;
 	}
 	
+	maxTracksPerArtist = Math.floor(duration / (60 * 60));
+	if('maxTracksPerArtist' in opts && opts.maxTracksPerArtist < maxTracksPerArtist) {
+		maxTracksPerArtist = opts.maxTracksPerArtist;
+	}
+		
 	if('tagWeights' in opts) {
 		tagWeights = opts.tagWeights;
 	}
@@ -443,20 +463,72 @@
 	if('adJingleCollisionStrategy' in opts) {
 		adJingleCollisionStrategy = opts.adJingleCollisionStrategy;
 	}
-
+	if('avoidRepeat' in opts) {
+		avoidRepeat = opts.avoidRepeat;
+	}
+	
+	if(trackStats != null) {
+		var baseTime = Date.now();
+		for(var i = 0; i < trackStats.length; i++) {
+			if(i < 12 && trackStats[i].artist != null) {
+				var artistName = normalizeArtist(trackStats[i].artist.name);
+				recentArtists[artistName] = true;
+			}
+			var started = Date.parse(trackStats[i].started_at);
+			var diff = Math.floor((baseTime - started) / (1000 * 60));
+			if(diff < avoidRepeat * 60) {
+				if(lastPlays[trackStats[i].id] == null) {
+					lastPlays[trackStats[i].id] = diff;
+				}
+			}
+			else {
+				break;
+			}
+		}
+	}
 	
 	/* Execution */
-	initTracksAndArtists();
+	var sumTrackDuration = 0;
+	var playlistTracks = [];
+	var remainingDuration = duration;
 	
-	var selectedTracks = buildPlaylist();
-	selectedTracks = insertJingles(selectedTracks);
+	var iteration = 0;
+	while(remainingDuration > 0 && iteration < 20) {
+		artists = [];
+		initTracksAndArtists(remainingDuration, iteration);
+		var selectedTracks = buildPlaylist();
+		selectedTracks.forEach(t => sumTrackDuration += t.duration);
+		playlistTracks = playlistTracks.concat(selectedTracks);
+		remainingDuration = duration - sumTrackDuration;
+		iteration++;
+		if(remainingDuration > 0) {
+			var addedMinutes = (Math.floor(sumTrackDuration / 60));
+			recentArtists = {};
+			// increase lastPlays
+			for (var id in lastPlays) {
+				lastPlays[id] += addedMinutes;
+			}
+			// register added tracks in lastPlays
+			var tmpDuration = 0;
+			for(var i = 0; i < selectedTracks.length; i++) {
+				tmpDuration += selectedTracks[i].duration;
+				lastPlays[selectedTracks[i].id] = Math.floor((sumTrackDuration - tmpDuration) / 60);
+				if(i >= selectedTracks.length - 12) {
+					var artistName = normalizeArtist(selectedTracks[i].artist);
+					recentArtists[artistName] = true;
+				}
+			}
+		}
+	}
+	
+	selectedTracks = insertJingles(playlistTracks);
 	if(adTrigger != null) {
-		selectedTracks = insertAdTriggers(selectedTracks);
+		playlistTracks = insertAdTriggers(playlistTracks);
 	}
 	if(hasLinkedTracks) {
-		selectedTracks = insertLinkedTracks(selectedTracks);
+		playlistTracks = insertLinkedTracks(playlistTracks);
 	}
 
 	
-	return selectedTracks;
+	return playlistTracks;
 })

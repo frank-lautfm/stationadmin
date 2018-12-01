@@ -18,6 +18,7 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.Settings;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.util.HintLabel;
 import de.stationadmin.gui.util.StringListTableModel;
 
 
@@ -43,7 +44,7 @@ public class ArtistNormalizePanel extends JPanel {
   
   private void init() {
     
-    this.setLayout(new FormLayout("100dlu:grow", "pref,5dlu,50dlu:grow,8dlu,pref,5dlu,50dlu:grow"));
+    this.setLayout(new FormLayout("100dlu:grow", "pref,5dlu,50dlu:grow,8dlu,pref,5dlu,50dlu:grow,5dlu,pref"));
     CellConstraints cc = new CellConstraints();
     
     StringListTableModel sepModel = new StringListTableModel(ctx.getTextProvider().getString("settings.artistnormalizer.separators.header"), new ArrayList<String>(model.getBean().getArtistNormalizerSeperators()));
@@ -58,6 +59,9 @@ public class ArtistNormalizePanel extends JPanel {
 
     this.add(new JLabel(ctx.getTextProvider().getString("settings.artistnormalizer.alias")), cc.xy(1,5));
     this.add(new JScrollPane(new JXTable(aliasModel)), cc.xy(1, 7, CellConstraints.FILL, CellConstraints.FILL));
+
+    JLabel hint = new HintLabel(ctx.getString("settings.shuffle.hint"));
+    this.add(hint,  cc.xy(1,  9));
 
     
   }

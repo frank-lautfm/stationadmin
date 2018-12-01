@@ -287,6 +287,14 @@ public class LautfmAdminService {
     response.close();
     return Arrays.asList(list.getPlaylists());
   }
+  
+  public CurrentPlaylist getCurrentPlaylist(int stationId) throws IOException {
+    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/current_playlist");
+    CurrentPlaylist pl = deserializeJson(response, CurrentPlaylist.class);
+    response.close();
+    return pl;
+  }
+
 
   public Playlist getPlaylist(int stationId, int playlistId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/playlists/" + playlistId);

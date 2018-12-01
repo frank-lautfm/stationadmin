@@ -42,16 +42,18 @@ class PlaylistTableTransferHandler extends TransferHandler {
   private ClientContext ctx;
   private JXTable table;
   private PlaylistTableModel model;
+  private boolean readOnly;
 
-  public PlaylistTableTransferHandler(ClientContext ctx, JXTable table) {
+  public PlaylistTableTransferHandler(ClientContext ctx, JXTable table, boolean readOnly) {
     super();
+    this.readOnly = readOnly;
     this.ctx = ctx;
     this.table = table;
     this.model = (PlaylistTableModel) table.getModel();
   }
 
   public boolean canImport(TransferSupport support) {
-    if (model.getPlaylist() == null) {
+    if (model.getPlaylist() == null || readOnly) {
       return false;
     }
     if (support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
@@ -230,7 +232,7 @@ class PlaylistTableTransferHandler extends TransferHandler {
    */
   @Override
   public int getSourceActions(JComponent c) {
-    return MOVE;
+    return readOnly ? COPY : MOVE;
   }
 
 }

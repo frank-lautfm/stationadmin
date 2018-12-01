@@ -44,7 +44,7 @@ public class StringTrackImportTask extends TrackImportTask {
       if (track instanceof DetailedTrack) {
         this.setAlbum(((DetailedTrack) track).getAlbum());
       }
-      if (track.getId() > 0) {
+      if (track.getId() >= 0) {
         this.setTrackLibraryTitle(track);
         this.setStatus(Status.RESOLVED);
       }
