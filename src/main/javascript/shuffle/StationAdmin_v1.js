@@ -8,6 +8,7 @@
 	var preserveAllJingles = 0;
 	var duration = 64800;
 	var avoidRepeat = 2;
+	var trackNameLimit = 0;
 	
 	var firstJingle;
 	var artists = [];
@@ -53,6 +54,13 @@
 		
 		return artistName;
 	}
+	
+	function normalizeTitle(name) {
+		name = name.toLowerCase();
+		var stripped = name.replace(/\W/g, "");
+		return stripped.length > 3 ? stripped : name;
+	}
+
 		
 	function applyTrackScore(track) {
 		// assign random score
@@ -150,6 +158,10 @@
 			
 			tracksDuration += tracks[i].duration;
 			tracks[i].use = false;
+			
+			if(trackNameLimit > 0) {
+				tracks[i].normTitle = normalizeTitle(tracks[i].title);
+			}
 			
 			applyTrackScore(tracks[i]);
 			
@@ -249,16 +261,35 @@
 		}
 		
 		var playlistTracks = [];
+		var recentTrackNames = [];
+		var buffer = [];
 		for(var s = 0; s < segments.length; s++) {
 			var segmentTracks = segments[s].tracks;
 			shuffle(segmentTracks);
 			segmentTracks.sort(function(a, b) { return a.penalty - b.penalty });
 			
 			for(var t = 0; t < segmentTracks.length; t++) {
+				var next = segmentTracks[t];
+				if(buffer.length > 0 && !recentTrackNames.includes(buffer[0].normTitle)) {
+					// use next track from buffer
+					next = buffer.shift();
+					t--;
+				}
+				// check if preserved track needs to be inserted
 				if(typeof preservedTracks[playlistTracks.length] != 'undefined') {
 					playlistTracks.push(preservedTracks[playlistTracks.length]);
 				}
-				playlistTracks.push(segmentTracks[t]);
+				if(trackNameLimit > 0 && recentTrackNames.includes(next.normTitle)) {
+					buffer.push(next);
+					continue;
+				}
+				playlistTracks.push(next);
+				if(trackNameLimit > 0) {
+					recentTrackNames.push(next.normTitle);
+					if(recentTrackNames.length > trackNameLimit) {
+						recentTrackNames.shift();
+					} 
+				}
 			}
 		}
 		
@@ -432,6 +463,8 @@
 	if('duration' in opts) {
 		duration = opts.duration < 64800 ? opts.duration : 64800;
 	}
+
+	var blockLength = 'blockLength' in opts ? opts.blockLength : duration;
 	
 	maxTracksPerArtist = Math.floor(duration / (60 * 60));
 	if('maxTracksPerArtist' in opts && opts.maxTracksPerArtist < maxTracksPerArtist) {
@@ -466,6 +499,9 @@
 	if('avoidRepeat' in opts) {
 		avoidRepeat = opts.avoidRepeat;
 	}
+	if('trackNameLimit' in opts) {
+		trackNameLimit = opts.trackNameLimit;
+	}
 	
 	if(trackStats != null) {
 		var baseTime = Date.now();
@@ -495,7 +531,7 @@
 	var iteration = 0;
 	while(remainingDuration > 0 && iteration < 20) {
 		artists = [];
-		initTracksAndArtists(remainingDuration, iteration);
+		initTracksAndArtists(Math.min(blockLength * 60 * 60, remainingDuration), iteration);
 		var selectedTracks = buildPlaylist();
 		selectedTracks.forEach(t => sumTrackDuration += t.duration);
 		playlistTracks = playlistTracks.concat(selectedTracks);
@@ -521,7 +557,7 @@
 		}
 	}
 	
-	selectedTracks = insertJingles(playlistTracks);
+	playlistTracks = insertJingles(playlistTracks);
 	if(adTrigger != null) {
 		playlistTracks = insertAdTriggers(playlistTracks);
 	}

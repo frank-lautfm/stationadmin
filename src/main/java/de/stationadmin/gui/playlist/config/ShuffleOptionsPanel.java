@@ -146,7 +146,7 @@ public class ShuffleOptionsPanel extends JPanel {
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private JPanel createStationAdminOptsPanel() {
-    JPanel panel = new JPanel(new FormLayout("5dlu,pref,5dlu,pref:grow,5dlu", "8dlu,pref,8dlu,pref,5dlu,pref, 10dlu,pref,5dlu,70dlu,5dlu"));
+    JPanel panel = new JPanel(new FormLayout("5dlu,pref,5dlu,pref:grow,5dlu", "8dlu,pref,7dlu,pref,7dlu,pref,5dlu,pref,10dlu,pref,5dlu,70dlu,7dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
     int row = 2;
 
@@ -171,6 +171,35 @@ public class ShuffleOptionsPanel extends JPanel {
       });
       row += 2;
     }
+    
+    // block length
+    final ValueHolder blockLengthHolder = new ValueHolder(getOptions().containsKey("blockLength") ? getOptions().get("blockLength") : 0);
+    {
+      JTextField blockLengthTf = BasicComponentFactory.createIntegerField(blockLengthHolder, 0);
+      blockLengthTf.setColumns(3);
+      panel.add(new JLabel(this.ctx.getTextProvider().getString("playlistcfg.property.shuffleBlockLength")), cc.xy(2, row));
+      
+      JPanel tfPanel = new JPanel(new FormLayout("pref,3dlu,pref", "pref"));
+      tfPanel.add(blockLengthTf, cc.xy(1, 1));
+      tfPanel.add(new JLabel(this.ctx.getTextProvider().getString("playlistcfg.property.hours")), cc.xy(3, 1));
+      panel.add(tfPanel, cc.xy(4, row, CellConstraints.LEFT, CellConstraints.CENTER));
+      
+      panel.add(tfPanel, cc.xy(4, row, CellConstraints.LEFT, CellConstraints.CENTER));
+
+      blockLengthHolder.addValueChangeListener(new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          Integer value = (Integer) evt.getNewValue();
+          if (value.intValue() > 0) {
+            getOptions().put("blockLength", value);
+          } else {
+            getOptions().remove("blockLength");
+          }
+        }
+      });
+      row += 2;
+    }
+
 
     // Max tracks per artist
     final ValueHolder avoidRepeat = new ValueHolder(getOptions().containsKey("avoidRepeat") ? getOptions().get("avoidRepeat") : 2);
@@ -184,7 +213,7 @@ public class ShuffleOptionsPanel extends JPanel {
 
       JPanel tfPanel = new JPanel(new FormLayout("pref,3dlu,pref", "pref"));
       tfPanel.add(avoidRepeatTf, cc.xy(1, 1));
-      tfPanel.add(new JLabel(this.ctx.getTextProvider().getString("playlistcfg.property.shuffleAvoidRepeat3")), cc.xy(3, 1));
+      tfPanel.add(new JLabel(this.ctx.getTextProvider().getString("playlistcfg.property.hours")), cc.xy(3, 1));
       panel.add(tfPanel, cc.xy(4, row, CellConstraints.LEFT, CellConstraints.CENTER));
 
       avoidRepeat.addValueChangeListener(new PropertyChangeListener() {
@@ -200,6 +229,7 @@ public class ShuffleOptionsPanel extends JPanel {
       });
       row += 2;
     }
+
 
     // Tag weights
     TagWeightsTableModel tagWeightsModel = new TagWeightsTableModel();
@@ -247,8 +277,37 @@ public class ShuffleOptionsPanel extends JPanel {
       table.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(weightCombo));
 
       panel.add(new JScrollPane(table), cc.xywh(2, row, 3, 1));
+      row += 2;
 
     }
+    
+    final ValueHolder trackNameLimit = new ValueHolder(getOptions().containsKey("trackNameLimit") ? getOptions().get("trackNameLimit") : 0);
+    {
+      JPanel titleNameLimitPanel = new JPanel(new FormLayout("pref,2dlu,pref,2dlu,pref", "pref"));
+      titleNameLimitPanel.add(new JLabel(ctx.getTextProvider().getString("playlistcfg.advice.titlename.description.pre")), cc.xy(1, 1));
+      JTextField tf = BasicComponentFactory.createIntegerField(trackNameLimit, 0);
+      tf.setColumns(2);
+      titleNameLimitPanel.add(tf, cc.xy(3, 1));
+      titleNameLimitPanel.add(new JLabel(ctx.getTextProvider().getString("playlistcfg.advice.titlename.description.post")), cc.xy(5, 1));
+
+      panel.add(titleNameLimitPanel, cc.xywh(2, row, 3, 1, CellConstraints.FILL, CellConstraints.CENTER));
+      
+      trackNameLimit.addValueChangeListener(new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          Integer value = (Integer) evt.getNewValue();
+          if (value.intValue() > 0) {
+            getOptions().put("trackNameLimit", value);
+          } else {
+            getOptions().remove("trackNameLimit");
+          }
+        }
+      });
+      
+      
+      row += 2;
+    }
+
 
     model.getBufferedModel("shuffleOpts").addValueChangeListener(new PropertyChangeListener() {
 
@@ -257,6 +316,8 @@ public class ShuffleOptionsPanel extends JPanel {
         HashMap<String, Object> opts = getOptions();
         maxArtistTracksHolder.setValue(opts.containsKey("maxTracksPerArtist") ? opts.get("maxTracksPerArtist") : 0);
         maxArtistTracksHolder.setValue(opts.containsKey("avoidRepeat") ? opts.get("avoidRepeat") : 2);
+        maxArtistTracksHolder.setValue(opts.containsKey("trackNameLimit") ? opts.get("trackNameLimit") : 0);
+        maxArtistTracksHolder.setValue(opts.containsKey("blockLength") ? opts.get("blockLength") : 0);
         tagWeightsModel.rebuild();
       }
     });
