@@ -45,6 +45,8 @@ public class PlaylistContainer extends JPanel {
     popupOnline.add(new PlaylistDeleteAction(playlistSelectionHolder, ctx.getAdminClient().getPlaylistService(), ctx.getTextProvider(), false));
     popupOnline.add(new PlaylistToArchiveAction(ctx, playlistSelectionHolder));
     popupOnline.addSeparator();
+    popupOnline.add(new ShuffleTesterAction(ctx, playlistSelectionHolder));
+    popupOnline.addSeparator();
     popupOnline.add(new PlaylistEditPropertiesAction(ctx, playlistSelectionHolder, false));
     selectorOnline.enableContextMenu(popupOnline);
     

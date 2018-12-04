@@ -210,6 +210,11 @@ public class StationAdminClient {
   public String getStation() {
     return sessionCtx.getStation();
   }
+  
+  public int getStationId() {
+    return sessionCtx.getStationId();
+  }
+
 
   /**
    * Gets the station status. This includes data like current listeners, rank, current title or current playlist

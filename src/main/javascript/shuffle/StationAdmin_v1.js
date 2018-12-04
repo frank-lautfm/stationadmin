@@ -517,9 +517,6 @@
 					lastPlays[trackStats[i].id] = diff;
 				}
 			}
-			else {
-				break;
-			}
 		}
 	}
 	
