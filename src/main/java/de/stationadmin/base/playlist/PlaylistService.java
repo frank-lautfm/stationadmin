@@ -418,7 +418,7 @@ public class PlaylistService implements Service {
       head.setShuffleOpts(playlist.getShuffleOpts());
       if (playlist.getId() > -1) {
         head.setId(playlist.getId());
-        this.ctx.getServer().updatePlaylist(ctx.getStationId(), head);
+        head = this.ctx.getServer().updatePlaylist(ctx.getStationId(), head);
         playlist.setUpdatedAt(head.getUpdatedAt());
       } else {
         head = this.ctx.getServer().createPlaylist(ctx.getStationId(), head);
