@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.prefs.Preferences;
 
 import org.apache.log4j.Logger;
 import org.json.JSONException;
@@ -75,7 +76,8 @@ public class StationAdminClient {
 
     String sAdminDefaultDir = System.getProperty("defaultDir", "laut.fm/StationAdmin/");
 
-    if (!(new File(System.getProperty("user.home") + File.separatorChar + sAdminDefaultDir)).exists() && new File(System.getProperty("user.home") + File.separatorChar + "laut.fm/beta").exists()) {
+    if (!(new File(System.getProperty("user.home") + File.separatorChar + sAdminDefaultDir)).exists()
+        && new File(System.getProperty("user.home") + File.separatorChar + "laut.fm/beta").exists()) {
       File old = new File(System.getProperty("user.home") + File.separatorChar + "laut.fm/beta");
       old.renameTo(new File(System.getProperty("user.home") + File.separatorChar + sAdminDefaultDir));
     }
@@ -99,8 +101,8 @@ public class StationAdminClient {
     this.subscriptionService = new SubscriptionService(this.sessionCtx, titleRegistry);
 
     this.backupService = new BackupService(sessionCtx, this.playlistService, this.trackService, this.tagManager, this.schedule, this.taskExecutionService, this.settings);
-    this.services.addAll(Arrays.asList(this.taskExecutionService, this.trackService, this.tagManager, this.playlistService, this.schedule, this.statisticsService, this.backupService,
-        this.subscriptionService, this.logAnalyzerService));
+    this.services.addAll(Arrays.asList(this.taskExecutionService, this.trackService, this.tagManager, this.playlistService, this.schedule, this.statisticsService,
+        this.backupService, this.subscriptionService, this.logAnalyzerService));
 
     this.loadSettings();
   }
@@ -145,7 +147,7 @@ public class StationAdminClient {
   }
 
   public void autoSynchronize() throws IOException, JSONException {
-    if(this.settings.getAutoSynchronisation() == null) {
+    if (this.settings.getAutoSynchronisation() == null) {
       return;
     }
     switch (this.settings.getAutoSynchronisation()) {
@@ -210,14 +212,14 @@ public class StationAdminClient {
   public String getStation() {
     return sessionCtx.getStation();
   }
-  
+
   public int getStationId() {
     return sessionCtx.getStationId();
   }
 
-
   /**
-   * Gets the station status. This includes data like current listeners, rank, current title or current playlist
+   * Gets the station status. This includes data like current listeners, rank,
+   * current title or current playlist
    * 
    * @return station status
    */
@@ -227,6 +229,7 @@ public class StationAdminClient {
 
   /**
    * Gets the streaming server on which this station is running
+   * 
    * @return streaming server
    */
   public String getStreamingServer() {
@@ -339,7 +342,14 @@ public class StationAdminClient {
       log.error("error while loading data", e);
       throw e;
     }
+  }
 
+  public int updateVersionInfo() {
+    int previous = Preferences.userRoot().getInt("stationadmin." + sessionCtx.getStation() + ".version", 0);
+    if (previous != Version.NUMBER) {
+      Preferences.userRoot().putInt("stationadmin." + sessionCtx.getStation() + ".version", Version.NUMBER);
+    }
+    return previous;
   }
 
   private void loadSettings() {
@@ -465,8 +475,7 @@ public class StationAdminClient {
   }
 
   /**
-   * @param mp3Streamer
-   *          the mp3Streamer to set
+   * @param mp3Streamer the mp3Streamer to set
    */
   public void setMp3Streamer(MP3Streamer mp3Streamer) {
     this.mp3Streamer = mp3Streamer;

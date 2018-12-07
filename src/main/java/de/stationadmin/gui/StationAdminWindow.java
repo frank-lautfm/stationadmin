@@ -589,6 +589,7 @@ public class StationAdminWindow extends StationAdminFrame {
           exception = e;
         }
         ctx.getAdminClient().initBackgroundTasks();
+        ctx.getAdminClient().updateVersionInfo();
       } catch (Exception e) {
         exception = e;
       }

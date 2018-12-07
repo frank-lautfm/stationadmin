@@ -44,6 +44,8 @@ public class PlaylistModificationDetector extends AbstractBean {
         Playlist playlist = this.playlistRegistry.getPlaylist(head.getId());
         if (playlist == null || playlist.getUpdatedAt() == null || head.getUpdatedAt().getTime() > playlist.getUpdatedAt().getTime()) {
           modifiedIds.add(head.getId());
+        } else if (playlist.isShuffle() && !playlist.isShuffleTypeSet()) {
+          modifiedIds.add(head.getId());
         }
         ids.remove(head.getId());
       }
@@ -93,8 +95,7 @@ public class PlaylistModificationDetector extends AbstractBean {
   }
 
   /**
-   * @param modified
-   *          the modified to set
+   * @param modified the modified to set
    */
   public void setModified(boolean modified) {
     boolean old = this.modified;

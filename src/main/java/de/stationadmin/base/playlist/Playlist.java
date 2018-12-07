@@ -1060,6 +1060,10 @@ public class Playlist extends AbstractBean {
       this.metaDataModified = true;
     }
   }
+  
+  public boolean isShuffleTypeSet() {
+    return this.shuffleType != null;
+  }
 
   public String getShuffleType() {
     return shuffleType != null ? shuffleType : "basic_v1";
