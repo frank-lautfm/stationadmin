@@ -455,7 +455,8 @@ public class PlaylistService implements Service {
 
   }
   
-  public void updateShuffleFunctions() throws IOException {
+  public List<Playlist> updateShuffleFunctions() throws IOException {
+    List<Playlist> updatedPlaylists = new ArrayList<>();
     for(Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
       if(playlist.isShuffle()) {
         String shuffleFunc = playlist.getShuffleType();
@@ -468,8 +469,10 @@ public class PlaylistService implements Service {
           }
         }
         this.ctx.getServer().setPlaylistShuffleFunction(ctx.getStationId(), playlist.getId(), shuffleFunc);
+        updatedPlaylists.add(playlist);
       }
     }
+    return updatedPlaylists;
   }
 
   /**

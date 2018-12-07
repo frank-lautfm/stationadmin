@@ -478,11 +478,12 @@ public class StationAdminWindow extends StationAdminFrame {
     {
       JMenu menuPlaylists = new JMenu(this.ctx.getTextProvider().getString("menu.playlist"));
       menuPlaylists.add(new PlaylistNewAction(this.ctx, null));
-      menuPlaylists.add(new CurrentPlaylistDisplayAction(this.ctx));
       menuPlaylists.add(new TempPlaylistDisplayAction(this.ctx));
       menuPlaylists.add(new MultiPlaylistShuffleDisplayAction(this.ctx));
       menuPlaylists.add(new PlaylistTrackSearchOpenAction(this.ctx));
       menuPlaylists.add(new DupeFinderDisplayAction(this.ctx));
+      menuPlaylists.addSeparator();
+      menuPlaylists.add(new CurrentPlaylistDisplayAction(this.ctx));
       if (!djOnly) {
         menuPlaylists.add(new ForecastDisplayAction(this.ctx));
       }

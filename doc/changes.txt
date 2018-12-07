@@ -11,8 +11,8 @@ Version 4.9
 -----------
 [+] Shuffeln auf dem Server
 [+] Anzeige der aktuell exportieren Playlist
-[#} Überarbeiteter Dialog für Playlistkonfiguration
-
+[#] Überarbeiteter Dialog für Playlistkonfiguration
+[*] Änderungsdatum vom Server wurde beim Speichern nicht übernommen - führte zu unnötigen Synchronisierungsaufforderungen
 
 Version 4.8
 -----------
