@@ -36,3 +36,13 @@ h1 {
 .image {
 	margin-left:10px;
 }
+
+table
+{
+	font-family:Arial,Helvetica;
+	font-size:10pt;
+}
+td.head {
+	font-weight:bold;
+	padding:10px;
+}

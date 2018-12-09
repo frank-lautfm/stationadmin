@@ -1,0 +1,170 @@
+<html>
+	<head>
+		<title>Station Admin: &Uuml;bersicht - Shuffeln und Generieren</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>&Uuml;bersicht - Playlists shuffeln und generieren</h1>
+
+<p>
+Selbstverst&auml;ndlich kannst Du die Titelreihenfolge innerhalb einer Playlist selbst festlegen. Um ein abwechslungsreiches Programm zu gestalten wird man aber normalerweise zumindest f&uuml;r einen Teil der Playlists keine feste Reihenfolge vorgeben wollen.
+</p>
+<img src="../images/playlistcfg-base.jpg">
+<p>
+Station Admin bietet mehrere M&ouml;glichkeiten wie die Titelreihenfolge automatisch festgelegt werden kann:
+<ul>
+	<li><span class="menuref">auf dem Server shuffeln</span> - hier werden auf dem Server die Titel der Playlist oder eine hinreichende lange Auswahl aus den Titeln in eine zuf&auml;llige Reihenfolge gebracht. Dazu gibt es mehrere m&ouml;gliche Verfahren.</li>
+	<li><span class="menuref">durch Station Admin shuffeln</span> - hier werden die Titel einer Playlist lokal durch Station Admin in eine zuf&auml;llige Reihenfolge gebracht und abgespeichert. Der Server spielt die Playlist dann so ab wie sie abgespeichert wurde.</li>
+	<li><span class="menuref">durch Station Admin generieren</span> - hier wird die Playlist auf Basis von vorgegebenen Regeln lokal durch Station Admin neu bef&uuml;lltt und abgespeichert. Der Server spielt die Playlist dann so ab wie sie abgespeichert wurde.</li>
+</ul>
+</p>
+<p>
+Generell gilt: Wird durch Station Admin lokal geshuffelt oder generiert muss Station Admin laufen, selbst wenn das durch Anlegen einer Aufgabe automatisiert abl&auml;uft - das ist der gro&szlig;e Nachteil. Der Vorteil besteht darin dass das lokale Shuffeln oder Generieren mehr Gestaltungsm&ouml;glichkeiten wie etwa das regelbasierte Einbinden von Jingles bietet.
+</p>
+<p>
+F&uuml;r das Shuffeln auf dem Server stehen folgende Verfahren zu Auswahl:
+<ul>
+	<li><span class="menuref">laut.fm - einfach</span> - einfaches Umsortieren der Titel, nicht weiter konfigurierbar </li>
+	<li><span class="menuref">laut.fm - Tag-Pattern</span> - Titelabfolge kann mittels Tags kontrolliert werden (&quot;Stundenuhr&quot;) </li>
+	<li><span class="menuref">Station Admin</span> - Umsortierung mit vielen Konfigurationsm&ouml;glichkeiten </li>
+</ul>
+</p>
+<p>
+Die folgende Tabelle stellt die M&ouml;glichkeiten gegen&uuml;ber:
+</p>
+<table cellpadding='5'>
+	<tr style='background-color:#DDDDDD'>
+		<td width='15%' class='head'></td>
+		<td width='17%' class='head'>Shuffeln auf dem Server / einfach</td>
+		<td width='17%' class='head'>Shuffeln auf dem Server / Tag-Pattern</td>
+		<td width='17%' class='head'>Shuffeln auf dem Server / Station Admin</td>
+		<td width='17%' class='head'>Shuffeln durch Station Admin</td>
+		<td width='17%' class='head'>Generieren durch Station Admin</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Ausf&uuml;hrung</td>
+		<td colspan='3'>auf dem Server, kurz vor dem Start der Playlist</td>
+		<td colspan='2'>auf Deinem PC, manuell oder zu konfigurierter Zeit</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Wiederholung von Tracks oder Artists aus vorheriger Playlist vermeiden</td>
+		<td>nein</td>
+		<td>ja</td>
+		<td>ja</td>
+		<td>nein</td>
+		<td>nur wenn aufeinander folgende Playlists zusammen generiert werden</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Bestimmte Tracks h&auml;ufiger oder weniger h&auml;ufig spielen</td>
+		<td>nein</td>
+		<td>indirekt gem&auml;&szlig; vorgegebenem Muster (etwa A-B-A-C)</td>
+		<td>Gewichtungsstufen auf Basis von Tags (pro Playlist)</td>
+		<td>nein</td>
+		<td>Gewichtungsstufen auf Basis von Tags (statisch und dynamisch, global und pro Playlist)</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Regeln f&uuml;r Titelabfolge</td>
+		<td>nein</td>
+		<td>Titelabfolge wird durch Muster vorgegeben</td>
+		<td>nein</td>
+		<td>nein</td>
+		<td>mehrere Soll-Regeln m&ouml;glich</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Zahl der Tracks pro Artist limitieren</td>
+		<td>nein</td>
+		<td>nein</td>
+		<td>ja</td>
+		<td>nein</td>
+		<td>ja</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Kurzfristige Wiederholung von Titeln gleichen Namens unterbinden</td>
+		<td>nein</td>
+		<td>nein</td>
+		<td>ja</td>
+		<td>nein</td>
+		<td>ja</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Artistnamen vereinheitlichen</td>
+		<td>nein</td>
+		<td>nein</td>
+		<td>ja</td>
+		<td>ja</td>
+		<td>ja</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Jingles</td>
+		<td>Jingle am Playlistbeginn bleibt stehen, Rest wird gleichm‰ssig verteilt</td>
+		<td>
+			<ul>
+				<li>Jingle am Playlistbeginn bleibt stehen</li>
+				<li>Platzierung gem‰ﬂ vorgegebenem Muster (etwa song-song-jingle)</li>
+			</ul>
+		</td>
+		<td colspan='3'>
+			<ul>
+				<li>Gleichm‰ﬂige Verteilung oder</li>
+				<li>Platzierung alle x Minuten oder</li>
+				<li>Verankerung an akueller Position</li> 
+				<li>Jingle am Playlistanfang bleibt wenn gew¸nscht stehen.</li>
+			</ul>
+		</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Gebundene Jingles</td>
+		<td>nein</td>
+		<td>nein</td>
+		<td>nein</td>
+		<td>ja</td>
+		<td>ja</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Worbeitr&auml;ge</td>
+		<td>zuf&auml;llige Verteilung</td>
+		<td>Platzierung gem‰ﬂ vorgegebenem Muster (etwa song-song-moderation)</td>
+		<td colspan='2'>
+			<ul>
+				<li>Gleichm‰ﬂige Verteilung oder</li>
+				<li>Verankerung an akueller Position oder</li> 
+				<li>Bindung an vorherigen oder nachfolgenden Titel</li> 
+			</ul>
+		</td>
+		<td>
+			<ul>
+				<li>Gleichm‰ﬂige Verteilung oder</li>
+				<li>Verankerung an akueller Position</li> 
+			</ul>
+		</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Zeiten f&uuml;r Ad-Trigger vorgeben</td>
+		<td>nein</td>
+		<td>indirekt, Ad-Trigger kann in Muster integriert werden</td>
+		<td>ja</td>
+		<td>ja</td>
+		<td>ja</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Eigenen Ad-Trigger verwenden</td>
+		<td>Ad-Trigger wird mit geshuffelt</td>
+		<td>eigener Ad-Trigger kann in Muster integriert werden</td>
+		<td>ja</td>
+		<td>ja</td>
+		<td>ja</td>
+	</tr>
+	<tr style='background-color:#FFEEEE'>
+		<td class='head'>Werbetrenner vor Ad-Trigger setzen</td>
+		<td>nein</td>
+		<td>ja - Werbetrenner und -trigger k&ouml;nnen in Muster integriert werden</td>
+		<td>ja</td>
+		<td>ja</td>
+		<td>ja</td>
+	</tr>
+</table>
+
+</body>
+</html>

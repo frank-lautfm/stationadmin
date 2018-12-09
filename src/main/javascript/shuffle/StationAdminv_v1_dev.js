@@ -1,22 +1,16 @@
 // key: StationAdmin_v1
 ( function( tracks, opts, trackStats ){
+	var maxTracksPerArtist = 0; 
+	var tagWeights;
+	var artistSeparators = [' feat'];
+	var artistAliases;
+	var wordDistribution = 'random';
+	var preserveAllJingles = 0;
+	var duration = 64800;
+	var avoidRepeat = 2;
+	var trackNameLimit = 0;
 	
-	var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
-	var blockLength = 'blockLength' in opts ? opts.blockLength : duration;
-	var maxTracksPerArtist = 'maxTracksPerArtist' in opts && opts.maxTracksPerArtist < Math.floor(duration / (60 * 60)) ? opts.maxTracksPerArtist : Math.floor(duration / (60 * 60)); 
-	var tagWeights = 'tagWeights' in opts ? opts.tagWeights : null;
-	var artistSeparators = 'artistSeparators' in opts ? opts.artistSeparators : [' feat'];
-	var artistAliases = 'artistAliases' in opts ? opts.artistAliases : null;
-	var wordDistribution = 'wordDistribution' in opts ? opts.wordDistribution : 'random';
-	var preserveAllJingles = 'preserveAllJingles' in opts ? opts.preserveAllJingles : 0;
-	var avoidRepeat = 'avoidRepeat' in opts ? opts.avoidRepeat : 2;
-	var trackNameLimit = 'trackNameLimit' in opts ? opts.trackNameLimit : 0;
-	var adPositions = 'adPositions' in opts && opts.adPositions.length > 1 ? opts.adPositions : [15, 45];
-	var adJingleCollisionStrategy = 'adJingleCollisionStrategy' in opts ? opts.adJingleCollisionStrategy : 'keep_both';
-
 	var firstJingle;
-	var adTrigger;
-	var adSeparator;
 	var artists = [];
 	var jingles = [];
 	var lastPlays = {};
@@ -25,6 +19,10 @@
 	var hasLinkedTracks = false;
 	var tracksAfter = {};
 	var tracksBefore = {};
+	var adTrigger;
+	var adSeparator;
+	var adPositions = [15, 45];
+	var adJingleCollisionStrategy = 'keep_both';
 
 	
 	// basic array shuffle function
@@ -64,7 +62,7 @@
 	}
 
 		
-	function assignTrackScore(track) {
+	function applyTrackScore(track) {
 		// assign random score
 		track.score = 100 + Math.floor((Math.random() * 500));
 		if(tagWeights != null && track.tags.length > 0) {
@@ -165,7 +163,7 @@
 				tracks[i].normTitle = normalizeTitle(tracks[i].title);
 			}
 			
-			assignTrackScore(tracks[i]);
+			applyTrackScore(tracks[i]);
 			
 			var artistName = normalizeArtist(tracks[i].artist);
 			var artist;
@@ -459,8 +457,52 @@
 	}
 	
 	// Main code
+	
+	/* Configuration */
+	
+	if('duration' in opts) {
+		duration = opts.duration < 64800 ? opts.duration : 64800;
+	}
 
-	/* Initialization */
+	var blockLength = 'blockLength' in opts ? opts.blockLength : duration;
+	
+	maxTracksPerArtist = Math.floor(duration / (60 * 60));
+	if('maxTracksPerArtist' in opts && opts.maxTracksPerArtist < maxTracksPerArtist) {
+		maxTracksPerArtist = opts.maxTracksPerArtist;
+	}
+		
+	if('tagWeights' in opts) {
+		tagWeights = opts.tagWeights;
+	}
+
+	if('artistSeparators' in opts) {
+		artistSeparators = opts.artistSeparators;
+		for(var i = 0; i < artistSeparators.length; i++) {
+			artistSeparators[i] = artistSeparators[i].toLowerCase();
+		}
+	}
+	if('artistAliases' in opts) {
+		artistAliases = opts.artistAliases;
+	}
+	if('wordDistribution' in opts) {
+		wordDistribution = opts.wordDistribution;
+	}
+	if('preserveAllJingles' in opts) {
+		preserveAllJingles = opts.preserveAllJingles;
+	}
+	if('adPositions' in opts && opts.adPositions.length > 1) {
+		adPositions = opts.adPositions;
+	}
+	if('adJingleCollisionStrategy' in opts) {
+		adJingleCollisionStrategy = opts.adJingleCollisionStrategy;
+	}
+	if('avoidRepeat' in opts) {
+		avoidRepeat = opts.avoidRepeat;
+	}
+	if('trackNameLimit' in opts) {
+		trackNameLimit = opts.trackNameLimit;
+	}
+	
 	if(trackStats != null) {
 		var baseTime = Date.now();
 		for(var i = 0; i < trackStats.length; i++) {
@@ -477,11 +519,7 @@
 			}
 		}
 	}
-
-	for(var i = 0; i < artistSeparators.length; i++) {
-		artistSeparators[i] = artistSeparators[i].toLowerCase();
-	}
-
+	
 	/* Execution */
 	var sumTrackDuration = 0;
 	var playlistTracks = [];

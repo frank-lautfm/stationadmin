@@ -88,7 +88,7 @@ Umgang mit Jingles und Wortbeitr&auml;gen
 </p>
 <img src="../images/einstellungen-playlists.jpg">
 <p>
-Es gibt einige Konfigurationsm&ouml;glichkeiten die den Umgang mit Jingles steuern. &Ouml;ffne dazu im <span class="menuref">Extras</span>-Men&uuml; <span class="menuref">Einstellungen</span> und wechsele auf das <span class="menuref">Playlists</span>-Tab.
+Es gibt einige Konfigurationsm&ouml;glichkeiten die den Umgang mit Jingles und Wortbeitr&auml;gen steuern. &Ouml;ffne dazu im <span class="menuref">Extras</span>-Men&uuml; <span class="menuref">Einstellungen</span> und w&auml;hle <span class="menuref">Playlist shuffeln / generieren</span>.
 </p>
 <p>
 Alle in einer Playlist enthaltenen Jingles werden normalerweise beim Generieren gleichm&auml;&szlig;ig und in zuf&auml;lliger Reihenfolge &uuml;ber die Playlist verteilt. Mit folgenden Optionen l&auml;&szlig;t sich das Verhalten &auml;ndern:
@@ -134,14 +134,33 @@ Wenn durch eine Regel ein gebundenes Jingle an eine Position eingef&uuml;gt werd
 </p>
 
 <p class="subheading">
-Best Practices
+Werbetrigger
+</p>
+<img src="../images/einstellungen-playlists-adtrigger.jpg">
+<p>
+Wenn du nichts weiter konfigurierst wird auf dem Server der Standard-Ad-Trigger zu Standardzeiten in Deine Playlist eingef&uuml;gt. M&ouml;chtest Du die Zeiten selber kontrollieren, einen eigenen Trigger verwenden oder ein Jingle vor den Trigger setzen gehe in die Einstellungen zu <span class="menuref">Werbetrigger</span> und aktiviere <span class="menuref">Werbetrigger beim Shuffeln oder Generieren einf&uuml;gen</span>.
 </p>
 <p>
-Alle Titel die für die Generierung zur Verfügung stehen sollen müssen in irgendeiner Playlist vorhanden sein - sonst hätte Station Admin keinen Zugriff auf die Titel. Es empfiehlt sich hierfür spezielle Playlisten anzulegen die als Pool fungieren, selbst aber nie gespielt werden. Man kann hier entweder mit einem Pool pro Sendunge ("Lounge 1", "Lounge 2", "Lounge 3", ...) oder mit einem globalen Pool arbeiten.<br>
-Station Admin unterstützt das Erzeugen von Pools durch die <span class="menuref">Auf Playlists verteilen</span>-Option aus dem Kontextmenü für Titel in einer Playlist oder in <span class="menuref">Meine Titel</span> - die ausgewählten Titel werden dabei so auf die Playlists verteilt dass nicht mehr als 3 Titel eines Artists in einer Playlist vorkommen.
+W&auml;hle die Zeiten aus zu denen Werbung gespielt werden soll. Die Positionen sind relativ zum Playlistanfang und wiederholen sich jede Stunde - d. h. bei 20 / 50 w&uuml;rde ein Trigger jeweils nach dem ersten Track platziert der 20 bzw 50 Minuten nach der vollen Stunde endet. Beachte bitte das in jeder vollen halben Stunde ein Trigger enthalten sein mu&szlig; und das der Mindestabstand 20 Minuten betragen mu&szlig; - sonst werden die Trigger auf dem Server verworfen.<br>
+Es wird empfohlen die Trigger nicht gegen Ende der vollen Stunde zu setzen weil sonst die Gefahr besteht dass ein lang laufender Ttiel das rechtzeitige Setzen des Triggers verhindert.
 </p>
 <p>
-Grundlage für das Generieren sind wie gesagt <a href="../titel/taggen.html">getaggte Titel</a>. Man kann z. B. ein Tag pro Sendung anlegen. Außerdem sollte man Tags anlegen für Titel die besonders häufig oder selten gespielt werden sollen ("Neue CDs").
+Wenn ein Jingle als Werbetrenner vor den Trigger platziert werden soll w&auml;hle unter <span class="menuref">Werbetrenner</span> ein Jingle aus.
+</p>
+
+<p>
+W&auml;hle unter <span class="menuref">Werbetrigger</span> ein Jingle das als Ad-Trigger verwendet werden soll. Normalerweise kann das Standardjingle verwendet werden. M&ouml;chtest Du dass ein bestimmtes Jingle nach der Werbung l&auml;ft so verwende dieses Jingle als Ad-Trigger - es muss jedoch "START_AD_BREAK" als Artist oder Titel gesetzt sein. In dem Fall l&ouml;st das Jingle die Werbung aus, nach der Werbung l&auml;uft ist dann das Jingle zu h&ouml;ren.
+</p>
+<p>
+Beachte bei der Verwendung von eigenen Werbetrennern oder -triggern bitte dass nicht zwangsl&auml;ufig Werbung gespielt wird. Es kann also passieren dass die H&ouml;rer nur die Jingles, aber keine Werbung h&ouml;ren.
+</p>
+<p>
+Weiterhin kannst Du festlegen was passieren soll wenn an der Stelle wo ein Werbetrigger eingef&uuml;gt werden soll schon ein Jingle steht:
+<ul>
+	<li><span class="menuref">Jingle und Werbetrigger einf&uuml;gen</span> - beides wird eingef&uuml;gt</li>
+	<li><span class="menuref">nur Werbetrigger einf&uuml;gen</span> - Werbetrigger wird eingef&uuml;gt, Jingle wird verworfen</li>
+	<li><span class="menuref">Werbetrigger einen Song einf&uuml;gen</span> - Werbetrigger verschiebt sich nach hinten</li>
+</ul>
 </p>
 
 </body>

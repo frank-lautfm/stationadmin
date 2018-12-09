@@ -1,0 +1,122 @@
+<html>
+	<head>
+		<title>Station Admin: Playlist shuffeln</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>Playlists auf dem Server shuffeln</h1>
+
+<img src="../images/playlistcfg-base.jpg">
+
+<p class="subheading">
+Playlist zum Shuffeln markieren
+</p>
+<p>
+Du kannst in den Playlist-Eigenschaften festlegen ob Playlists auf dem Server geshuffelt werden sollen:
+<ul>
+<li>Laß Dir die entsprechende Playlist anzeigen</li>
+<li>Klicke auf <img src="../icons/configure.png"></li>
+<li>W&auml;hle <span class="menuref">auf dem Server shuffeln</span> als Option f&uuml;r <span class="menuref">Titelreihenfolge</span>
+<li>W&auml;hle eines der m&ouml;glichen <span class="menuref">Verfahren</span>
+<ul>
+	<li><span class="menuref">laut.fm - einfach</span> - einfaches Umsortieren der Titel, nicht weiter konfigurierbar </li>
+	<li><span class="menuref">laut.fm - Tag-Pattern</span> - Titelabfolge kann mittels Tags kontrolliert werden (&quot;Stundenuhr&quot;) </li>
+	<li><span class="menuref">Station Admin</span> - Umsortierung mit vielen Konfigurationsm&ouml;glichkeiten </li>
+</ul>
+</li>
+<li>Wenn Du <span class="menuref">laut.fm - Tag-Pattern</span> oder <span class="menuref">Station Admin</span> gew&auml;hlt hast wird <span class="menuref">Shuffle-Optionen</span> aktiviert. Hier kannst Du weitere Einstellungen vornehmen</li>
+</ul>
+</p>
+
+<p class="subheading">
+Optionen für "laut.fm - Tag-Pattern"
+</p>
+<img src="../images/playlistcfg-shuffle-pattern.jpg">
+<p>
+Bei diesem Verfahren gibst Du ein Muster (Pattern) f&uuml;r die Titelreihenfolge auf Basis von Tags vor. Angenommen Du hast Titel mit den Tags A, B und C versehen und gibst als Muster "A B A C" an: Dann w&uuml;rde zun&auml;chst ein mit A getaggter Titel verwendet, dann ein B-Titel gefolgt von einem A-Titel und einem C-Titel - danach wird das Muster wiederholt. In diesem Fall k&auml;men A-Titel also h&auml;ufiger vor als mit B oder C getaggte Titel.
+</p>
+<p>
+Neben den Tags die Du selbst vergeben hast gibt es noch "song", "jingle" oder "moderation" als "magic Tags" die einfach alle Tracks des entsprechenden Typs selektieren. Wenn Du also z. B. nach jedem zweiten Titel ein Jingle platzieren m&ouml;chtest setzt Du einfach "song song jingle" als Pattern.
+</p>
+<p>
+Um einen Eintrag zu dem Muster hinzuzuf&uuml;gen klicke auf die letzte graue Box und w&auml;hle ein Tag aus. Um einen Eintrag zu &auml;ndern oder zu l&ouml;schen klicke auf den Eintrag und w&auml;hle entweder ein neues Tag oder die leere Option aus.
+</p>
+
+<p class="subheading">
+Optionen für "Station Admin"
+</p>
+<img src="../images/playlistcfg-shuffle-sa.jpg">
+<p>
+F&uuml;r das Shuffeln mit dem Station Admin-Verfahren hast Du folgend Optionen:
+<ul>
+	<li><span class="menuref">Max. Titel pro Arist</span>: Wenn nichts weiter angegeben wird wird maximal ein Track eines Artists pro Stunde Laufzeit verwendet. M&ouml;chtest Du weniger Titel pro Artist verwenden gib ein Limit an. Ein zu hohes Limit das zu einer Verletzung der GVL-Regeln f&uuml;hren w&uuml;rde wird automatisch beim Shuffeln verworfen.</li>
+<li><span class="menuref">Blockl&auml;nge</span>: Ist die L&auml;nge der Playlist k&uuml;rzer als die Laufzeit gem&auml;&szlig; Sendeplan werden intern mehrere Durchl&auml;ufe gemacht bist die gew&uuml;nschte L&auml;nge erreicht ist. Dabei werden jedoch wenn nichts weiter angegeben ist (fast) alle verf&uuml;gbaren Titel verwendet - d. h. Gewichtungs- und Vermeidungsregeln greifen nicht oder kaum. Gibst Du eine Blockl&auml;nge an die deutlich k&uuml;rzer ist als die Playlistl&auml;nge gibt es intern zwar mehr Durchl&auml;ufe um die gew&uuml;nschte L&auml;nge zu erreichen, es k&ouml;nnen dann aber pro Durchlauf Titel bevorzugt oder vermieden werden. Ist die Playlistl&auml;nge gr&ouml;&szlig;er als die Laufzeit gem&auml;&szlig; Sendeplan hat diese Einstellung keine Wirkung.</li> 
+<li>Um zu vermeiden dass Titel die gerade erst gespielt wurden direkt wieder gespielt werden gib einen <span class="menuref">Zeitraum</span> in Stunden an. Normalerweise werden die Tracks der letzten zwei Stunden mit geringerer Wahrscheinlichkeit verwendet - Du kannst den Zeitraum aber auf bis zu 24 Stunden erh&ouml;hen.</li>
+<li><span class="menuref">Bevorzugte Titel</span>: Optional kannst Du noch Regeln angeben um bestimmte Titel bei der Auswahl zu bevorzugen oder die Wahrscheinlichkeit f&uuml;r eine Auswahl zu reduzieren.<br> 
+Das funktioniert wieder auf Basis von Titeltags: W&auml;hle ein Tag und eine H&auml;ufigkeitsstufe f&uuml;r Titel die mit diesem Tag versehen sind. Entsprechende Titel k&ouml;nnen h&auml;ufiger oder seltener gespielt werden als &quot;normale&quot; Titel - f&uuml;r beide Varianten stehen jeweils drei Stufen zur Verf&uuml;gung.</li>
+<li>Optional kann die kurzfristige Wiederholung von <span class="menuref">gleichnamigen Titeln</span> (etwa verschiedene Versionen des gleichen Songs) unterbunden werden. Ausschlaggebend hierf&uuml;r ist alleine der Titel des Tracks. Es wird nur auf Buchstaben und Ziffern geschaut - Komma, Klammern etc spielen beim Vergleich keine Rolle.</li>
+</ul>
+</p>
+
+<p class="subheading">
+Umgang mit Jingles und Wortbeitr&auml;gen (nur f&uuml;r Verfahren "Station Admin")
+</p>
+<img src="../images/einstellungen-playlists.jpg">
+<p>
+Es gibt einige Konfigurationsm&ouml;glichkeiten die den Umgang mit Jingles und Wortbeitr&auml;gen steuern. &Ouml;ffne dazu im <span class="menuref">Extras</span>-Men&uuml; <span class="menuref">Einstellungen</span> und w&auml;hle <span class="menuref">Playlist shuffeln / generieren</span>.
+</p>
+<p>
+Alle in einer Playlist enthaltenen Jingles werden normalerweise beim Shufflen gleichm&auml;&szlig;ig und in zuf&auml;lliger Reihenfolge &uuml;ber die Playlist verteilt. Mit folgenden Optionen l&auml;&szlig;t sich das Verhalten &auml;ndern:
+<ul>
+<li><span class="menuref">Jingle am Anfang der Playlist nicht verschieben</span> sorgt daf&uuml;r dass wenn eine Playlist mit einem Jingle beginnt dieses Jingle beim Shuffeln nicht verschoben wird. Dies ist sinnvoll f&uuml;r Show-Opener. F&uuml;r Playlists die nicht mit einem Jingle beginnen hat diese Option keinerlei Wirkung.
+<li><span class="menuref">alle [ ] Minuten ein Jingle einstreuen</span> sorgt daf&uuml;r dass in festen Zeitabst&auml;nden Jingles eingestreut werden. Grundlage hierf&uuml;r sind alle in der Playlist enthaltenen Jingles. Wurden alle Jingles einmal verwendet so wird als n&auml;chstes das zuerst verwendete Jingle erneut eingestreut - die Jingles wiederholen sich also. Sind in der Playlist so viele Jingles vorhanden dass eigentlich nicht alle Jingles eingestreut werden k&ouml;nnen werden die verbleibenden Jingles ans Ende der Playlist geh&auml;ngt damit sie nicht verloren gehen.
+<li><span class="menuref">Jingles generell nicht verschieben</span> f&uuml;hrt dazu dass Jingles in der Playlist an den Positionen stehen bleiben an denen sie sind. Bei Auswahl dieser Option werden die anderen Optionen deaktiviert dies nicht kombinierbar ist.
+</ul>
+</p>
+<p>
+F&uuml;r Wortbeitr&auml;ge gibt es folgende M&ouml;glichkeiten:
+<ul>
+<li><span class="menuref">zuf&auml;llig verteilen</span>: Die Wortbeitr&auml;ge werden wie normale Musiktitel zuf&auml;llig verteilt.
+<li><span class="menuref">nicht verschieben</span>: Die Wortbeitr&auml;ge bleiben an den Positionen an denen sie sind. Kommt also z. B. an 5. Stelle in einer Playlist ein Wortbeitrag so steht nach dem Shuffeln auch genau dieser Wortbeitrag wieder an 5. Stelle.
+<li><span class="menuref">an folgenden Titel koppeln</span>: Die Wortbeitr&auml;ge werden an die nachfolgenden Musiktitel gekoppelt: Werden beim Shuffeln Musiktitel verschoben so verschieben sich Wortbeitr&auml;ge die vor diesen Titeln platziert sind entsprechend mit. Diese Option sollte gew&auml;hlt werden wenn die Wortbeitr&auml;ge Anmoderationen nachfolgender Titel beinhalten.
+<li><span class="menuref">an vorherigen Titel koppeln</span>: Die Wortbeitr&auml;ge werden an die vorherigen Musiktitel gekoppelt: Werden beim Shuffeln Musiktitel verschoben so verschieben sich Wortbeitr&auml;ge die nach diesen Titeln platziert sind entsprechend mit. Diese Option sollte gew&auml;hlt werden wenn die Wortbeitr&auml;ge Information vorhergehenden Titeln beinhalten.
+</ul>
+</p>
+
+<p class="subheading">
+Werbetrigger  (nur f&uuml;r Verfahren "Station Admin")
+</p>
+<img src="../images/einstellungen-playlists-adtrigger.jpg">
+<p>
+Wenn du nichts weiter konfigurierst wird auf dem Server der Standard-Ad-Trigger zu Standardzeiten in Deine Playlist eingef&uuml;gt. M&ouml;chtest Du die Zeiten selber kontrollieren, einen eigenen Trigger verwenden oder ein Jingle vor den Trigger setzen gehe in die Einstellungen zu <span class="menuref">Werbetrigger</span> und aktiviere <span class="menuref">Werbetrigger beim Shuffeln oder Generieren einf&uuml;gen</span>. 
+</p>
+<p>
+W&auml;hle die Zeiten aus zu denen Werbung gespielt werden soll. Die Positionen sind relativ zum Playlistanfang und wiederholen sich jede Stunde - d. h. bei 20 / 50 w&uuml;rde ein Trigger jeweils nach dem ersten Track platziert der 20 bzw 50 Minuten nach der vollen Stunde endet. Beachte bitte das in jeder vollen halben Stunde ein Trigger enthalten sein mu&szlig; und das der Mindestabstand 20 Minuten betragen mu&szlig; - sonst werden die Trigger auf dem Server verworfen.<br>
+Es wird empfohlen die Trigger nicht gegen Ende der vollen Stunde zu setzen weil sonst die Gefahr besteht dass ein lang laufender Ttiel das rechtzeitige Setzen des Triggers verhindert.
+</p>
+<p>
+Wenn ein Jingle als Werbetrenner vor den Trigger platziert werden soll w&auml;hle unter <span class="menuref">Werbetrenner</span> ein Jingle aus.
+</p>
+
+<p>
+W&auml;hle unter <span class="menuref">Werbetrigger</span> ein Jingle das als Ad-Trigger verwendet werden soll. Normalerweise kann das Standardjingle verwendet werden. M&ouml;chtest Du dass ein bestimmtes Jingle nach der Werbung l&auml;ft so verwende dieses Jingle als Ad-Trigger - es muss jedoch "START_AD_BREAK" als Artist oder Titel gesetzt sein. In dem Fall l&ouml;st das Jingle die Werbung aus, nach der Werbung l&auml;uft ist dann das Jingle zu h&ouml;ren.
+</p>
+<p class="hint">
+	Du musst die Jingles die Du als Werbetrenner oder Werbetrigger verwendest in die Playlist einf&uuml;gen da beim Shuffeln keine Tracks verwendet werden k&ouml;nnen die nicht schon in der Playlist enhalten sind.
+</p>
+<p>
+Beachte bei der Verwendung von eigenen Werbetrennern oder -triggern bitte dass nicht zwangsl&auml;ufig Werbung gespielt wird. Es kann also passieren dass die H&ouml;rer nur die Jingles, aber keine Werbung h&ouml;ren.
+</p>
+<p>
+Weiterhin kannst Du festlegen was passieren soll wenn an der Stelle wo ein Werbetrigger eingef&uuml;gt werden soll schon ein Jingle steht:
+<ul>
+	<li><span class="menuref">Jingle und Werbetrigger einf&uuml;gen</span> - beides wird eingef&uuml;gt</li>
+	<li><span class="menuref">nur Werbetrigger einf&uuml;gen</span> - Werbetrigger wird eingef&uuml;gt, Jingle wird verworfen</li>
+	<li><span class="menuref">Werbetrigger einen Song einf&uuml;gen</span> - Werbetrigger verschiebt sich nach hinten</li>
+</ul>
+</p>
+
+</body>
+</html>
