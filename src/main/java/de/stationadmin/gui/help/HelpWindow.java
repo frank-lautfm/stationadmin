@@ -25,6 +25,7 @@ import de.stationadmin.gui.util.SwingTools;
  * 
  */
 public class HelpWindow extends JFrame {
+  private static final long serialVersionUID = -4265495961576875851L;
   private ClientContext ctx;
   private JEditorPane htmlPane;
 
@@ -41,7 +42,7 @@ public class HelpWindow extends JFrame {
     CellConstraints cc = new CellConstraints();
     this.getContentPane().add(new JScrollPane(this.htmlPane), cc.xy(2, 2, CellConstraints.FILL, CellConstraints.FILL));
 
-    this.setSize(400, 500);
+    this.setSize(400, 200);
     this.setTitle(ctx.getString("help.title"));
     SwingTools.centerOnScreen(this);
 

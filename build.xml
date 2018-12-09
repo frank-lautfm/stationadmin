@@ -97,7 +97,7 @@
 		</copy>
 
 		<copy todir="${dist.dir.app}//">
-			<fileset dir="${basedir}/doc" includes="license.txt changes.txt userguide/**" />
+			<fileset dir="${basedir}/doc" includes="license.txt changes.txt" />
 			<fileset dir="${basedir}/src/main/launch4j" includes="*.exe" />
 		</copy>
 

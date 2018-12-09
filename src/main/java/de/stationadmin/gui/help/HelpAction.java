@@ -4,8 +4,7 @@
 package de.stationadmin.gui.help;
 
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.net.URL;
+import java.net.URI;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -18,11 +17,11 @@ import de.stationadmin.gui.util.AppUtils;
  * @author Frank Korf
  * 
  */
-public class HelpWindowDisplayAction extends AbstractAction {
+public class HelpAction extends AbstractAction {
   private static final long serialVersionUID = -950619028306548082L;
   private ClientContext ctx;
 
-  public HelpWindowDisplayAction(ClientContext ctx) {
+  public HelpAction(ClientContext ctx) {
     super();
     this.ctx = ctx;
     this.putValue(Action.NAME, ctx.getTextProvider().getString("action.help"));
@@ -33,17 +32,15 @@ public class HelpWindowDisplayAction extends AbstractAction {
    */
   @Override
   public void actionPerformed(ActionEvent evt) {
-    if (AppUtils.getDesktop() != null && AppUtils.getDesktop().isSupported(java.awt.Desktop.Action.OPEN)) {
-      URL url = this.getClass().getClassLoader().getResource("index.html");
-      if (url != null) {
-        try {
-          File file = new File(url.toURI());
-          AppUtils.getDesktop().open(file);
-          return;
-        } catch (Exception e) {
-        }
+    if (AppUtils.getDesktop() != null) {
+      try {
+        AppUtils.getDesktop().browse(new URI("http://stationadmin.sourceforge.net/userguide/"));
+        return;
+      } catch (Exception e) {
+
       }
     }
+
     // fallback
     HelpWindow browser = new HelpWindow(ctx);
     browser.setVisible(true);

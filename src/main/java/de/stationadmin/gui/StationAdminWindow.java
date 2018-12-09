@@ -59,7 +59,7 @@ import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.gui.backup.BackupCreateAction;
 import de.stationadmin.gui.backup.BackupRestoreAction;
 import de.stationadmin.gui.help.AboutDisplayAction;
-import de.stationadmin.gui.help.HelpWindowDisplayAction;
+import de.stationadmin.gui.help.HelpAction;
 import de.stationadmin.gui.help.HomepageAction;
 import de.stationadmin.gui.live.MP3StreamerOpenAction;
 import de.stationadmin.gui.loganalyzer.dailysummary.DailySummariesOpenAction;
@@ -527,7 +527,7 @@ public class StationAdminWindow extends StationAdminFrame {
 
     {
       JMenu menuHelp = new JMenu(this.ctx.getTextProvider().getString("menu.help"));
-      menuHelp.add(new HelpWindowDisplayAction(this.ctx));
+      menuHelp.add(new HelpAction(this.ctx));
       menuHelp.add(new HomepageAction());
       menuHelp.addSeparator();
       menuHelp.add(new AboutDisplayAction(this.ctx));
