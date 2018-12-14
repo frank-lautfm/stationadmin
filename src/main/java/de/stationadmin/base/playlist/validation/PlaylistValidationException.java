@@ -12,7 +12,7 @@ public class PlaylistValidationException extends Exception {
   private static final long serialVersionUID = 3983738996328329232L;
   
   public enum Reason {
-    MIN_LENGTH, LAUT_RULE_VIOLATION, GVL_ARTIST_RULE_VIOLOATION, MISSING_NAME
+    MIN_LENGTH, LAUT_RULE_VIOLATION, GVL_ARTIST_RULE_VIOLOATION, MISSING_NAME, MAX_TRACKS
   }
 
   private Reason error;

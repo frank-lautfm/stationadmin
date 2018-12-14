@@ -55,6 +55,8 @@ import de.stationadmin.lfm.backend.TrackRef;
  * 
  */
 public class PlaylistService implements Service {
+  public static final int MAX_TRACKS = 10000;
+  
   private static final Logger log = Logger.getLogger(PlaylistService.class);
   private static final Pattern shuffleKeyPattern = Pattern.compile("key.\\s*([\\w|_]+)", Pattern.MULTILINE | Pattern.DOTALL);
 
@@ -440,6 +442,9 @@ public class PlaylistService implements Service {
     }
 
     if (playlist.isModified()) {
+      if(playlist.getEntries().size() > MAX_TRACKS) {
+        throw new PlaylistValidationException(Reason.MAX_TRACKS);
+      }
       if (playlist.getLength() < 60 * 60) {
         // FIXME throw new PlaylistValidationException(Reason.MIN_LENGTH);
       }
