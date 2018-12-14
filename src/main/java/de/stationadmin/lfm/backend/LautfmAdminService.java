@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -26,6 +27,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
@@ -196,6 +198,26 @@ public class LautfmAdminService {
     return response;
   }
 
+  private CloseableHttpResponse doDeleteWithBody(String path, Object content) throws IOException {
+    HttpDeleteWithBody request = new HttpDeleteWithBody(BASE_URL + path);
+    this.addAuthHeaders(request);
+
+    ObjectMapper mapper = new ObjectMapper();
+    String contentStr = mapper.writeValueAsString(content);
+
+    if (log.isInfoEnabled()) {
+      log.info("DELETE " + BASE_URL + path);
+      log.info(contentStr);
+    }
+
+    StringEntity entity = new StringEntity(contentStr, ContentType.APPLICATION_JSON);
+    request.setEntity(entity);
+    CloseableHttpResponse response = this.client.execute(request);
+    this.checkResponse(response);
+
+    return response;
+  }
+
   private CloseableHttpResponse doPatch(String path, Object content) throws IOException {
     HttpPatch request = new HttpPatch(BASE_URL + path);
     this.addAuthHeaders(request);
@@ -287,14 +309,13 @@ public class LautfmAdminService {
     response.close();
     return Arrays.asList(list.getPlaylists());
   }
-  
+
   public CurrentPlaylist getCurrentPlaylist(int stationId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/current_playlist");
     CurrentPlaylist pl = deserializeJson(response, CurrentPlaylist.class);
     response.close();
     return pl;
   }
-
 
   public Playlist getPlaylist(int stationId, int playlistId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/playlists/" + playlistId);
@@ -547,7 +568,11 @@ public class LautfmAdminService {
   public void untagTracks(int stationId, String tag, int... trackIds) throws IOException {
     String prefix = "/stations/" + stationId + "/tracks/";
 
-    String suffix = "/tags/" + StringUtils.replace(URLEncoder.encode(tag, "UTF-8"), "+", "%20");
+    String suffix = "/tags"; // + StringUtils.replace(URLEncoder.encode(tag, "UTF-8"), "+", "%20");
+
+    HashMap<String, String[]> tagData = new HashMap<>();
+    tagData.put("tags", new String[] { tag });
+
     StringBuilder trackList = new StringBuilder();
     for (int i = 0; i < trackIds.length; i++) {
       if (trackList.length() > 0) {
@@ -556,7 +581,7 @@ public class LautfmAdminService {
       trackList.append(trackIds[i]);
 
       if (trackList.length() > 800) {
-        CloseableHttpResponse response = this.doDelete(prefix + trackList.toString() + suffix);
+        CloseableHttpResponse response = this.doDeleteWithBody(prefix + trackList.toString() + suffix, tagData);
         if (response.getStatusLine().getStatusCode() != 200) {
           throw new AdminServiceException(this.getErrorMessage(response));
         }
@@ -566,7 +591,7 @@ public class LautfmAdminService {
 
     }
     if (trackList.length() > 0) {
-      CloseableHttpResponse response = this.doDelete(prefix + trackList.toString() + suffix);
+      CloseableHttpResponse response = this.doDeleteWithBody(prefix + trackList.toString() + suffix, tagData);
       if (response.getStatusLine().getStatusCode() != 200) {
         throw new AdminServiceException(this.getErrorMessage(response));
       }
@@ -813,6 +838,22 @@ public class LautfmAdminService {
       this.stop = true;
     }
 
+  }
+
+  private static class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
+
+    public HttpDeleteWithBody(String url) throws IOException {
+      try {
+        this.setURI(new URI(url));
+      } catch (Exception e) {
+        throw new IOException(e);
+      }
+    }
+
+    @Override
+    public String getMethod() {
+      return "DELETE";
+    }
   }
 
 }
