@@ -1165,4 +1165,12 @@ public class PlaylistViewer extends JPanel {
     return highlightedTrackHolder;
   }
 
+  protected JXTable getTable() {
+    return table;
+  }
+
+  protected ValueModel getPlaylistHolder() {
+    return playlistHolder;
+  }
+
 }

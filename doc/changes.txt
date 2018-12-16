@@ -6,6 +6,10 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.10.0
+--------------
+[+] Hervorhebung des aktuellen Titels in der aktuellen Playlist
+
 
 Version 4.9.1
 -------------
