@@ -261,6 +261,11 @@ public class PlaylistConfigurationDialog extends JDialog {
         && (model.getBufferedModel("shuffleType").getString().equals(PlaylistConfigurationModel.SHUFFLE_BUCKET) || model.getBufferedModel("shuffleType").getString().equals(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN))
         && model.getBean().getType() != PlaylistType.ARCHIVED;
   }
+  
+  private boolean checkIfAutoFillEnabled() {
+    return (model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER) || model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_LOCAL)) && model.getBean().getType() != PlaylistType.ARCHIVED;
+  }
+
 
   private boolean checkIfGenerateEnabled() {
     return model.getTrackOrderType().getValue().equals(TrackOrderOption.GENERATE) && model.getBean().getType() != PlaylistType.ARCHIVED;
@@ -281,10 +286,12 @@ public class PlaylistConfigurationDialog extends JDialog {
     tabPane.addTab(textProvider.getString("playlistcfg.tab.shuffleopts"), new ShuffleOptionsPanel(ctx, model));
     tabPane.addTab(textProvider.getString("playlistcfg.tab.generate.base"), new PlaylistGeneratorBaseConfigurationPanel(ctx, model));
     tabPane.addTab(textProvider.getString("playlistcfg.tab.generate.advice"), new PlaylistGeneratorAdviceConfigurationPanel(ctx, model));
+    tabPane.addTab(textProvider.getString("playlistcfg.tab.autofill"), new PlaylistAutoFillPanel(ctx, model));
 
     tabPane.setEnabledAt(1, checkIfShuffleOptsEnabled());
     tabPane.setEnabledAt(2, checkIfGenerateEnabled());
     tabPane.setEnabledAt(3, checkIfGenerateEnabled());
+    tabPane.setEnabledAt(4, checkIfAutoFillEnabled());
 
     model.getTrackOrderType().addValueChangeListener(new PropertyChangeListener() {
 
@@ -293,6 +300,14 @@ public class PlaylistConfigurationDialog extends JDialog {
         tabPane.setEnabledAt(1, checkIfShuffleOptsEnabled());
         tabPane.setEnabledAt(2, checkIfGenerateEnabled());
         tabPane.setEnabledAt(3, checkIfGenerateEnabled());
+      }
+    });
+    
+    model.getBufferedModel("shuffle").addPropertyChangeListener(new PropertyChangeListener() {
+      
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        tabPane.setEnabledAt(4, checkIfAutoFillEnabled());
       }
     });
 
@@ -336,7 +351,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     }
 
     Dimension prefSize = this.getPreferredSize();
-    this.setSize(Math.max(250, (int) prefSize.getWidth() + 30), (int) prefSize.getHeight() + 80);
+    this.setSize(Math.max(280, (int) prefSize.getWidth() + 30), (int) prefSize.getHeight() + 80);
     this.setTitle(textProvider.getString("playlistcfg.title"));
     SwingTools.centerWithin(ctx.getRootWindow(), this);
 

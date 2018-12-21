@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.plaf.PopupMenuUI;
 
 import com.jgoodies.binding.value.ValueHolder;
 

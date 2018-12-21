@@ -71,7 +71,7 @@ public class PlaylistService implements Service {
   private String dirArchive;
   private PlaylistValidator playlistValidator;
   private PlaylistModificationDetector playlistModificationDetector;
-
+  
   /**
    * @param ctx
    * @param titleRegistry
@@ -117,6 +117,7 @@ public class PlaylistService implements Service {
     // unregister from playlist registry
     this.playlistRegistry.unregister(playlist);
   }
+  
 
   public Playlist getCurrentPlaylist() throws IOException {
     CurrentPlaylist source = this.ctx.getServer().getCurrentPlaylist(this.ctx.getStationId());

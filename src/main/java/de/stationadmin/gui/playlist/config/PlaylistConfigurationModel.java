@@ -26,12 +26,14 @@ import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
 
 import de.stationadmin.base.Settings;
+import de.stationadmin.base.playlist.AutoFillRule;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.shuffle.Advice;
 import de.stationadmin.base.playlist.shuffle.TagSequenceAdvice;
 import de.stationadmin.base.playlist.shuffle.TitleNameLimitAdvice;
 import de.stationadmin.base.tag.TagManager;
+import de.stationadmin.gui.util.NonObservingPresentationModel;
 
 /**
  * 
@@ -52,6 +54,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   private TagManager tagManager;
   private ValueHolder titleNameAdviceLimit = new ValueHolder(0);
   private ValueModel trackOrderType = new ValueHolder(TrackOrderOption.MANUAL);
+  private PresentationModel<AutoFillRule> autoFillModel;
   private Settings settings;
 
   /**
@@ -108,11 +111,14 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
         }
         else if(evt.getNewValue().equals(SHUFFLE_STATIONADMIN)) {
           HashMap<String, Object> opts = new HashMap<>();
-          PlaylistService.updateGlobalShuffleOpts(opts, settings);
+          PlaylistService.updateGlobalShuffleOpts(opts, PlaylistConfigurationModel.this.settings);
           getBufferedModel("shuffleOpts").setValue(opts);
         }
       }
     });
+    
+    this.autoFillModel = new NonObservingPresentationModel<AutoFillRule>(this.getBufferedModel("autoFillRule"), getTriggerChannel());
+
 
   }
 
@@ -535,5 +541,10 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   public ValueModel getTrackOrderType() {
     return trackOrderType;
   }
+
+  public PresentationModel<AutoFillRule> getAutoFillModel() {
+    return autoFillModel;
+  }
+  
 
 }

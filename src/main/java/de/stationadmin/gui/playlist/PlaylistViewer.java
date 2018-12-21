@@ -639,6 +639,7 @@ public class PlaylistViewer extends JPanel {
       toolbar.add(new SortAction());
       toolbar.add(new ShuffleAction());
       toolbar.add(new GenerateAction());
+      toolbar.add(new AutoFillAction(ctx, playlistHolder));
       toolbar.add(new AdTriggerInsertAction());
       toolbar.addSeparator();
     }
