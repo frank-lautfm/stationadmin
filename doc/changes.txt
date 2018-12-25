@@ -17,6 +17,7 @@ Version 4.9.1
 
 [+] Playlists werden vor dem Speichern auf maximal Länge überprüft.
 [#] Untaggen von Tracks auf Basis einer API-Erweiterung anders implementiert - sollte robuster sein.
+[#] Shuffle-Script: Kurzfristige Vermeidung von Artistwiederholung nach Playlistwechsel funktionierte nicht
 
 Version 4.9
 -----------

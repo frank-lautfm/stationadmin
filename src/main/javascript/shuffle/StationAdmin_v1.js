@@ -464,7 +464,7 @@
 	if(trackStats != null) {
 		var baseTime = Date.now();
 		for(var i = 0; i < trackStats.length; i++) {
-			if(i < 12 && trackStats[i].artist != null) {
+			if(i > trackStats.length - 12 && trackStats[i].artist != null) {
 				var artistName = normalizeArtist(trackStats[i].artist.name);
 				recentArtists[artistName] = true;
 			}
