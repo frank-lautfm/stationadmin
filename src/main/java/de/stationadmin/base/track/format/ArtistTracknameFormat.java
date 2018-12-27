@@ -29,6 +29,7 @@ public class ArtistTracknameFormat implements TrackExportFormat {
       String artist = str.substring(0, separator).trim();
       String title = str.substring(separator + separatorLength).trim();
       BasicTrack t = new BasicTrack();
+      t.setId(-1);
       t.setArtist(artist);
       t.setTitle(title);
       return t;
