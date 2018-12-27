@@ -34,14 +34,15 @@ public class CSVFormat implements TrackExportFormat {
   private BasicTrack tryParse(String str, int separator) {
     Position pos = new Position();
     
-    DetailedTrack title = new DetailedTrack();
-    title.setArtist(this.readNextValue(str, separator, pos));
+    DetailedTrack track = new DetailedTrack();
+    track.setId(-1);
+    track.setArtist(this.readNextValue(str, separator, pos));
     pos.pos++;
-    title.setTitle(this.readNextValue(str, separator, pos));
+    track.setTitle(this.readNextValue(str, separator, pos));
     pos.pos++;
-    title.setAlbum(this.readNextValue(str, separator, pos));
+    track.setAlbum(this.readNextValue(str, separator, pos));
 
-    return title.getTitle() != null ? title : null;
+    return track.getTitle() != null ? track : null;
   }
   
   private String readNextValue(String str, int separator, Position p) {
