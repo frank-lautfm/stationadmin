@@ -63,6 +63,7 @@ public class PlaylistService implements Service {
   public static final String SHUFFLE_CLASSIC = "basic_v1";
   public static final String SHUFFLE_BUCKET = "bucket_v1_1";
   public static final String SHUFFLE_STATIONADMIN = "StationAdmin_v1";
+  public static final String SHUFFLE_BLOCKSELECT = "BlockSelect_v1";
 
   private SessionCtx ctx;
   private TrackRegistry trackRegistry;
@@ -432,7 +433,7 @@ public class PlaylistService implements Service {
       }
       if (playlist.isShuffle() && playlist.getShuffleType() != null) {
         String shuffleFunc = playlist.getShuffleType();
-        if (shuffleFunc.startsWith("StationAdmin")) {
+        if (shuffleFunc.startsWith("StationAdmin") || shuffleFunc.startsWith("BlockSelect")) {
           try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream("shuffle/" + shuffleFunc + ".js")) {
             shuffleFunc = IOUtils.toString(stream, "UTF-8");
           }
@@ -466,7 +467,7 @@ public class PlaylistService implements Service {
     for(Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
       if(playlist.isShuffle()) {
         String shuffleFunc = playlist.getShuffleType();
-        if (shuffleFunc.startsWith("StationAdmin")) {
+        if (shuffleFunc.startsWith("StationAdmin") || shuffleFunc.startsWith("BlockSelect")) {
           if(shuffleFunc.contains("dev")) {
             shuffleFunc = "StationAdmin_v1";
           }
@@ -615,7 +616,7 @@ public class PlaylistService implements Service {
       if (matcher.find()) {
         String match = matcher.group(1);
         // limit to supported types
-        if (match.startsWith("basic") || match.startsWith("bucket") || match.startsWith("StationAdmin")) {
+        if (match.startsWith("basic") || match.startsWith("bucket") || match.startsWith("StationAdmin") || match.startsWith("BlockSelect")) {
           return match;
         }
       }

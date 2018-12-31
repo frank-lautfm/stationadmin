@@ -45,6 +45,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   public static final String SHUFFLE_CLASSIC = PlaylistService.SHUFFLE_CLASSIC;
   public static final String SHUFFLE_BUCKET = PlaylistService.SHUFFLE_BUCKET;
   public static final String SHUFFLE_STATIONADMIN = PlaylistService.SHUFFLE_STATIONADMIN;
+  public static final String SHUFFLE_BLOCKSELECT = PlaylistService.SHUFFLE_BLOCKSELECT;
   private static final long serialVersionUID = 4865584693941336972L;
   private static final Logger log = Logger.getLogger(PlaylistConfigurationModel.class);
   private AbstractValueModel tags;

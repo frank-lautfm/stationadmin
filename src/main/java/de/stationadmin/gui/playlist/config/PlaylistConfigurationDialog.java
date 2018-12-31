@@ -155,6 +155,7 @@ public class PlaylistConfigurationDialog extends JDialog {
       shuffleFuncOptions.add(PlaylistConfigurationModel.SHUFFLE_CLASSIC);
       shuffleFuncOptions.add(PlaylistConfigurationModel.SHUFFLE_BUCKET);
       shuffleFuncOptions.add(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN);
+      shuffleFuncOptions.add(PlaylistConfigurationModel.SHUFFLE_BLOCKSELECT);
 
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.shuffleFunc")), cc.xy(2, row));
       SelectionInList<String> shuffleFuncSelection = new SelectionInList<>(shuffleFuncOptions, model.getBufferedModel("shuffleType"));
@@ -173,6 +174,8 @@ public class PlaylistConfigurationDialog extends JDialog {
             setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.bucket"));
           } else if (value.equals(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN)) {
             setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.stationadmin"));
+          } else if (value.equals(PlaylistConfigurationModel.SHUFFLE_BLOCKSELECT)) {
+            setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.blockselect"));
           }
 
           return this;
@@ -258,7 +261,7 @@ public class PlaylistConfigurationDialog extends JDialog {
 
   private boolean checkIfShuffleOptsEnabled() {
     return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER)
-        && (model.getBufferedModel("shuffleType").getString().equals(PlaylistConfigurationModel.SHUFFLE_BUCKET) || model.getBufferedModel("shuffleType").getString().equals(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN))
+        && (model.getBufferedModel("shuffleType").getString().equals(PlaylistConfigurationModel.SHUFFLE_BUCKET) || model.getBufferedModel("shuffleType").getString().equals(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN)  || model.getBufferedModel("shuffleType").getString().equals(PlaylistConfigurationModel.SHUFFLE_BLOCKSELECT))
         && model.getBean().getType() != PlaylistType.ARCHIVED;
   }
   

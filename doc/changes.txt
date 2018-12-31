@@ -10,6 +10,7 @@ Version 4.10.0
 --------------
 [+] Hervorhebung des aktuellen Titels in der aktuellen Playlist
 [+] Automatisches Befüllen von geshuffelten Playlists auf Basis von Tags oder anderen Playlists
+[+] Neues Shuffleverfahren: Auswahl eines Teils einer größeren Playlist
 
 
 Version 4.9.1
