@@ -17,6 +17,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
+import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXTable;
 
 import com.jgoodies.binding.value.ValueHolder;
@@ -32,6 +33,7 @@ import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.StationAdminFrame;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PopupListener;
+import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.TableExportUtils;
 
 /**
@@ -147,7 +149,7 @@ public class PlaysAnalyzer extends StationAdminFrame {
       this.statistics.update(plays);
 
     } catch (Exception e) {
-      e.printStackTrace();
+      JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo(e, "playsanalyzer.load.error"));
     }
 
   }

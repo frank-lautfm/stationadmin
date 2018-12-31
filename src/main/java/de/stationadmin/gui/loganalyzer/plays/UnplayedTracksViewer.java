@@ -25,6 +25,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXStatusBar;
 import org.jdesktop.swingx.JXTable;
 
@@ -53,6 +54,7 @@ import de.stationadmin.gui.track.DistributeTracksAction;
 import de.stationadmin.gui.track.PlaySnippetAction;
 import de.stationadmin.gui.track.TagMenu;
 import de.stationadmin.gui.track.TrackViewAction;
+import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.TableExportUtils;
 
@@ -112,8 +114,7 @@ public class UnplayedTracksViewer extends StationAdminFrame {
       }
     };
 
-    PlayFilterPanel filterPanel = new PlayFilterPanel(ctx.getTextProvider(), this.filter, ctx.getAdminClient().getPlaylistService()
-        .getPlaylistRegistry(), filterListener);
+    PlayFilterPanel filterPanel = new PlayFilterPanel(ctx.getTextProvider(), this.filter, ctx.getAdminClient().getPlaylistService().getPlaylistRegistry(), filterListener);
     this.getContentPane().add(filterPanel, cc.xy(2, 2, CellConstraints.FILL, CellConstraints.FILL));
 
     {
@@ -193,7 +194,6 @@ public class UnplayedTracksViewer extends StationAdminFrame {
       }
     };
 
-
     // add playlist selector
     {
       JPanel playlistSelectorPanel = new JPanel(new FormLayout("pref,2dlu,pref", "max(pref;16dlu)"));
@@ -212,8 +212,7 @@ public class UnplayedTracksViewer extends StationAdminFrame {
     // add tag selector
     {
       JPanel tagSelectorPanel = new JPanel(new FormLayout("pref,2dlu,pref", "max(pref;16dlu)"));
-      tagSelectorPanel.add(new JLabel(textProvider.getString("unplayedtitles.selector.tag")),
-          cc.xy(1, 1, CellConstraints.LEFT, CellConstraints.CENTER));
+      tagSelectorPanel.add(new JLabel(textProvider.getString("unplayedtitles.selector.tag")), cc.xy(1, 1, CellConstraints.LEFT, CellConstraints.CENTER));
       List<String> tags = this.ctx.getAdminClient().getTagManager().getTags();
       Collections.sort(tags);
       SelectionInList<String> tagSelection = new SelectionInList<String>(tags, this.tagHolder);
@@ -291,7 +290,7 @@ public class UnplayedTracksViewer extends StationAdminFrame {
       this.numTitlesHolder.setValue(titles.size());
 
     } catch (Exception e) {
-      e.printStackTrace();
+      JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo(e, "playsanalyzer.load.error"));
     }
 
   }
