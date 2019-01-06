@@ -371,7 +371,7 @@ public class ShuffleOptionsPanel extends JPanel {
         Component component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         int v = (Integer) value;
         if (v < 0) {
-          setText("");
+          setText("kein Jingle - Aufteilung nach Zeit");
         } else {
           BasicTrack track = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(v);
           if (track != null) {

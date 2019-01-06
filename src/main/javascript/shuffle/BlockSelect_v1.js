@@ -13,9 +13,11 @@
 	var currentBlock = [];
 	var currentBlockHash = 0;
 	var currentBlockHashCnt = 0;
+	var currentBlockDuration = 0;
 	for(var i = 0; i < tracks.length; i++) {
 		
-		if(tracks[i].id == separatorTrackId) {
+		if(tracks[i].id == separatorTrackId || (separatorTrackId < 0 && currentBlockDuration > duration)) {
+			// console.log("split at " + tracks[i].artist + " " + tracks[i].title + " | " + currentBlockDuration);
 			if(currentBlock.length > 0) {
 				blocks.push(currentBlock);
 				blockHashs.push(currentBlockHash);
@@ -23,19 +25,22 @@
 			currentBlock = [];
 			currentBlockHash = 0;
 			currentBlockHashCnt = 0;
-			if(includeSeparatorTrack) {
+			currentBlockDuration = 0;
+			if(includeSeparatorTrack || separatorTrackId < 0) {
 				currentBlock.push(tracks[i]);
+				currentBlockDuration += tracks[i].duration;
 			}
 		}
 		else {
 			currentBlock.push(tracks[i]);
+			currentBlockDuration += tracks[i].duration;
 			if(currentBlockHashCnt < 3 && tracks[i].type != 'jingle') {
 				currentBlockHash = currentBlockHash ^ tracks[i].id;
 				currentBlockHashCnt++;
 			}
 		}
 	}
-	if(currentBlock.length > (includeSeparatorTrack ? 1 : 0)) {
+	if(currentBlock.length > (includeSeparatorTrack ? 1 : 0) && separatorTrackId > -1) {
 		blocks.push(currentBlock);
 		blockHashs.push(currentBlockHash);
 	}

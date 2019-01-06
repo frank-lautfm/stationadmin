@@ -21,7 +21,7 @@ public class PropertyPanel extends JPanel {
   }
 
   public PropertyPanel(String label, ValueModel model, String suffix) {
-    this.setLayout(new FormLayout("pref,3dlu,min(pref;20dlu),pref", "2dlu,pref,2dlu"));
+    this.setLayout(new FormLayout("pref,3dlu,min(pref;35dlu),pref", "2dlu,pref,2dlu"));
     this.add(new JLabel(label), new CellConstraints(1, 2));
     this.add(BasicComponentFactory.createLabel(model, NumberFormat.getIntegerInstance()), new CellConstraints(3, 2));
     if(suffix != null) {

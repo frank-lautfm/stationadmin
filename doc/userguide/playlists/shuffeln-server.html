@@ -23,7 +23,8 @@ Du kannst in den Playlist-Eigenschaften festlegen ob Playlists auf dem Server ge
 <ul>
 	<li><span class="menuref">laut.fm - einfach</span> - einfaches Umsortieren der Titel, nicht weiter konfigurierbar </li>
 	<li><span class="menuref">laut.fm - Tag-Pattern</span> - Titelabfolge kann mittels Tags kontrolliert werden (&quot;Stundenuhr&quot;) </li>
-	<li><span class="menuref">Station Admin</span> - Umsortierung mit vielen Konfigurationsm&ouml;glichkeiten </li>
+	<li><span class="menuref">Station Admin - Shuffle</span> - Umsortierung mit vielen Konfigurationsm&ouml;glichkeiten </li>
+	<li><span class="menuref">Station Admin - Teilplaylist ausw&auml;hlen</span> - zerlegt eine Playlist mit vordefinierter Titelreihenfolge in Teile und w&auml;hlt einen davon aus.</li>
 </ul>
 </li>
 <li>Wenn Du <span class="menuref">laut.fm - Tag-Pattern</span> oder <span class="menuref">Station Admin</span> gew&auml;hlt hast wird <span class="menuref">Shuffle-Optionen</span> aktiviert. Hier kannst Du weitere Einstellungen vornehmen</li>
@@ -45,11 +46,11 @@ Um einen Eintrag zu dem Muster hinzuzuf&uuml;gen klicke auf die letzte graue Box
 </p>
 
 <p class="subheading">
-Optionen für "Station Admin"
+Optionen für "Station Admin - Shuffle"
 </p>
 <img src="../images/playlistcfg-shuffle-sa.jpg">
 <p>
-F&uuml;r das Shuffeln mit dem Station Admin-Verfahren hast Du folgend Optionen:
+F&uuml;r das Shuffeln mit dem Station Admin-Verfahren hast Du folgende Optionen:
 <ul>
 	<li><span class="menuref">Max. Titel pro Arist</span>: Wenn nichts weiter angegeben wird wird maximal ein Track eines Artists pro Stunde Laufzeit verwendet. M&ouml;chtest Du weniger Titel pro Artist verwenden gib ein Limit an. Ein zu hohes Limit das zu einer Verletzung der GVL-Regeln f&uuml;hren w&uuml;rde wird automatisch beim Shuffeln verworfen.</li>
 <li><span class="menuref">Blockl&auml;nge</span>: Ist die L&auml;nge der Playlist k&uuml;rzer als die Laufzeit gem&auml;&szlig; Sendeplan werden intern mehrere Durchl&auml;ufe gemacht bist die gew&uuml;nschte L&auml;nge erreicht ist. Dabei werden jedoch wenn nichts weiter angegeben ist (fast) alle verf&uuml;gbaren Titel verwendet - d. h. Gewichtungs- und Vermeidungsregeln greifen nicht oder kaum. Gibst Du eine Blockl&auml;nge an die deutlich k&uuml;rzer ist als die Playlistl&auml;nge gibt es intern zwar mehr Durchl&auml;ufe um die gew&uuml;nschte L&auml;nge zu erreichen, es k&ouml;nnen dann aber pro Durchlauf Titel bevorzugt oder vermieden werden. Ist die Playlistl&auml;nge gr&ouml;&szlig;er als die Laufzeit gem&auml;&szlig; Sendeplan hat diese Einstellung keine Wirkung.</li> 
@@ -60,8 +61,8 @@ Das funktioniert wieder auf Basis von Titeltags: W&auml;hle ein Tag und eine H&a
 </ul>
 </p>
 
-<p class="subheading">
-Umgang mit Jingles und Wortbeitr&auml;gen (nur f&uuml;r Verfahren "Station Admin")
+<p class="subheading2">
+Umgang mit Jingles und Wortbeitr&auml;gen (nur f&uuml;r Verfahren "Station Admin - Shuffle")
 </p>
 <img src="../images/einstellungen-playlists.jpg">
 <p>
@@ -85,8 +86,8 @@ F&uuml;r Wortbeitr&auml;ge gibt es folgende M&ouml;glichkeiten:
 </ul>
 </p>
 
-<p class="subheading">
-Werbetrigger  (nur f&uuml;r Verfahren "Station Admin")
+<p class="subheading2">
+Werbetrigger  (nur f&uuml;r Verfahren "Station Admin - Shuffle")
 </p>
 <img src="../images/einstellungen-playlists-adtrigger.jpg">
 <p>
@@ -118,5 +119,22 @@ Weiterhin kannst Du festlegen was passieren soll wenn an der Stelle wo ein Werbe
 </ul>
 </p>
 
+
+<p class="subheading">
+Optionen für "Station Admin - Teilplaylist ausw&auml;hlen"
+</p>
+<!-- <img src="../images/playlistcfg-shuffle-sa.jpg"> -->
+<p>
+Das Verfahren "Teilplaylist ausw&auml;hlen" ist geeignet wenn Du mehrere vorgefertigte Playlists hast &uuml;ber die Du rotieren m&ouml;chtest. In diesem Fall kannst Du diese (Teil)Playlists alle in einer gro&szlig;en Playlist ablegen und die Teile durch ein spezielles Jingle voneinander trennen. Vor dem Start wird dann einer dieser Teile ausgew&auml;hlt und unver&auml;ndert gespielt. Es werden hierbei werder Jingles noch Ad-Trigger eingef&uuml;gt oder ver&auml;ndert.
+</p>
+<p>
+F&uuml;r die Auswahl einer Teilplaylist hast Du folgende Optionen:
+<ul>
+	<li><span class="menuref">Verwende folgendes Jingle um die Playlist zu unterteilen</span> - hier kannst Du ein Jingle ausw&auml;hlen das die Playlist unterteilt. Es k&ouml;nnen nur Jingles ausgew&auml;hlt werden die auch in der Playlist vorhanden sind. Empfohlen wird ein eigenes Marker-Jingle das sonst nicht verwendet wird. Gibst Du kein Trennerjingle an wird die Playlist anhand der im Sendeplan eingetragenen Länge unterteilt - d. h. wennn die Playlist 3 Stunden laufen soll wird sie intern Teilplaylists a 3 Stunden unterteilt.</li>
+	<li><span class="menuref">diese Jingle am Anfang der Playlist spielen</span> - legt fest ob das Jingle das zum Trennen der Teile verwendet wird auch gespielt werden soll</li>
+	<li><span class="menuref">Wie soll der zu spielende Teil ausgew&auuml;hlt werden?</span> - Entweder wird ein Teil v&ouml;llig zuf&auml;llig ausgew&auml;lt oder es wird &uuml;ber die Teile rotiert. Wenn &uuml;ber die Teile rotiert werden soll musst Du angeben wie oft ein neuer Teil ausgew&auml;hlt werden soll: Steht Deine Playlist z. B. einmal am Tag im Sendeplan wäre "jeden Tag einen anderen Teil ausw&auml;hlen" die passende Option. Spielst Du eine Playlist nur einmal pro Woche w&auml;hlst Du "jede Woche einen anderen Teil ausw&auml;hlen"</li>
+</ul>
+	
+</p>
 </body>
 </html>
