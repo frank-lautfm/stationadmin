@@ -7,6 +7,9 @@ import javax.swing.table.AbstractTableModel;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.jgoodies.binding.value.ValueHolder;
+import com.jgoodies.binding.value.ValueModel;
+
 import de.stationadmin.base.playlist.shuffle.TrackRule;
 import de.stationadmin.base.playlist.shuffle.TrackRule.TrackPosition;
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
@@ -22,14 +25,16 @@ public class TrackRuleTableModel extends AbstractTableModel {
   private List<TrackRuleGroup> groups;
   private List<TrackRule> displayedRules;
   private List<TrackRule> rules;
+  private ValueModel tableContentChanged;
 
-  TrackRuleTableModel(TextProvider textProvider, TrackRegistry trackRegistry, List<TrackRule> rules, List<TrackRuleGroup> groups) {
+  TrackRuleTableModel(TextProvider textProvider, TrackRegistry trackRegistry, List<TrackRule> rules, List<TrackRuleGroup> groups, ValueModel tableContentChanged) {
     this.textProvider = textProvider;
     this.trackRegistry = trackRegistry;
     this.groups = groups;
     this.rules = rules;
     this.displayedRules = new ArrayList<TrackRule>(rules);
     this.displayedRules.add(new TrackRule());
+    this.tableContentChanged = tableContentChanged;
   }
 
   @Override
@@ -148,6 +153,7 @@ public class TrackRuleTableModel extends AbstractTableModel {
         entry.setMinDistance(0);
       }
     }
+    tableContentChanged.setValue(Boolean.TRUE);
     updateModel();
   }
 

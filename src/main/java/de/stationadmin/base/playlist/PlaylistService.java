@@ -35,6 +35,8 @@ import de.stationadmin.base.Settings;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.exporter.PlaylistBackupExporter;
+import de.stationadmin.base.playlist.shuffle.TrackRule;
+import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
 import de.stationadmin.base.playlist.validation.PlaylistValidationException;
 import de.stationadmin.base.playlist.validation.PlaylistValidationException.Reason;
 import de.stationadmin.base.playlist.validation.PlaylistValidator;
@@ -56,13 +58,13 @@ import de.stationadmin.lfm.backend.TrackRef;
  */
 public class PlaylistService implements Service {
   public static final int MAX_TRACKS = 10000;
-  
+
   private static final Logger log = Logger.getLogger(PlaylistService.class);
   private static final Pattern shuffleKeyPattern = Pattern.compile("key.\\s*([\\w|_]+)", Pattern.MULTILINE | Pattern.DOTALL);
 
   public static final String SHUFFLE_CLASSIC = "basic_v1";
   public static final String SHUFFLE_BUCKET = "bucket_v1_1";
-  public static final String SHUFFLE_STATIONADMIN = "StationAdmin_v1";
+  public static final String SHUFFLE_STATIONADMIN = "StationAdmin_v1_1";
   public static final String SHUFFLE_BLOCKSELECT = "BlockSelect_v1";
 
   private SessionCtx ctx;
@@ -72,7 +74,7 @@ public class PlaylistService implements Service {
   private String dirArchive;
   private PlaylistValidator playlistValidator;
   private PlaylistModificationDetector playlistModificationDetector;
-  
+
   /**
    * @param ctx
    * @param titleRegistry
@@ -118,7 +120,6 @@ public class PlaylistService implements Service {
     // unregister from playlist registry
     this.playlistRegistry.unregister(playlist);
   }
-  
 
   public Playlist getCurrentPlaylist() throws IOException {
     CurrentPlaylist source = this.ctx.getServer().getCurrentPlaylist(this.ctx.getStationId());
@@ -444,7 +445,7 @@ public class PlaylistService implements Service {
     }
 
     if (playlist.isModified()) {
-      if(playlist.getEntries().size() > MAX_TRACKS) {
+      if (playlist.getEntries().size() > MAX_TRACKS) {
         throw new PlaylistValidationException(Reason.MAX_TRACKS);
       }
       if (playlist.getLength() < 60 * 60) {
@@ -461,14 +462,14 @@ public class PlaylistService implements Service {
     playlist.commit();
 
   }
-  
+
   public List<Playlist> updateShuffleFunctions() throws IOException {
     List<Playlist> updatedPlaylists = new ArrayList<>();
-    for(Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
-      if(playlist.isShuffle()) {
+    for (Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
+      if (playlist.isShuffle()) {
         String shuffleFunc = playlist.getShuffleType();
         if (shuffleFunc.startsWith("StationAdmin") || shuffleFunc.startsWith("BlockSelect")) {
-          if(shuffleFunc.contains("dev")) {
+          if (shuffleFunc.contains("dev")) {
             shuffleFunc = "StationAdmin_v1";
           }
           try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream("shuffle/" + shuffleFunc + ".js")) {
@@ -753,12 +754,48 @@ public class PlaylistService implements Service {
         break;
       }
 
+
     } else {
       opts.remove("adTrigger");
       opts.remove("adSeparator");
       opts.remove("adPositions");
       opts.remove("adJingleCollisionStrategy");
     }
+    
+    // track rules
+    if (settings.getTrackRules().size() > 0) {
+      opts.put("trackRuleJingleCollisionStrategy", settings.getTrackRuleJingleCollsisionStrategy().name().toLowerCase());
+      opts.put("trackRuleGroupCollisionStrategy", settings.getTrackRuleGroupCollisionStrategy().name().toLowerCase());
+
+      HashMap<String, HashMap<String, Object>> groups = new HashMap<>();
+      for (TrackRuleGroup group : settings.getTrackRuleGroups()) {
+        HashMap<String, Object> groupOpts = new HashMap<>();
+        groupOpts.put("minDistance", group.getMinDistance());
+        groupOpts.put("multiMatchSelection", group.getMultiMatchSelection().name().toLowerCase());
+        groups.put(group.getName(), groupOpts);
+      }
+      opts.put("trackRuleGroups", groups);
+
+      ArrayList<HashMap<String, Object>> rules = new ArrayList<>();
+      for (TrackRule rule : settings.getTrackRules()) {
+        HashMap<String, Object> ruleOpts = new HashMap<>();
+        ruleOpts.put("groupName", rule.getGroupName());
+        ruleOpts.put("trackId", rule.getTrackId());
+        ruleOpts.put("filter", rule.getFilter());
+        ruleOpts.put("filterType", rule.getFilterType().name().toLowerCase());
+        ruleOpts.put("position", rule.getPosition().name().toLowerCase());
+        ruleOpts.put("minDistance", rule.getMinDistance());
+        rules.add(ruleOpts);
+      }
+
+      opts.put("trackRules", rules);
+    } else {
+      opts.remove("trackRuleJingleCollisionStrategy");
+      opts.remove("trackRuleGroupCollisionStrategy");
+      opts.remove("trackRuleGroups");
+      opts.remove("trackRules");
+    }
+
 
   }
 

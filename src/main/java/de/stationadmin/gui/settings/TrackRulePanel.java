@@ -19,6 +19,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 
 import org.apache.commons.lang.StringUtils;
@@ -27,6 +29,7 @@ import org.jdesktop.swingx.JXTable;
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.list.SelectionInList;
+import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -47,10 +50,12 @@ public class TrackRulePanel extends JPanel {
   private static final long serialVersionUID = 7997929549512395824L;
   private ClientContext ctx;
   private PresentationModel<Settings> model;
+  private ValueModel tableContentChanged;
 
-  public TrackRulePanel(ClientContext ctx, PresentationModel<Settings> model) {
+  public TrackRulePanel(ClientContext ctx, PresentationModel<Settings> model, ValueModel tableContentChanged) {
     this.ctx = ctx;
     this.model = model;
+    this.tableContentChanged = tableContentChanged;
     this.init();
   }
 
@@ -70,8 +75,9 @@ public class TrackRulePanel extends JPanel {
     if (groups.size() == 0) {
       groups.add(new TrackRuleGroup("Standard", 0));
     }
+    
 
-    TrackRuleGroupTableModel groupsModel = new TrackRuleGroupTableModel(ctx.getTextProvider(), groups);
+    TrackRuleGroupTableModel groupsModel = new TrackRuleGroupTableModel(ctx.getTextProvider(), groups, tableContentChanged);
     JXTable groupsTable = new JXTable(groupsModel);
     this.add(new JScrollPane(groupsTable), cc.xy(1, 3));
     {
@@ -114,7 +120,7 @@ public class TrackRulePanel extends JPanel {
       model.getBean().setTrackRules(rules);
     }
 
-    TrackRuleTableModel rulesModel = new TrackRuleTableModel(ctx.getTextProvider(), ctx.getAdminClient().getTrackService().getTrackRegistry(), rules, groups);
+    TrackRuleTableModel rulesModel = new TrackRuleTableModel(ctx.getTextProvider(), ctx.getAdminClient().getTrackService().getTrackRegistry(), rules, groups, tableContentChanged);
     final JXTable rulesTable = new JXTable(rulesModel);
     this.add(new JScrollPane(rulesTable), cc.xy(1, 7));
 
@@ -192,7 +198,7 @@ public class TrackRulePanel extends JPanel {
     this.add(new JLabel(ctx.getString("settings.playlistgen.table.rule.collission")), cc.xy(1, 13));
     this.add(jcsCmb, cc.xy(1, 15, CellConstraints.LEFT, CellConstraints.CENTER));
 
-    JLabel hint = new HintLabel(ctx.getString("settings.shuffle.hint.shufflegenerate"));
+    JLabel hint = new HintLabel(ctx.getString("settings.shuffle.hint"));
     this.add(hint,  cc.xy(1,  17));
 
     final JPopupMenu popup = new JPopupMenu();

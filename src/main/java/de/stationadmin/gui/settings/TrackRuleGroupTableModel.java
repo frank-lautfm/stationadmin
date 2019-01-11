@@ -9,6 +9,8 @@ import javax.swing.table.AbstractTableModel;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.jgoodies.binding.value.ValueModel;
+
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup.MultiMatchSelection;
 import de.stationadmin.gui.TextProvider;
@@ -19,12 +21,14 @@ public class TrackRuleGroupTableModel extends AbstractTableModel {
   private TextProvider textProvider;
   private List<TrackRuleGroup> displayedGroups;
   private List<TrackRuleGroup> groups;
+  private ValueModel tableContentChanged;
 
-  TrackRuleGroupTableModel(TextProvider textProvider, List<TrackRuleGroup> groups) {
+  TrackRuleGroupTableModel(TextProvider textProvider, List<TrackRuleGroup> groups, ValueModel tableContentChanged) {
     this.textProvider = textProvider;
     this.groups = groups;
     this.displayedGroups = new ArrayList<TrackRuleGroup>(groups);
     this.displayedGroups.add(new TrackRuleGroup());
+    this.tableContentChanged = tableContentChanged;
   }
 
   @Override
@@ -97,6 +101,7 @@ public class TrackRuleGroupTableModel extends AbstractTableModel {
         entry.setMinDistance(0);
       }
     }
+    tableContentChanged.setValue(Boolean.TRUE);
     updateModel();
   }
 

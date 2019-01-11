@@ -1,7 +1,6 @@
 package de.stationadmin.gui.settings;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -79,6 +78,7 @@ public class SettingsDlg extends JDialog {
   private ClientContext ctx;
   private PresentationModel<Settings> model;
   private JPanel container = new JPanel(new BorderLayout());
+  private ValueHolder tableContentChanged = new ValueHolder(Boolean.FALSE);
 
   public SettingsDlg(ClientContext ctx) {
     this.ctx = ctx;
@@ -135,8 +135,9 @@ public class SettingsDlg extends JDialog {
           ShuffleOptsUpdateDetector detector = new ShuffleOptsUpdateDetector();
           ctx.getAdminClient().getSettings().addPropertyChangeListener(detector);
           model.triggerCommit();
-          shuffleOptsChanged = detector.isChanged();
+          shuffleOptsChanged = detector.isChanged() || tableContentChanged.getValue().equals(Boolean.TRUE);
           ctx.getAdminClient().getSettings().removePropertyChangeListener(detector);
+          tableContentChanged.setValue(Boolean.FALSE);
         } else {
           model.triggerCommit();
         }
@@ -552,7 +553,7 @@ public class SettingsDlg extends JDialog {
   private JPanel createTrackRulePanel() {
     JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref:grow,3dlu"));
     panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.gen.trackrules")));
-    panel.add(new TrackRulePanel(ctx, model), new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
+    panel.add(new TrackRulePanel(ctx, model, tableContentChanged), new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
 
     return panel;
 
@@ -773,6 +774,10 @@ public class SettingsDlg extends JDialog {
       this.properties.add("adTriggerPosition2");
       this.properties.add("artistNormalizerSeperators");
       this.properties.add("artistNormalizerAliases");
+      this.properties.add("trackRuleGroups");
+      this.properties.add("trackRules");
+      this.properties.add("trackRuleJingleCollsisionStrategy");
+      this.properties.add("trackRuleGroupCollisionStrategy");
     }
 
     @Override
