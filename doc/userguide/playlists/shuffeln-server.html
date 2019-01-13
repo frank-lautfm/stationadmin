@@ -87,6 +87,41 @@ F&uuml;r Wortbeitr&auml;ge gibt es folgende M&ouml;glichkeiten:
 </p>
 
 <p class="subheading2">
+Gebundene Jingles oder Wortbeitr&auml;ge  (nur f&uuml;r Verfahren "Station Admin - Shuffle")
+</p>
+<p>
+Einen Sonderfall stellen Jingles oder Wortbeitr&auml;ge dar die an bestimmte Titel gebunden werden sollen und entweder vor oder nach den entsprechenden Titeln platziert werden sollen. Entsprechende Regeln lassen sich über <span class="menuref">Gebunden Jingles</span> konfigurieren.
+</p>
+<p>
+Die Regeln f&uuml;r gebundene Jingles k&ouml;nnen in Gruppen organisiert werden. F&uuml;r jede Gruppe kann ein Mindestabstand in Minuten konfiguriert werden. Angenommen Du hast mehrere Jingles die jeweils an bestimmte K&uuml;nstler gebunden werden, m&ouml;chtest aber nicht dass zwei solcher Jingles innerhalb einer halben Stunde vorkommen: Dann organisierst Du die Regeln f&uuml;r diese Jingles in einer Gruppe und setzt den Abstand auf 30 Minuten.
+</p>
+<p>
+Eine Regel legt f&uuml;r ein einzelnes Jingle oder einen Wortbeitrag fest an welche Titel es gebunden wird. Folgende Einstellungen sind verf&uuml;gbar:
+<ul>
+<li>Die <span class="menuref">Gruppe</span> zu der eine Regel geh&ouml;rt</li>
+<li>Die <span class="menuref">Position</span> - ob das Jingle oder der Wortbeitrag vor oder nach den entsprechenden Titeln platziert werden soll</li>
+<li>Der <span class="menuref">Typ</span> des Filters der passende Titel festlegt - m&ouml;glich sind K&uuml;nstler, K&uuml;nstler + Titel, Album oder Tag</li>
+<li>Der <span class="menuref">Name</span> des K&uuml;nstlers, Titels, Albums oder Tags an den das Jingle gebunden wird</li>
+<li>Der minimale <span class="menuref">Abstand</span> zwischen zwei Platzierungen dieses Jingles oder Wortbeitrags in Minuten</li>
+</ul>
+</p>
+<p>
+Wenn Regeln f&uuml;r K&uuml;nstler erstellt werden reicht ein Teil des Namens - d. h. eine Regel f&uuml;r &quot;Foo&quot; w&uuml;rde auch &quot;Foo feat. Bar&quot; akzeptieren. F&uuml;r Alben und K&uuml;nstler + Titel muss der gesamte Begriff passen - allerdings werden Gro&szlig;-/Kleinschreibung sowie Leer- und Sonderzeichen ignoriert. 
+</p>
+<p>
+Wenn durch eine Regel ein gebundenes Jingle an eine Position eingef&uuml;gt werde w&uuml;rde an der sich bereits ein Jingle befindet gibt es folgende M&ouml;glichkeiten:
+<ul>
+<li>Es werden beide Jingles beibehalten - wenn also etwa ein Jingle vor einem Titel eingef&uuml;gt werden soll und dort befindet sich schon ein Standardjingle wird das gebundene Jingle hinter das bestehende Jingle und vor den Titel eingef&uuml;gt.</li>
+<li>Das gebundene Jingle wird nicht eingef&uuml;gt.</li>
+<li>Das gebundene Jingle wird eingef&uuml;gt und das Standardjingle wird entfernt. Hier gilt jedoch eine Ausnahme: Wenn das bestehende Jingle das erste Jingle der Playlist ist und als solches nicht verschoben werden soll bleibt es stehen.</li>
+</ul>
+</p>
+<p class="hint">
+	Du musst die gebundenen Jingles in die Playlist einf&uuml;gen da beim Shuffeln keine Tracks verwendet werden k&ouml;nnen die nicht schon in der Playlist enhalten sind. Es wird empfohlen die Playlist automatisch bef&uuml;llen zu lassen.
+</p>
+
+
+<p class="subheading2">
 Werbetrigger  (nur f&uuml;r Verfahren "Station Admin - Shuffle")
 </p>
 <img src="../images/einstellungen-playlists-adtrigger.jpg">
@@ -105,7 +140,7 @@ Wenn ein Jingle als Werbetrenner vor den Trigger platziert werden soll w&auml;hl
 W&auml;hle unter <span class="menuref">Werbetrigger</span> ein Jingle das als Ad-Trigger verwendet werden soll. Normalerweise kann das Standardjingle verwendet werden. M&ouml;chtest Du dass ein bestimmtes Jingle nach der Werbung l&auml;ft so verwende dieses Jingle als Ad-Trigger - es muss jedoch "START_AD_BREAK" als Artist oder Titel gesetzt sein. In dem Fall l&ouml;st das Jingle die Werbung aus, nach der Werbung l&auml;uft ist dann das Jingle zu h&ouml;ren.
 </p>
 <p class="hint">
-	Du musst die Jingles die Du als Werbetrenner oder Werbetrigger verwendest in die Playlist einf&uuml;gen da beim Shuffeln keine Tracks verwendet werden k&ouml;nnen die nicht schon in der Playlist enhalten sind.
+	Du musst die gebundenen Jingles in die Playlist einf&uuml;gen da beim Shuffeln keine Tracks verwendet werden k&ouml;nnen die nicht schon in der Playlist enhalten sind. Es wird empfohlen die Playlist automatisch bef&uuml;llen zu lassen.
 </p>
 <p>
 Beachte bei der Verwendung von eigenen Werbetrennern oder -triggern bitte dass nicht zwangsl&auml;ufig Werbung gespielt wird. Es kann also passieren dass die H&ouml;rer nur die Jingles, aber keine Werbung h&ouml;ren.

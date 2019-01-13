@@ -29,6 +29,8 @@
 
 	var boundTracks = {};
 
+	var startTime;
+
 	
 	// basic array shuffle function
 	// source: http://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array-in-javascript
@@ -401,7 +403,7 @@
 	}
 
 	function filterApplicableRules(rules) {
-		console.log("filter applicable rules " + rules.length);
+		// console.log("filter applicable rules " + rules.length);
 		var rulesByGroup =  {};
 		var groupNames = [];
 		for(var i = 0; i < rules.length; i++) {
@@ -436,18 +438,19 @@
 		return filtered;
 	}
 
-	function markRuleApplied(rule, position) {
-		console.log("insert " + boundTracks[rule.trackId].title + " at "  + position);
-		rule.lastPlay = position;
+	function markRuleApplied(rule, time) {
+		// console.log("insert " + boundTracks[rule.trackId].title + " at "  + new Date(time));
+		rule.lastPlay = time;
 		if(rule.groupName in opts.trackRuleGroups) {
-			opts.trackRuleGroups[rule.groupName].lastPlay = position;
+			opts.trackRuleGroups[rule.groupName].lastPlay = time;
 		}
+		return time + boundTracks[rule.trackId].duration * 1000;
 	}
 
 	function applyTrackRules(playlistTracks) {
 		console.log("apply track rules on " + playlistTracks.length + " tracks / " + opts.trackRules.length +  " rules");
 		var newTracks = [];
-		var position = 0;
+		var currentTime = baseTime;
 		
 		// check rules - do we have the bound track?
 		for(var i = 0; i < opts.trackRules.length; i++) {
@@ -471,14 +474,11 @@
 			if(playlistTracks[i].boundTo.length > 0) {
 				var applicableRules = [];
 				// filter for applicable rules
-				// console.log(playlistTracks[i].artist + " " + playlistTracks[i].title + ": bound = " + playlistTracks[i].boundTo.length);
 				for(var r = 0; r < playlistTracks[i].boundTo.length; r++) {
 					var rIdx = playlistTracks[i].boundTo[r];
 					var group = opts.trackRuleGroups[opts.trackRules[rIdx].groupName];
-					var ruleTimeMatch = position - opts.trackRules[rIdx].lastPlay > opts.trackRules[rIdx].minDistance * 60;
-					var groupTimeMatch = !('lastPlay' in group) || position - group.lastPlay > group.minDistance * 60;
-					// console.log(opts.trackRules[rIdx].filter + " => " + ruleTimeMatch + "/" + groupTimeMatch);
-					// console.log("groupLastPlay = " + position + " - " + group.lastPlay + " > " + group.minDistance * 60);
+					var ruleTimeMatch = currentTime - opts.trackRules[rIdx].lastPlay > opts.trackRules[rIdx].minDistance * 60000;
+					var groupTimeMatch = !('lastPlay' in group) || currentTime - group.lastPlay > group.minDistance * 60000;
 					if(ruleTimeMatch && groupTimeMatch) {
 						applicableRules.push(opts.trackRules[rIdx]);
 					}
@@ -500,14 +500,14 @@
 								switch(opts.trackRuleJingleCollisionStrategy) {
 									case 'keep_both':
 										newTracks.push(boundTracks[rule.trackId]);
-										markRuleApplied(rule, position);
+										currentTime = markRuleApplied(rule, currentTime);
 										break;
 									case 'keep_rule_jingle':
 										if(!opts.protectFirstJingle || newTracks.length > 1) {
 											newTracks.splice(newTracks.length -1, 1);
 										}
 										newTracks.push(boundTracks[rule.trackId]);
-										markRuleApplied(rule, position);
+										currentTime = markRuleApplied(rule, currentTime);
 										break;
 									case 'keep_standard_jingle':
 										// preserve added jingle, don't add rule jingle
@@ -517,7 +517,7 @@
 							else {
 				                // no jingle collision - just add
 								newTracks.push(boundTracks[rule.trackId]);
-								markRuleApplied(rule, position);
+								currentTime = markRuleApplied(rule, currentTime);
 							}
 						}
 						else {
@@ -525,11 +525,11 @@
 								switch(opts.trackRuleJingleCollisionStrategy) {
 									case 'keep_both':
 										newTracks.push(boundTracks[rule.trackId]);
-										markRuleApplied(rule, position);
+										currentTime = markRuleApplied(rule, currentTime);
 										break;
 									case 'keep_rule_jingle':
 										newTracks.push(boundTracks[rule.trackId]);
-										markRuleApplied(rule, position);
+										currentTime = markRuleApplied(rule, currentTime);
 										skipNext = true;
 										break;
 									case 'keep_standard_jingle':
@@ -540,7 +540,7 @@
 							else {
 				                // no jingle collision - just add
 								newTracks.push(boundTracks[rule.trackId]);
-								markRuleApplied(rule, position);
+								currentTime = markRuleApplied(rule, currentTime);
 							}
 						}
 					}
@@ -549,10 +549,10 @@
 			}
 
 			newTracks.push(playlistTracks[i]);
-			position += playlistTracks[i].duration;
+			currentTime += playlistTracks[i].duration * 1000;
 			for(var j = 0; j < jinglesAfter.length; j++) {
 				newTracks.push(jinglesAfter[j]);
-				position += jinglesAfter[j].duration;
+				currentTime += jinglesAfter[j].duration * 1000;
 			}
 
 			if(skipNext) {
@@ -660,6 +660,20 @@
 	// Main code
 
 	/* Initialization */
+
+	startTime = new Date().getTime() + 1000 * 120; // buest guess: Assume current track runs for two more minutes
+	if(trackRulesEnabled) {
+		for(var i = 0; i < opts.trackRules.length; i++) {
+			var trackId = opts.trackRules[i].trackId;
+			boundTracks[trackId] = {};
+			opts.trackRules[i].lastPlay = startTime -  (1000 * 60 * 60 * 24);
+			if(!('rules' in boundTracks[trackId])) {
+				boundTracks[trackId].rules = [];
+			}
+			boundTracks[trackId].rules.push(opts.trackRules[i]);
+		}
+	}
+	
 	if(trackStats != null) {
 		var baseTime = Date.now();
 		for(var i = 0; i < trackStats.length; i++) {
@@ -674,13 +688,11 @@
 					lastPlays[trackStats[i].id] = diff;
 				}
 			}
-		}
-	}
-
-	if(trackRulesEnabled) {
-		for(var i = 0; i < opts.trackRules.length; i++) {
-			boundTracks[opts.trackRules[i].trackId] = {};
-			opts.trackRules[i].lastPlay = -Math.floor(Math.random() * opts.trackRules[i].minDistance) * 60;
+			if(trackRulesEnabled && trackStats[i].id in boundTracks) {
+				for(var r = 0; r < boundTracks[trackStats[i].id].rules.length; r++) {
+					markRuleApplied(boundTracks[trackStats[i].id].rules[r], started);
+				}
+			}
 		}
 	}
 
