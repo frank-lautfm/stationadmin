@@ -448,7 +448,6 @@
 	}
 
 	function applyTrackRules(playlistTracks) {
-		console.log("apply track rules on " + playlistTracks.length + " tracks / " + opts.trackRules.length +  " rules");
 		var newTracks = [];
 		var currentTime = baseTime;
 		
@@ -524,12 +523,12 @@
 							if(isJingle && nextIsJingle) {
 								switch(opts.trackRuleJingleCollisionStrategy) {
 									case 'keep_both':
-										newTracks.push(boundTracks[rule.trackId]);
-										currentTime = markRuleApplied(rule, currentTime);
+										jinglesAfter.push(boundTracks[rule.trackId]);
+										markRuleApplied(rule, currentTime);
 										break;
 									case 'keep_rule_jingle':
-										newTracks.push(boundTracks[rule.trackId]);
-										currentTime = markRuleApplied(rule, currentTime);
+										jinglesAfter.push(boundTracks[rule.trackId]);
+										markRuleApplied(rule, currentTime);
 										skipNext = true;
 										break;
 									case 'keep_standard_jingle':
@@ -539,8 +538,8 @@
 							}
 							else {
 				                // no jingle collision - just add
-								newTracks.push(boundTracks[rule.trackId]);
-								currentTime = markRuleApplied(rule, currentTime);
+								jinglesAfter.push(boundTracks[rule.trackId]);
+								markRuleApplied(rule, currentTime);
 							}
 						}
 					}
