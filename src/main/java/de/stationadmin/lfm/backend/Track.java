@@ -46,13 +46,13 @@ public class Track {
     this.id = id;
   }
   public String getArtist() {
-    return artist;
+    return artist != null ? artist : "";
   }
   public void setArtist(String artist) {
     this.artist = artist;
   }
   public String getTitle() {
-    return title;
+    return title != null ? title : "";
   }
   public void setTitle(String title) {
     this.title = title;
