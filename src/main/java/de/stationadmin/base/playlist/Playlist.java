@@ -463,7 +463,7 @@ public class Playlist extends AbstractBean {
   }
 
   public boolean isLocalShuffleAllowed() {
-    return this.localData != null ? this.localData.isShuffleAllowed() : true;
+    return this.localData != null ? this.localData.isShuffleAllowed() : false;
   }
 
   /**

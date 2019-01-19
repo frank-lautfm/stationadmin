@@ -19,7 +19,7 @@ import org.apache.commons.lang.StringUtils;
 public class ExtendedPlaylistData {
   private static final int VERSION = 1;
   private int id;
-  private boolean shuffleAllowed = true;
+  private boolean shuffleAllowed = false;
   private boolean gvlCheck = true;
   private Set<String> tags = new HashSet<String>();
   private int generateLength = 2;
