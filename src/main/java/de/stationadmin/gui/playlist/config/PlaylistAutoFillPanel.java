@@ -2,10 +2,12 @@ package de.stationadmin.gui.playlist.config;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -37,13 +39,26 @@ public class PlaylistAutoFillPanel extends JPanel {
   private void init(PlaylistConfigurationModel playlistCfgModel) {
     PresentationModel<AutoFillRule> model = playlistCfgModel.getAutoFillModel();
     
+    final ArrayList<JComponent> dependentComponents = new ArrayList<>();
+    
     this.setLayout(new FormLayout("5dlu,pref,5dlu,170dlu,5dlu", "5dlu,pref,8dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
     int row = 2;
-
+    
+    
     {
       JCheckBox enabledCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("enabled"), ctx.getString("playlistcfg.property.autofill.enabled"));
       this.add(enabledCb, cc.xywh(2, row, 3, 1));
+      
+      model.getBufferedModel("enabled").addValueChangeListener(new PropertyChangeListener() {
+        
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          for(JComponent comp : dependentComponents) {
+            comp.setEnabled((Boolean)evt.getNewValue());
+          }
+        }
+      });
 
       row += 2;
     }
@@ -61,6 +76,7 @@ public class PlaylistAutoFillPanel extends JPanel {
       Collections.sort(tags);
       final JList<String> list = new JList<String>(tags.toArray(new String[tags.size()]));
       list.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+      dependentComponents.add(list);
 
       String[] selection = (String[]) tagsModel.getValue();
       updateSelection(list, tags, selection);
@@ -107,6 +123,7 @@ public class PlaylistAutoFillPanel extends JPanel {
       // Collections.sort(playlists);
       final JList<Playlist> list = new JList<Playlist>(playlists.toArray(new Playlist[playlists.size()]));
       list.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+      dependentComponents.add(list);
 
       int[] selection = (int[]) playlistModel.getValue();
       updateSelection(list, playlists, selection);
@@ -150,6 +167,7 @@ public class PlaylistAutoFillPanel extends JPanel {
     {
       JCheckBox adTriggerCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("includeAdTrigger"), ctx.getString("playlistcfg.property.autofill.includeAdTrigger"));
       this.add(adTriggerCb, cc.xywh(2, row, 3, 1));
+      dependentComponents.add(adTriggerCb);
 
       row += 2;
     }
@@ -166,10 +184,14 @@ public class PlaylistAutoFillPanel extends JPanel {
         }
       });
       this.add(jinglesCb, cc.xywh(2, row, 3, 1));
+      dependentComponents.add(jinglesCb);
 
       row += 2;
     }
 
+    for(JComponent comp : dependentComponents) {
+      comp.setEnabled(model.getBufferedModel("enabled").booleanValue());
+    }
 
   }
 
