@@ -33,6 +33,8 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 
 import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+import org.jdesktop.swingx.error.ErrorLevel;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.list.SelectionInList;
@@ -332,6 +334,14 @@ public class PlaylistConfigurationDialog extends JDialog {
       okBtn.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
+          List<String> messages = model.validate();
+          if(messages.size() > 0) {
+            ErrorInfo errorInfo = new ErrorInfo(ctx.getTextProvider().getString("error.title"), messages.get(0), null,
+                "general", null, ErrorLevel.SEVERE, null);
+            JXErrorPane.showDialog(AppUtils.getRootFrame(), errorInfo);
+            return;
+          }
+          
           model.triggerCommit();
           try {
             playlistService.savePlaylist(model.getBean());

@@ -20,6 +20,7 @@ import de.stationadmin.base.track.TrackRegistry;
 
 /**
  * Tool class for populating playlists based on autofill rules
+ * 
  * @author fkorf
  */
 public class PlaylistFiller {
@@ -36,9 +37,9 @@ public class PlaylistFiller {
     this.tagManager = tagManager;
   }
 
-
   /**
    * Fills a single playlist with tracks based on autofill rules (if enabled)
+   * 
    * @param playlist playlist to fill
    * @throws IOException
    */
@@ -46,7 +47,7 @@ public class PlaylistFiller {
     if (playlist.getAutoFillRule().isEnabled()) {
       playlist.removeEntries(new ArrayList<Entry>(playlist.getEntries()));
       Map<Integer, BasicTrack> tracks = new HashMap<>();
-      
+
       // Source: Tgas
       String[] tags = playlist.getAutoFillRule().getSourceTags();
       if (tags != null) {
@@ -61,48 +62,48 @@ public class PlaylistFiller {
           }
         }
       }
-      
+
       // Source: playlists
       int[] playlistIds = playlist.getAutoFillRule().getSourcePlaylists();
-      if(playlistIds != null) {
-        for(int playlistId : playlistIds) {
+      if (playlistIds != null) {
+        for (int playlistId : playlistIds) {
           Playlist sourcePlaylist = this.playlistRegistry.getPlaylist(playlistId);
-          if(sourcePlaylist != null) {
-            for(Entry entry : sourcePlaylist.getEntries()) {
-              if(!tracks.containsKey(entry.getTrackId())) {
+          if (sourcePlaylist != null) {
+            for (Entry entry : sourcePlaylist.getEntries()) {
+              if (!tracks.containsKey(entry.getTrackId())) {
                 tracks.put(entry.getTrackId(), entry.getTrack());
               }
             }
           }
         }
       }
-      
+
       // add tracks from source tags and playlists
       ArrayList<BasicTrack> trackList = new ArrayList<>(tracks.values());
       trackList.sort(new TrackComparator());
-      for(BasicTrack track : trackList) {
+      for (BasicTrack track : trackList) {
         playlist.addTrack(track);
       }
 
       // add ad separator / ad trigger
-      if(playlist.getAutoFillRule().isIncludeAdTrigger() && settings.getAdTriggerPosition1() > -1) {
-        if(settings.getAdSeparatorId() > -1) {
+      if (playlist.getAutoFillRule().isIncludeAdTrigger() && settings.getAdTriggerPosition1() > -1) {
+        if (settings.getAdSeparatorId() > 0) {
           BasicTrack adSeparator = trackRegistry.getTrack(settings.getAdSeparatorId());
-          if(adSeparator != null) {
+          if (adSeparator != null) {
             playlist.addTrack(adSeparator);
           }
-          BasicTrack adTrigger = trackRegistry.getTrack(settings.getAdTriggerId());
-          if(adTrigger != null) {
-            playlist.addTrack(adTrigger);
-          }
+        }
+        BasicTrack adTrigger = settings.getAdTriggerId() > 0 ? trackRegistry.getTrack(settings.getAdTriggerId()) : trackRegistry.getStandardAdTrigger();
+        if (adTrigger != null) {
+          playlist.addTrack(adTrigger);
         }
       }
-      
+
       // add jingles from track rules
-      if(playlist.getAutoFillRule().isIncludeTrackRules()) {
-        for(TrackRule rule : settings.getTrackRules()) {
+      if (playlist.getAutoFillRule().isIncludeTrackRules()) {
+        for (TrackRule rule : settings.getTrackRules()) {
           BasicTrack track = trackRegistry.getTrack(rule.getTrackId());
-          if(track != null) {
+          if (track != null) {
             playlist.addTrack(track);
           }
         }
@@ -112,13 +113,14 @@ public class PlaylistFiller {
 
   /**
    * Fills all playlists for which autofill is enabled
+   * 
    * @return list of filled playlists
    * @throws IOException
    */
   public List<Playlist> fillPlaylists() throws IOException {
     List<Playlist> playlists = new ArrayList<>();
-    for(Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
-      if(playlist.getAutoFillRule().isEnabled()) {
+    for (Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
+      if (playlist.getAutoFillRule().isEnabled()) {
         fillPlaylist(playlist);
         playlists.add(playlist);
       }

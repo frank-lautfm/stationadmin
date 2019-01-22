@@ -32,7 +32,9 @@ import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.shuffle.Advice;
 import de.stationadmin.base.playlist.shuffle.TagSequenceAdvice;
 import de.stationadmin.base.playlist.shuffle.TitleNameLimitAdvice;
+import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.tag.TagManager;
+import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.util.NonObservingPresentationModel;
 
 /**
@@ -57,16 +59,18 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   private ValueModel trackOrderType = new ValueHolder(TrackOrderOption.MANUAL);
   private PresentationModel<AutoFillRule> autoFillModel;
   private Settings settings;
+  private TextProvider textProvider;
 
   /**
    * @param bean
    */
-  public PlaylistConfigurationModel(Playlist playlist, TagManager tagManager, Settings settings) {
+  public PlaylistConfigurationModel(Playlist playlist, TagManager tagManager, Settings settings, TextProvider textProvider) {
     super(playlist);
     this.settings = settings;
     this.tags = new TagsModel();
     this.generateTags = new TrackTagsModel();
     this.tagManager = tagManager;
+    this.textProvider = textProvider;
     this.initAdvices(playlist);
     this.initTrackOrderType(playlist);
 
@@ -102,24 +106,22 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
     // - create a copy we can work on
     HashMap<String, Object> shuffleOpts = playlist.getShuffleOpts() != null ? new HashMap<>(playlist.getShuffleOpts()) : new HashMap<>();
     this.getBufferedModel("shuffleOpts").setValue(shuffleOpts);
-    
+
     this.getBufferedModel("shuffleType").addPropertyChangeListener(new PropertyChangeListener() {
-      
+
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        if(evt.getNewValue().equals(SHUFFLE_BUCKET)) {
+        if (evt.getNewValue().equals(SHUFFLE_BUCKET)) {
           getBufferedModel("shuffleOpts").setValue(new HashMap<>());
-        }
-        else if(evt.getNewValue().equals(SHUFFLE_STATIONADMIN)) {
+        } else if (evt.getNewValue().equals(SHUFFLE_STATIONADMIN)) {
           HashMap<String, Object> opts = new HashMap<>();
           PlaylistService.updateGlobalShuffleOpts(opts, PlaylistConfigurationModel.this.settings);
           getBufferedModel("shuffleOpts").setValue(opts);
         }
       }
     });
-    
-    this.autoFillModel = new NonObservingPresentationModel<AutoFillRule>(this.getBufferedModel("autoFillRule"), getTriggerChannel());
 
+    this.autoFillModel = new NonObservingPresentationModel<AutoFillRule>(this.getBufferedModel("autoFillRule"), getTriggerChannel());
 
   }
 
@@ -360,7 +362,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
       case 1:
         if (aValue instanceof String) {
           try {
-            aValue = Integer.parseInt((String)aValue);
+            aValue = Integer.parseInt((String) aValue);
           } catch (NumberFormatException e) {
           }
         }
@@ -546,6 +548,38 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   public PresentationModel<AutoFillRule> getAutoFillModel() {
     return autoFillModel;
   }
-  
+
+  public List<String> validate() {
+    List<String> messages = new ArrayList<>();
+    validateShuffleTagPattern(messages);
+    return messages;
+
+  }
+
+  private void validateShuffleTagPattern(List<String> messages) {
+    if (trackOrderType.getValue().equals(TrackOrderOption.SHUFFLE_SERVER) && this.getBufferedModel("shuffleType").getValue().equals(SHUFFLE_BUCKET)) {
+      HashMap<String, Object> opts = (HashMap<String, Object>) getBufferedModel("shuffleOpts").getValue();
+      if (!opts.containsKey("pattern") || opts.get("pattern").equals("")) {
+        messages.add(textProvider.getString("playlist.cfg.validation.tagPatternMissing"));
+      } else {
+        String[] tags = StringUtils.split((String) opts.get("pattern"), ",");
+        StringBuffer missingTags = new StringBuffer();
+        for (String tag : tags) {
+          if (!(tag.equals("song") || tag.equals("jingle") || tag.equals("moderation"))) {
+            if (!(tagManager.getTag(tag) instanceof StaticTag)) {
+              if (missingTags.length() > 0) {
+                missingTags.append(',');
+              }
+              missingTags.append(tag);
+            }
+          }
+        }
+        if(missingTags.length() > 0) {
+          messages.add(textProvider.getString("playlist.cfg.validation.invalidTags", missingTags.toString()));
+        }
+      }
+    }
+
+  }
 
 }

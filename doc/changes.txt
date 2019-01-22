@@ -12,6 +12,7 @@ Version 4.10.0
 [+] Automatisches Befüllen von geshuffelten Playlists auf Basis von Tags oder anderen Playlists
 [+] Neues Shuffleverfahren: Auswahl eines Teils einer größeren Playlist
 [+] Gebundene Jingles für Shuffeln auf dem Server mit Station Admin-Verfahren
+[+] Playlistkonfiguration: Validierung von Muster für Tag-Pattern-Verfahren
 [*] Nach Übernahme von hochgeladenen Tracks ohne Artist / Titel in Playlist konnte es zu Fehlern kommen
 
 Version 4.9.1
