@@ -54,7 +54,6 @@ public class Playlist extends AbstractBean {
 
   private String shuffleType;
   private Map<String, Object> shuffleOpts;
-  private AutoFillRule autoFillRule = new AutoFillRule();
 
   private transient boolean metaDataModified = false;
 
@@ -322,14 +321,15 @@ public class Playlist extends AbstractBean {
     properties.add("shuffle = " + Boolean.toString(this.shuffle));
     properties.add("createdAt = " + (this.createdAt != null ? this.createdAt.getTime() : new Date().getTime()));
     properties.add("updatedAt = " + (this.updatedAt != null ? this.updatedAt.getTime() : new Date().getTime()));
-    if (this.shuffleOpts != null || this.autoFillRule.isEnabled()) {
+    AutoFillRule autoFillRule = this.localData != null ? this.localData.getAutoFillRule() : null;
+    if (this.shuffleOpts != null || (autoFillRule != null && autoFillRule.isEnabled())) {
       try {
         ObjectMapper mapper = new ObjectMapper();
         if (this.shuffleOpts != null) {
           properties.add("shuffleOpts = " + mapper.writeValueAsString(this.shuffleOpts));
         }
-        if (this.autoFillRule.isEnabled()) {
-          properties.add("autoFill = " + mapper.writeValueAsString(this.autoFillRule));
+        if (autoFillRule != null && autoFillRule.isEnabled()) {
+          properties.add("autoFill = " + mapper.writeValueAsString(autoFillRule));
         }
       } catch (Exception e) {
       }
@@ -704,7 +704,7 @@ public class Playlist extends AbstractBean {
     this.localData.setShuffleAllowed(shuffleAllowed);
     this.firePropertyChange("localShuffleAllowed", old, shuffleAllowed);
     if(!shuffle && !shuffleAllowed) {
-      autoFillRule.setEnabled(false);
+      localData.getAutoFillRule().setEnabled(false);
     }
   }
 
@@ -785,7 +785,7 @@ public class Playlist extends AbstractBean {
     if (map.containsKey("autoFill")) {
       try {
         ObjectMapper mapper = new ObjectMapper();
-        this.autoFillRule = mapper.readValue(map.get("autoFill"), AutoFillRule.class);
+        this.localData.setAutoFillRule(mapper.readValue(map.get("autoFill"), AutoFillRule.class));
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -802,7 +802,8 @@ public class Playlist extends AbstractBean {
       this.metaDataModified = true;
     }
     if(!shuffle && !isLocalShuffleAllowed()) {
-      autoFillRule.setEnabled(false);
+      this.ensureLocalDataExists();
+      localData.getAutoFillRule().setEnabled(false);
     }
     getPcs().firePropertyChange("shuffle", old, shuffle);
   }
@@ -1106,12 +1107,14 @@ public class Playlist extends AbstractBean {
   }
 
   public AutoFillRule getAutoFillRule() {
-    return autoFillRule;
+    this.ensureLocalDataExists();
+    return this.localData.getAutoFillRule();
   }
 
   public void setAutoFillRule(AutoFillRule autoFillRule) {
-    AutoFillRule old = this.autoFillRule;
-    this.autoFillRule = autoFillRule;
+    this.ensureLocalDataExists();
+    AutoFillRule old = this.localData.getAutoFillRule();
+    this.localData.setAutoFillRule(autoFillRule);
     this.firePropertyChange("autoFillRule", old, autoFillRule);
   }
 }

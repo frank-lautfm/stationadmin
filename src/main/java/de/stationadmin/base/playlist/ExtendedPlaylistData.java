@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
  */
 public class ExtendedPlaylistData {
   private static final int VERSION = 1;
+  private AutoFillRule autoFillRule = new AutoFillRule();
   private int id;
   private boolean shuffleAllowed = false;
   private boolean gvlCheck = true;
@@ -303,6 +304,14 @@ public class ExtendedPlaylistData {
    */
   void setId(int id) {
     this.id = id;
+  }
+
+  public AutoFillRule getAutoFillRule() {
+    return autoFillRule;
+  }
+
+  public void setAutoFillRule(AutoFillRule autoFillRule) {
+    this.autoFillRule = autoFillRule;
   }
 
 }

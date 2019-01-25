@@ -10,6 +10,7 @@ Station Admin für laut.fm - Änderungen
 Version 4.10.1
 --------------
 [*] Scriptfehler beim Shuffeln mit Station Admin-Verfahren wenn eine Regel für gebundene Jingles keiner Gruppe zugeordnet war
+[*] Regeln zum Befüllen gingen beim Synchronisieren verloren
 
 Version 4.10.0
 --------------
