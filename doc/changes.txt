@@ -11,6 +11,7 @@ Version 4.10.1
 --------------
 [*] Scriptfehler beim Shuffeln mit Station Admin-Verfahren wenn eine Regel für gebundene Jingles keiner Gruppe zugeordnet war
 [*] Regeln zum Befüllen gingen beim Synchronisieren verloren
+[#] Jingle am Playlistanfang wird beim erneuten befüllen stehen gelassen.
 
 Version 4.10.0
 --------------

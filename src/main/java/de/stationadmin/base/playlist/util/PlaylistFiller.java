@@ -45,6 +45,13 @@ public class PlaylistFiller {
    */
   public void fillPlaylist(Playlist playlist) throws IOException {
     if (playlist.getAutoFillRule().isEnabled()) {
+      BasicTrack firstJingle = null;
+      if(playlist.getEntries().size() > 0) {
+        if(playlist.getEntry(0).getTrack().getType() == BasicTrack.TYPE_JINGLE) {
+          firstJingle = playlist.getEntry(0).getTrack();
+        }
+      }
+      
       playlist.removeEntries(new ArrayList<Entry>(playlist.getEntries()));
       Map<Integer, BasicTrack> tracks = new HashMap<>();
 
@@ -81,6 +88,13 @@ public class PlaylistFiller {
       // add tracks from source tags and playlists
       ArrayList<BasicTrack> trackList = new ArrayList<>(tracks.values());
       trackList.sort(new TrackComparator());
+
+      if(firstJingle != null) {
+        if(trackList.remove(firstJingle)) {
+          playlist.addTrack(firstJingle);
+        }
+      }
+      
       for (BasicTrack track : trackList) {
         playlist.addTrack(track);
       }
