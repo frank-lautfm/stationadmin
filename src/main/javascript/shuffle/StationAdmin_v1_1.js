@@ -477,7 +477,7 @@
 					var rIdx = playlistTracks[i].boundTo[r];
 					var group = opts.trackRuleGroups[opts.trackRules[rIdx].groupName];
 					var ruleTimeMatch = currentTime - opts.trackRules[rIdx].lastPlay > opts.trackRules[rIdx].minDistance * 60000;
-					var groupTimeMatch = !('lastPlay' in group) || currentTime - group.lastPlay > group.minDistance * 60000;
+					var groupTimeMatch = group == null || !('lastPlay' in group) || currentTime - group.lastPlay > group.minDistance * 60000;
 					if(ruleTimeMatch && groupTimeMatch) {
 						applicableRules.push(opts.trackRules[rIdx]);
 					}
