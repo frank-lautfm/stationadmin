@@ -32,7 +32,9 @@ public class TempPlaylistWindow extends JFrame {
     ValueHolder playlistHolder = new ValueHolder(null, true);
     PlaylistViewer viewer = new PlaylistViewer(ctx, playlistHolder);
     viewer.setValidationEnabled(false);
-    playlistHolder.setValue(new Playlist(ctx.getAdminClient().getTrackService().getTrackRegistry(), PlaylistType.TEMPORARY));
+    Playlist playlist = new Playlist(ctx.getAdminClient().getTrackService().getTrackRegistry(), PlaylistType.TEMPORARY);
+    playlist.setLocalShuffleAllowed(true);
+    playlistHolder.setValue(playlist);
     this.getContentPane().setLayout(new BorderLayout());
     this.getContentPane().add(viewer, BorderLayout.CENTER);
     this.setSize(500, 600);

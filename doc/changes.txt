@@ -7,6 +7,11 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
+Version 4.10.2
+--------------
+[*] Einstellungen zum Generieren gingen beim Synchronisieren verloren
+[*] Shuffeln für temporäre Playlists wieder möglich
+
 Version 4.10.1
 --------------
 [*] Scriptfehler beim Shuffeln mit Station Admin-Verfahren wenn eine Regel für gebundene Jingles keiner Gruppe zugeordnet war

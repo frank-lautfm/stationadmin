@@ -703,7 +703,7 @@ public class Playlist extends AbstractBean {
     boolean old = this.isLocalShuffleAllowed();
     this.localData.setShuffleAllowed(shuffleAllowed);
     this.firePropertyChange("localShuffleAllowed", old, shuffleAllowed);
-    if(!shuffle && !shuffleAllowed) {
+    if (!shuffle && !shuffleAllowed) {
       localData.getAutoFillRule().setEnabled(false);
     }
   }
@@ -801,9 +801,12 @@ public class Playlist extends AbstractBean {
     if (old != shuffle) {
       this.metaDataModified = true;
     }
-    if(!shuffle && !isLocalShuffleAllowed()) {
-      this.ensureLocalDataExists();
-      localData.getAutoFillRule().setEnabled(false);
+    if (!shuffle && !isLocalShuffleAllowed()) {
+      if (localData != null) {
+        // turn auto fill rule off
+        localData.getAutoFillRule().setEnabled(false);
+      }
+      // else: no auto fill rule yet => can't be enabled
     }
     getPcs().firePropertyChange("shuffle", old, shuffle);
   }
