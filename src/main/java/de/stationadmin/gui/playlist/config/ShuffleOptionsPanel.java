@@ -33,6 +33,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.Playlist.Entry;
+import de.stationadmin.base.playlist.ShuffleScriptMeta;
 import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
@@ -67,12 +68,15 @@ public class ShuffleOptionsPanel extends JPanel {
 
   private void updatePanel() {
     this.removeAll();
-    if (model.getBufferedModel("shuffleType").getValue().equals(PlaylistConfigurationModel.SHUFFLE_BUCKET)) {
-      this.add(bucketOptsPanel, BorderLayout.CENTER);
-    } else if (model.getBufferedModel("shuffleType").getValue().equals(PlaylistConfigurationModel.SHUFFLE_BLOCKSELECT)) {
-      this.add(blockSelectionOptsPanel, BorderLayout.CENTER);
-    } else {
-      this.add(stationAdminOptsPanel, BorderLayout.CENTER);
+    ShuffleScriptMeta script = (ShuffleScriptMeta)model.getShuffleScript().getValue();
+    if (script != null && script.getOptsKey() != null) {
+      if (script.getOptsKey().equalsIgnoreCase(ShuffleScriptMeta.BUCKET)) {
+        this.add(bucketOptsPanel, BorderLayout.CENTER);
+      } else if (script.getOptsKey().equalsIgnoreCase(ShuffleScriptMeta.BLOCKSELECT)) {
+        this.add(blockSelectionOptsPanel, BorderLayout.CENTER);
+      } else if (script.getOptsKey().equalsIgnoreCase(ShuffleScriptMeta.STATIONADMIN)) {
+        this.add(stationAdminOptsPanel, BorderLayout.CENTER);
+      }
     }
     this.invalidate();
     this.repaint();

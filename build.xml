@@ -71,10 +71,7 @@
 
 		<!-- copy resources -->
 		<copy todir="${build.dir}">
-			<fileset dir="${src.dir.resources}" excludes="*.vm stationadmin-default.conf trackmapping" />
-		</copy>
-		<copy todir="${build.dir}">
-			<fileset dir="${src.dir.javascript}"  />
+			<fileset dir="${src.dir.resources}" excludes="*.vm stationadmin-default.conf trackmapping shufflescripts.json" />
 		</copy>
 
 	</target>
@@ -83,18 +80,31 @@
 		<mkdir dir="${dist.dir.app}/" />
 		<mkdir dir="${dist.dir.app}/lib" />
 		<mkdir dir="${dist.dir.app}/conf" />
+		<mkdir dir="${dist.dir.app}/script" />
 
 		<copy todir="${dist.dir.app}/lib/">
 			<fileset dir="${basedir}/lib" />
 		</copy>
+		
 
 		<copy todir="${dist.dir.app}/conf">
 			<fileset dir="${src.dir.resources}">
 				<include name="*.vm"/>
-        <include name="stationadmin-default.conf"/>
-        <include name="trackmapping"/>
+		        <include name="stationadmin-default.conf"/>
+		        <include name="trackmapping"/>
 			</fileset>
 		</copy>
+		
+		<copy todir="${dist.dir.app}/script">
+			<fileset dir="${src.dir.resources}">
+		        <include name="shufflescripts.json"/>
+			</fileset>
+			<fileset dir="${basedir}/doc" includes="shufflescripts.readme.txt" />
+		</copy>
+		<copy todir="${dist.dir.app}/script">
+			<fileset dir="${src.dir.javascript}"/>
+		</copy>
+		
 
 		<copy todir="${dist.dir.app}//">
 			<fileset dir="${basedir}/doc" includes="license.txt changes.txt" />
@@ -104,7 +114,7 @@
 		<manifestclasspath property="jar.classpath" jarfile="${dist.dir.app}/StationAdmin.jar">
 			<classpath>
 				<pathelement path="${dist.dir.app}/conf/" />
-				<pathelement path="${dist.dir.app}/userguide/" />
+				<pathelement path="${dist.dir.app}/script/" />
 				<fileset dir="${dist.dir.app}/lib/" includes="**/*.jar" />
 			</classpath>
 		</manifestclasspath>

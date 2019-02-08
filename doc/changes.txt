@@ -7,6 +7,13 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
+Version 4.10.3
+--------------
+[*] Korrekte Zuordnung von älteren Versionen der Shufflescripte
+[#] Bei Konfiguration von Tag-Pattern als Shufflescript wird die aktuellste Version (1.2) gesetzt
+[#] Verfügbare Shufflescripte werden aus Konfigurationsdatei gelesen
+
+
 Version 4.10.2
 --------------
 [*] Einstellungen zum Generieren gingen beim Synchronisieren verloren

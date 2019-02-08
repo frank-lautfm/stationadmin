@@ -1,0 +1,36 @@
+﻿[  
+   {  
+      "key":"basic",
+      "defaultVersion":"basic_v1",
+      "optsKey":null,
+      "file":null,
+      "defaultOpts":null,
+      "supportsGlobalOpts":false
+   },
+   {  
+      "key":"bucket",
+      "defaultVersion":"bucket_v1_2",
+      "optsKey":"bucket",
+      "file":null,
+      "defaultOpts":{  
+         "pattern":"song"
+      },
+      "supportsGlobalOpts":false
+   },
+   {  
+      "key":"StationAdmin",
+      "defaultVersion":"StationAdmin_v1_1",
+      "optsKey":"StationAdmin",
+      "file":"StationAdmin_v1_1.js",
+      "defaultOpts":null,
+      "supportsGlobalOpts":true
+   },
+   {  
+      "key":"BlockSelect",
+      "defaultVersion":"BlockSelect_v1",
+      "optsKey":"BlockSelect",
+      "file":"BlockSelect_v1.js",
+      "defaultOpts":null,
+      "supportsGlobalOpts":false
+   }
+]

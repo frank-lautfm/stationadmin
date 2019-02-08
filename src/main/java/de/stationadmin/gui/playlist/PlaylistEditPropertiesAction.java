@@ -13,7 +13,6 @@ import javax.swing.Action;
 import com.jgoodies.binding.value.ValueModel;
 
 import de.stationadmin.base.playlist.Playlist;
-import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.playlist.config.PlaylistConfigurationDialog;
 import de.stationadmin.gui.playlist.config.PlaylistConfigurationModel;
@@ -45,7 +44,7 @@ class PlaylistEditPropertiesAction extends AbstractAction implements PropertyCha
   public void actionPerformed(ActionEvent e) {
     Playlist playlist = (Playlist) this.playlistHolder.getValue();
     if (playlist != null) {
-      PlaylistConfigurationModel model = new PlaylistConfigurationModel(playlist, this.ctx.getAdminClient().getTagManager(), ctx.getAdminClient().getSettings(), ctx.getTextProvider());
+      PlaylistConfigurationModel model = new PlaylistConfigurationModel(playlist, this.ctx.getAdminClient().getTagManager(), ctx.getAdminClient().getSettings(), ctx.getAdminClient().getPlaylistService().getShuffleScripts(), ctx.getTextProvider());
       PlaylistConfigurationDialog dlg = new PlaylistConfigurationDialog(this.ctx, model);
       dlg.setVisible(true);
     }

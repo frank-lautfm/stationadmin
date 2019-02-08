@@ -32,6 +32,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 import org.jdesktop.swingx.error.ErrorLevel;
@@ -44,6 +45,7 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.PlaylistService;
+import de.stationadmin.base.playlist.ShuffleScriptMeta;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
@@ -150,18 +152,17 @@ public class PlaylistConfigurationDialog extends JDialog {
       panel.add(trackOrderCmb, cc.xy(4, row));
       row += 2;
 
-      List<String> shuffleFuncOptions = new ArrayList<>();
+      List<ShuffleScriptMeta> shuffleFuncOptions = new ArrayList<>();
       if (model.getBean().getShuffleType() == null) {
         shuffleFuncOptions.add(null);
       }
-      shuffleFuncOptions.add(PlaylistConfigurationModel.SHUFFLE_CLASSIC);
-      shuffleFuncOptions.add(PlaylistConfigurationModel.SHUFFLE_BUCKET);
-      shuffleFuncOptions.add(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN);
-      shuffleFuncOptions.add(PlaylistConfigurationModel.SHUFFLE_BLOCKSELECT);
+      for (ShuffleScriptMeta script : ctx.getAdminClient().getPlaylistService().getShuffleScripts()) {
+        shuffleFuncOptions.add(script);
+      }
 
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.shuffleFunc")), cc.xy(2, row));
-      SelectionInList<String> shuffleFuncSelection = new SelectionInList<>(shuffleFuncOptions, model.getBufferedModel("shuffleType"));
-      final JComboBox<String> shuffleFuncCmb = BasicComponentFactory.createComboBox(shuffleFuncSelection, new DefaultListCellRenderer() {
+      SelectionInList<ShuffleScriptMeta> shuffleFuncSelection = new SelectionInList<>(shuffleFuncOptions, model.getShuffleScript());
+      final JComboBox<ShuffleScriptMeta> shuffleFuncCmb = BasicComponentFactory.createComboBox(shuffleFuncSelection, new DefaultListCellRenderer() {
         private static final long serialVersionUID = 666514488594966718L;
 
         @Override
@@ -170,30 +171,30 @@ public class PlaylistConfigurationDialog extends JDialog {
 
           if (value == null) {
             setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.custom"));
-          } else if (value.equals(PlaylistConfigurationModel.SHUFFLE_CLASSIC)) {
-            setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.classic"));
-          } else if (value.equals(PlaylistConfigurationModel.SHUFFLE_BUCKET)) {
-            setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.bucket"));
-          } else if (value.equals(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN)) {
-            setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.stationadmin"));
-          } else if (value.equals(PlaylistConfigurationModel.SHUFFLE_BLOCKSELECT)) {
-            setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.blockselect"));
+          } else {
+            ShuffleScriptMeta script = (ShuffleScriptMeta)value;
+            String key = "playlistcfg.property.shuffleFunc." + script.getKey().toLowerCase();
+            String text = ctx.getTextProvider().getString(key);
+            if (!key.equals(text)) {
+              setText(text);
+            } else {
+              setText(script.getKey());
+            }
           }
-
           return this;
         }
 
       });
-      
+
       shuffleFuncCmb.setEnabled(model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER));
       this.model.getTrackOrderType().addValueChangeListener(new PropertyChangeListener() {
-        
+
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
           shuffleFuncCmb.setEnabled(evt.getNewValue().equals(TrackOrderOption.SHUFFLE_SERVER));
         }
       });
-      
+
       panel.add(shuffleFuncCmb, cc.xy(4, row));
       row += 2;
 
@@ -263,14 +264,13 @@ public class PlaylistConfigurationDialog extends JDialog {
 
   private boolean checkIfShuffleOptsEnabled() {
     return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER)
-        && (model.getBufferedModel("shuffleType").getString().equals(PlaylistConfigurationModel.SHUFFLE_BUCKET) || model.getBufferedModel("shuffleType").getString().equals(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN)  || model.getBufferedModel("shuffleType").getString().equals(PlaylistConfigurationModel.SHUFFLE_BLOCKSELECT))
-        && model.getBean().getType() != PlaylistType.ARCHIVED;
-  }
-  
-  private boolean checkIfAutoFillEnabled() {
-    return (model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER) || model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_LOCAL)) && model.getBean().getType() != PlaylistType.ARCHIVED;
+        && (model.getShuffleScript().getValue() != null && StringUtils.isNotEmpty(((ShuffleScriptMeta)model.getShuffleScript().getValue()).getOptsKey())) && model.getBean().getType() != PlaylistType.ARCHIVED;
   }
 
+  private boolean checkIfAutoFillEnabled() {
+    return (model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER) || model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_LOCAL))
+        && model.getBean().getType() != PlaylistType.ARCHIVED;
+  }
 
   private boolean checkIfGenerateEnabled() {
     return model.getTrackOrderType().getValue().equals(TrackOrderOption.GENERATE) && model.getBean().getType() != PlaylistType.ARCHIVED;
@@ -307,9 +307,9 @@ public class PlaylistConfigurationDialog extends JDialog {
         tabPane.setEnabledAt(3, checkIfGenerateEnabled());
       }
     });
-    
+
     model.getBufferedModel("shuffle").addPropertyChangeListener(new PropertyChangeListener() {
-      
+
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         tabPane.setEnabledAt(4, checkIfAutoFillEnabled());
@@ -335,13 +335,12 @@ public class PlaylistConfigurationDialog extends JDialog {
         @Override
         public void actionPerformed(ActionEvent evt) {
           List<String> messages = model.validate();
-          if(messages.size() > 0) {
-            ErrorInfo errorInfo = new ErrorInfo(ctx.getTextProvider().getString("error.title"), messages.get(0), null,
-                "general", null, ErrorLevel.SEVERE, null);
+          if (messages.size() > 0) {
+            ErrorInfo errorInfo = new ErrorInfo(ctx.getTextProvider().getString("error.title"), messages.get(0), null, "general", null, ErrorLevel.SEVERE, null);
             JXErrorPane.showDialog(AppUtils.getRootFrame(), errorInfo);
             return;
           }
-          
+
           model.triggerCommit();
           try {
             playlistService.savePlaylist(model.getBean());

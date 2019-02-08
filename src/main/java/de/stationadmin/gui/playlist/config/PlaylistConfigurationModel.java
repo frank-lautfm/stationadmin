@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
@@ -29,6 +30,7 @@ import de.stationadmin.base.Settings;
 import de.stationadmin.base.playlist.AutoFillRule;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.PlaylistService;
+import de.stationadmin.base.playlist.ShuffleScriptMeta;
 import de.stationadmin.base.playlist.shuffle.Advice;
 import de.stationadmin.base.playlist.shuffle.TagSequenceAdvice;
 import de.stationadmin.base.playlist.shuffle.TitleNameLimitAdvice;
@@ -44,10 +46,7 @@ import de.stationadmin.gui.util.NonObservingPresentationModel;
  */
 @SuppressWarnings("unchecked")
 public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
-  public static final String SHUFFLE_CLASSIC = PlaylistService.SHUFFLE_CLASSIC;
-  public static final String SHUFFLE_BUCKET = PlaylistService.SHUFFLE_BUCKET;
-  public static final String SHUFFLE_STATIONADMIN = PlaylistService.SHUFFLE_STATIONADMIN;
-  public static final String SHUFFLE_BLOCKSELECT = PlaylistService.SHUFFLE_BLOCKSELECT;
+
   private static final long serialVersionUID = 4865584693941336972L;
   private static final Logger log = Logger.getLogger(PlaylistConfigurationModel.class);
   private AbstractValueModel tags;
@@ -61,16 +60,21 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   private Settings settings;
   private TextProvider textProvider;
 
+  private List<ShuffleScriptMeta> shuffleScripts;
+  private ShuffleScriptModel shuffleScript;
+
   /**
    * @param bean
    */
-  public PlaylistConfigurationModel(Playlist playlist, TagManager tagManager, Settings settings, TextProvider textProvider) {
+  public PlaylistConfigurationModel(Playlist playlist, TagManager tagManager, Settings settings, List<ShuffleScriptMeta> shuffleScripts, TextProvider textProvider) {
     super(playlist);
     this.settings = settings;
     this.tags = new TagsModel();
     this.generateTags = new TrackTagsModel();
+    this.shuffleScript = new ShuffleScriptModel();
     this.tagManager = tagManager;
     this.textProvider = textProvider;
+    this.shuffleScripts = shuffleScripts;
     this.initAdvices(playlist);
     this.initTrackOrderType(playlist);
 
@@ -111,11 +115,17 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getNewValue().equals(SHUFFLE_BUCKET)) {
-          getBufferedModel("shuffleOpts").setValue(new HashMap<>());
-        } else if (evt.getNewValue().equals(SHUFFLE_STATIONADMIN)) {
-          HashMap<String, Object> opts = new HashMap<>();
-          PlaylistService.updateGlobalShuffleOpts(opts, PlaylistConfigurationModel.this.settings);
+        ShuffleScriptMeta current = (ShuffleScriptMeta) shuffleScript.getValue();
+        if (current != null) {
+          Map<String, Object> opts;
+          if (current.getDefaultOpts() != null) {
+            opts = current.getDefaultOpts();
+          } else {
+            opts = new HashMap<>();
+          }
+          if (current.isSupportsGlobalOpts()) {
+            PlaylistService.updateGlobalShuffleOpts(opts, PlaylistConfigurationModel.this.settings);
+          }
           getBufferedModel("shuffleOpts").setValue(opts);
         }
       }
@@ -533,6 +543,38 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
 
   }
 
+  class ShuffleScriptModel extends AbstractValueModel {
+    private ShuffleScriptMeta script;
+    private String shuffleType;
+
+    @Override
+    public Object getValue() {
+      String shuffleType = getBufferedModel("shuffleType").getString();
+      if (shuffleType != null) {
+        if (!shuffleType.equals(this.shuffleType)) {
+          this.script = PlaylistService.getShuffleScriptMeta(shuffleScripts, shuffleType);
+          this.shuffleType = shuffleType;
+        }
+        return script;
+
+      } else {
+        return null;
+      }
+    }
+
+    @Override
+    public void setValue(Object value) {
+      ShuffleScriptMeta script = (ShuffleScriptMeta) value;
+      if (script != null) {
+        getBufferedModel("shuffleType").setValue(script.getDefaultVersion());
+        this.script = script;
+        this.shuffleType = script.getDefaultVersion();
+      } else {
+        getBufferedModel("shuffleType").setValue(null);
+      }
+    }
+  }
+
   public ValueModel getAdvices() {
     return advices;
   }
@@ -557,7 +599,8 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   }
 
   private void validateShuffleTagPattern(List<String> messages) {
-    if (trackOrderType.getValue().equals(TrackOrderOption.SHUFFLE_SERVER) && this.getBufferedModel("shuffleType").getValue().equals(SHUFFLE_BUCKET)) {
+    if (trackOrderType.getValue().equals(TrackOrderOption.SHUFFLE_SERVER) && this.shuffleScript.getValue() != null
+        && ((ShuffleScriptMeta) this.shuffleScript.getValue()).getKey().equals(ShuffleScriptMeta.BUCKET)) {
       HashMap<String, Object> opts = (HashMap<String, Object>) getBufferedModel("shuffleOpts").getValue();
       if (!opts.containsKey("pattern") || opts.get("pattern").equals("")) {
         messages.add(textProvider.getString("playlist.cfg.validation.tagPatternMissing"));
@@ -574,12 +617,20 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
             }
           }
         }
-        if(missingTags.length() > 0) {
+        if (missingTags.length() > 0) {
           messages.add(textProvider.getString("playlist.cfg.validation.invalidTags", missingTags.toString()));
         }
       }
     }
 
+  }
+
+  public ValueModel getShuffleScript() {
+    return shuffleScript;
+  }
+
+  public List<ShuffleScriptMeta> getShuffleScripts() {
+    return shuffleScripts;
   }
 
 }

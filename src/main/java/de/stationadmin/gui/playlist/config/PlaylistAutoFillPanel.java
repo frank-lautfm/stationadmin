@@ -24,6 +24,7 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.AutoFillRule;
 import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.base.playlist.ShuffleScriptMeta;
 import de.stationadmin.gui.ClientContext;
 
 public class PlaylistAutoFillPanel extends JPanel {
@@ -174,12 +175,14 @@ public class PlaylistAutoFillPanel extends JPanel {
 
     {
       final JCheckBox jinglesCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("includeTrackRules"), ctx.getString("playlistcfg.property.autofill.includeTrackRules"));
-      jinglesCb.setEnabled(playlistCfgModel.getBufferedModel("shuffleType").getValue().equals(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN));
+      ShuffleScriptMeta script = playlistCfgModel.getShuffleScript() != null ? (ShuffleScriptMeta)playlistCfgModel.getShuffleScript().getValue() : null;
+      jinglesCb.setEnabled(script != null && script.isSupportsGlobalOpts());
       playlistCfgModel.getBufferedModel("shuffleType").addValueChangeListener(new PropertyChangeListener() {
         
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-          jinglesCb.setEnabled(evt.getNewValue() != null && evt.getNewValue().equals(PlaylistConfigurationModel.SHUFFLE_STATIONADMIN));
+          ShuffleScriptMeta script = playlistCfgModel.getShuffleScript() != null ? (ShuffleScriptMeta)playlistCfgModel.getShuffleScript().getValue() : null;
+          jinglesCb.setEnabled(script != null && script.isSupportsGlobalOpts());
           
         }
       });

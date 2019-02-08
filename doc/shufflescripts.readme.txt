@@ -1,0 +1,9 @@
+Falls Du eigene Scripte einbinden möchtest oder vorhandene Scripte anpassen  möchtest erstelle Dir in diesem Verzeichnis eine Datei "shufflescripts-custom.json". Das Format muss dem Format der shufflescripts.json entsprechen.
+
+Jeder Eintrag benötigt die folgenden Angaben:
+- key - ein eindeutiger Key der Dein Script identifiziert. Dieser muß in einer Kommentarzeile am Anfang des Scripts vorkommen.
+- defaultVersion - Key plus Versionsinformation
+- optsKey - steuert wie und ob Station Admin Shuffle-Optionen editierbar macht. Mögliche Werte sind die Keys der Standardscripte.
+- file - Name der Datei im shuffle-Ordner die das Script enthält. 
+- defaultOpts - Default-Optionen für dieses Script. Diese werden auch gesetzt wenn die Optionen in Station Admin nicht editierbar sind.
+- supportsGlobalOpts - ob die globalen Optionen von Station Admin bezüglich Jingles etc unterstützt werden
