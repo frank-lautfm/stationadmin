@@ -6,6 +6,10 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.11.0
+--------------
+[*] Standard-Ad-Trigger wurde beim Synchronisieren übergegangen wenn er bis dahin noch gar nicht verwendet wurde
+[+] Shuffle-Script: Positionierung des ersten Jingles berücksichtigt Trackhistorie
 
 Version 4.10.3
 --------------

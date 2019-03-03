@@ -314,7 +314,12 @@ public class TrackRegistry extends AbstractBean {
    * @return
    */
   public RegisteredTrack getTrack(int id) {
-    return this.tracks.get(id);
+    RegisteredTrack track = this.tracks.get(id);
+    if(track == null && id == STANDARD_AD_TRIGGER_ID) {
+      this.register(getStandardAdTrigger());
+      track = this.tracks.get(id);
+    }
+    return track;
   }
 
   /**
@@ -426,7 +431,7 @@ public class TrackRegistry extends AbstractBean {
         this.standardAdTrigger.setType(DetailedTrack.TYPE_JINGLE);
         this.standardAdTrigger.setArtist("START_AD_BREAK");
         this.standardAdTrigger.setTitle("START_AD_BREAK");
-        this.standardAdTrigger.setAlbum("ad");
+        this.standardAdTrigger.setAlbum("Offizieller Werbetrigger, ID 0");
         this.standardAdTrigger.setLength(1);
         this.standardAdTrigger.setYear(2017);
         this.standardAdTrigger.setId(STANDARD_AD_TRIGGER_ID);
