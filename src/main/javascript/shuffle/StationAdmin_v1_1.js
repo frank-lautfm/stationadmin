@@ -1,4 +1,4 @@
-// key: StationAdmin_v1_1
+// key: StationAdmin_v1_1_1
 ( function( tracks, opts, trackStats ){
 	
 	var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -30,6 +30,7 @@
 	var boundTracks = {};
 
 	var startTime;
+	var lastJinglePlay = -1;
 
 	
 	// basic array shuffle function
@@ -346,7 +347,12 @@
 			jingleOffset = jingleInterval;
 		}
 		else {
-			jingleOffset = Math.floor((Math.random() * jingleInterval));
+			if(lastJinglePlay > -1) {
+				jingleOffset = Math.max(0, jingleInterval - lastJinglePlay);
+			}
+			else {
+				jingleOffset = Math.floor((Math.random() * jingleInterval));
+			}
 			timeNextJingle = jingleOffset;
 		}
 		
@@ -686,6 +692,9 @@
 				if(lastPlays[trackStats[i].id] == null) {
 					lastPlays[trackStats[i].id] = diff;
 				}
+			}
+			if(trackStats[i].type == 'jingle') {
+				lastJinglePlay = diff;
 			}
 			if(trackRulesEnabled && trackStats[i].id in boundTracks) {
 				for(var r = 0; r < boundTracks[trackStats[i].id].rules.length; r++) {
