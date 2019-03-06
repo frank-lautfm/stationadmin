@@ -311,6 +311,7 @@ public class PlaylistService implements Service {
   private void loadShuffleScripts() throws IOException {
     this.loadShuffleScripts("shufflescripts.json");
     this.loadShuffleScripts("shufflescripts-custom.json");
+    this.loadShuffleScripts("shufflescripts-" + ctx.getStation() + ".json");
   }
 
   private void loadShuffleScripts(String fileName) throws IOException {
@@ -575,7 +576,11 @@ public class PlaylistService implements Service {
       for (int i = 0; i < trackRefs.length; i++) {
         tracks[i] = this.trackRegistry.getTrack(trackRefs[i].getTrackId());
         if (tracks[i] == null) {
-          missing[missingIdx++] = trackRefs[i].getTrackId();
+          if (trackRefs[i].getTrackId() == TrackRegistry.STANDARD_AD_TRIGGER_ID) {
+            tracks[i] = this.trackRegistry.getStandardAdTrigger();
+          } else {
+            missing[missingIdx++] = trackRefs[i].getTrackId();
+          }
         }
       }
 
