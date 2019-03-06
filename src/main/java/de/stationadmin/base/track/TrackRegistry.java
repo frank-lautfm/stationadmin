@@ -314,12 +314,7 @@ public class TrackRegistry extends AbstractBean {
    * @return
    */
   public RegisteredTrack getTrack(int id) {
-    RegisteredTrack track = this.tracks.get(id);
-    if(track == null && id == STANDARD_AD_TRIGGER_ID) {
-      this.register(getStandardAdTrigger());
-      track = this.tracks.get(id);
-    }
-    return track;
+    return this.tracks.get(id);
   }
 
   /**
