@@ -825,7 +825,7 @@ public class PlaylistService implements Service {
     }
 
     // track rules
-    if (settings.getTrackRules().size() > 0) {
+    if (settings.getTrackRules() != null && settings.getTrackRules().size() > 0) {
       opts.put("trackRuleJingleCollisionStrategy", settings.getTrackRuleJingleCollsisionStrategy().name().toLowerCase());
       opts.put("trackRuleGroupCollisionStrategy", settings.getTrackRuleGroupCollisionStrategy().name().toLowerCase());
 
