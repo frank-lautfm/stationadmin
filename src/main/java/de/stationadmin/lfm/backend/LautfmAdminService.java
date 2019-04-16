@@ -31,6 +31,7 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustStrategy;
@@ -261,6 +262,28 @@ public class LautfmAdminService {
 
   }
 
+  private CloseableHttpResponse doPut(String path, Object content) throws IOException {
+    HttpPut request = new HttpPut(BASE_URL + path);
+
+    this.addAuthHeaders(request);
+
+    ObjectMapper mapper = new ObjectMapper();
+    String contentStr = mapper.writeValueAsString(content);
+
+    if (log.isInfoEnabled()) {
+      log.info("PUT " + BASE_URL + path);
+      log.info(contentStr);
+    }
+
+    StringEntity entity = new StringEntity(contentStr, ContentType.APPLICATION_JSON);
+    request.setEntity(entity);
+    CloseableHttpResponse response = this.client.execute(request);
+    this.checkResponse(response);
+
+    return response;
+
+  }
+
   public List<Station> getStations() throws IOException {
     CloseableHttpResponse response = this.doGet("/stations");
     StationList list = deserializeJson(response, StationList.class);
@@ -315,6 +338,13 @@ public class LautfmAdminService {
     CurrentPlaylist pl = deserializeJson(response, CurrentPlaylist.class);
     response.close();
     return pl;
+  }
+
+  public <T> T getClientConfiguration(int stationId, Class<T> type) throws IOException {
+    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/client_config");
+    T cfg = deserializeJson(response, type);
+    response.close();
+    return cfg;
   }
 
   public Playlist getPlaylist(int stationId, int playlistId) throws IOException {
@@ -503,6 +533,16 @@ public class LautfmAdminService {
     } finally {
       response.close();
     }
+  }
+
+  public <T> T updateClientConfiguration(int stationId, T cfg, Class<T> type) throws IOException {
+    CloseableHttpResponse response = this.doPut("/stations/" + stationId + "/client_config", cfg);
+    try {
+      return deserializeJson(response, type);
+    } finally {
+      response.close();
+    }
+
   }
 
   public Playlist updatePlaylist(int stationId, PlaylistHead playlist) throws IOException {
