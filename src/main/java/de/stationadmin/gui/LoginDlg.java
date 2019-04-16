@@ -163,7 +163,7 @@ public class LoginDlg extends JDialog {
           dlg.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,pref,5dlu"));
           dlg.getContentPane().add(new JLabel("Bitte öffne die folgende URL in Deinem Browser:"), cc.xy(2, 2));
           JTextField tf = new JTextField(40);
-          tf.setText("https://new.radioadmin.laut.fm/login?callback_url=StationAdmin");
+          tf.setText("https://radioadmin.laut.fm/login?callback_url=StationAdmin");
           tf.setEditable(false);
           dlg.getContentPane().add(tf, cc.xy(2, 4));
           dlg.setSize(400, 100);
