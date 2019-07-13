@@ -37,6 +37,9 @@ public class PlaylistHead {
   @JsonProperty("shuffle_opts")
   private Map<String,Object> shuffleOpts;
   
+  @JsonProperty("automation_algorithm_name")
+  private String automationAlgorithm;
+  
   
   public int getId() {
     return id;
@@ -128,6 +131,14 @@ public class PlaylistHead {
 
   public void setShuffleOpts(Map<String, Object> shuffleOpts) {
     this.shuffleOpts = shuffleOpts;
+  }
+
+  public String getAutomationAlgorithm() {
+    return automationAlgorithm;
+  }
+
+  public void setAutomationAlgorithm(String automationAlgorithm) {
+    this.automationAlgorithm = automationAlgorithm;
   }
 
 }

@@ -326,6 +326,59 @@ public class LautfmAdminService {
     response.close();
   }
 
+  public List<AutomationAlgorithmHead> getAutomationAlgorithms() throws IOException {
+
+    CloseableHttpResponse response = this.doGet("/automation_algorithms");
+    AutomationAlgorithmHead[] list = deserializeJson(response, AutomationAlgorithmHead[].class);
+    response.close();
+    return Arrays.asList(list);
+  }
+
+  public AutomationAlgorithm getAutomationAlgorithm(String name) throws IOException {
+    name = URLEncoder.encode(name, "UTF-8");
+    name = StringUtils.replace(name, "+", "%20");
+
+    CloseableHttpResponse response = this.doGet("/automation_algorithms/" + name);
+    AutomationAlgorithm alg = deserializeJson(response, AutomationAlgorithm.class);
+    response.close();
+    return alg;
+  }
+
+  public AutomationAlgorithm createAutomationAlgorithm(String name, String body) throws IOException {
+    name = URLEncoder.encode(name, "UTF-8");
+    name = StringUtils.replace(name, "+", "%20");
+
+    HashMap<String, String> content = new HashMap<>();
+    content.put("body", body);
+
+    CloseableHttpResponse response = this.doPut("/automation_algorithms/" + name, content);
+    AutomationAlgorithm alg = deserializeJson(response, AutomationAlgorithm.class);
+    response.close();
+    return alg;
+
+  }
+
+  public AutomationAlgorithm updateAutomationAlgorithm(String name, String body) throws IOException {
+    name = URLEncoder.encode(name, "UTF-8");
+    name = StringUtils.replace(name, "+", "%20");
+
+    HashMap<String, String> content = new HashMap<>();
+    content.put("body", body);
+
+    CloseableHttpResponse response = this.doPut("/automation_algorithms/" + name, content);
+    AutomationAlgorithm alg = deserializeJson(response, AutomationAlgorithm.class);
+    response.close();
+    return alg;
+
+  }
+
+  public void deleteAutomationAlgorithm(String name) throws IOException {
+    name = URLEncoder.encode(name, "UTF-8");
+    name = StringUtils.replace(name, "+", "%20");
+    CloseableHttpResponse response = this.doDelete("/automation_algorithms/" + name);
+    response.close();
+  }
+
   public List<ExtendedPlaylistHead> getPlaylists(int stationId) throws IOException {
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/playlists");
     PlaylistHeadList list = deserializeJson(response, PlaylistHeadList.class);
