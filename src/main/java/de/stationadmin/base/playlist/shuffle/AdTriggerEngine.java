@@ -61,7 +61,7 @@ public class AdTriggerEngine implements PlaylistEnhancer {
   }
 
   @Override
-  public List<BasicTrack> process(Playlist playlist, List<BasicTrack> tracks, boolean protectFirstJingle, Date playlistStartTime) {
+  public List<BasicTrack> process(Playlist playlist, List<BasicTrack> tracks, boolean protectFirstJingle) {
     List<BasicTrack> newTracks = new ArrayList<BasicTrack>();
 
     BasicTrack adSeparator = this.adSeparatorId > 0 ? this.trackRegistry.getTrack(this.adSeparatorId) : null;

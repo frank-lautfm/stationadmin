@@ -314,7 +314,7 @@ public class PlaylistShuffler {
     }
     
     if(this.playlistEnhancer != null && !this.protectAllJingles) {
-      newTrackList = playlistEnhancer.process(playlist, newTrackList, this.protectFirstJingle, null);
+      newTrackList = playlistEnhancer.process(playlist, newTrackList, this.protectFirstJingle);
     }
 
     playlist.setTracks(newTrackList);

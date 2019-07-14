@@ -2,7 +2,6 @@ package de.stationadmin.base.playlist.shuffle;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import de.stationadmin.base.playlist.Playlist;
@@ -27,9 +26,9 @@ public class PlaylistsEnhancerGroup implements PlaylistEnhancer {
   }
 
   @Override
-  public List<BasicTrack> process(Playlist playlist, List<BasicTrack> tracks, boolean protectFirstJingle, Date playlistStartTime) {
+  public List<BasicTrack> process(Playlist playlist, List<BasicTrack> tracks, boolean protectFirstJingle) {
     for (int i = 0; i < playlistEnhancers.size(); i++) {
-      tracks = playlistEnhancers.get(i).process(playlist, tracks, protectFirstJingle, playlistStartTime);
+      tracks = playlistEnhancers.get(i).process(playlist, tracks, protectFirstJingle);
     }
     return tracks;
   }

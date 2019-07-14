@@ -1005,7 +1005,7 @@ public class PlaylistViewer extends JPanel {
             tracks.add(entry.getTrack());
           }
         }
-        playlist.setTracks(engine.process(playlist, tracks, false, null));
+        playlist.setTracks(engine.process(playlist, tracks, false));
       }
     }
 

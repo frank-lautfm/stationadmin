@@ -1,6 +1,5 @@
 package de.stationadmin.base.playlist.shuffle;
 
-import java.util.Date;
 import java.util.List;
 
 import de.stationadmin.base.playlist.Playlist;
@@ -19,7 +18,7 @@ public interface PlaylistEnhancer {
    * Add or remove tracks
    * @param tracks
    */
-  List<BasicTrack> process(Playlist playlist, List<BasicTrack> tracks, boolean protectFirstJingle, Date playlistStartTime);
+  List<BasicTrack> process(Playlist playlist, List<BasicTrack> tracks, boolean protectFirstJingle);
   
   /**
    * Reset internal state
