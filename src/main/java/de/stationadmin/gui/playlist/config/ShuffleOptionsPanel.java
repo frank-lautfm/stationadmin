@@ -29,6 +29,7 @@ import org.jdesktop.swingx.JXTable;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.list.SelectionInList;
 import com.jgoodies.binding.value.ValueHolder;
+import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -37,6 +38,7 @@ import de.stationadmin.base.playlist.ShuffleScriptMeta;
 import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.util.EnumListCellRenderer;
 import de.stationadmin.gui.util.HintLabel;
 
 public class ShuffleOptionsPanel extends JPanel {
@@ -68,7 +70,7 @@ public class ShuffleOptionsPanel extends JPanel {
 
   private void updatePanel() {
     this.removeAll();
-    ShuffleScriptMeta script = (ShuffleScriptMeta)model.getShuffleScript().getValue();
+    ShuffleScriptMeta script = (ShuffleScriptMeta) model.getShuffleScript().getValue();
     if (script != null && script.getOptsKey() != null) {
       if (script.getOptsKey().equalsIgnoreCase(ShuffleScriptMeta.BUCKET)) {
         this.add(bucketOptsPanel, BorderLayout.CENTER);
@@ -162,7 +164,7 @@ public class ShuffleOptionsPanel extends JPanel {
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private JPanel createStationAdminOptsPanel() {
-    JPanel panel = new JPanel(new FormLayout("5dlu,pref,5dlu,pref:grow,5dlu", "8dlu,pref,7dlu,pref,7dlu,pref,5dlu,pref,10dlu,pref,5dlu,70dlu,7dlu,pref,5dlu"));
+    JPanel panel = new JPanel(new FormLayout("5dlu,pref,5dlu,pref:grow,5dlu", "8dlu,pref,7dlu,pref,7dlu,pref,5dlu,pref,10dlu,pref,5dlu,70dlu,7dlu,pref,7dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
     int row = 2;
 
@@ -321,6 +323,56 @@ public class ShuffleOptionsPanel extends JPanel {
 
       row += 2;
     }
+    
+    boolean containsNews = false;
+    for (Entry entry : model.getBean().getEntries()) {
+      if(entry.getTrackId() == 1) {
+        containsNews = true;
+        break;
+      }
+    }
+
+
+    final ValueHolder newsInterval = new ValueHolder(getOptions().containsKey("newsInterval") ? getOptions().get("newsInterval") : 60);
+    {
+      panel.add(new JLabel(this.ctx.getTextProvider().getString("playlistcfg.property.news")), cc.xywh(2, row, 3, 1));
+      SelectionInList<Integer> opts = new SelectionInList<>(new Integer[] { 60, 120, 180, 240, 300, 360 }, newsInterval);
+
+      JComboBox<Integer> optsCmb = BasicComponentFactory.createComboBox(opts, new EnumListCellRenderer(ctx.getTextProvider(), "playlistcfg.property.newsInterval.option"));
+      panel.add(optsCmb, cc.xy(4, row, CellConstraints.LEFT, CellConstraints.CENTER));
+      optsCmb.setEnabled(containsNews);
+
+      newsInterval.addValueChangeListener(new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          Integer value = (Integer) evt.getNewValue();
+          if (value.intValue() > 0) {
+            getOptions().put("newsInterval", value);
+          } else {
+            getOptions().put("newsInterval", 60);
+          }
+        }
+      });
+      row += 2;
+
+    }
+
+    final ValueModel firstJingleAfterNews = new ValueHolder(getOptions().containsKey("firstJingleAfterNews") ? getOptions().get("firstJingleAfterNews") : false);
+    {
+      JCheckBox repeatJingleCb = BasicComponentFactory.createCheckBox(firstJingleAfterNews, ctx.getTextProvider().getString("playlistcfg.property.firstJingleAfterNews"));
+      panel.add(repeatJingleCb, cc.xy(4, row, CellConstraints.LEFT, CellConstraints.CENTER));
+      repeatJingleCb.setEnabled(containsNews && ctx.getAdminClient().getSettings().isShuffleProtectFirstJingle());
+
+      firstJingleAfterNews.addValueChangeListener(new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          Boolean value = (Boolean) evt.getNewValue();
+          getOptions().put("firstJingleAfterNews", value);
+        }
+      });
+      row += 2;
+
+    }
 
     model.getBufferedModel("shuffleOpts").addValueChangeListener(new PropertyChangeListener() {
 
@@ -331,6 +383,8 @@ public class ShuffleOptionsPanel extends JPanel {
         avoidRepeat.setValue(opts.containsKey("avoidRepeat") ? opts.get("avoidRepeat") : 2);
         trackNameLimit.setValue(opts.containsKey("trackNameLimit") ? opts.get("trackNameLimit") : 0);
         blockLengthHolder.setValue(opts.containsKey("blockLength") ? opts.get("blockLength") : 0);
+        newsInterval.setValue(opts.containsKey("newsInterval") ? opts.get("newsInterval") : 60);
+        firstJingleAfterNews.setValue(opts.containsKey("firstJingleAfterNews") ? opts.get("firstJingleAfterNews") : false);
         tagWeightsModel.rebuild();
       }
 

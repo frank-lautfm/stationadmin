@@ -22,11 +22,10 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.Playlist;
-import de.stationadmin.base.playlist.PlaylistNameCompator;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
+import de.stationadmin.base.playlist.PlaylistNameCompator;
 import de.stationadmin.base.playlist.util.PlaylistFiller;
 import de.stationadmin.gui.ClientContext;
-import de.stationadmin.gui.playlist.tools.MultiPlaylistShuffleDlg.ShuffleAction;
 import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.DisposeAction;
 
@@ -39,7 +38,7 @@ public class AutoFillPlaylistsDlg extends JDialog {
   public AutoFillPlaylistsDlg(ClientContext ctx) {
     this.ctx = ctx;
     this.filler = new PlaylistFiller(ctx.getAdminClient().getSettings(), ctx.getAdminClient().getPlaylistService().getPlaylistRegistry(),
-        ctx.getAdminClient().getTrackService().getTrackRegistry(), ctx.getAdminClient().getTagManager());
+        ctx.getAdminClient().getTrackService(), ctx.getAdminClient().getTagManager());
     this.init();
   }
 

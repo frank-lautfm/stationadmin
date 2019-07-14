@@ -17,6 +17,7 @@ import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.TrackComparator;
 import de.stationadmin.base.track.TrackRegistry;
+import de.stationadmin.base.track.TrackService;
 
 /**
  * Tool class for populating playlists based on autofill rules
@@ -26,14 +27,16 @@ import de.stationadmin.base.track.TrackRegistry;
 public class PlaylistFiller {
   private Settings settings;
   private PlaylistRegistry playlistRegistry;
+  private TrackService trackService;
   private TrackRegistry trackRegistry;
   private TagManager tagManager;
 
-  public PlaylistFiller(Settings settings, PlaylistRegistry playlistRegistry, TrackRegistry trackRegistry, TagManager tagManager) {
+  public PlaylistFiller(Settings settings, PlaylistRegistry playlistRegistry, TrackService trackService, TagManager tagManager) {
     super();
     this.settings = settings;
     this.playlistRegistry = playlistRegistry;
-    this.trackRegistry = trackRegistry;
+    this.trackService = trackService;
+    this.trackRegistry = trackService.getTrackRegistry();
     this.tagManager = tagManager;
   }
 
@@ -97,6 +100,14 @@ public class PlaylistFiller {
       
       for (BasicTrack track : trackList) {
         playlist.addTrack(track);
+      }
+      
+      if(playlist.getAutoFillRule().isIncludeNews()) {
+        BasicTrack newsTrack = trackService.getTrack(TrackRegistry.LAUTFM_NEWS_ID);
+        if (newsTrack != null) {
+          playlist.addTrack(newsTrack);
+        }
+        
       }
 
       // add ad separator / ad trigger

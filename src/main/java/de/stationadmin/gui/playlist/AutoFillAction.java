@@ -34,7 +34,7 @@ public class AutoFillAction extends AbstractAction {
     this.ctx = ctx;
     this.playlistHolder = playlistHolder;
     this.filler = new PlaylistFiller(ctx.getAdminClient().getSettings(), ctx.getAdminClient().getPlaylistService().getPlaylistRegistry(),
-        ctx.getAdminClient().getTrackService().getTrackRegistry(), ctx.getAdminClient().getTagManager());
+        ctx.getAdminClient().getTrackService(), ctx.getAdminClient().getTagManager());
     this.setEnabled(false);
     playlistHolder.addValueChangeListener(new PropertyChangeListener() {
 

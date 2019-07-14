@@ -19,9 +19,9 @@
    },
    {  
       "key":"StationAdmin",
-      "defaultVersion":"StationAdmin_v1_1",
+      "defaultVersion":"StationAdmin_v1_2",
       "optsKey":"StationAdmin",
-      "file":"StationAdmin_v1_1.js",
+      "file":"StationAdmin_v1_2.js",
       "defaultOpts":null,
       "supportsGlobalOpts":true
    },

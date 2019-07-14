@@ -11,9 +11,9 @@ package de.stationadmin.base;
 public interface Version {
 
   int MAJOR = 4;
-  int MINOR = 10;
-  int STEP = 3;
-  String STATUS = "";
+  int MINOR = 11;
+  int STEP = 0;
+  String STATUS = "Alpha";
 
   String VERSION = MAJOR + "." + MINOR + "." + STEP + " " + STATUS;
   

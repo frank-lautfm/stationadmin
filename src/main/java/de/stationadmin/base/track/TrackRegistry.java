@@ -25,6 +25,7 @@ import de.stationadmin.base.util.AbstractBean;
  */
 public class TrackRegistry extends AbstractBean {
   public static final int STANDARD_AD_TRIGGER_ID = 0;
+  public static final int LAUTFM_NEWS_ID = 1;
   
   private Map<Integer, RegisteredTrack> tracks = Collections.synchronizedMap(new HashMap<Integer, RegisteredTrack>());
   private Map<Integer, LiveTrack> liveTracks = Collections.synchronizedMap(new HashMap<Integer, LiveTrack>());

@@ -42,7 +42,7 @@ public class PlaylistAutoFillPanel extends JPanel {
     
     final ArrayList<JComponent> dependentComponents = new ArrayList<>();
     
-    this.setLayout(new FormLayout("5dlu,pref,5dlu,170dlu,5dlu", "5dlu,pref,8dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
+    this.setLayout(new FormLayout("5dlu,pref,5dlu,170dlu,5dlu", "5dlu,pref,8dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
     int row = 2;
     
@@ -164,6 +164,13 @@ public class PlaylistAutoFillPanel extends JPanel {
       row += 2;
     }
 
+    {
+      JCheckBox newsCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("includeNews"), ctx.getString("playlistcfg.property.autofill.includeNews"));
+      this.add(newsCb, cc.xywh(2, row, 3, 1));
+      dependentComponents.add(newsCb);
+
+      row += 2;
+    }
 
     {
       JCheckBox adTriggerCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("includeAdTrigger"), ctx.getString("playlistcfg.property.autofill.includeAdTrigger"));

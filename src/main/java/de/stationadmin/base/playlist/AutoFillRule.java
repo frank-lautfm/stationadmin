@@ -10,6 +10,7 @@ public class AutoFillRule {
   private String[] sourceTags;
   private boolean includeAdTrigger = false;
   private boolean includeTrackRules = false;
+  private boolean includeNews = false;
 
   public boolean isEnabled() {
     return enabled;
@@ -49,6 +50,14 @@ public class AutoFillRule {
 
   public void setIncludeTrackRules(boolean includeTrackRules) {
     this.includeTrackRules = includeTrackRules;
+  }
+
+  public boolean isIncludeNews() {
+    return includeNews;
+  }
+
+  public void setIncludeNews(boolean includeNews) {
+    this.includeNews = includeNews;
   }
 
 }
