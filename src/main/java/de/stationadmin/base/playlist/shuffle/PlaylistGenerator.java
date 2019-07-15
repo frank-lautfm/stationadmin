@@ -217,8 +217,10 @@ public class PlaylistGenerator {
 
     if (this.protectFirstJingle && playlist.getEntries().size() > 0 && !this.protectAllJingles) {
       // check if first title is jingle and protect it if so
-      Entry entry = playlist.getEntries().get(0);
-      BasicTrack firstTrack = this.trackRegistry.getTrack(entry.getTrackId());
+      BasicTrack firstTrack = playlist.getEntries().get(0).getTrack();
+      if(firstTrack.getId() == TrackRegistry.LAUTFM_NEWS_ID && playlist.getEntries().size() > 1) {
+        firstTrack = playlist.getEntries().get(1).getTrack();
+      }
       if (firstTrack != null && firstTrack.getType() == BasicTrack.TYPE_JINGLE && (playlistEnhancer == null || !playlistEnhancer.excludeFromCorePlaylist(firstTrack))) {
         ctx.setFirstJingle(firstTrack);
       }

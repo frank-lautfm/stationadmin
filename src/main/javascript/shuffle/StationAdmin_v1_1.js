@@ -6,7 +6,7 @@
 	var maxTracksPerArtist = 'maxTracksPerArtist' in opts && opts.maxTracksPerArtist < Math.floor(duration / (60 * 60)) ? opts.maxTracksPerArtist : Math.floor(duration / (60 * 60)); 
 	var tagWeights = 'tagWeights' in opts ? opts.tagWeights : null;
 	var artistSeparators = 'artistSeparators' in opts ? opts.artistSeparators : [' feat'];
-	var artistAliases = 'artistAliases' in opts ? opts.artistAliases : null;
+	var artistAliases = null;
 	var wordDistribution = 'wordDistribution' in opts ? opts.wordDistribution : 'random';
 	var preserveAllJingles = 'preserveAllJingles' in opts ? opts.preserveAllJingles : 0;
 	var avoidRepeat = 'avoidRepeat' in opts ? opts.avoidRepeat : 2;
@@ -88,7 +88,7 @@
 					}
 				}
 			}
-			if(minWeight == -4) {
+			if(minWeight < -3) {
 				// not at all
 				track.score = 999999;
 				return;
@@ -177,6 +177,10 @@
 			}
 			
 			assignTrackScore(tracks[i]);
+			if(tracks[i].score > 10000) {
+				// excluded
+				continue;
+			}
 			
 			var artistName = normalizeArtist(tracks[i].artist);
 			var artist;
@@ -677,6 +681,17 @@
 			}
 			boundTracks[trackId].rules.push(opts.trackRules[i]);
 		}
+	}
+
+	if('artistAliases' in opts) {
+		artistAliases = {};
+		for (var property in opts.artistAliases) {
+			if (opts.artistAliases.hasOwnProperty(property)) {
+				var key = property.toLowerCase();
+				var value = opts.artistAliases[property].toLowerCase();
+				artistAliases.key = value;
+			}
+		}		
 	}
 	
 	if(trackStats != null) {

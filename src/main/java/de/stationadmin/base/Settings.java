@@ -69,6 +69,8 @@ public class Settings extends AbstractBean {
   private AdJingleCollisionStrategy adJingleCollisionStrategy = AdJingleCollisionStrategy.KEEP_BOTH;
 
   private Autosynchronisation autoSynchronisation = Autosynchronisation.NONE;
+  
+  private int newsLength = 150;
 
   public int getStatisticsRefreshInterval() {
     return statisticsRefreshInterval;

@@ -18,6 +18,7 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -39,6 +40,7 @@ import de.stationadmin.base.playlist.shuffle.TagSequenceAdvice;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
+import de.stationadmin.gui.util.EnumListCellRenderer;
 
 /**
  * @author korf
@@ -64,7 +66,7 @@ public class PlaylistGeneratorAdviceConfigurationPanel extends JPanel {
   }
 
   private void init() {
-    this.setLayout(new FormLayout("5dlu,min(pref;250dlu):grow,5dlu", "5dlu,pref,8dlu,50dlu,15dlu,pref,5dlu,pref,15dlu,pref,5dlu"));
+    this.setLayout(new FormLayout("5dlu,min(pref;250dlu):grow,5dlu", "5dlu,pref,8dlu,50dlu,15dlu,pref,5dlu,pref,15dlu,pref,15dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
     int row = 2;
 
@@ -105,6 +107,24 @@ public class PlaylistGeneratorAdviceConfigurationPanel extends JPanel {
       panel.add(new JLabel(textProvider.getString("playlistcfg.advice.titlename.description.post")), cc.xy(5, 1));
 
       this.add(panel, cc.xy(2, row, CellConstraints.FILL, CellConstraints.CENTER));
+      row += 2;
+    }
+
+    {
+
+      JPanel panel = new JPanel(new FormLayout("pref,5dlu,pref", "pref,5dlu,pref"));
+      panel.add(new JLabel(textProvider.getString("playlistcfg.property.news")), cc.xy(1, 1));
+
+      SelectionInList<Integer> opts = new SelectionInList<>(new Integer[] { 0, 60, 120, 180, 240, 300, 360 }, model.getBufferedModel("generateNewsInterval"));
+      JComboBox<Integer> optsCmb = BasicComponentFactory.createComboBox(opts, new EnumListCellRenderer(textProvider, "playlistcfg.property.newsInterval.option"));
+      panel.add(optsCmb, cc.xy(3, 1, CellConstraints.LEFT, CellConstraints.CENTER));
+
+      JCheckBox protectCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("generateFirstJingleAfterNews"),
+          textProvider.getString("playlistcfg.property.firstJingleAfterNews"));
+      panel.add(protectCb, cc.xy(3, 3, CellConstraints.LEFT, CellConstraints.CENTER));
+
+      this.add(panel, cc.xy(2, row, CellConstraints.FILL, CellConstraints.CENTER));
+
     }
 
   }

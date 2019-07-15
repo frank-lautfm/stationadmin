@@ -32,6 +32,8 @@ public class ExtendedPlaylistData {
   private String[] generateAdvices = null;
   private int generateMaxArtistTitles = 3;
   private String comment;
+  private int newsInterval = 0;
+  private boolean firstJingleAfterNews;
 
   public ExtendedPlaylistData(int id) {
     super();
@@ -46,8 +48,7 @@ public class ExtendedPlaylistData {
   }
 
   /**
-   * @param shuffleAllowed
-   *          the shuffleAllowed to set
+   * @param shuffleAllowed the shuffleAllowed to set
    */
   public void setShuffleAllowed(boolean shuffleAllowed) {
     this.shuffleAllowed = shuffleAllowed;
@@ -61,8 +62,7 @@ public class ExtendedPlaylistData {
   }
 
   /**
-   * @param tags
-   *          the tags to set
+   * @param tags the tags to set
    */
   public void setTags(Set<String> tags) {
     this.tags = tags;
@@ -83,8 +83,7 @@ public class ExtendedPlaylistData {
   }
 
   /**
-   * @param generateLength
-   *          the generateLength to set
+   * @param generateLength the generateLength to set
    */
   public void setGenerateLength(int generateLength) {
     this.generateLength = generateLength;
@@ -98,8 +97,7 @@ public class ExtendedPlaylistData {
   }
 
   /**
-   * @param generateTags
-   *          the generateTags to set
+   * @param generateTags the generateTags to set
    */
   public void setGenerateTags(String generateTags) {
     this.generateTags = generateTags;
@@ -113,8 +111,7 @@ public class ExtendedPlaylistData {
   }
 
   /**
-   * @param generatePushTag
-   *          the generatePushTag to set
+   * @param generatePushTag the generatePushTag to set
    */
   public void setGeneratePushTag(String generatePushTag) {
     this.generatePushTag = generatePushTag;
@@ -128,8 +125,7 @@ public class ExtendedPlaylistData {
   }
 
   /**
-   * @param generateTagsAll
-   *          the generateTagsAll to set
+   * @param generateTagsAll the generateTagsAll to set
    */
   public void setGenerateTagsAll(boolean generateTagsAll) {
     this.generateTagsAll = generateTagsAll;
@@ -162,6 +158,10 @@ public class ExtendedPlaylistData {
     properties.add("generate.minimizeArtistRepeats = " + Boolean.toString(this.generateMinimizeArtistRepeats));
     properties.add("generate.titleRepeatLevel = " + Integer.toString(this.generateTitleRepeatLevel));
     properties.add("generate.maxArtistTitles= " + Integer.toString(this.generateMaxArtistTitles));
+    if (newsInterval > 0) {
+      properties.add("generate.newsInterval= " + Integer.toString(this.newsInterval));
+      properties.add("generate.firstJingleAfterNews= " + Boolean.toString(this.firstJingleAfterNews));
+    }
 
     if (this.generateAdvices != null) {
       for (int i = 0; i < this.generateAdvices.length; i++) {
@@ -217,6 +217,12 @@ public class ExtendedPlaylistData {
       if (map.containsKey("generate.maxArtistTitles")) {
         data.setGenerateMaxArtistTitles(Integer.parseInt(map.get("generate.maxArtistTitles")));
       }
+      if(map.containsKey("generate.newsInterval")) {
+        data.setNewsInterval(Integer.parseInt(map.get("generate.newsInterval")));
+      }
+      if(map.containsKey("generate.firstJingleAfterNews")) {
+        data.setFirstJingleAfterNews(Boolean.valueOf(map.get("generate.firstJingleAfterNews")));
+      }
 
       int adviceIdx = 0;
       List<String> advices = new ArrayList<String>();
@@ -244,8 +250,7 @@ public class ExtendedPlaylistData {
   }
 
   /**
-   * @param generateMinimizeArtistRepeats
-   *          the generateMinimizeArtistRepeats to set
+   * @param generateMinimizeArtistRepeats the generateMinimizeArtistRepeats to set
    */
   public void setGenerateMinimizeArtistRepeats(boolean generateMinimizeArtistRepeats) {
     this.generateMinimizeArtistRepeats = generateMinimizeArtistRepeats;
@@ -259,8 +264,7 @@ public class ExtendedPlaylistData {
   }
 
   /**
-   * @param generateTitleRepeatLevel
-   *          the generateTitleRepeatLevel to set
+   * @param generateTitleRepeatLevel the generateTitleRepeatLevel to set
    */
   public void setGenerateTitleRepeatLevel(int generateTitleRepeatLevel) {
     this.generateTitleRepeatLevel = generateTitleRepeatLevel;
@@ -299,8 +303,7 @@ public class ExtendedPlaylistData {
   }
 
   /**
-   * @param id
-   *          the id to set
+   * @param id the id to set
    */
   void setId(int id) {
     this.id = id;
@@ -312,6 +315,22 @@ public class ExtendedPlaylistData {
 
   public void setAutoFillRule(AutoFillRule autoFillRule) {
     this.autoFillRule = autoFillRule;
+  }
+
+  public int getNewsInterval() {
+    return newsInterval;
+  }
+
+  public void setNewsInterval(int newsInterval) {
+    this.newsInterval = newsInterval;
+  }
+
+  public boolean isFirstJingleAfterNews() {
+    return firstJingleAfterNews;
+  }
+
+  public void setFirstJingleAfterNews(boolean firstJingleAfterNews) {
+    this.firstJingleAfterNews = firstJingleAfterNews;
   }
 
 }

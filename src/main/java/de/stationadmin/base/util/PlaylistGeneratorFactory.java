@@ -12,6 +12,7 @@ import de.stationadmin.base.Settings;
 import de.stationadmin.base.StationAdminClient;
 import de.stationadmin.base.playlist.shuffle.AdTriggerEngine;
 import de.stationadmin.base.playlist.shuffle.DefaultArtistNormalizer;
+import de.stationadmin.base.playlist.shuffle.NewsEngine;
 import de.stationadmin.base.playlist.shuffle.PlaylistEnhancer;
 import de.stationadmin.base.playlist.shuffle.PlaylistGenerator;
 import de.stationadmin.base.playlist.shuffle.PlaylistShuffler;
@@ -77,6 +78,7 @@ public class PlaylistGeneratorFactory {
       playlistEnhancers.add(trackRuleEngine);
     }
 
+    playlistEnhancers.add(createNewsEngine(client, false));
     if (client.getSettings().getAdTriggerPosition1() > -1) {
       playlistEnhancers.add(createAdTriggerEngine(client));
     }
@@ -110,6 +112,10 @@ public class PlaylistGeneratorFactory {
     engine.setPosition2(settings.getAdTriggerPosition2());
 
     return engine;
+  }
+  
+  public static NewsEngine createNewsEngine(StationAdminClient client, boolean shuffleMode) {
+    return new NewsEngine(client.getTrackService(), shuffleMode);
   }
 
   private static TrackRuleEngine createTrackRuleEngine(StationAdminClient client) {
@@ -159,6 +165,8 @@ public class PlaylistGeneratorFactory {
     if (trackRuleEngine != null) {
       playlistEnhancers.add(trackRuleEngine);
     }
+    
+    playlistEnhancers.add(createNewsEngine(client, true));
 
     if (client.getSettings().getAdTriggerPosition1() > -1) {
       playlistEnhancers.add(createAdTriggerEngine(client));

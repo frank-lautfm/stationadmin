@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.track.BasicTrack;
+import de.stationadmin.base.track.TrackRegistry;
 
 /**
  * Tool class for shuffling a playlist
@@ -106,7 +107,7 @@ public class PlaylistShuffler {
             ctx.getJingles().add(title);
             jingleIds.add(title.getId());
           }
-          if (pos == 0) {
+          if (pos == 0 || (pos == 1 && entries.get(0).getTrackId() == TrackRegistry.LAUTFM_NEWS_ID)) {
             ctx.setStartsWithJingle(true);
           }
         }

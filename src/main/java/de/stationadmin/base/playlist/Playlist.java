@@ -465,6 +465,14 @@ public class Playlist extends AbstractBean {
   public boolean isLocalShuffleAllowed() {
     return this.localData != null ? this.localData.isShuffleAllowed() : false;
   }
+  
+  public int getGenerateNewsInterval() {
+    return this.localData != null ? this.localData.getNewsInterval() : 0;
+  }
+  
+  public boolean getGenerateFirstJingleAfterNews() {
+    return this.localData != null ? this.localData.isFirstJingleAfterNews() : false;
+  }
 
   /**
    * Checks if the playlist was modified locally and not saved yet
@@ -623,6 +631,21 @@ public class Playlist extends AbstractBean {
     this.localData.setGenerateTagsAll(all);
     this.firePropertyChange("generateTagsAll", old, all);
   }
+  
+  public void setGenerateNewsInterval(int time) {
+    this.ensureLocalDataExists();
+    int old = this.localData.getNewsInterval();
+    this.localData.setNewsInterval(time);
+    this.firePropertyChange("generateNewsInterval", old, time);
+  }
+  
+  public void setGenerateFirstJingleAfterNews(boolean firstJingleAfterNews) {
+    this.ensureLocalDataExists();
+    boolean old = this.localData.isFirstJingleAfterNews();
+    this.localData.setFirstJingleAfterNews(firstJingleAfterNews);
+    this.firePropertyChange("generateFirstJingleAfterNews", old, firstJingleAfterNews);
+  }
+
 
   /**
    * Configures if / which titles can be repeated when generating a playlist.
