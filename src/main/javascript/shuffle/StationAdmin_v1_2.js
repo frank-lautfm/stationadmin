@@ -52,6 +52,9 @@
 	
 	function normalizeArtist(artistName) {
 		artistName = artistName.toLowerCase();
+		if(artistAliases != null && artistName in artistAliases) {
+			artistName = artistAliases[artistName];
+		}
 		for(var i = 0; i < artistSeparators.length; i++) {
 			var pos = artistName.indexOf(artistSeparators[i]);
 			if(pos > 1) {
@@ -59,12 +62,9 @@
 				artistName = artistName.substring(0, pos).trim();
 			}
 		}
-		if(artistAliases != null) {
-			if(artistName in artistAliases) {
-				artistName = artistAliases[artistName];
-			}
+		if(artistAliases != null && artistName in artistAliases) {
+			artistName = artistAliases[artistName];
 		}
-		
 		return artistName;
 	}
 	
@@ -684,7 +684,7 @@
 		// console.log("start: " + ts.toUTCString());
 
 		var minDistance = (newsInterval - 30) * 1000 * 60;
-		var newsDuration = 150 * 1000;
+		var newsDuration = 165 * 1000;
  
 		if((ts.getMinutes() >= 58 || ts.getMinutes() < 5) && ts.getTime() - lastNewsStarted > 1000 * 30) {
 			// start of playlist at full hour - add news
@@ -743,7 +743,7 @@
 			if (opts.artistAliases.hasOwnProperty(property)) {
 				var key = property.toLowerCase();
 				var value = opts.artistAliases[property].toLowerCase();
-				artistAliases.key = value;
+				artistAliases[key] = value;
 			}
 		}		
 	}

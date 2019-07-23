@@ -46,7 +46,11 @@
 	}
 	
 	function normalizeArtist(artistName) {
+		var original = artistName;
 		artistName = artistName.toLowerCase();
+		if(artistAliases != null && artistName in artistAliases) {
+			artistName = artistAliases[artistName];
+		}
 		for(var i = 0; i < artistSeparators.length; i++) {
 			var pos = artistName.indexOf(artistSeparators[i]);
 			if(pos > 1) {
@@ -54,12 +58,9 @@
 				artistName = artistName.substring(0, pos).trim();
 			}
 		}
-		if(artistAliases != null) {
-			if(artistName in artistAliases) {
-				artistName = artistAliases[artistName];
-			}
+		if(artistAliases != null && artistName in artistAliases) {
+			artistName = artistAliases[artistName];
 		}
-		
 		return artistName;
 	}
 	
@@ -689,7 +690,7 @@
 			if (opts.artistAliases.hasOwnProperty(property)) {
 				var key = property.toLowerCase();
 				var value = opts.artistAliases[property].toLowerCase();
-				artistAliases.key = value;
+				artistAliases[key] = value;
 			}
 		}		
 	}
