@@ -47,17 +47,23 @@ public class NewsEngine implements PlaylistEnhancer {
     }
     int interval = shuffleMode ? 60 * 60 : playlist.getGenerateNewsInterval() * 60;
     boolean firstJingleAfterNews = (shuffleMode ? protectFirstJingle : playlist.getGenerateFirstJingleAfterNews()) && tracks.get(0).getType() == BasicTrack.TYPE_JINGLE;
-    int newsLength = 150;
+    int newsLength = 165;
     try {
       BasicTrack newsTrack = trackService.getTrack(TrackRegistry.LAUTFM_NEWS_ID);
 
+      int totalDuration = 0;
+      for (int i = 0; i < tracks.size(); i++) { 
+        totalDuration += tracks.get(i).getLength();
+      }
+
+      
       List<BasicTrack> newList = new ArrayList<>();
       newList.add(newsTrack);
       int nextNewsInsert = interval;
       int time = newsLength;
       for (int i = 0; i < tracks.size(); i++) {
         BasicTrack track = tracks.get(i);
-        if (time > nextNewsInsert - 2 * 60 && (track.getType() == BasicTrack.TYPE_MUSIC || track.getLength() > 90)) {
+        if (time > nextNewsInsert - 2 * 60 && (track.getType() == BasicTrack.TYPE_MUSIC || track.getLength() > 90) && time < totalDuration - 60 * 15) {
           newList.add(newsTrack);
           time += newsLength;
           nextNewsInsert += interval;

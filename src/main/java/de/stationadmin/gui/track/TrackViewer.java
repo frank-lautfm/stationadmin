@@ -243,7 +243,7 @@ public class TrackViewer extends JDialog {
     row += 2;
 
     SelectionInList<Integer> typeSelection = new SelectionInList<Integer>(
-        new Integer[] { Integer.valueOf(BasicTrack.TYPE_MUSIC), Integer.valueOf(BasicTrack.TYPE_JINGLE), Integer.valueOf(BasicTrack.TYPE_WORD) }, model.getBufferedModel("type"));
+        new Integer[] { Integer.valueOf(BasicTrack.TYPE_MUSIC), Integer.valueOf(BasicTrack.TYPE_JINGLE), Integer.valueOf(BasicTrack.TYPE_WORD), Integer.valueOf(BasicTrack.TYPE_NEWS) }, model.getBufferedModel("type"));
     JComboBox typeCmb = BasicComponentFactory.createComboBox(typeSelection, new TrackTypeListCellRenderer(ctx.getTextProvider()));
     typeCmb.setEnabled(model.getBean().isOwnTrack());
     panel.add(new JLabel(ctx.getTextProvider().getString("trackviewer.property.type")), cc.xy(2, row));

@@ -74,6 +74,9 @@ public class DetailedTrack extends BasicTrack {
     case TYPE_WORD:
       track.setType("moderation");
       break;
+    case TYPE_NEWS:
+      track.setType("news");
+      break;
     }
     track.setTitle(this.getTitle());
     return track;

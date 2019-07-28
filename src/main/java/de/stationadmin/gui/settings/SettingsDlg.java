@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -63,6 +64,7 @@ import de.stationadmin.base.backup.BackupFrequency;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.PlaylistService;
+import de.stationadmin.base.playlist.ShuffleScriptMeta;
 import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.playlist.GlobalShuffleOptsUpdateAction;
@@ -125,8 +127,10 @@ public class SettingsDlg extends JDialog {
       public void actionPerformed(ActionEvent evt) {
         boolean shuffleOptsChanged = false;
         boolean hasShufflePlaylists = false;
+        List<ShuffleScriptMeta> shuffleScripts = ctx.getAdminClient().getPlaylistService().getShuffleScripts();
         for (Playlist pl : ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE)) {
-          if (pl.isShuffle() && pl.getShuffleType().equals(PlaylistService.SHUFFLE_STATIONADMIN)) {
+          ShuffleScriptMeta meta = PlaylistService.getShuffleScriptMeta(shuffleScripts, pl.getShuffleType());
+          if (pl.isShuffle() && meta != null && meta.isSupportsGlobalOpts()) {
             hasShufflePlaylists = true;
             break;
           }

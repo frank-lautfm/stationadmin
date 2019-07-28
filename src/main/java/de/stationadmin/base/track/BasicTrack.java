@@ -15,6 +15,7 @@ public class BasicTrack {
   public static final int TYPE_MUSIC = 1;
   public static final int TYPE_JINGLE = 2;
   public static final int TYPE_WORD = 3;
+  public static final int TYPE_NEWS = 4;
 
   static {
     characterMapping.put('é', 'e');
@@ -62,7 +63,7 @@ public class BasicTrack {
     this.artist = track.getArtist();
     this.title = track.getTitle();
     this.length = track.getDuration();
-    this.type = track.getType().equalsIgnoreCase("song") ? TYPE_MUSIC : track.getType().equalsIgnoreCase("jingle") ? TYPE_JINGLE : TYPE_WORD;
+    this.type = track.getType().equalsIgnoreCase("song") ? TYPE_MUSIC : track.getType().equalsIgnoreCase("jingle") ? TYPE_JINGLE : track.getType().equalsIgnoreCase("news") ? TYPE_NEWS : TYPE_WORD;
   }
 
   /**

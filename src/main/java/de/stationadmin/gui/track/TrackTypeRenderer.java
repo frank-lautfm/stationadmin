@@ -27,6 +27,7 @@ public class TrackTypeRenderer extends DefaultTableCellRenderer {
         AppUtils.getIcon("music.png"),
         AppUtils.getIcon("jingle.png"),
         AppUtils.getIcon("text.png"),
+        AppUtils.getIcon("text.png"),
     };
   }
 

@@ -66,7 +66,7 @@ public class PlaylistService implements Service {
 
   public static final String SHUFFLE_CLASSIC = "basic_v1";
   public static final String SHUFFLE_BUCKET = "bucket_v1_1";
-  public static final String SHUFFLE_STATIONADMIN = "StationAdmin_v1_1";
+  public static final String SHUFFLE_STATIONADMIN = "StationAdmin_v1_2";
   public static final String SHUFFLE_BLOCKSELECT = "BlockSelect_v1";
 
   private SessionCtx ctx;

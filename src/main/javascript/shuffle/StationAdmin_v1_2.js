@@ -1,4 +1,5 @@
-// key: StationAdmin_v1_1_2
+// key: StationAdmin_v1_2
+// Beta 4
 ( function( tracks, opts, trackStats ){
 	
 	var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -682,11 +683,16 @@
 		var ts = new Date();
 		ts.setTime(startTime);
 		// console.log("start: " + ts.toUTCString());
+		var endTime = startTime + duration * 1000;
+		var noNewsAfter = endTime - 15 * 60 * 1000;
+		// var ts2 = new Date();
+		// ts2.setTime(noNewsAfter);
+		// console.log("no news after: " + ts2.toUTCString());
 
 		var minDistance = (newsInterval - 30) * 1000 * 60;
 		var newsDuration = 165 * 1000;
  
-		if((ts.getMinutes() >= 58 || ts.getMinutes() < 5) && ts.getTime() - lastNewsStarted > 1000 * 30) {
+		if((ts.getMinutes() >= 58 || ts.getMinutes() < 5) && ts.getTime() - lastNewsStarted > 1000 * 30 * 60) {
 			// start of playlist at full hour - add news
 			newTracks.push(newsTrack);
 			lastNewsStarted = ts.getTime();
@@ -694,8 +700,12 @@
 		}
 
 		var newsDelayed = false;
+		var skipNextIfJingle = false;
 		for(var i = 0; i < playlistTracks.length; i++) {
 			var minutesBefore = ts.getMinutes();
+			if(playlistTracks[i].type == 'jingle' && skipNextIfJingle) {
+				continue;
+			}
 			newTracks.push(playlistTracks[i]);
 		    ts.setTime(ts.getTime() + playlistTracks[i].duration * 1000);
 			var insertNews = newsDelayed || ((ts.getMinutes() >= 59 || ts.getMinutes() < minutesBefore) && ts.getTime() - lastNewsStarted > minDistance);
@@ -704,7 +714,9 @@
 				newsDelayed = true;
 				insertNews = false;
 			}
-			if(insertNews && i < playlistTracks.length - 1)  {
+			skipNextIfJingle = false;
+			if(insertNews && ts.getTime() < noNewsAfter)  {
+				newsDelayed = false;
 				newTracks.push(newsTrack);
 				// console.log("news at " + ts.toUTCString() + " / " + (ts.getTime() - lastNewsStarted));
 				lastNewsStarted = ts.getTime();
@@ -712,6 +724,7 @@
 				if(firstJingle != null && firstJingleAfterNews) {
 					newTracks.push(firstJingle);
 					ts.setTime(ts.getTime() + firstJingle.duration * 1000);
+					skipNextIfJingle = true;
 				}
 			}
 		}
@@ -750,12 +763,15 @@
 	
 	if(trackStats != null) {
 		var baseTime = Date.now();
+		var lastTrackEnd = 0;
 		for(var i = 0; i < trackStats.length; i++) {
 			if(i > trackStats.length - 12 && trackStats[i].artist != null) {
 				var artistName = normalizeArtist(trackStats[i].artist.name);
 				recentArtists[artistName] = true;
 			}
 			var started = Date.parse(trackStats[i].started_at);
+			var endsAt = Date.parse(trackStats[i].ends_at);
+			lastTrackEnd = Math.max(lastTrackEnd, endsAt);
 			var diff = Math.floor((baseTime - started) / (1000 * 60));
 			if(diff < avoidRepeat * 60) {
 				if(lastPlays[trackStats[i].id] == null) {
@@ -773,6 +789,9 @@
 			if(trackStats[i].id == 1) {
 				lastNewsStarted = started;
 			}
+		}
+		if(lastTrackEnd > baseTime) {
+			startTime = lastTrackEnd;
 		}
 	}
 
