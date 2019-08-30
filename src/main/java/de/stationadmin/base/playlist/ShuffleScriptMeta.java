@@ -20,6 +20,7 @@ public class ShuffleScriptMeta {
   public static final String BLOCKSELECT = "BlockSelect";
 
   private String key;
+  private String automationAlgorithm;
   private String defaultVersion;
   private String optsKey;
   private String file;
@@ -127,6 +128,14 @@ public class ShuffleScriptMeta {
 
   public void setSupportsGlobalOpts(boolean useGlobalOpts) {
     this.supportsGlobalOpts = useGlobalOpts;
+  }
+
+  public String getAutomationAlgorithm() {
+    return automationAlgorithm;
+  }
+
+  public void setAutomationAlgorithm(String automationAlgorithm) {
+    this.automationAlgorithm = automationAlgorithm;
   }
 
 

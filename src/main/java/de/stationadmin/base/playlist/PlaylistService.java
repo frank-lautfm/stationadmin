@@ -29,8 +29,6 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
 
-import com.thoughtworks.xstream.XStream;
-
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.Settings;
@@ -47,7 +45,6 @@ import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
-import de.stationadmin.base.util.XStreamFactory;
 import de.stationadmin.lfm.backend.CurrentPlaylist;
 import de.stationadmin.lfm.backend.ExtendedPlaylistHead;
 import de.stationadmin.lfm.backend.PlaylistHead;
@@ -64,10 +61,10 @@ public class PlaylistService implements Service {
   private static final Logger log = Logger.getLogger(PlaylistService.class);
   private static final Pattern shuffleKeyPattern = Pattern.compile("key.\\s*([\\w|_]+)", Pattern.MULTILINE | Pattern.DOTALL);
 
-  public static final String SHUFFLE_CLASSIC = "basic_v1";
-  public static final String SHUFFLE_BUCKET = "bucket_v1_1";
-  public static final String SHUFFLE_STATIONADMIN = "StationAdmin_v1_2";
-  public static final String SHUFFLE_BLOCKSELECT = "BlockSelect_v1";
+  public static final String SHUFFLE_CLASSIC = "basic";
+  public static final String SHUFFLE_BUCKET = "bucket";
+  public static final String SHUFFLE_STATIONADMIN = "StationAdmin";
+  public static final String SHUFFLE_BLOCKSELECT = "BlockSelect";
 
   private SessionCtx ctx;
   private TrackRegistry trackRegistry;
@@ -303,9 +300,6 @@ public class PlaylistService implements Service {
     this.playlistRegistry.clear();
     this.loadPlaylists(PlaylistType.ONLINE);
     this.loadPlaylists(PlaylistType.ARCHIVED);
-    if (this.getPlaylistRegistry().getNumPlaylists() == 0) {
-      this.loadPlaylistsLegacy();
-    }
   }
 
   private void loadShuffleScripts() throws IOException {
@@ -320,27 +314,6 @@ public class PlaylistService implements Service {
         ObjectMapper mapper = new ObjectMapper();
         ShuffleScriptMeta[] scripts = mapper.readValue(stream, ShuffleScriptMeta[].class);
         this.shuffleScripts.addAll(Arrays.asList(scripts));
-      }
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private void loadPlaylistsLegacy() throws IOException {
-    XStream xstream = XStreamFactory.newXStream();
-    xstream.alias("playlist", Playlist.class);
-    xstream.alias("entry", Entry.class);
-
-    File file = new File(this.ctx.getStationDirectory() + "playlists.xml");
-    if (file.exists()) {
-      FileInputStream playlistStream = new FileInputStream(file);
-      List<Playlist> playlists = (List<Playlist>) xstream.fromXML(playlistStream);
-      playlistStream.close();
-
-      for (Playlist playlist : playlists) {
-        playlist.setTrackRegistry(this.trackRegistry);
-        playlist.reset(); // marks playlist as clean
-        playlist.resolveTitles();
-        this.playlistRegistry.register(playlist);
       }
     }
   }
@@ -454,6 +427,12 @@ public class PlaylistService implements Service {
       head.setTitle(playlist.getName());
       head.setShuffled(playlist.isShuffle());
       head.setShuffleOpts(playlist.getShuffleOpts());
+
+      ShuffleScriptMeta scriptMeta = getShuffleScriptMeta(shuffleScripts, playlist.getShuffleType());
+      if (playlist.isShuffle()) {
+        head.setAutomationAlgorithm(scriptMeta != null ? scriptMeta.getAutomationAlgorithm() : "simple_shuffle");
+      }
+
       if (playlist.getId() > -1) {
         head.setId(playlist.getId());
         head = this.ctx.getServer().updatePlaylist(ctx.getStationId(), head);
@@ -465,8 +444,8 @@ public class PlaylistService implements Service {
         playlist.setUpdatedAt(head.getUpdatedAt());
         playlistRegistry.register(playlist);
       }
-      if (playlist.isShuffle() && playlist.getShuffleType() != null) {
-        updateShuffleFunc(playlist);
+      if (playlist.isShuffle() && scriptMeta != null) {
+        updateShuffleFunc(playlist, false);
       }
     }
 
@@ -489,11 +468,11 @@ public class PlaylistService implements Service {
 
   }
 
-  private boolean updateShuffleFunc(Playlist playlist) throws IOException {
+  private boolean updateShuffleFunc(Playlist playlist, boolean updateShufleAlgorithm) throws IOException {
     if (playlist.isShuffle() && playlist.getShuffleType() != null) {
       String shuffleType = playlist.getShuffleType();
       ShuffleScriptMeta scriptMeta = getShuffleScriptMeta(shuffleScripts, shuffleType);
-      if (scriptMeta != null) {
+      if (scriptMeta != null && StringUtils.isEmpty(scriptMeta.getAutomationAlgorithm())) {
         String shuffleFunc = scriptMeta.getDefaultVersion();
         if (scriptMeta.getFile() != null) {
           try (InputStream stream = this.getClass().getClassLoader().getResourceAsStream("shuffle/" + scriptMeta.getFile())) {
@@ -505,6 +484,13 @@ public class PlaylistService implements Service {
           return true;
         }
       }
+      else {
+        this.ctx.getServer().setPlaylistShuffleFunction(ctx.getStationId(), playlist.getId(), "");
+        if(updateShufleAlgorithm && !StringUtils.isEmpty(scriptMeta.getAutomationAlgorithm())) {
+          this.ctx.getServer().setAutomationAlgorithm(ctx.getStationId(), playlist.getId(), scriptMeta.getAutomationAlgorithm());
+          return true;
+        }
+      }
     }
     return false;
 
@@ -513,7 +499,7 @@ public class PlaylistService implements Service {
   public List<Playlist> updateShuffleFunctions() throws IOException {
     List<Playlist> updatedPlaylists = new ArrayList<>();
     for (Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
-      if (updateShuffleFunc(playlist)) {
+      if (updateShuffleFunc(playlist, true)) {
         updatedPlaylists.add(playlist);
       }
     }
@@ -653,7 +639,17 @@ public class PlaylistService implements Service {
   }
 
   private String getShuffleType(ExtendedPlaylistHead head) {
-    if (head.getShuffleFunction() != null) {
+    if(!StringUtils.isEmpty(head.getAutomationAlgorithm())) {
+      ShuffleScriptMeta meta = getShuffleScriptMeta(shuffleScripts, head.getAutomationAlgorithm());
+      if(meta != null) {
+        return meta.getKey();
+      }
+      else {
+        // unknown algorithm - just use it
+        head.getAutomationAlgorithm();
+      }
+    }
+    else if (head.getShuffleFunction() != null) {
       Matcher matcher = shuffleKeyPattern.matcher(head.getShuffleFunction());
       if (matcher.find()) {
         String match = matcher.group(1);
@@ -678,7 +674,7 @@ public class PlaylistService implements Service {
     }
     shuffleType = shuffleType.toLowerCase();
     for (ShuffleScriptMeta script : shuffleScripts) {
-      if (shuffleType.startsWith(script.getKey().toLowerCase() + "_")) {
+      if (shuffleType.equals(script.getKey().toLowerCase()) || shuffleType.startsWith(script.getKey().toLowerCase() + "_") || shuffleType.equals(script.getAutomationAlgorithm())) {
         return script;
       }
     }
@@ -699,7 +695,6 @@ public class PlaylistService implements Service {
     playlist.setId(playlistInfo.getId());
     playlist.setName(playlistInfo.getTitle());
     playlist.setDescription(playlistInfo.getDescription());
-    // playlist.setLength(playlistInfo.getLength());
     playlist.setShuffle(playlistInfo.isShuffled());
     playlist.setColor(playlistInfo.getColor());
     playlist.setCreatedAt(playlistInfo.getCreatedAt());

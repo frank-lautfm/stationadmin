@@ -566,9 +566,9 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
     public void setValue(Object value) {
       ShuffleScriptMeta script = (ShuffleScriptMeta) value;
       if (script != null) {
-        getBufferedModel("shuffleType").setValue(script.getDefaultVersion());
+        getBufferedModel("shuffleType").setValue(script.getKey());
         this.script = script;
-        this.shuffleType = script.getDefaultVersion();
+        this.shuffleType = script.getKey();
       } else {
         getBufferedModel("shuffleType").setValue(null);
       }

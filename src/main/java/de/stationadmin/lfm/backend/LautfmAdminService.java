@@ -531,6 +531,16 @@ public class LautfmAdminService {
     response.close();
     return playlist;
   }
+  
+  public Playlist setAutomationAlgorithm(int stationId, int playlistId, String alg) throws IOException {
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put("automation_algorithm", alg);
+    CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/playlists/" + playlistId, map);
+    Playlist playlist = deserializeJson(response, Playlist.class);
+    response.close();
+    return playlist;
+  }
+
 
   public Playlist updatePlaylistShuffleOpts(int stationId, int playlistId, Map<String, Object> opts) throws IOException {
     Map<String, Object> map = new HashMap<String, Object>();

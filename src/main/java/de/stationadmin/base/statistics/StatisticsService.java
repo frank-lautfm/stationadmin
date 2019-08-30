@@ -144,14 +144,15 @@ public class StatisticsService implements Service {
    */
   @Override
   public void load() throws IOException {
-    for(ListenersEntry entry : this.logAnalyzerService.getListenersOf(new Date())) {
+    for (ListenersEntry entry : this.logAnalyzerService.getListenersOf(new Date())) {
       this.listenerStatsHistory.addFromHistory(entry.getTime().getTime(), entry.getListeners());
     }
     this.listenerStatsHistory.sortEntries();
   }
 
   /**
-   * Retrieves the latest stastitics from the laut.fm server (including current listeners)
+   * Retrieves the latest stastitics from the laut.fm server (including current
+   * listeners)
    * 
    * @throws IOException
    */
@@ -185,19 +186,18 @@ public class StatisticsService implements Service {
     stationStatus.setListenersToday(listenersToday);
     stationStatus.setDurationToday(tlhToday);
     stationStatus.setDurationYesterday(tlhYesterday);
-    
+
     // calculate duration today
     cal = Calendar.getInstance();
     double tlm = 0;
     long lastTs = todayStartTime;
-    for(Entry entry : this.listenerStatsHistory.getEntries(todayStartTime)) {
-      double seconds = (entry.getTime() - lastTs) / 1000; 
+    for (Entry entry : this.listenerStatsHistory.getEntries(todayStartTime)) {
+      double seconds = (entry.getTime() - lastTs) / 1000;
       tlm += (seconds * entry.getNumberOfListeners()) / 60;
       lastTs = entry.getTime();
     }
-   
-    stationStatus.setDurationTodayCalculated((int)(tlm / 60));
-    
+
+    stationStatus.setDurationTodayCalculated((int) (tlm / 60));
 
     // add current listeners to history
     this.listenerStatsHistory.add(stats.getListenersNow(), stats.getPositionNow());
@@ -221,7 +221,6 @@ public class StatisticsService implements Service {
   }
 
   private class StatsRefresher extends TimerTask {
-    private boolean errorDisplayed = false;
 
     /**
      * @see java.util.TimerTask#run()
@@ -231,12 +230,6 @@ public class StatisticsService implements Service {
       try {
         refreshStatistics();
       } catch (final Exception e) {
-        if (!errorDisplayed) {
-          if (sessionCtx.getErrorHandler() != null) {
-            sessionCtx.getErrorHandler().display("Fehler beim Aktualisieren der Statistik", e);
-          }
-          errorDisplayed = true;
-        }
       }
     }
 

@@ -1,7 +1,7 @@
 ﻿[  
    {  
       "key":"basic",
-      "defaultVersion":"basic_v1",
+      "automationAlgorithm": "simple_shuffle",
       "optsKey":null,
       "file":null,
       "defaultOpts":null,
@@ -9,7 +9,7 @@
    },
    {  
       "key":"bucket",
-      "defaultVersion":"bucket_v1_2",
+      "automationAlgorithm": "bucket_automation",
       "optsKey":"bucket",
       "file":null,
       "defaultOpts":{  
