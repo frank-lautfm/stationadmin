@@ -52,6 +52,9 @@
 	}
 	
 	function normalizeArtist(artistName) {
+		if(artistName == null) {
+			return "<no artist>";
+		}
 		artistName = artistName.toLowerCase();
 		if(artistAliases != null && artistName in artistAliases) {
 			artistName = artistAliases[artistName];
@@ -70,6 +73,9 @@
 	}
 	
 	function normalizeTitle(name) {
+		if(name == null) {
+			return "<no title>";
+		}
 		name = name.toLowerCase();
 		var stripped = name.replace(/\W/g, "");
 		return stripped.length > 3 ? stripped : name;
