@@ -146,6 +146,8 @@ public class TrackRegistry extends AbstractBean {
   }
 
   public int registerLiveTrack(String artist, String title) {
+    if(artist == null) artist = "<no artist>";
+    if(title == null) title = "<no title>";
     String key = StringUtils.trimToEmpty(artist.toLowerCase()) + " - " + StringUtils.trimToEmpty(title.toLowerCase());
     int id = key.hashCode();
     if (!liveTracks.containsKey(id)) {
