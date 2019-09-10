@@ -1,5 +1,4 @@
 // key: StationAdmin_v1_2
-// Beta 4
 ( function( tracks, opts, trackStats ){
 	
 	var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -16,6 +15,8 @@
 	var adJingleCollisionStrategy = 'adJingleCollisionStrategy' in opts ? opts.adJingleCollisionStrategy : 'keep_both';
 	var trackRulesEnabled = 'trackRules' in opts;
 	var newsInterval= 'newsInterval' in opts ? opts.newsInterval : 60;
+	var newsMin = 'newsMin' in opts ? opts.newsMin : 59;
+	var newsMax = 'newsMax' in opts ? opts.newsMax : 15;
 	var firstJingleAfterNews = 'firstJingleAfterNews' in opts ? opts.firstJingleAfterNews : true;
 
 	var firstJingle;
@@ -682,6 +683,18 @@
 		}
 		return newTracks;
 	}
+	
+	function isInNewsTimeframe(minutes) {
+		if(newsMax > newsMin) { // sth like 0 - 15 or 30 - 45
+			return minutes >= newsMin && minutes <= newsMax;
+		}
+		else { // sth like 59 - 15
+			var diff = 60 - newsMin;
+			var m = (minutes + diff) % 60;
+			return m >= 0 && m <= newsMax + diff;
+		}
+		
+	}
 
 	function insertNews(playlistTracks) {
 		var newTracks = [];
@@ -698,7 +711,7 @@
 		var minDistance = (newsInterval - 30) * 1000 * 60;
 		var newsDuration = 165 * 1000;
  
-		if((ts.getMinutes() >= 58 || ts.getMinutes() < 5) && ts.getTime() - lastNewsStarted > 1000 * 30 * 60) {
+		if(isInNewsTimeframe(ts.getMinutes()) && ts.getTime() - lastNewsStarted > 1000 * 30 * 45) {
 			// start of playlist at full hour - add news
 			newTracks.push(newsTrack);
 			lastNewsStarted = ts.getTime();
@@ -708,13 +721,13 @@
 		var newsDelayed = false;
 		var skipNextIfJingle = false;
 		for(var i = 0; i < playlistTracks.length; i++) {
-			var minutesBefore = ts.getMinutes();
 			if(playlistTracks[i].type == 'jingle' && skipNextIfJingle) {
 				continue;
 			}
 			newTracks.push(playlistTracks[i]);
 		    ts.setTime(ts.getTime() + playlistTracks[i].duration * 1000);
-			var insertNews = newsDelayed || ((ts.getMinutes() >= 59 || ts.getMinutes() < minutesBefore) && ts.getTime() - lastNewsStarted > minDistance);
+			var insertNews = newsDelayed 
+				|| (isInNewsTimeframe(ts.getMinutes()) && ts.getTime() - lastNewsStarted > minDistance);
 			if(insertNews && !newsDelayed && playlistTracks[i].type != 'song' && playlistTracks[i].duration < 60) {
 				// play jingle or word first, then news
 				newsDelayed = true;

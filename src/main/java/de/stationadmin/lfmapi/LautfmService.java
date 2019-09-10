@@ -40,6 +40,17 @@ public class LautfmService {
         "Mozilla/4.0 (compatible; Laut.fm API 4 Java; " + System.getProperty("os.name") + ")");
     return client;
   }
+  
+  public String get(String path) throws IOException {
+    String url = "https://api.laut.fm/" + path;
+    HttpGet action = new HttpGet(url);
+    synchronized (this.client) {
+      HttpResponse response = this.client.execute(action);
+      String raw = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+      return raw;
+    }
+    
+  }
 
   /**
    * Gets the basic info about a single station.

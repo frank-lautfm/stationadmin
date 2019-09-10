@@ -11,6 +11,7 @@ Version 4.11.0
 [*] Standard-Ad-Trigger wurde beim Synchronisieren übergegangen wenn er bis dahin noch gar nicht verwendet wurde
 [+] Shuffle-Script: Positionierung des ersten Jingles berücksichtigt Trackhistorie
 [+] Unterstützung für laut.fm-Nachrichten beim Shuffeln und Generieren
+[#] Fehler beim Aktualisieren der Statistik wird nicht mehr angezeigt
 
 Version 4.10.3
 --------------

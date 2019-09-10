@@ -2,6 +2,7 @@ package de.stationadmin.gui.playlist.config;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -164,7 +165,7 @@ public class ShuffleOptionsPanel extends JPanel {
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private JPanel createStationAdminOptsPanel() {
-    JPanel panel = new JPanel(new FormLayout("5dlu,pref,5dlu,pref:grow,5dlu", "8dlu,pref,7dlu,pref,7dlu,pref,5dlu,pref,10dlu,pref,5dlu,70dlu,7dlu,pref,7dlu,pref,5dlu,pref,5dlu"));
+    JPanel panel = new JPanel(new FormLayout("5dlu,pref,5dlu,pref:grow,5dlu", "8dlu,pref,7dlu,pref,7dlu,pref,5dlu,pref,10dlu,pref,5dlu,70dlu,7dlu,pref,7dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
     int row = 2;
 
@@ -356,6 +357,42 @@ public class ShuffleOptionsPanel extends JPanel {
       row += 2;
 
     }
+    
+    final ValueHolder newsMin = new ValueHolder(getOptions().containsKey("newsMin") ? getOptions().get("newsMin") : 59);
+    final ValueHolder newsMax = new ValueHolder(getOptions().containsKey("newsMax") ? getOptions().get("newsMax") : 15);
+    {
+      panel.add(new JLabel(this.ctx.getTextProvider().getString("playlistcfg.property.news.time")), cc.xywh(2, row, 3, 1));
+      
+      JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 0));
+      JTextField minTf = BasicComponentFactory.createIntegerField(newsMin);
+      minTf.setColumns(2);
+      JTextField maxTf = BasicComponentFactory.createIntegerField(newsMax);
+      maxTf.setColumns(2);
+      timePanel.add(minTf);
+      timePanel.add(new JLabel(" - "));
+      timePanel.add(maxTf);
+      panel.add(timePanel, cc.xy(4, row, CellConstraints.LEFT, CellConstraints.CENTER));
+
+      newsMin.addValueChangeListener(new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          Integer value = evt.getNewValue() != null ? (Integer) evt.getNewValue() : 59;
+          getOptions().put("newsMin", value.intValue() >= 0 && value < 60 ? value : 59);
+        }
+      });
+      
+      newsMax.addValueChangeListener(new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          Integer value = evt.getNewValue() != null ? (Integer) evt.getNewValue() : 15;
+          getOptions().put("newsMax", value.intValue() >= 0 && value < 60 ? value : 15);
+        }
+      });
+      
+      row += 2;
+
+    }
+
 
     final ValueModel firstJingleAfterNews = new ValueHolder(getOptions().containsKey("firstJingleAfterNews") ? getOptions().get("firstJingleAfterNews") : false);
     {
@@ -384,6 +421,8 @@ public class ShuffleOptionsPanel extends JPanel {
         trackNameLimit.setValue(opts.containsKey("trackNameLimit") ? opts.get("trackNameLimit") : 0);
         blockLengthHolder.setValue(opts.containsKey("blockLength") ? opts.get("blockLength") : 0);
         newsInterval.setValue(opts.containsKey("newsInterval") ? opts.get("newsInterval") : 60);
+        newsMin.setValue(opts.containsKey("newsMin") ? opts.get("newsMin") : 59);
+        newsMax.setValue(opts.containsKey("newsMax") ? opts.get("newsMax") : 15);
         firstJingleAfterNews.setValue(opts.containsKey("firstJingleAfterNews") ? opts.get("firstJingleAfterNews") : false);
         tagWeightsModel.rebuild();
       }
