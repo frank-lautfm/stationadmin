@@ -19,7 +19,7 @@
    },
    {  
       "key":"StationAdmin",
-      "defaultVersion":"StationAdmin_v1_2",
+      "automationAlgorithm": "stationadmin_shuffle",
       "optsKey":"StationAdmin",
       "file":"StationAdmin_v1_2.js",
       "defaultOpts":null,

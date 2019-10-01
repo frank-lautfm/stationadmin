@@ -659,7 +659,18 @@ public class PlaylistService implements Service {
         }
       }
     }
-    return null;
+    else if(head.getShuffleOpts() != null) {
+      if(head.getShuffleOpts().containsKey("jingleInterval")) {
+        return SHUFFLE_STATIONADMIN;
+      }
+      else if(head.getShuffleOpts().containsKey("pattern")) {
+        return SHUFFLE_CLASSIC;
+      }
+      else if(head.getShuffleOpts().containsKey("iterationStepHours")) {
+        return SHUFFLE_BLOCKSELECT;
+      }
+    }
+    return head.isShuffled() ? SHUFFLE_CLASSIC : null;
   }
 
   /**

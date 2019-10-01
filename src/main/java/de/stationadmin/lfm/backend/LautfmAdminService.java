@@ -365,7 +365,7 @@ public class LautfmAdminService {
     HashMap<String, String> content = new HashMap<>();
     content.put("body", body);
 
-    CloseableHttpResponse response = this.doPut("/automation_algorithms/" + name, content);
+    CloseableHttpResponse response = this.doPatch("/automation_algorithms/" + name, content);
     AutomationAlgorithm alg = deserializeJson(response, AutomationAlgorithm.class);
     response.close();
     return alg;
@@ -534,7 +534,7 @@ public class LautfmAdminService {
   
   public Playlist setAutomationAlgorithm(int stationId, int playlistId, String alg) throws IOException {
     Map<String, Object> map = new HashMap<String, Object>();
-    map.put("automation_algorithm", alg);
+    map.put("automation_algorithm_name", alg);
     CloseableHttpResponse response = this.doPatch("/stations/" + stationId + "/playlists/" + playlistId, map);
     Playlist playlist = deserializeJson(response, Playlist.class);
     response.close();
