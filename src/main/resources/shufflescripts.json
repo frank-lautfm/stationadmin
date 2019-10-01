@@ -27,7 +27,7 @@
    },
    {  
       "key":"BlockSelect",
-      "defaultVersion":"BlockSelect_v1",
+      "automationAlgorithm": "blockselect",
       "optsKey":"BlockSelect",
       "file":"BlockSelect_v1.js",
       "defaultOpts":null,
