@@ -388,7 +388,10 @@ public class ShuffleOptionsPanel extends JPanel {
           getOptions().put("newsMax", value.intValue() >= 0 && value < 60 ? value : 15);
         }
       });
-      
+
+      minTf.setEnabled(containsNews);
+      maxTf.setEnabled(containsNews);
+
       row += 2;
 
     }
