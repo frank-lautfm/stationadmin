@@ -13,6 +13,7 @@ Version 4.11.0
 [+] Unterstützung für laut.fm-Nachrichten beim Shuffeln und Generieren
 [#] Zentrale Speicherung der Shuffle-Scripte auf dem Server
 [#] Fehler beim Aktualisieren der Statistik wird nicht mehr angezeigt
+[#] Aufruf von Shuffle-Tester entfernt, funktioniert nicht mehr
 
 Version 4.10.3
 --------------
