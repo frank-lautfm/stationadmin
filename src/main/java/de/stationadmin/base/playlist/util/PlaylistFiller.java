@@ -73,6 +73,9 @@ public class PlaylistFiller {
         }
       }
 
+      ArrayList<BasicTrack> trackList = new ArrayList<>(tracks.values());
+      trackList.sort(new TrackComparator());
+
       // Source: playlists
       int[] playlistIds = playlist.getAutoFillRule().getSourcePlaylists();
       if (playlistIds != null) {
@@ -82,15 +85,12 @@ public class PlaylistFiller {
             for (Entry entry : sourcePlaylist.getEntries()) {
               if (!tracks.containsKey(entry.getTrackId())) {
                 tracks.put(entry.getTrackId(), entry.getTrack());
+                trackList.add(entry.getTrack());
               }
             }
           }
         }
       }
-
-      // add tracks from source tags and playlists
-      ArrayList<BasicTrack> trackList = new ArrayList<>(tracks.values());
-      trackList.sort(new TrackComparator());
 
       if(firstJingle != null) {
         if(trackList.remove(firstJingle)) {
