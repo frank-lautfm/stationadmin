@@ -61,9 +61,10 @@ public class NewsEngine implements PlaylistEnhancer {
       newList.add(newsTrack);
       int nextNewsInsert = interval;
       int time = newsLength;
+      int tolerance = shuffleMode ? 0 : 2;
       for (int i = 0; i < tracks.size(); i++) {
         BasicTrack track = tracks.get(i);
-        if (time > nextNewsInsert - 2 * 60 && (track.getType() == BasicTrack.TYPE_MUSIC || track.getLength() > 90) && time < totalDuration - 60 * 15) {
+        if (time > nextNewsInsert - tolerance * 60 && (track.getType() == BasicTrack.TYPE_MUSIC || track.getLength() > 90) && time < totalDuration - 60 * 15) {
           newList.add(newsTrack);
           time += newsLength;
           nextNewsInsert += interval;
