@@ -16,36 +16,40 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
+import de.stationadmin.base.config.ClientConfiguration;
+import de.stationadmin.base.config.ClientConfigurationSource;
 import de.stationadmin.base.loganalyzer.LogAnalyzerService;
 import de.stationadmin.base.loganalyzer.Play;
 import de.stationadmin.base.loganalyzer.PlayFilter;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.PlaylistRegistry;
 import de.stationadmin.base.schedule.Schedule;
-import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.BasicTrack;
+import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.base.util.AbstractBean;
 import de.stationadmin.base.util.FileUtils;
 import de.stationadmin.lfm.backend.ResourceNotFoundException;
 import de.stationadmin.lfm.backend.Track;
+import jdk.internal.jline.internal.Log;
 
 /**
  * Manages title tags
  * 
  * @author Frank Korf
  */
-public class TagManager extends AbstractBean implements Service, TagChecker {
+public class TagManager extends AbstractBean implements Service, TagChecker, ClientConfigurationSource {
   /** pseudo tag: used titles */
   public static final String USED_TITLES = "#USED#";
   /** pseudo tag: unused titles */
@@ -769,6 +773,75 @@ public class TagManager extends AbstractBean implements Service, TagChecker {
 
   public void setCurrentTagSetName(String currentTitleTagSetName) {
     this.currentTagSetName = currentTitleTagSetName;
+  }
+
+  @Override
+  public void applyClientConfiguration(ClientConfiguration cfg) {
+    // apply tag groups
+    if (cfg.getTagGroups() != null && cfg.getTagGroups().size() > 0) {
+      for (Entry<String, String> entry : cfg.getTagGroups().entrySet()) {
+        Tag tag = getTag(entry.getKey());
+        if (tag != null && !org.apache.commons.lang3.StringUtils.equals(tag.getGroup(), entry.getValue())) {
+          try {
+            if (tag instanceof StaticTag) {
+              ((StaticTag) tag).setGroup(entry.getValue());
+              saveStaticTag((StaticTag) tag);
+            } else if (tag instanceof DynamicTag) {
+              ((DynamicTag) tag).setGroup(entry.getValue());
+              saveDynamicTag((DynamicTag) tag);
+            }
+          } catch (IOException e) {
+            Log.error("Unable to apply group for tag " + entry.getKey(), e);
+          }
+        }
+
+      }
+    }
+    // apply dynamic tags
+    if (cfg.getDynamicTags() != null & cfg.getDynamicTags().size() > 0) {
+      HashSet<String> tagsToDelete = new HashSet<>();
+      cfg.getDynamicTags().forEach(t -> tagsToDelete.add(t));
+      for (String dtagCfg : cfg.getDynamicTags()) {
+        DynamicTag dtag = new DynamicTag(dtagCfg);
+        tagsToDelete.add(dtag.getName());
+
+        try {
+          Tag t = getTag(dtag.getName());
+          if (t == null) {
+            saveDynamicTag(dtag);
+          } else if (t instanceof DynamicTag) {
+            DynamicTag existingTag = (DynamicTag) t;
+            if (!existingTag.getConfiguration().equals(dtagCfg)) {
+              existingTag.update(dtagCfg);
+              saveDynamicTag(existingTag);
+            }
+          }
+        } catch (IOException e) {
+          Log.error("Unable to update dynamic tag " + dtag.getName(), e);
+        }
+
+      }
+
+    }
+
+  }
+
+  @Override
+  public void collectClientConfiguration(ClientConfiguration cfg) {
+    // collect dynamic tags
+    List<String> dtags = new ArrayList<>();
+    for (DynamicTag tag : getDynamicTags()) {
+      dtags.add(tag.getConfiguration());
+    }
+    cfg.setDynamicTags(dtags);
+
+    // collect groups
+    HashMap<String, String> groups = new HashMap<>();
+    for (String tagName : getTags()) {
+      groups.put(tagName, getTag(tagName).getGroup());
+    }
+    cfg.setTagGroups(groups);
+
   }
 
 }

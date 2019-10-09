@@ -230,6 +230,7 @@ public class TagManagerDlg extends JFrame {
           DynamicTag tag = ((DynamicTagEditor) currentEditor).getModel().getBean();
           tagManager.saveDynamicTag(tag);
         }
+        ctx.getAdminClient().getClientConfigService().write();
       } catch (IOException e) {
         ErrorInfo errorInfo = ctx.createErrorInfo(e, "titletagmanager.action.save.failed");
         JXErrorPane.showDialog(TagManagerDlg.this, errorInfo);

@@ -40,6 +40,30 @@ public class DynamicTag implements Tag {
   private int maxLength = Integer.MAX_VALUE;
   private transient Matcher matcher;
 
+  public DynamicTag() {
+  }
+
+  DynamicTag(String cfg) {
+    load(Arrays.asList(org.apache.commons.lang3.StringUtils.split(cfg, "\n")));
+  }
+
+  void reset() {
+    artists = null;
+    titles = null;
+    albums = null;
+    playedWithin = 0;
+    playedWithinPlaylist = -1;
+    playlistIds = null;
+    tags = null;
+    minLength = 0;
+    maxLength = Integer.MAX_VALUE;
+  }
+
+  void update(String cfg) {
+    reset();
+    load(Arrays.asList(org.apache.commons.lang3.StringUtils.split(cfg, "\n")));
+  }
+
   @Override
   public int compareTo(Tag o) {
     return this.getName().compareToIgnoreCase(o.getName());
@@ -198,7 +222,7 @@ public class DynamicTag implements Tag {
     }
     return buf.toString();
   }
-  
+
   public void setConfiguration(String content) {
     load(Arrays.asList(StringUtils.split(content, "\n")));
   }

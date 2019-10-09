@@ -1,10 +1,16 @@
 package de.stationadmin.base.playlist;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 /**
  * Rule for populating a playlist automatically
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@XmlRootElement(name = "AutoFillRule")
 public class AutoFillRule {
-  
+
   private boolean enabled = false;
   private int[] sourcePlaylists;
   private String[] sourceTags;
@@ -14,6 +20,10 @@ public class AutoFillRule {
 
   public boolean isEnabled() {
     return enabled;
+  }
+
+  public boolean isConfigured() {
+    return (sourcePlaylists != null && sourcePlaylists.length > 0) || (sourceTags != null && sourceTags.length > 0);
   }
 
   public void setEnabled(boolean enabled) {

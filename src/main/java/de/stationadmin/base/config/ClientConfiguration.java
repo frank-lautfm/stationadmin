@@ -1,55 +1,66 @@
 package de.stationadmin.base.config;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import de.stationadmin.base.Version;
-import de.stationadmin.base.playlist.shuffle.TrackRule;
-import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
+import de.stationadmin.base.playlist.PlaylistClientCfgData;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement(name = "ClientCfg")
 public class ClientConfiguration {
 
   private String version = Version.MAJOR + "." + Version.MINOR;
-  private List<TrackRuleGroup> trackRuleGroups = new ArrayList<TrackRuleGroup>();
-  private List<TrackRule> trackRules = new ArrayList<TrackRule>();
   private List<String> dynamicTags = new ArrayList<>();
-
-  public String getVersion() {
-    return version;
-  }
-
-  public void setVersion(String version) {
-    this.version = version;
-  }
-
-  public List<TrackRuleGroup> getTrackRuleGroups() {
-    return trackRuleGroups;
-  }
-
-  public void setTrackRuleGroups(List<TrackRuleGroup> trackRuleGroups) {
-    this.trackRuleGroups = trackRuleGroups;
-  }
-
-  public List<TrackRule> getTrackRules() {
-    return trackRules;
-  }
-
-  public void setTrackRules(List<TrackRule> trackRules) {
-    this.trackRules = trackRules;
-  }
+  private Map<String,String> tagGroups = new HashMap<>();
+  private List<PlaylistClientCfgData> playlistData = new ArrayList<>();
+  private Date timmestamp = new Date();
 
   public List<String> getDynamicTags() {
     return dynamicTags;
   }
 
+  public List<PlaylistClientCfgData> getPlaylistData() {
+    return playlistData;
+  }
+
+  public Map<String, String> getTagGroups() {
+    return tagGroups;
+  }
+
+  public Date getTimmestamp() {
+    return timmestamp;
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
   public void setDynamicTags(List<String> dynamicTags) {
     this.dynamicTags = dynamicTags;
+  }
+
+  public void setPlaylistData(List<PlaylistClientCfgData> playlistData) {
+    this.playlistData = playlistData;
+  }
+
+  public void setTagGroups(Map<String, String> tagFolders) {
+    this.tagGroups = tagFolders;
+  }
+
+  public void setTimmestamp(Date timmestamp) {
+    this.timmestamp = timmestamp;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
   }
 
 }

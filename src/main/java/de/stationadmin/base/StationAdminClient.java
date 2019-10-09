@@ -18,6 +18,7 @@ import org.json.JSONException;
 import com.thoughtworks.xstream.XStream;
 
 import de.stationadmin.base.backup.BackupService;
+import de.stationadmin.base.config.ClientConfigurationService;
 import de.stationadmin.base.loganalyzer.LogAnalyzerService;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
@@ -58,6 +59,7 @@ public class StationAdminClient {
   private Schedule schedule;
   private StatisticsService statisticsService;
   private LogAnalyzerService logAnalyzerService;
+  private ClientConfigurationService clientConfigService;
   private List<Service> services = new ArrayList<Service>();
 
   private MP3Streamer mp3Streamer;
@@ -92,6 +94,7 @@ public class StationAdminClient {
 
     TrackRegistry titleRegistry = new TrackRegistry();
     PlaylistRegistry playlistRegistry = new PlaylistRegistry();
+    this.clientConfigService = new ClientConfigurationService(sessionCtx);
     this.trackService = new TrackService(this.sessionCtx, titleRegistry, this.settings);
     this.playlistService = new PlaylistService(this.sessionCtx, titleRegistry, playlistRegistry);
     this.schedule = new Schedule(sessionCtx, playlistRegistry);
@@ -101,8 +104,12 @@ public class StationAdminClient {
     this.subscriptionService = new SubscriptionService(this.sessionCtx, titleRegistry);
 
     this.backupService = new BackupService(sessionCtx, this.playlistService, this.trackService, this.tagManager, this.schedule, this.taskExecutionService, this.settings);
+    
+    this.clientConfigService.register(this.playlistService);
+    this.clientConfigService.register(this.tagManager);
+    
     this.services.addAll(Arrays.asList(this.taskExecutionService, this.trackService, this.tagManager, this.playlistService, this.schedule, this.statisticsService,
-        this.backupService, this.subscriptionService, this.logAnalyzerService));
+        this.backupService, this.subscriptionService, this.logAnalyzerService, this.clientConfigService));
 
     this.loadSettings();
   }
@@ -432,6 +439,7 @@ public class StationAdminClient {
       this.schedule.synchronize();
       this.trackService.getTrackRegistry().removeUnused();
       this.trackService.saveTracks();
+      this.clientConfigService.synchronize();
     } catch (IOException e) {
       log.error("error during synchronization", e);
       throw e;
@@ -483,6 +491,10 @@ public class StationAdminClient {
 
   public void registerErrorHandler(ErrorHandler errorHandler) {
     this.sessionCtx.setErrorHandler(errorHandler);
+  }
+
+  public ClientConfigurationService getClientConfigService() {
+    return clientConfigService;
   }
 
 }

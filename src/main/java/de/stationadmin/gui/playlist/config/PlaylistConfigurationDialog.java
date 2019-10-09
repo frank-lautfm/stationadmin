@@ -43,6 +43,7 @@ import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
+import de.stationadmin.base.config.ClientConfigurationService;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.ShuffleScriptMeta;
@@ -66,11 +67,13 @@ public class PlaylistConfigurationDialog extends JDialog {
   private PlaylistService playlistService;
   private TextProvider textProvider;
   private PlaylistConfigurationModel model;
+  private ClientConfigurationService clientCfgService;
 
   public PlaylistConfigurationDialog(ClientContext ctx, PlaylistConfigurationModel model) {
     this.ctx = ctx;
     this.textProvider = ctx.getTextProvider();
     this.playlistService = ctx.getAdminClient().getPlaylistService();
+    this.clientCfgService = ctx.getAdminClient().getClientConfigService();
     this.model = model;
     this.init();
   }
@@ -344,6 +347,7 @@ public class PlaylistConfigurationDialog extends JDialog {
           model.triggerCommit();
           try {
             playlistService.savePlaylist(model.getBean());
+            clientCfgService.write();
             dispose();
 
             ctx.getJumpHandler().jumpTo(new PlaylistEntryJumpTarget(model.getBean(), null));

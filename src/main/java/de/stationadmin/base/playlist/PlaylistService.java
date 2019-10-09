@@ -32,6 +32,8 @@ import org.json.JSONException;
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.Settings;
+import de.stationadmin.base.config.ClientConfiguration;
+import de.stationadmin.base.config.ClientConfigurationSource;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.exporter.PlaylistBackupExporter;
@@ -55,7 +57,7 @@ import de.stationadmin.lfm.backend.TrackRef;
  * @author Frank
  * 
  */
-public class PlaylistService implements Service {
+public class PlaylistService implements Service, ClientConfigurationSource {
   public static final int MAX_TRACKS = 10000;
 
   private static final Logger log = Logger.getLogger(PlaylistService.class);
@@ -91,18 +93,6 @@ public class PlaylistService implements Service {
     new File(this.dirArchive).mkdirs();
 
     this.playlistModificationDetector = new PlaylistModificationDetector(ctx, this.playlistRegistry);
-
-    // TEMP
-    /*
-     * this.shuffleScripts.add(new ShuffleScriptMeta("basic", "basic_v1", null,
-     * null, null, false)); HashMap<String, Object> bucketOpts = new HashMap<>();
-     * bucketOpts.put("pattern", "song"); this.shuffleScripts.add(new
-     * ShuffleScriptMeta("bucket", "bucket_v1_2", "bucket", null, bucketOpts,
-     * false)); this.shuffleScripts.add(new ShuffleScriptMeta("StationAdmin",
-     * "StationAdmin_v1_1", "StationAdmin", "StationAdmin_v1_1.js", null, true));
-     * this.shuffleScripts.add(new ShuffleScriptMeta("BlockSelect",
-     * "BlockSelect_v1", "BlockSelect", "BlockSelect_v1.js", null, false));
-     */
   }
 
   public void deletePlaylist(Playlist playlist) throws IOException {
@@ -483,10 +473,9 @@ public class PlaylistService implements Service {
           this.ctx.getServer().setPlaylistShuffleFunction(ctx.getStationId(), playlist.getId(), shuffleFunc);
           return true;
         }
-      }
-      else {
+      } else {
         this.ctx.getServer().setPlaylistShuffleFunction(ctx.getStationId(), playlist.getId(), "");
-        if(updateShufleAlgorithm && !StringUtils.isEmpty(scriptMeta.getAutomationAlgorithm())) {
+        if (updateShufleAlgorithm && !StringUtils.isEmpty(scriptMeta.getAutomationAlgorithm())) {
           this.ctx.getServer().setAutomationAlgorithm(ctx.getStationId(), playlist.getId(), scriptMeta.getAutomationAlgorithm());
           return true;
         }
@@ -639,17 +628,15 @@ public class PlaylistService implements Service {
   }
 
   private String getShuffleType(ExtendedPlaylistHead head) {
-    if(!StringUtils.isEmpty(head.getAutomationAlgorithm())) {
+    if (!StringUtils.isEmpty(head.getAutomationAlgorithm())) {
       ShuffleScriptMeta meta = getShuffleScriptMeta(shuffleScripts, head.getAutomationAlgorithm());
-      if(meta != null) {
+      if (meta != null) {
         return meta.getKey();
-      }
-      else {
+      } else {
         // unknown algorithm - just use it
         head.getAutomationAlgorithm();
       }
-    }
-    else if (head.getShuffleFunction() != null) {
+    } else if (head.getShuffleFunction() != null) {
       Matcher matcher = shuffleKeyPattern.matcher(head.getShuffleFunction());
       if (matcher.find()) {
         String match = matcher.group(1);
@@ -658,15 +645,12 @@ public class PlaylistService implements Service {
           return match;
         }
       }
-    }
-    else if(head.getShuffleOpts() != null) {
-      if(head.getShuffleOpts().containsKey("jingleInterval")) {
+    } else if (head.getShuffleOpts() != null) {
+      if (head.getShuffleOpts().containsKey("jingleInterval")) {
         return SHUFFLE_STATIONADMIN;
-      }
-      else if(head.getShuffleOpts().containsKey("pattern")) {
+      } else if (head.getShuffleOpts().containsKey("pattern")) {
         return SHUFFLE_CLASSIC;
-      }
-      else if(head.getShuffleOpts().containsKey("iterationStepHours")) {
+      } else if (head.getShuffleOpts().containsKey("iterationStepHours")) {
         return SHUFFLE_BLOCKSELECT;
       }
     }
@@ -868,6 +852,50 @@ public class PlaylistService implements Service {
 
   public List<ShuffleScriptMeta> getShuffleScripts() {
     return shuffleScripts;
+  }
+
+  @Override
+  public void applyClientConfiguration(ClientConfiguration cfg) {
+    HashMap<Integer, PlaylistClientCfgData> map = new HashMap<>();
+    cfg.getPlaylistData().forEach(c -> map.put(c.getId(), c));
+    if(map.size() == 0) {
+      // TODO
+      return;
+    }
+    for (Playlist pl : playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
+      PlaylistClientCfgData data = map.get(pl.getId());
+      if (data != null) {
+        pl.setAutoFillRule(data.getAutoFillRule());
+        pl.setComment(data.getComment());
+        pl.setTags(new HashSet<>(Arrays.asList(data.getTags())));
+      } else {
+        // TODO clear out data
+      }
+      if (!pl.isModified()) {
+        try {
+          savePlaylist(pl);
+        } catch (Exception e) {
+          log.info("unable to update playlist meta data from client configuration", e);
+        }
+      }
+    }
+  }
+
+  @Override
+  public void collectClientConfiguration(ClientConfiguration cfg) {
+    List<PlaylistClientCfgData> list = new ArrayList<>();
+    for (Playlist pl : playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
+      if ((pl.getAutoFillRule() != null && pl.getAutoFillRule().isConfigured()) || org.apache.commons.lang3.StringUtils.isNotEmpty(pl.getComment()) || pl.getTags().size() > 0) {
+        PlaylistClientCfgData data = new PlaylistClientCfgData();
+        data.setId(pl.getId());
+        data.setAutoFillRule(pl.getAutoFillRule());
+        data.setComment(pl.getComment());
+        data.setTags(pl.getTags().toArray(new String[pl.getTags().size()]));
+        list.add(data);
+      }
+    }
+    cfg.setPlaylistData(list);
+
   }
 
 }
