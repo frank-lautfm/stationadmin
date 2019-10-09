@@ -49,7 +49,7 @@ public class ShuffleTesterAction extends AbstractAction {
     if(duration > 18) {
       duration = 18;
     }
-    String url = "https://radioadmin.laut.fm/shuffle-tester/?station=" + ctx.getAdminClient().getStationId() + "&playlist=" + playlist.getId() + "&duration=" + duration;
+    String url = "https://radioadmin.laut.fm/tools/#/shuffle-tester?stationId=" + ctx.getAdminClient().getStationId() + "&playlistId=" + playlist.getId() + "&duration=" + duration;
     try {
       ctx.getDesktop().browse(new URI(url));
     } catch (Exception e) {
