@@ -608,9 +608,7 @@ public class Playlist extends AbstractBean {
     this.ensureLocalDataExists();
     int old = this.localData.getGenerateLength();
     this.localData.setGenerateLength(hours);
-    if (old != hours) {
-      generateSettingsToShuffleOpts();
-    }
+    this.metaDataModified = true;
     this.firePropertyChange("generateLength", old, hours);
   }
 
@@ -618,9 +616,7 @@ public class Playlist extends AbstractBean {
     this.ensureLocalDataExists();
     String old = this.localData.getGeneratePushTag();
     this.localData.setGeneratePushTag(tag);
-    if (!StringUtils.equals(old, tag)) {
-      generateSettingsToShuffleOpts();
-    }
+    this.metaDataModified = true;
     this.firePropertyChange("generatePushTag", old, tag);
   }
 
@@ -628,9 +624,7 @@ public class Playlist extends AbstractBean {
     this.ensureLocalDataExists();
     String old = this.localData.getGenerateTags();
     this.localData.setGenerateTags(titleTags);
-    if (!StringUtils.equals(old, titleTags)) {
-      generateSettingsToShuffleOpts();
-    }
+    this.metaDataModified = true;
     this.firePropertyChange("generateTags", old, titleTags);
   }
 
@@ -638,9 +632,7 @@ public class Playlist extends AbstractBean {
     this.ensureLocalDataExists();
     boolean old = this.localData.isGenerateTagsAll();
     this.localData.setGenerateTagsAll(all);
-    if (old != all) {
-      generateSettingsToShuffleOpts();
-    }
+    this.metaDataModified = true;
     this.firePropertyChange("generateTagsAll", old, all);
   }
 
@@ -648,9 +640,7 @@ public class Playlist extends AbstractBean {
     this.ensureLocalDataExists();
     int old = this.localData.getNewsInterval();
     this.localData.setNewsInterval(time);
-    if (old != time) {
-      generateSettingsToShuffleOpts();
-    }
+    this.metaDataModified = true;
     this.firePropertyChange("generateNewsInterval", old, time);
   }
 
@@ -658,9 +648,7 @@ public class Playlist extends AbstractBean {
     this.ensureLocalDataExists();
     boolean old = this.localData.isFirstJingleAfterNews();
     this.localData.setFirstJingleAfterNews(firstJingleAfterNews);
-    if (old != firstJingleAfterNews) {
-      this.generateSettingsToShuffleOpts();
-    }
+    this.metaDataModified = true;
     this.firePropertyChange("generateFirstJingleAfterNews", old, firstJingleAfterNews);
   }
 
@@ -674,9 +662,7 @@ public class Playlist extends AbstractBean {
     this.ensureLocalDataExists();
     int old = this.localData.getGenerateTitleRepeatLevel();
     this.localData.setGenerateTitleRepeatLevel(level);
-    if (old != level) {
-      generateSettingsToShuffleOpts();
-    }
+    this.metaDataModified = true;
     this.firePropertyChange("generateTitleRepeatLevel", old, level);
   }
 
@@ -684,9 +670,7 @@ public class Playlist extends AbstractBean {
     this.ensureLocalDataExists();
     int old = this.localData.getGenerateMaxArtistTitles();
     this.localData.setGenerateMaxArtistTitles(max);
-    if (old != max) {
-      generateSettingsToShuffleOpts();
-    }
+    this.metaDataModified = true;
     this.firePropertyChange("generateMaxArtistTitles", old, max);
   }
 
@@ -699,7 +683,7 @@ public class Playlist extends AbstractBean {
     this.ensureLocalDataExists();
     String[] old = this.localData.getGenerateAdvices();
     this.localData.setGenerateAdvices(advices);
-    this.generateSettingsToShuffleOpts();
+    this.metaDataModified = true;
     this.firePropertyChange("generateAdvices", old, advices);
   }
 
@@ -715,9 +699,7 @@ public class Playlist extends AbstractBean {
     this.ensureLocalDataExists();
     boolean old = this.localData.isGenerateMinimizeArtistRepeats();
     this.localData.setGenerateMinimizeArtistRepeats(minimize);
-    if (old != minimize) {
-      generateSettingsToShuffleOpts();
-    }
+    this.metaDataModified = true;
     this.firePropertyChange("generateMinimizeArtistRepeats", old, minimize);
   }
 
@@ -1136,37 +1118,42 @@ public class Playlist extends AbstractBean {
   }
 
   public void setShuffleOpts(Map<String, Object> shuffleOpts) {
+    setShuffleOpts(shuffleOpts, false);
+  }
+
+  public void setShuffleOpts(Map<String, Object> shuffleOpts, boolean updateGenerateSettings) {
     if (this.shuffleOpts == null || !this.shuffleOpts.equals(shuffleOpts)) {
-      this.shuffleOpts = shuffleOpts;
-      this.metaDataModified = true;
       if (shuffleOpts != null && shuffleOpts.containsKey("type") && shuffleOpts.get("type").equals("generate")) {
-        shuffleOptsToGenerateSettings();
-        localData.setGenerateTags((String) this.shuffleOpts.get("tags"));
-        localData.setGeneratePushTag((String) this.shuffleOpts.get("pushTags"));
-        localData.setGenerateLength(getShuffleIntSetting("length"));
-        localData.setGenerateMaxArtistTitles(getShuffleIntSetting("maxArtistTracks"));
-        localData.setGenerateTitleRepeatLevel(getShuffleIntSetting("trackRepeatLevel"));
-        localData.setNewsInterval(getShuffleIntSetting("newsInterval"));
-        localData.setFirstJingleAfterNews(getShuffleBooleanSetting("firstJingleAfterNews"));
-        localData.setGenerateMinimizeArtistRepeats(getShuffleBooleanSetting("minimizeArtistRepeats"));
-        localData.setGenerateTagsAll(getShuffleBooleanSetting("tagsAll"));
-        int i = 0;
-        ArrayList<String> advices = new ArrayList<>();
-        while (shuffleOpts.containsKey("advice." + i)) {
-          advices.add((String) shuffleOpts.get("advice." + i));
-          i++;
+        if (updateGenerateSettings) {
+          this.shuffleOpts = shuffleOpts;
+          ensureLocalDataExists();
+          localData.setGenerateTags((String) shuffleOpts.get("tags"));
+          localData.setGeneratePushTag((String) shuffleOpts.get("pushTags"));
+          localData.setGenerateLength(getShuffleIntSetting("length"));
+          localData.setGenerateMaxArtistTitles(getShuffleIntSetting("maxArtistTracks"));
+          localData.setGenerateTitleRepeatLevel(getShuffleIntSetting("trackRepeatLevel"));
+          localData.setNewsInterval(getShuffleIntSetting("newsInterval"));
+          localData.setFirstJingleAfterNews(getShuffleBooleanSetting("firstJingleAfterNews"));
+          localData.setGenerateMinimizeArtistRepeats(getShuffleBooleanSetting("minimizeArtistRepeats"));
+          localData.setGenerateTagsAll(getShuffleBooleanSetting("tagsAll"));
+          int i = 0;
+          ArrayList<String> advices = new ArrayList<>();
+          while (shuffleOpts.containsKey("advice." + i)) {
+            advices.add((String) shuffleOpts.get("advice." + i));
+            i++;
+          }
+          localData.setGenerateAdvices(advices.toArray(new String[advices.size()]));
         }
-        localData.setGenerateAdvices(advices.toArray(new String[advices.size()]));
+        this.shuffleOpts = null;
+      }
+      else {
+        this.shuffleOpts = shuffleOpts;
+        this.metaDataModified = true;
       }
     }
   }
 
-  private void shuffleOptsToGenerateSettings() {
-    ensureLocalDataExists();
-
-  }
-
-  private void generateSettingsToShuffleOpts() {
+  HashMap<String, Object> getGenerateSettingsAsMap() {
     if (!shuffle && localData != null && localData.getGenerateTags() != null) {
       HashMap<String, Object> opts = new HashMap<>();
       opts.put("type", "generate");
@@ -1184,9 +1171,9 @@ public class Playlist extends AbstractBean {
           opts.put("advice." + i, localData.getGenerateAdvices()[i]);
         }
       }
-
-      this.shuffleOpts = opts;
-      this.metaDataModified = true;
+      return opts;
+    } else {
+      return null;
     }
   }
 

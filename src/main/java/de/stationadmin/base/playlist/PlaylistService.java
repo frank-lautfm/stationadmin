@@ -417,6 +417,9 @@ public class PlaylistService implements Service, ClientConfigurationSource {
       head.setTitle(playlist.getName());
       head.setShuffled(playlist.isShuffle());
       head.setShuffleOpts(playlist.getShuffleOpts());
+      if(!playlist.isShuffle() && StringUtils.isNotEmpty(playlist.getGenerateTags())) {
+        head.setShuffleOpts(playlist.getGenerateSettingsAsMap());
+      }
 
       ShuffleScriptMeta scriptMeta = getShuffleScriptMeta(shuffleScripts, playlist.getShuffleType());
       if (playlist.isShuffle()) {
@@ -682,7 +685,7 @@ public class PlaylistService implements Service, ClientConfigurationSource {
     playlist.setDescription(head.getDescription());
     playlist.setName(head.getTitle());
     playlist.setUpdatedAt(head.getUpdatedAt());
-    playlist.setShuffleOpts(head.getShuffleOpts());
+    playlist.setShuffleOpts(head.getShuffleOpts(), true);
     playlist.setShuffleType(getShuffleType(head));
   }
 
@@ -694,7 +697,7 @@ public class PlaylistService implements Service, ClientConfigurationSource {
     playlist.setColor(playlistInfo.getColor());
     playlist.setCreatedAt(playlistInfo.getCreatedAt());
     playlist.setUpdatedAt(playlist.getUpdatedAt());
-    playlist.setShuffleOpts(playlistInfo.getShuffleOpts());
+    playlist.setShuffleOpts(playlistInfo.getShuffleOpts(), true);
     playlist.setShuffleType(getShuffleType(playlistInfo));
   }
 

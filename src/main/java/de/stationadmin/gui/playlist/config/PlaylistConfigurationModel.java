@@ -108,7 +108,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
 
     // init shuffle opts
     // - create a copy we can work on
-    HashMap<String, Object> shuffleOpts = playlist.getShuffleOpts() != null ? new HashMap<>(playlist.getShuffleOpts()) : new HashMap<>();
+    Map<String, Object> shuffleOpts = playlist.getShuffleOpts() != null ? new HashMap<>(playlist.getShuffleOpts()) : new HashMap<>();
     this.getBufferedModel("shuffleOpts").setValue(shuffleOpts);
 
     this.getBufferedModel("shuffleType").addPropertyChangeListener(new PropertyChangeListener() {
@@ -359,6 +359,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
           }
         }
         getBean().setGeneratePushTag(builder.toString());
+        // ((HashMap<String,Object>)getBufferedModel("shuffleOpts").getValue()).put("pushTags", builder.toString());
       }
     }
 
