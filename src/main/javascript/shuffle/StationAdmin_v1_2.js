@@ -141,7 +141,7 @@
 				newsTrack = tracks[i];
 				continue;
 			}
-			if(tracks[i].title.indexOf('START_AD_BREAK') > -1) {
+			if(tracks[i].title != null && tracks[i].title.indexOf('START_AD_BREAK') > -1) {
 				adTrigger = tracks[i];
 				continue;
 			}
