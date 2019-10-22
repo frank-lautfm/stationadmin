@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import java.util.regex.Pattern;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -76,6 +78,8 @@ public class PlaylistService implements Service, ClientConfigurationSource {
   private PlaylistValidator playlistValidator;
   private PlaylistModificationDetector playlistModificationDetector;
   private List<ShuffleScriptMeta> shuffleScripts = new ArrayList<>();
+
+  private List<PlaylistProfile> profiles = new ArrayList<>();
 
   /**
    * @param ctx
@@ -290,6 +294,7 @@ public class PlaylistService implements Service, ClientConfigurationSource {
     this.playlistRegistry.clear();
     this.loadPlaylists(PlaylistType.ONLINE);
     this.loadPlaylists(PlaylistType.ARCHIVED);
+    this.loadProfilesFromFile();
   }
 
   private void loadShuffleScripts() throws IOException {
@@ -417,7 +422,7 @@ public class PlaylistService implements Service, ClientConfigurationSource {
       head.setTitle(playlist.getName());
       head.setShuffled(playlist.isShuffle());
       head.setShuffleOpts(playlist.getShuffleOpts());
-      if(!playlist.isShuffle() && StringUtils.isNotEmpty(playlist.getGenerateTags())) {
+      if (!playlist.isShuffle() && StringUtils.isNotEmpty(playlist.getGenerateTags())) {
         head.setShuffleOpts(playlist.getGenerateSettingsAsMap());
       }
 
@@ -861,7 +866,7 @@ public class PlaylistService implements Service, ClientConfigurationSource {
   public void applyClientConfiguration(ClientConfiguration cfg) {
     HashMap<Integer, PlaylistClientCfgData> map = new HashMap<>();
     cfg.getPlaylistData().forEach(c -> map.put(c.getId(), c));
-    if(map.size() == 0) {
+    if (map.size() == 0) {
       // TODO
       return;
     }
@@ -899,6 +904,61 @@ public class PlaylistService implements Service, ClientConfigurationSource {
     }
     cfg.setPlaylistData(list);
 
+  }
+
+  public List<PlaylistProfile> getProfiles() {
+    return this.profiles;
+  }
+
+  public PlaylistProfile getProfile(String id) {
+    for (PlaylistProfile p : profiles) {
+      if (p.getId().equals(id)) {
+        return p;
+      }
+    }
+    return null;
+  }
+
+  public void addProfile(PlaylistProfile profile) {
+    this.profiles.add(profile);
+  }
+
+  public void removeProfile(String id) {
+    for (int i = 0; i < profiles.size(); i++) {
+      if (profiles.get(i).getId().equals(id)) {
+        profiles.remove(i);
+        return;
+      }
+    }
+  }
+
+  public void saveProfiles() throws IOException {
+
+    saveProfilesToFile();
+  }
+
+  private List<PlaylistProfile> convertJsonToProfiles(String json) throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+    PlaylistProfile[] profiles = mapper.readValue(json, PlaylistProfile[].class);
+    return new ArrayList<>(Arrays.asList(profiles));
+  }
+  
+  private String convertProfilesToJson() throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+    PlaylistProfile[] profiles = this.profiles.toArray(new PlaylistProfile[this.profiles.size()]);
+    return mapper.writeValueAsString(profiles);
+  }
+
+  private void loadProfilesFromFile() throws IOException {
+    String file = ctx.getStationDirectory() + "playlistprofiles.json";
+    if(new File(file).exists()) {
+      this.profiles = convertJsonToProfiles(org.apache.commons.io.FileUtils.readFileToString(new File(file), Charset.forName("UTF-8")));
+    }
+  }
+
+  private void saveProfilesToFile() throws IOException {
+    String file = ctx.getStationDirectory() + "playlistprofiles.json";
+    FileUtils.write(new File(file), convertProfilesToJson(), Charset.forName("UTF-8"));
   }
 
 }
