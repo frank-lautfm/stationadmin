@@ -23,6 +23,7 @@ public class StationStatus extends AbstractBean {
   private int durationTodayCalculated;
   private int durationYesterday;
   private int currentTrackId;
+  private boolean currentTrackLive;
   private String currentTrackLabel;
   
   public String getCurrentTrackLabel() {
@@ -215,6 +216,16 @@ public class StationStatus extends AbstractBean {
     int old = this.durationTodayCalculated;
     this.durationTodayCalculated = durationTodayCalculated;
     this.firePropertyChange("durationTodayCalculated", old, durationTodayCalculated);
+  }
+
+  public boolean isCurrentTrackLive() {
+    return currentTrackLive;
+  }
+
+  public void setCurrentTrackLive(boolean currentTrackLive) {
+    boolean old = this.currentTrackLive;
+    this.currentTrackLive = currentTrackLive;
+    this.firePropertyChange("currentTrackLive", old, currentTrackLive);
   }
 
 }

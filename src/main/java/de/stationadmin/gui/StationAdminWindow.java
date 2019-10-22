@@ -420,7 +420,7 @@ public class StationAdminWindow extends StationAdminFrame {
 
   private void updateTitle(JumpLabel label) {
     RegisteredTrack title = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(ctx.getAdminClient().getStationStatus().getCurrentTrackId());
-    if (title != null) {
+    if (title != null && !ctx.getAdminClient().getStationStatus().isCurrentTrackLive()) {
       label.setText(title.getArtist() + " - " + title.getTitle());
     } else {
       label.setText(ctx.getAdminClient().getStationStatus().getCurrentTrackLabel());
