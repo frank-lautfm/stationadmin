@@ -11,6 +11,7 @@ Version 4.11.1
 [+] Shuffle-Tester kann wieder aus dem Playlist-Kontextmenü aufgerufen werden
 [#] News werden bei lokalem Shuffling nicht mehr vor der vollen Stunde platziert
 [*] Korrekte Titelanzeige bei Live-Sendungen
+[*] Robustere Ermittlung des Streamingservers
 
 Version 4.11.0
 --------------

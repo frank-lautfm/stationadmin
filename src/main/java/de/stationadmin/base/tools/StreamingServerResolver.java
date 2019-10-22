@@ -21,13 +21,11 @@ public class StreamingServerResolver {
 
       Process myProcess = Runtime.getRuntime().exec(cmd);
       myProcess.waitFor();
-      if (myProcess.exitValue() == 0) {
-        String output = IOUtils.toString(myProcess.getInputStream(), "UTF-8");
-        Pattern pattern = Pattern.compile("(\\w+).stream.laut.fm");
-        Matcher matcher = pattern.matcher(output);
-        if (matcher.find()) {
-          return matcher.group(1);
-        }
+      String output = IOUtils.toString(myProcess.getInputStream(), "UTF-8");
+      Pattern pattern = Pattern.compile("(\\w+).stream.laut.fm");
+      Matcher matcher = pattern.matcher(output);
+      if (matcher.find()) {
+        return matcher.group(1);
       }
       return null;
     } catch (Exception e) {
