@@ -24,6 +24,7 @@ public class Song implements Serializable {
   private int length;
   private Date createdAt;
   private String type;
+  private boolean live;
 
   private Date startedAt;
   private Date endsAt;
@@ -43,6 +44,7 @@ public class Song implements Serializable {
     this.startedAt = JSONUtil.getDate(json, "started_at", JSONUtil.DEFAULT_DATE_FORMAT);
     this.endsAt = JSONUtil.getDate(json, "ends_at", JSONUtil.DEFAULT_DATE_FORMAT);
     this.type = JSONUtil.getString(json, "type");
+    this.live = JSONUtil.getBoolean(json, "live");
   }
 
   /**
@@ -146,5 +148,10 @@ public class Song implements Serializable {
     }
     return false;
   }
+
+  public boolean isLive() {
+    return live;
+  }
+
 
 }

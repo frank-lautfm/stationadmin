@@ -73,13 +73,14 @@ public class PlaylistRecorder extends Thread {
           }
           
           
+          this.stationStatus.setCurrentTrackLive(curr.isLive());
           this.stationStatus.setCurrentTrackId(currTrackId);
           this.stationStatus.setCurrentTrackLabel(label);
           this.stationStatus.setCurrentTrackEndTime(curr.getEndsAt().getTime() + timeDiff);
         }
         if (!first) {
           if (lastTrack == null || !lastTrack.equals(curr)) {
-            if (this.titleRegistry != null && this.titleRegistry.getTrack(curr.getId()) != null) {
+            if (!curr.isLive() && this.titleRegistry != null && this.titleRegistry.getTrack(curr.getId()) != null) {
               collector.add(this.titleRegistry.getTrack(curr.getId()));
             } else {
               BasicTrack title = new BasicTrack();
