@@ -2,6 +2,12 @@ package de.stationadmin.base.playlist.shuffle;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@XmlRootElement(name = "TrackRuleGroup")
 public class TrackRuleGroup implements Serializable {
   private static final long serialVersionUID = -2153598585047049570L;
   private String name;
@@ -22,6 +28,11 @@ public class TrackRuleGroup implements Serializable {
     this.minDistance = minDistance;
   }
 
+  public TrackRuleGroup(TrackRuleGroup source) {
+    this.name = source.name;
+    this.multiMatchSelection = source.multiMatchSelection;
+    this.minDistance = source.minDistance;
+  }
   
   public String getName() {
     return name;

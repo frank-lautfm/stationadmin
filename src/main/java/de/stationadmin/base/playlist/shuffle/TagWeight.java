@@ -5,21 +5,27 @@ package de.stationadmin.base.playlist.shuffle;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 /**
  * @author korf
  * 
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@XmlRootElement(name = "TagWeight")
 public class TagWeight implements Serializable, Comparable<TagWeight> {
   private static final long serialVersionUID = -3576031795553153260L;
 
   private String tag;
   private int weight;
   private float maxFraction;
-  
+
   public TagWeight() {
-    
+
   }
-  
+
   /**
    * @param tag
    * @param weight
@@ -30,6 +36,12 @@ public class TagWeight implements Serializable, Comparable<TagWeight> {
     this.tag = tag;
     this.weight = weight;
     this.maxFraction = maxFraction;
+  }
+
+  public TagWeight(TagWeight source) {
+    this.tag = source.tag;
+    this.weight = source.weight;
+    this.maxFraction = source.maxFraction;
   }
 
   /**
@@ -58,33 +70,32 @@ public class TagWeight implements Serializable, Comparable<TagWeight> {
   }
 
   /**
-   * Gets the maximum fraction for tracks tagged with the configured tag within
-   * a playlist
+   * Gets the maximum fraction for tracks tagged with the configured tag within a
+   * playlist
    * 
-   * @param maxFraction
-   *          the maxFraction to set
+   * @param maxFraction the maxFraction to set
    */
   public void setMaxFraction(float maxFraction) {
     this.maxFraction = maxFraction;
   }
 
   /**
-   * @param tag
-   *          the tag to set
+   * @param tag the tag to set
    */
   public void setTag(String tag) {
     this.tag = tag;
   }
 
   /**
-   * @param weight
-   *          the weight to set
+   * @param weight the weight to set
    */
   public void setWeight(int weight) {
     this.weight = weight;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
   @Override

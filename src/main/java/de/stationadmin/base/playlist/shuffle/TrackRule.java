@@ -2,6 +2,12 @@ package de.stationadmin.base.playlist.shuffle;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@XmlRootElement(name = "TrackRule")
 public class TrackRule implements Serializable {
   private static final long serialVersionUID = -6689217810843399901L;
   

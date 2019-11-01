@@ -96,7 +96,7 @@ public class StationAdminClient {
     PlaylistRegistry playlistRegistry = new PlaylistRegistry();
     this.clientConfigService = new ClientConfigurationService(sessionCtx);
     this.trackService = new TrackService(this.sessionCtx, titleRegistry, this.settings);
-    this.playlistService = new PlaylistService(this.sessionCtx, titleRegistry, playlistRegistry);
+    this.playlistService = new PlaylistService(this.sessionCtx, titleRegistry, playlistRegistry, this.settings);
     this.schedule = new Schedule(sessionCtx, playlistRegistry);
     this.logAnalyzerService = new LogAnalyzerService(this.sessionCtx, this.trackService);
     this.tagManager = new TagManager(this.sessionCtx, this.trackService, this.playlistService.getPlaylistRegistry(), logAnalyzerService, this.schedule);

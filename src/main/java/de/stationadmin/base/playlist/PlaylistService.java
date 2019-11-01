@@ -39,6 +39,8 @@ import de.stationadmin.base.config.ClientConfigurationSource;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.exporter.PlaylistBackupExporter;
+import de.stationadmin.base.playlist.profile.PlaylistProfile;
+import de.stationadmin.base.playlist.shuffle.PlaylistProfileType;
 import de.stationadmin.base.playlist.shuffle.TrackRule;
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
 import de.stationadmin.base.playlist.validation.PlaylistValidationException;
@@ -80,13 +82,14 @@ public class PlaylistService implements Service, ClientConfigurationSource {
   private List<ShuffleScriptMeta> shuffleScripts = new ArrayList<>();
 
   private List<PlaylistProfile> profiles = new ArrayList<>();
+  private Settings settings;
 
   /**
    * @param ctx
    * @param titleRegistry
    * @param playlistRegistry
    */
-  public PlaylistService(SessionCtx ctx, TrackRegistry titleRegistry, PlaylistRegistry playlistRegistry) {
+  public PlaylistService(SessionCtx ctx, TrackRegistry titleRegistry, PlaylistRegistry playlistRegistry, Settings settings) {
     super();
     this.ctx = ctx;
     this.trackRegistry = titleRegistry;
@@ -95,6 +98,8 @@ public class PlaylistService implements Service, ClientConfigurationSource {
     this.dirArchive = dir + "archive" + File.separatorChar;
     new File(this.dir).mkdirs();
     new File(this.dirArchive).mkdirs();
+
+    this.settings = settings;
 
     this.playlistModificationDetector = new PlaylistModificationDetector(ctx, this.playlistRegistry);
   }
@@ -942,7 +947,7 @@ public class PlaylistService implements Service, ClientConfigurationSource {
     PlaylistProfile[] profiles = mapper.readValue(json, PlaylistProfile[].class);
     return new ArrayList<>(Arrays.asList(profiles));
   }
-  
+
   private String convertProfilesToJson() throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     PlaylistProfile[] profiles = this.profiles.toArray(new PlaylistProfile[this.profiles.size()]);
@@ -951,9 +956,19 @@ public class PlaylistService implements Service, ClientConfigurationSource {
 
   private void loadProfilesFromFile() throws IOException {
     String file = ctx.getStationDirectory() + "playlistprofiles.json";
-    if(new File(file).exists()) {
+    if (new File(file).exists()) {
       this.profiles = convertJsonToProfiles(org.apache.commons.io.FileUtils.readFileToString(new File(file), Charset.forName("UTF-8")));
+    } else {
+      this.migrateGlobalSettingsToProfiles();
     }
+  }
+
+  private void migrateGlobalSettingsToProfiles() throws IOException {
+    this.profiles.add(new PlaylistProfile(PlaylistProfileType.Generate, "Generieren", settings));
+    this.profiles.add(new PlaylistProfile(PlaylistProfileType.LocalShuffle, "Shuffeln (lokal)", settings));
+    this.profiles.add(new PlaylistProfile(PlaylistProfileType.StationAdminShuffle, "Shuffeln - Station Admin", settings));
+
+    this.saveProfilesToFile();
   }
 
   private void saveProfilesToFile() throws IOException {
