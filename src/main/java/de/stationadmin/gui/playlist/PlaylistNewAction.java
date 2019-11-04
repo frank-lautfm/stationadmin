@@ -43,7 +43,7 @@ public class PlaylistNewAction extends AbstractAction {
     if (playlistHolder != null) {
       playlistHolder.setValue(playlist);
     }
-    PlaylistConfigurationModel model = new PlaylistConfigurationModel(playlist, ctx.getAdminClient().getTagManager(), ctx.getAdminClient().getSettings(), ctx.getAdminClient().getPlaylistService().getShuffleScripts(), ctx.getTextProvider());
+    PlaylistConfigurationModel model = new PlaylistConfigurationModel(playlist, ctx.getAdminClient().getTagManager(), ctx.getAdminClient().getSettings(), ctx.getAdminClient().getPlaylistService().getShuffleScripts(), ctx.getAdminClient().getPlaylistService().getProfiles(), ctx.getTextProvider());
     PlaylistConfigurationDialog dlg = new PlaylistConfigurationDialog(ctx, model);
     dlg.setVisible(true);
 

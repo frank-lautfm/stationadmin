@@ -87,6 +87,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     rowSpec.append("pref,5dlu,"); // color
     rowSpec.append("pref,5dlu,"); // shuffle 1
     rowSpec.append("pref,5dlu,"); // shuffle 2
+    rowSpec.append("pref,5dlu,"); // profile
     rowSpec.append("pref,5dlu,"); // tags
     rowSpec.append("pref,5dlu,"); // comment
 
@@ -175,7 +176,7 @@ public class PlaylistConfigurationDialog extends JDialog {
           if (value == null) {
             setText(ctx.getTextProvider().getString("playlistcfg.property.shuffleFunc.custom"));
           } else {
-            ShuffleScriptMeta script = (ShuffleScriptMeta)value;
+            ShuffleScriptMeta script = (ShuffleScriptMeta) value;
             String key = "playlistcfg.property.shuffleFunc." + script.getKey().toLowerCase();
             String text = ctx.getTextProvider().getString(key);
             if (!key.equals(text)) {
@@ -201,6 +202,31 @@ public class PlaylistConfigurationDialog extends JDialog {
       panel.add(shuffleFuncCmb, cc.xy(4, row));
       row += 2;
 
+    }
+
+    // profile
+    {
+      SelectionInList<String> profileSelection = new SelectionInList<>(model.getProfileListModel(), model.getBufferedModel("profileId"));
+      JComboBox<String> profileCmb = BasicComponentFactory.createComboBox(profileSelection, new DefaultListCellRenderer() {
+        private static final long serialVersionUID = 8912776835119146763L;
+
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+          Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+          if(value == null) {
+            setText(" ");
+          }
+          else {
+            setText(model.getProfileName((String)value));
+          }
+          return comp;
+        }
+        
+      });
+
+      panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.profile")), cc.xy(2, row));
+      panel.add(profileCmb, cc.xy(4, row));
+      row += 2;
     }
 
     // tags
@@ -267,7 +293,8 @@ public class PlaylistConfigurationDialog extends JDialog {
 
   private boolean checkIfShuffleOptsEnabled() {
     return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER)
-        && (model.getShuffleScript().getValue() != null && StringUtils.isNotEmpty(((ShuffleScriptMeta)model.getShuffleScript().getValue()).getOptsKey())) && model.getBean().getType() != PlaylistType.ARCHIVED;
+        && (model.getShuffleScript().getValue() != null && StringUtils.isNotEmpty(((ShuffleScriptMeta) model.getShuffleScript().getValue()).getOptsKey()))
+        && model.getBean().getType() != PlaylistType.ARCHIVED;
   }
 
   private boolean checkIfAutoFillEnabled() {

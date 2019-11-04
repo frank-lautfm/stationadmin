@@ -44,7 +44,7 @@ class PlaylistEditPropertiesAction extends AbstractAction implements PropertyCha
   public void actionPerformed(ActionEvent e) {
     Playlist playlist = (Playlist) this.playlistHolder.getValue();
     if (playlist != null) {
-      PlaylistConfigurationModel model = new PlaylistConfigurationModel(playlist, this.ctx.getAdminClient().getTagManager(), ctx.getAdminClient().getSettings(), ctx.getAdminClient().getPlaylistService().getShuffleScripts(), ctx.getTextProvider());
+      PlaylistConfigurationModel model = new PlaylistConfigurationModel(playlist, this.ctx.getAdminClient().getTagManager(), ctx.getAdminClient().getSettings(), ctx.getAdminClient().getPlaylistService().getShuffleScripts(), ctx.getAdminClient().getPlaylistService().getProfiles(), ctx.getTextProvider());
       PlaylistConfigurationDialog dlg = new PlaylistConfigurationDialog(this.ctx, model);
       dlg.setVisible(true);
     }

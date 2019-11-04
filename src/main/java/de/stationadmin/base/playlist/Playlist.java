@@ -303,6 +303,11 @@ public class Playlist extends AbstractBean {
     }
     return artists.size();
   }
+  
+  public String getProfileId() {
+    this.ensureLocalDataExists();
+    return localData.getProfileId();
+  }
 
   public List<String> getProperties() {
     List<String> properties = this.localData != null ? this.localData.export() : new ArrayList<String>();
@@ -825,6 +830,14 @@ public class Playlist extends AbstractBean {
     if (map.containsKey("shuffleType")) {
       this.shuffleType = map.get("shuffleType");
     }
+  }
+  
+  public void setProfileId(String profileId) {
+    this.ensureLocalDataExists();
+    String old = this.localData.getProfileId();
+    this.localData.setProfileId(profileId);
+    this.metaDataModified = true;
+    this.firePropertyChange("profileId", old, profileId);
   }
 
   public void setShuffle(boolean shuffle) {

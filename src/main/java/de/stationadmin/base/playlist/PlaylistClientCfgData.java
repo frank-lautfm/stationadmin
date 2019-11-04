@@ -6,6 +6,7 @@ package de.stationadmin.base.playlist;
  */
 public class PlaylistClientCfgData {
   private int id;
+  private String profileId;
   private String[] tags;
   private String comment;
   private AutoFillRule autoFillRule;
@@ -43,6 +44,14 @@ public class PlaylistClientCfgData {
 
   public void setTags(String[] tags) {
     this.tags = tags;
+  }
+
+  public String getProfileId() {
+    return profileId;
+  }
+
+  public void setProfileId(String profileId) {
+    this.profileId = profileId;
   }
 
 }

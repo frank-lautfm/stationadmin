@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import com.jgoodies.binding.PresentationModel;
+import com.jgoodies.binding.list.IndirectListModel;
 import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
@@ -31,6 +32,7 @@ import de.stationadmin.base.playlist.AutoFillRule;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.ShuffleScriptMeta;
+import de.stationadmin.base.playlist.profile.PlaylistProfile;
 import de.stationadmin.base.playlist.shuffle.Advice;
 import de.stationadmin.base.playlist.shuffle.TagSequenceAdvice;
 import de.stationadmin.base.playlist.shuffle.TitleNameLimitAdvice;
@@ -63,10 +65,14 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   private List<ShuffleScriptMeta> shuffleScripts;
   private ShuffleScriptModel shuffleScript;
 
+  private List<PlaylistProfile> profiles;
+  private IndirectListModel<String> profileListModel = new IndirectListModel<>();
+
   /**
    * @param bean
    */
-  public PlaylistConfigurationModel(Playlist playlist, TagManager tagManager, Settings settings, List<ShuffleScriptMeta> shuffleScripts, TextProvider textProvider) {
+  public PlaylistConfigurationModel(Playlist playlist, TagManager tagManager, Settings settings, List<ShuffleScriptMeta> shuffleScripts, List<PlaylistProfile> profiles,
+      TextProvider textProvider) {
     super(playlist);
     this.settings = settings;
     this.tags = new TagsModel();
@@ -75,8 +81,10 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
     this.tagManager = tagManager;
     this.textProvider = textProvider;
     this.shuffleScripts = shuffleScripts;
+    this.profiles = profiles;
     this.initAdvices(playlist);
     this.initTrackOrderType(playlist);
+    this.updateProfileListModel();
 
     PropertyChangeListener adviceUpdater = new PropertyChangeListener() {
 
@@ -128,6 +136,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
           }
           getBufferedModel("shuffleOpts").setValue(opts);
         }
+        updateProfileListModel();
       }
     });
 
@@ -171,9 +180,59 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
           getBufferedModel("generateTags").setValue(null);
           break;
         }
+        updateProfileListModel();
 
       }
     });
+  }
+
+  private void updateProfileListModel() {
+    ArrayList<String> activeProfiles = new ArrayList<>();
+
+    TrackOrderOption option = (TrackOrderOption) trackOrderType.getValue();
+    String shuffleType = (String) getBufferedModel("shuffleType").getValue();
+    String currentSelection = (String) getBufferedModel("profileId").getValue();
+
+    for (PlaylistProfile profile : profiles) {
+      switch (profile.getType()) {
+      case Generate:
+        if (option.equals(TrackOrderOption.GENERATE)) {
+          activeProfiles.add(profile.getId());
+        }
+        break;
+      case LocalShuffle:
+        if (option.equals(TrackOrderOption.SHUFFLE_LOCAL)) {
+          activeProfiles.add(profile.getId());
+        }
+        break;
+      case StationAdminShuffle:
+        if (option.equals(TrackOrderOption.SHUFFLE_SERVER)) {
+          ShuffleScriptMeta script = PlaylistService.getShuffleScriptMeta(shuffleScripts, shuffleType);
+          if (script.getAutomationAlgorithm() != null && script.getAutomationAlgorithm().equals("stationadmin_shuffle")) {
+            activeProfiles.add(profile.getId());
+          }
+        }
+        break;
+      }
+    }
+
+    int numActive = activeProfiles.size();
+
+    String newSelection = currentSelection;
+    if (activeProfiles.size() == 0 && currentSelection != null) {
+      newSelection = null;
+    } else if (activeProfiles.size() > 0 && (currentSelection == null || !activeProfiles.contains(currentSelection))) {
+      newSelection = activeProfiles.get(0);
+    }
+
+    activeProfiles.add(0, null);
+
+    profileListModel.setList(activeProfiles);
+
+    if (newSelection != currentSelection) {
+      getBufferedModel("profileId").setValue(newSelection);
+    }
+
   }
 
   static String tagsToString(Set<String> tagSet) {
@@ -359,7 +418,8 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
           }
         }
         getBean().setGeneratePushTag(builder.toString());
-        // ((HashMap<String,Object>)getBufferedModel("shuffleOpts").getValue()).put("pushTags", builder.toString());
+        // ((HashMap<String,Object>)getBufferedModel("shuffleOpts").getValue()).put("pushTags",
+        // builder.toString());
       }
     }
 
@@ -632,6 +692,20 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
 
   public List<ShuffleScriptMeta> getShuffleScripts() {
     return shuffleScripts;
+  }
+
+  public IndirectListModel<String> getProfileListModel() {
+    return profileListModel;
+  }
+
+  String getProfileName(String id) {
+    // TODO improve
+    for (PlaylistProfile p : profiles) {
+      if (p.getId().equals(id)) {
+        return p.getName();
+      }
+    }
+    return id;
   }
 
 }

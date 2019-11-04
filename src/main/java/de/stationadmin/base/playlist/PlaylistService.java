@@ -880,6 +880,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       PlaylistClientCfgData data = map.get(pl.getId());
       if (data != null) {
         pl.setAutoFillRule(data.getAutoFillRule());
+        pl.setProfileId(data.getProfileId());
         pl.setComment(data.getComment());
         pl.setTags(new HashSet<>(Arrays.asList(data.getTags())));
       } else {
@@ -899,11 +900,12 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
   public void collectClientConfiguration(ClientConfiguration cfg) {
     List<PlaylistClientCfgData> list = new ArrayList<>();
     for (Playlist pl : playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
-      if ((pl.getAutoFillRule() != null && pl.getAutoFillRule().isConfigured()) || org.apache.commons.lang3.StringUtils.isNotEmpty(pl.getComment()) || pl.getTags().size() > 0) {
+      if ((pl.getAutoFillRule() != null && pl.getAutoFillRule().isConfigured())  || org.apache.commons.lang3.StringUtils.isNotEmpty(pl.getProfileId()) || org.apache.commons.lang3.StringUtils.isNotEmpty(pl.getComment()) || pl.getTags().size() > 0) {
         PlaylistClientCfgData data = new PlaylistClientCfgData();
         data.setId(pl.getId());
         data.setAutoFillRule(pl.getAutoFillRule());
         data.setComment(pl.getComment());
+        data.setProfileId(pl.getProfileId());
         data.setTags(pl.getTags().toArray(new String[pl.getTags().size()]));
         list.add(data);
       }

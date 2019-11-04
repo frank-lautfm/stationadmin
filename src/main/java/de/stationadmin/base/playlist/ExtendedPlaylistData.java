@@ -20,6 +20,7 @@ public class ExtendedPlaylistData {
   private static final int VERSION = 1;
   private AutoFillRule autoFillRule = new AutoFillRule();
   private int id;
+  private String profileId;
   private boolean shuffleAllowed = false;
   private boolean gvlCheck = true;
   private Set<String> tags = new HashSet<String>();
@@ -140,6 +141,9 @@ public class ExtendedPlaylistData {
     List<String> properties = new ArrayList<String>();
     properties.add("version = " + VERSION);
     properties.add("id = " + this.id);
+    if(StringUtils.isNotEmpty(this.profileId)) {
+      properties.add("profile = " + this.profileId);
+    }
     properties.add("shuffleAllowed = " + Boolean.toString(this.shuffleAllowed));
     properties.add("gvlCheck = " + Boolean.toString(this.gvlCheck));
     int tagIdx = 1;
@@ -182,6 +186,8 @@ public class ExtendedPlaylistData {
       data.setShuffleAllowed(map.containsKey("shuffleAllowed") ? map.get("shuffleAllowed").equalsIgnoreCase("true") : false);
 
       data.setGvlCheck(map.containsKey("gvlCheck") ? map.get("gvlCheck").equalsIgnoreCase("true") : true);
+      
+      data.profileId = map.containsKey("profile") ? map.get("profile") : null;
 
       HashSet<String> tags = new HashSet<String>();
       int tagIdx = 1;
@@ -331,6 +337,14 @@ public class ExtendedPlaylistData {
 
   public void setFirstJingleAfterNews(boolean firstJingleAfterNews) {
     this.firstJingleAfterNews = firstJingleAfterNews;
+  }
+
+  public String getProfileId() {
+    return profileId;
+  }
+
+  public void setProfileId(String profileId) {
+    this.profileId = profileId;
   }
 
 }
