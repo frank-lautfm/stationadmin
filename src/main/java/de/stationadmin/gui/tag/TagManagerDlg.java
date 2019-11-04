@@ -92,8 +92,7 @@ public class TagManagerDlg extends JFrame {
 
       });
 
-      this.getContentPane().add(new JScrollPane(list),
-          new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
+      this.getContentPane().add(new JScrollPane(list), new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
 
     }
 
@@ -214,15 +213,13 @@ public class TagManagerDlg extends JFrame {
         if (currentEditor instanceof StaticTagEditor) {
           ((StaticTagEditor) currentEditor).getModel().triggerCommit();
           StaticTag tag = ((StaticTagEditor) currentEditor).getModel().getBean();
-          if(tag.getName().trim().length() == 0) {
+          if (tag.getName().trim().length() == 0) {
             ErrorInfo errorInfo = ctx.createErrorInfo(null, "titletagmanager.action.save.illegalname.empty");
             JXErrorPane.showDialog(TagManagerDlg.this, errorInfo);
-          }
-          else if(tag.getName().contains("/")) {
+          } else if (tag.getName().contains("/")) {
             ErrorInfo errorInfo = ctx.createErrorInfo(null, "titletagmanager.action.save.illegalname.slash");
             JXErrorPane.showDialog(TagManagerDlg.this, errorInfo);
-          }
-          else {
+          } else {
             tagManager.saveStaticTag(tag);
           }
         } else if (currentEditor instanceof DynamicTagEditor) {
@@ -264,7 +261,8 @@ public class TagManagerDlg extends JFrame {
      */
     @Override
     public void actionPerformed(ActionEvent evt) {
-      if (JOptionPane.showConfirmDialog(TagManagerDlg.this, ctx.getString("titletagmanager.action.delete.confirm", tag.getName()), "", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+      if (JOptionPane.showConfirmDialog(TagManagerDlg.this, ctx.getString("titletagmanager.action.delete.confirm", tag.getName()), "",
+          JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
         try {
           tagManager.deleteTag(tag.getName());
         } catch (IOException e) {

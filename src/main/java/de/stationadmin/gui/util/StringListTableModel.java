@@ -20,6 +20,10 @@ public class StringListTableModel extends AbstractTableModel {
   private List<String> list;
   private List<String> entries = new ArrayList<String>();
 
+  public StringListTableModel(String heading) {
+    this(heading, new ArrayList<>());
+  }
+
   /**
    * @param heading
    * @param list
@@ -28,11 +32,17 @@ public class StringListTableModel extends AbstractTableModel {
     super();
     this.heading = heading;
     this.list = list;
-    for(String str : this.list) {
+    updateEntries();
+  }
+
+  private void updateEntries() {
+    this.entries.clear();
+    for (String str : this.list) {
       this.entries.add(str);
     }
     Collections.sort(this.entries);
     this.entries.add("");
+
   }
 
   @Override
@@ -44,13 +54,15 @@ public class StringListTableModel extends AbstractTableModel {
   public int getColumnCount() {
     return 1;
   }
-  
+
   @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
     return this.entries.get(rowIndex);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see javax.swing.table.AbstractTableModel#getColumnName(int)
    */
   @Override
@@ -65,14 +77,14 @@ public class StringListTableModel extends AbstractTableModel {
 
   @Override
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-    this.entries.set(rowIndex, (String)aValue);
+    this.entries.set(rowIndex, (String) aValue);
     this.list.clear();
-    for(String str : this.entries) {
-      if(str.trim().length() > 0) {
+    for (String str : this.entries) {
+      if (str.trim().length() > 0) {
         this.list.add(str);
       }
     }
-    if(entries.size() > 0 && entries.get(entries.size() - 1).trim().length() > 0) {
+    if (entries.size() > 0 && entries.get(entries.size() - 1).trim().length() > 0) {
       this.entries.add("");
       this.fireTableRowsInserted(this.entries.size() - 1, this.entries.size() - 1);
     }
@@ -83,6 +95,12 @@ public class StringListTableModel extends AbstractTableModel {
    */
   public List<String> getList() {
     return list;
+  }
+
+  public void setList(List<String> list) {
+    this.list = list != null ? list : new ArrayList<>();
+    this.updateEntries();
+    this.fireTableDataChanged();
   }
 
 }

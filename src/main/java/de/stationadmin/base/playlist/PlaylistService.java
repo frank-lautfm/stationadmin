@@ -51,6 +51,7 @@ import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
+import de.stationadmin.base.util.AbstractBean;
 import de.stationadmin.lfm.backend.CurrentPlaylist;
 import de.stationadmin.lfm.backend.ExtendedPlaylistHead;
 import de.stationadmin.lfm.backend.PlaylistHead;
@@ -61,7 +62,7 @@ import de.stationadmin.lfm.backend.TrackRef;
  * @author Frank
  * 
  */
-public class PlaylistService implements Service, ClientConfigurationSource {
+public class PlaylistService extends AbstractBean implements Service, ClientConfigurationSource {
   public static final int MAX_TRACKS = 10000;
 
   private static final Logger log = Logger.getLogger(PlaylistService.class);
@@ -925,13 +926,17 @@ public class PlaylistService implements Service, ClientConfigurationSource {
   }
 
   public void addProfile(PlaylistProfile profile) {
+    List<PlaylistProfile> old = new ArrayList<>(this.profiles);
     this.profiles.add(profile);
+    this.firePropertyChange("profiles", old, profiles);
   }
 
   public void removeProfile(String id) {
+    List<PlaylistProfile> old = new ArrayList<>(this.profiles);
     for (int i = 0; i < profiles.size(); i++) {
       if (profiles.get(i).getId().equals(id)) {
         profiles.remove(i);
+        this.firePropertyChange("profiles", old, profiles);
         return;
       }
     }

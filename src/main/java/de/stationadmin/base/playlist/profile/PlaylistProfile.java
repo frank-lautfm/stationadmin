@@ -25,7 +25,7 @@ public class PlaylistProfile {
   private String jingleOrder = "shuffle_repeat";
   private boolean protectFirstJingle;
   private boolean protectAllJingles;
-  private WordDistributionStrategy wordDistributionStrategy;
+  private WordDistributionStrategy wordDistributionStrategy = WordDistributionStrategy.RANDOM;
 
   private ArtistNormalizationCfg artistNormalization = new ArtistNormalizationCfg();
   private AdTriggerCfg adTrigger = new AdTriggerCfg();
@@ -190,6 +190,10 @@ public class PlaylistProfile {
 
   public void setGenerate(GenerateCfg generate) {
     this.generate = generate;
+  }
+  
+  public String toString() {
+    return this.name;
   }
 
 }

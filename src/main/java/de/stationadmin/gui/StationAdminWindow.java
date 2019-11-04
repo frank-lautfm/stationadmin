@@ -75,6 +75,7 @@ import de.stationadmin.gui.playlist.PlaylistTrackSearchOpenAction;
 import de.stationadmin.gui.playlist.ResetModifiedPlaylistsAction;
 import de.stationadmin.gui.playlist.SaveModifiedPlaylistsAction;
 import de.stationadmin.gui.playlist.forecast.ForecastDisplayAction;
+import de.stationadmin.gui.playlist.profile.PlaylistProfileEditAction;
 import de.stationadmin.gui.playlist.tools.AutoFillPlaylistsAction;
 import de.stationadmin.gui.playlist.tools.CurrentPlaylistDisplayAction;
 import de.stationadmin.gui.playlist.tools.DupeFinderDisplayAction;
@@ -484,8 +485,11 @@ public class StationAdminWindow extends StationAdminFrame {
       if (!djOnly) {
         menuPlaylists.add(new AutoFillPlaylistsAction(this.ctx));
       }
+      menuPlaylists.addSeparator();
       menuPlaylists.add(new PlaylistTrackSearchOpenAction(this.ctx));
       menuPlaylists.add(new DupeFinderDisplayAction(this.ctx));
+      menuPlaylists.addSeparator();
+      menuPlaylists.add(new PlaylistProfileEditAction(this.ctx));
       menuPlaylists.addSeparator();
       menuPlaylists.add(new CurrentPlaylistDisplayAction(this.ctx));
       if (!djOnly) {
