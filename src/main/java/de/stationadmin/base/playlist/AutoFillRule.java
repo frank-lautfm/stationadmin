@@ -1,8 +1,14 @@
 package de.stationadmin.base.playlist;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 /**
  * Rule for populating a playlist automatically
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@XmlRootElement(name = "AutoFillRule")
 public class AutoFillRule {
   
   private boolean enabled = false;

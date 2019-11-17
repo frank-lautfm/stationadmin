@@ -6,6 +6,10 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.11.2
+--------------
+[*] Werbetrigger soll fest positionierte Wortbeiträge nicht verschieben
+
 Version 4.11.1
 --------------
 [+] Shuffle-Tester kann wieder aus dem Playlist-Kontextmenü aufgerufen werden
