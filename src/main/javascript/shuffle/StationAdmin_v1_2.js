@@ -1,4 +1,4 @@
-// key: StationAdmin_v1_2
+// StationAdmin v1.3
 ( function( tracks, opts, trackStats ){
 	
 	var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -34,6 +34,7 @@
 	var boundTracks = {};
 	
 	var newsTrack;
+	var preNewsJingle;
 
 	var startTime;
 	var lastJinglePlay = -1;
@@ -133,15 +134,32 @@
 		
 		var artistMap = {};
 		var tracksDuration = 0;
-		
-		for(var i = 0; i < tracks.length; i++) {
+
+		var start = 0;
+
+		// check for jingle-news pattern at the beginning
+		if(tracks.length > 2 && (tracks[0].type == 'news') || (tracks[0].type == 'jingle' && tracks[1].type == 'news')) {
+			if(tracks[0].type == 'jingle') {
+				preNewsJingle = tracks[0];
+				start++;
+			}
+			newsTrack = tracks[start];
+			start++;
+			if(firstJingleAfterNews && tracks[start].type == 'jingle') {
+				firstJingle = tracks[start];
+				start++;
+			}
+		}
+
+		for(var i = start; i < tracks.length; i++) {
 
 
 			if(tracks[i].id == 1) {
 				newsTrack = tracks[i];
 				continue;
 			}
-			if(tracks[i].title != null && tracks[i].title.indexOf('START_AD_BREAK') > -1) {
+			if((tracks[i].title != null && tracks[i].title.indexOf('START_AD_BREAK') > -1) ||
+				(tracks[i].artist != null && tracks[i].artist.indexOf('START_AD_BREAK') > -1)) {
 				adTrigger = tracks[i];
 				continue;
 			}
@@ -713,8 +731,12 @@
  
 		if(isInNewsTimeframe(ts.getMinutes()) && ts.getTime() - lastNewsStarted > 1000 * 30 * 45) {
 			// start of playlist at full hour - add news
-			newTracks.push(newsTrack);
 			lastNewsStarted = ts.getTime();
+			if(preNewsJingle != null) {
+				newTracks.push(preNewsJingle);
+				ts.setTime(ts.getTime() + preNewsJingle.duration * 1000);
+			}
+			newTracks.push(newsTrack);
 		    ts.setTime(ts.getTime() + newsDuration);
 		}
 
@@ -736,9 +758,12 @@
 			skipNextIfJingle = false;
 			if(insertNews && ts.getTime() < noNewsAfter)  {
 				newsDelayed = false;
-				newTracks.push(newsTrack);
-				// console.log("news at " + ts.toUTCString() + " / " + (ts.getTime() - lastNewsStarted));
 				lastNewsStarted = ts.getTime();
+				if(preNewsJingle != null) {
+					newTracks.push(preNewsJingle);
+					ts.setTime(ts.getTime() + preNewsJingle.duration * 1000);
+				}
+				newTracks.push(newsTrack);
 				ts.setTime(ts.getTime() + newsDuration);
 				if(firstJingle != null && firstJingleAfterNews) {
 					newTracks.push(firstJingle);
