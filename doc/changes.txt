@@ -10,6 +10,7 @@ Version 4.11.2
 --------------
 [*] Werbetrigger soll fest positionierte Wortbeiträge nicht verschieben
 [#] News-Track wird beim lokalen Shuffeln nur noch mit kürzerer angenommener Länge berechnet - reduziert die Gefahr eines News-Tracks kurz vorm Playlistwechsel
+[+] Automatisches Befüllen: Nachrichten werden an den Anfang platziert, News-Jingle oder Jingle-News-Jingle-Muster beibehalten
 
 Version 4.11.1
 --------------
