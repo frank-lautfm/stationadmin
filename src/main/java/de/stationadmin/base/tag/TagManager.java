@@ -42,7 +42,6 @@ import de.stationadmin.base.util.AbstractBean;
 import de.stationadmin.base.util.FileUtils;
 import de.stationadmin.lfm.backend.ResourceNotFoundException;
 import de.stationadmin.lfm.backend.Track;
-import jdk.internal.jline.internal.Log;
 
 /**
  * Manages title tags
@@ -50,6 +49,7 @@ import jdk.internal.jline.internal.Log;
  * @author Frank Korf
  */
 public class TagManager extends AbstractBean implements Service, TagChecker, ClientConfigurationSource {
+  private static final Logger log = Logger.getLogger(TagManager.class);
   /** pseudo tag: used titles */
   public static final String USED_TITLES = "#USED#";
   /** pseudo tag: unused titles */
@@ -791,7 +791,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker, Cli
               saveDynamicTag((DynamicTag) tag);
             }
           } catch (IOException e) {
-            Log.error("Unable to apply group for tag " + entry.getKey(), e);
+            log.error("Unable to apply group for tag " + entry.getKey(), e);
           }
         }
 
@@ -817,7 +817,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker, Cli
             }
           }
         } catch (IOException e) {
-          Log.error("Unable to update dynamic tag " + dtag.getName(), e);
+          log.error("Unable to update dynamic tag " + dtag.getName(), e);
         }
 
       }
