@@ -332,6 +332,24 @@ public class ShuffleOptionsPanel extends JPanel {
         break;
       }
     }
+    if(containsNews) {
+      HashMap<String, Object> options = getOptions();
+      if(!options.containsKey("newsInterval")) {
+        options.put("newsInterval", 60);
+      }
+      if(!options.containsKey("newsMin")) {
+        options.put("newsMin", 59);
+      }
+      if(!options.containsKey("newsMax")) {
+        options.put("newsMax", 59);
+      }
+    }
+    else {
+      HashMap<String, Object> options = getOptions();
+      options.remove("newsInterval");
+      options.remove("newsMin");
+      options.remove("newsMax");
+    }
 
 
     final ValueHolder newsInterval = new ValueHolder(getOptions().containsKey("newsInterval") ? getOptions().get("newsInterval") : 60);
