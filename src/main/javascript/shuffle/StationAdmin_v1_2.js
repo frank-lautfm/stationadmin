@@ -881,14 +881,14 @@
 	if(trackRulesEnabled) {
 		playlistTracks = applyTrackRules(playlistTracks);
 	}
-	if(adTrigger != null) {
-		playlistTracks = insertAdTriggers(playlistTracks);
-	}
 	if(hasLinkedTracks) {
 		playlistTracks = insertLinkedTracks(playlistTracks);
 	}
 	if(newsTrack != null) {
 		playlistTracks = insertNews(playlistTracks);
+	}
+	if(adTrigger != null) {
+		playlistTracks = insertAdTriggers(playlistTracks);
 	}
 
 	
