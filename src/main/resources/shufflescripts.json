@@ -22,7 +22,9 @@
       "automationAlgorithm": "stationadmin_shuffle",
       "optsKey":"StationAdmin",
       "file":"StationAdmin_v1_2.js",
-      "defaultOpts":null,
+      "defaultOpts":{
+	      "avoidRepeat": 2
+      },
       "supportsGlobalOpts":true
    },
    {  

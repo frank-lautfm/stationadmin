@@ -6,6 +6,13 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 4.11.2
+--------------
+[*] Werbetrigger soll fest positionierte Wortbeiträge nicht verschieben
+[#] News-Track wird beim lokalen Shuffeln nur noch mit kürzerer angenommener Länge berechnet - reduziert die Gefahr eines News-Tracks kurz vorm Playlistwechsel
+[+] Automatisches Befüllen: Nachrichten werden an den Anfang platziert, News-Jingle oder Jingle-News-Jingle-Muster beibehalten
+[#] Default-Werte werden explizit in die shuffle_opts für das Station Admin-Verfahren eingefügt
+
 Version 4.11.1
 --------------
 [+] Shuffle-Tester kann wieder aus dem Playlist-Kontextmenü aufgerufen werden

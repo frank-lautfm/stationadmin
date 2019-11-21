@@ -51,6 +51,7 @@ public class PlaylistShuffler {
     HashSet<Integer> jingleIds = new HashSet<Integer>();
     
 
+    int numSkipped = 0;
     for (int pos = 0; pos < entries.size(); pos++) {
       Entry entry = entries.get(pos);
       BasicTrack title = playlist.getTrackRegistry().getTrack(entry.getTrackId());
@@ -58,6 +59,7 @@ public class PlaylistShuffler {
         throw new IllegalStateException("Title with id " + entry.getTrackId() + " not known");
       }
       if(playlistEnhancer != null && playlistEnhancer.excludeFromCorePlaylist(title)) {
+        numSkipped++;
         continue;
       }
 
@@ -65,7 +67,7 @@ public class PlaylistShuffler {
         boolean randomTrack = true;
         if (title.getType() == BasicTrack.TYPE_WORD) {
           if (this.wordDistribution == WordDistributionStrategy.PROTECT) {
-            ProtectedTrack fxtitle = new ProtectedTrack(pos, title);
+            ProtectedTrack fxtitle = new ProtectedTrack(pos - numSkipped, title);
             ctx.addProtectedTrack(fxtitle);
             randomTrack = false;
           } else if (this.wordDistribution == WordDistributionStrategy.SUCCESSOR_COUPLING && pos < entries.size() - 1) {
@@ -100,7 +102,7 @@ public class PlaylistShuffler {
       } else {
         // jingle
         if (protectAllJingles) {
-          ProtectedTrack fxtitle = new ProtectedTrack(pos, title);
+          ProtectedTrack fxtitle = new ProtectedTrack(pos - numSkipped, title);
           ctx.addProtectedTrack(fxtitle);
         } else {
           if (!jingleIds.contains(title.getId())) {

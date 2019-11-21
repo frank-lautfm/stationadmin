@@ -48,13 +48,24 @@ public class PlaylistFiller {
    */
   public void fillPlaylist(Playlist playlist) throws IOException {
     if (playlist.getAutoFillRule().isEnabled()) {
+      BasicTrack preNewsJingle = null;
       BasicTrack firstJingle = null;
-      if(playlist.getEntries().size() > 0) {
-        if(playlist.getEntry(0).getTrack().getType() == BasicTrack.TYPE_JINGLE) {
+      if (playlist.getEntries().size() > 0) {
+
+        if (playlist.getEntries().size() > 1 && playlist.getEntry(0).getTrack().getType() == BasicTrack.TYPE_NEWS
+            && playlist.getEntry(1).getTrack().getType() == BasicTrack.TYPE_JINGLE) {
+          firstJingle = playlist.getEntry(1).getTrack();
+        } else if (playlist.getEntries().size() > 2 && playlist.getEntry(0).getTrack().getType() == BasicTrack.TYPE_JINGLE
+            && playlist.getEntry(1).getTrack().getType() == BasicTrack.TYPE_NEWS) {
+          preNewsJingle = playlist.getEntry(0).getTrack();
+          if (playlist.getEntry(2).getTrack().getType() == BasicTrack.TYPE_JINGLE) {
+            firstJingle = playlist.getEntry(2).getTrack();
+          }
+        } else if (playlist.getEntry(0).getTrack().getType() == BasicTrack.TYPE_JINGLE) {
           firstJingle = playlist.getEntry(0).getTrack();
         }
       }
-      
+
       playlist.removeEntries(new ArrayList<Entry>(playlist.getEntries()));
       Map<Integer, BasicTrack> tracks = new HashMap<>();
 
@@ -92,22 +103,26 @@ public class PlaylistFiller {
         }
       }
 
-      if(firstJingle != null) {
-        if(trackList.remove(firstJingle)) {
-          playlist.addTrack(firstJingle);
+      if (playlist.getAutoFillRule().isIncludeNews()) {
+        if (preNewsJingle != null) {
+          if (trackList.remove(preNewsJingle)) {
+            playlist.addTrack(preNewsJingle);
+          }
         }
-      }
-      
-      for (BasicTrack track : trackList) {
-        playlist.addTrack(track);
-      }
-      
-      if(playlist.getAutoFillRule().isIncludeNews()) {
         BasicTrack newsTrack = trackService.getTrack(TrackRegistry.LAUTFM_NEWS_ID);
         if (newsTrack != null) {
           playlist.addTrack(newsTrack);
         }
-        
+      }
+
+      if (firstJingle != null) {
+        if (trackList.remove(firstJingle)) {
+          playlist.addTrack(firstJingle);
+        }
+      }
+
+      for (BasicTrack track : trackList) {
+        playlist.addTrack(track);
       }
 
       // add ad separator / ad trigger
