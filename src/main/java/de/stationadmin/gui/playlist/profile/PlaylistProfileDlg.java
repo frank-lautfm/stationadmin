@@ -147,6 +147,9 @@ public class PlaylistProfileDlg extends StationAdminFrame {
       tabbedPane.addTab("Werbetrigger", new ProfileAdTriggerPanel(ctx, profileModel));
       tabbedPane.addTab("Gebundene Jingles", new ProfileTrackRulePanel(ctx, profileModel));
       tabbedPane.addTab("Normalisierung", new ArtistNormalizationPanel(ctx, profileModel));
+      
+      final JPanel tagWeightPanel = new TagWeightPanel(ctx, profileModel);
+      final JPanel artistLimitPanel = new ArtistLimitPanel(ctx, profileModel);
 
       selection.addValueChangeListener(new PropertyChangeListener() {
 
@@ -163,8 +166,8 @@ public class PlaylistProfileDlg extends StationAdminFrame {
 
             if (profile.getType() == PlaylistProfileType.Generate) {
               if (tabbedPane.getTabCount() < 6) {
-                tabbedPane.addTab("Gewichtung", new JPanel());
-                tabbedPane.addTab("Vorauswahl", new JPanel());
+                tabbedPane.addTab("Gewichtung", tagWeightPanel);
+                tabbedPane.addTab("Vorauswahl", artistLimitPanel);
               }
             } else if (tabbedPane.getTabCount() > 4) {
               tabbedPane.removeTabAt(tabbedPane.getTabCount() - 1);

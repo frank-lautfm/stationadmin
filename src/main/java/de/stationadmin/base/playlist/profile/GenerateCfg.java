@@ -11,7 +11,6 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @XmlRootElement(name = "GenerateCfg")
 public class GenerateCfg {
 
-  private int minRandomValue;
   private Map<String,Integer> artistPreselectLimits;
   private Map<String,Integer> artistPreselectWeights;
   
@@ -20,7 +19,6 @@ public class GenerateCfg {
   }
   
   public GenerateCfg(GenerateCfg source) {
-    this.minRandomValue = source.getMinRandomValue();
     if(source.artistPreselectLimits != null) {
       artistPreselectLimits = new HashMap<>(source.artistPreselectLimits);
     }
@@ -29,14 +27,6 @@ public class GenerateCfg {
     }
   }
   
-  public int getMinRandomValue() {
-    return minRandomValue;
-  }
-
-  public void setMinRandomValue(int minRandomValue) {
-    this.minRandomValue = minRandomValue;
-  }
-
   public Map<String, Integer> getArtistPreselectLimits() {
     return artistPreselectLimits;
   }

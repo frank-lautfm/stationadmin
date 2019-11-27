@@ -32,6 +32,7 @@ public class PlaylistProfile {
   private TrackRuleCfg trackRules = new TrackRuleCfg();
   private GenerateCfg generate;
 
+  private int tagWeightBottom = 100;
   private List<TagWeight> tagWeights;
 
   public PlaylistProfile() {
@@ -59,6 +60,7 @@ public class PlaylistProfile {
     this.jingleInterval = settings.getShuffleJingleInterval();
     this.protectFirstJingle = settings.isShuffleProtectFirstJingle();
     this.protectAllJingles = settings.isShuffleProtectAllJingles();
+    this.tagWeightBottom = settings.getGenerateMinRandomValue();
 
     this.adTrigger.setPos1(settings.getAdTriggerPosition1());
     this.adTrigger.setPos2(settings.getAdTriggerPosition2());
@@ -81,7 +83,6 @@ public class PlaylistProfile {
     if (type == PlaylistProfileType.Generate) {
       this.tagWeights = new ArrayList<>(settings.getGenerateGlobalTagWeights());
       this.generate = new GenerateCfg();
-      this.generate.setMinRandomValue(settings.getGenerateMinRandomValue());
       this.generate.setArtistPreselectLimits(settings.getGenerateArtistPreselectLimits());
       this.generate.setArtistPreselectWeights(settings.getGenerateArtistPreselectTagWeights());
     }
@@ -194,6 +195,14 @@ public class PlaylistProfile {
   
   public String toString() {
     return this.name;
+  }
+
+  public int getTagWeightBottom() {
+    return tagWeightBottom;
+  }
+
+  public void setTagWeightBottom(int tagWeightBottom) {
+    this.tagWeightBottom = tagWeightBottom;
   }
 
 }
