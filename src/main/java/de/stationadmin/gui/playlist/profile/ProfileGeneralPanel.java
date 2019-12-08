@@ -11,6 +11,9 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.ListCellRenderer;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.list.SelectionInList;
@@ -38,7 +41,8 @@ public class ProfileGeneralPanel extends JPanel {
   @SuppressWarnings("unchecked")
   private void init() {
 
-    this.setLayout(new FormLayout("5dlu,60dlu,5dlu,pref,2dlu,pref,pref,pref:grow,5dlu", "5dlu,pref,5dlu,pref,8dlu,pref,3dlu,pref,3dlu,pref,3dlu,pref,10dlu:grow,pref,3dlu"));
+    this.setLayout(
+        new FormLayout("5dlu,70dlu,5dlu,pref,2dlu,pref,pref,pref:grow,5dlu", "5dlu,pref,5dlu,pref,8dlu,pref,3dlu,pref,3dlu,pref,3dlu,pref,10dlu,pref,10dlu,pref,5dlu,pref,3dlu"));
     CellConstraints cc = new CellConstraints();
 
     int row = 2;
@@ -53,7 +57,7 @@ public class ProfileGeneralPanel extends JPanel {
     JLabel typeTf = BasicComponentFactory.createLabel(typeHolder);
     this.add(typeTf, cc.xywh(4, row, 5, 1, CellConstraints.FILL, CellConstraints.CENTER));
     row += 2;
-    
+
     model.getBufferedModel("type").addValueChangeListener(new PropertyChangeListener() {
 
       @Override
@@ -150,6 +154,42 @@ public class ProfileGeneralPanel extends JPanel {
     this.add(new JLabel(this.textProvider.getString("settings.property.shuffleWordDistribution")), cc.xy(2, row));
     this.add(wordDistCmb, cc.xywh(4, row, 5, 1));
     row += 2;
+
+    ListCellRenderer<Object> profileIdRenderer = new DefaultListCellRenderer() {
+      private static final long serialVersionUID = -3128851951559170210L;
+
+      @Override
+      public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        Component c  = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        if (value == null) {
+          setText(textProvider.getString("playlistprofilemanager.ref.none"));
+        } else {
+          for (PlaylistProfile p : model.getProfiles()) {
+            if (p.getId().equals(value)) {
+              setText(textProvider.getString("playlistprofilemanager.ref.other", p.getName()));
+              break;
+            }
+          }
+        }
+        return c;
+      }
+
+    };
+
+    SelectionInList<String> trackRuleProfileRefSelection = new SelectionInList<>(model.getProfileRefListModel(), model.getBufferedModel("trackRuleFromProfile"));
+    final JComboBox<String> trackRuleRefCmb = BasicComponentFactory.createComboBox(trackRuleProfileRefSelection, profileIdRenderer);
+    this.add(new JLabel(this.textProvider.getString("playlistprofilemanager.property.trackRuleRef")), cc.xy(2, row));
+    this.add(trackRuleRefCmb, cc.xywh(4, row, 5, 1));
+    row += 2;
+
+    SelectionInList<String> artistNormalizationProfileRefSelection = new SelectionInList<>(model.getProfileRefListModel(),
+        model.getBufferedModel("artistNormalizationFromProfile"));
+    final JComboBox<String> artistNormRefCmb = BasicComponentFactory.createComboBox(artistNormalizationProfileRefSelection, profileIdRenderer);
+    this.add(new JLabel(this.textProvider.getString("playlistprofilemanager.property.aritstNormalizationRef")), cc.xy(2, row));
+    this.add(artistNormRefCmb, cc.xywh(4, row, 5, 1));
+    row += 2;
+    
+
 
   }
 

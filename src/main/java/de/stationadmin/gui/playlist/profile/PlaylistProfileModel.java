@@ -2,7 +2,10 @@ package de.stationadmin.gui.playlist.profile;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.jgoodies.binding.list.IndirectListModel;
 import com.jgoodies.binding.value.ValueModel;
 
 import de.stationadmin.base.playlist.profile.AdTriggerCfg;
@@ -16,6 +19,9 @@ public class PlaylistProfileModel extends NonObservingPresentationModel<Playlist
   private NonObservingPresentationModel<AdTriggerCfg> adTriggerModel;
   private TrackRuleModel trackRuleModel;
   private ArtistNormalizationModel artistNormalization;
+
+  private List<PlaylistProfile> profiles;
+  private IndirectListModel<String> profileRefListModel = new IndirectListModel<>();
 
   public PlaylistProfileModel(ValueModel selection) {
     super((PlaylistProfile) null);
@@ -34,11 +40,13 @@ public class PlaylistProfileModel extends NonObservingPresentationModel<Playlist
           adTriggerModel.setBean(profile != null ? profile.getAdTrigger() : null);
           trackRuleModel.setBean(profile != null ? profile.getTrackRules() : null);
           artistNormalization.setBean(profile != null ? profile.getArtistNormalization() : null);
+          updateProfileRefModel(profile != null ? profile.getId() : null);
         } finally {
           initializing = false;
         }
       }
     });
+
   }
 
   public boolean isInitializing() {
@@ -71,6 +79,39 @@ public class PlaylistProfileModel extends NonObservingPresentationModel<Playlist
 
   public ArtistNormalizationModel getArtistNormalization() {
     return artistNormalization;
+  }
+
+  public IndirectListModel<String> getProfileRefListModel() {
+    return profileRefListModel;
+  }
+
+  public List<PlaylistProfile> getProfiles() {
+    return profiles;
+  }
+
+  public void setProfiles(List<PlaylistProfile> profiles) {
+    this.profiles = profiles;
+    updateProfileRefModel(getBean() != null ? getBean().getId() : null);
+  }
+
+  private void updateProfileRefModel(String currentProfileId) {
+    List<String> list = new ArrayList<>();
+    list.add(null);
+
+    for (PlaylistProfile profile : this.profiles) {
+      if (currentProfileId == null || !currentProfileId.equals(profile.getId())) {
+        list.add(profile.getId());
+      }
+    }
+
+    // String trackRuleFromProfile =
+    // getBufferedModel("trackRuleFromProfile").getString();
+    // String artistNormalizationFromProfile =
+    // getBufferedModel("artistNormalizationFromProfile").getString();
+    // System.out.println("Before update: " + trackRuleFromProfile);
+    this.profileRefListModel.setList(list);
+    // getBufferedModel("trackRuleFromProfile").setValue(trackRuleFromProfile);
+    // getBufferedModel("artistNormalizationFromProfile").setValue(artistNormalizationFromProfile);
   }
 
 }

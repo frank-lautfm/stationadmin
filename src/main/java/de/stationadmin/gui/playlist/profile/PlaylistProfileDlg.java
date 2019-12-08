@@ -51,6 +51,16 @@ public class PlaylistProfileDlg extends StationAdminFrame {
     super(ctx, "playlistprofiles");
     selection.setIdentityCheckEnabled(true);
     this.profileModel = new PlaylistProfileModel(selection);
+    this.profileModel.setProfiles(this.ctx.getAdminClient().getPlaylistService().getProfiles());
+    this.ctx.getAdminClient().getPlaylistService().addPropertyChangeListener("profiles", new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        profileModel.setProfiles(ctx.getAdminClient().getPlaylistService().getProfiles());
+      }
+
+    });
+    
     init();
   }
 

@@ -27,8 +27,10 @@ public class PlaylistProfile {
   private boolean protectAllJingles;
   private WordDistributionStrategy wordDistributionStrategy = WordDistributionStrategy.RANDOM;
 
+  private String artistNormalizationFromProfile;
   private ArtistNormalizationCfg artistNormalization = new ArtistNormalizationCfg();
   private AdTriggerCfg adTrigger = new AdTriggerCfg();
+  private String trackRuleFromProfile;
   private TrackRuleCfg trackRules = new TrackRuleCfg();
   private GenerateCfg generate;
 
@@ -203,6 +205,22 @@ public class PlaylistProfile {
 
   public void setTagWeightBottom(int tagWeightBottom) {
     this.tagWeightBottom = tagWeightBottom;
+  }
+
+  public String getArtistNormalizationFromProfile() {
+    return artistNormalizationFromProfile;
+  }
+
+  public void setArtistNormalizationFromProfile(String artistNormalizationFromProfile) {
+    this.artistNormalizationFromProfile = artistNormalizationFromProfile;
+  }
+
+  public String getTrackRuleFromProfile() {
+    return trackRuleFromProfile;
+  }
+
+  public void setTrackRuleFromProfile(String trackRuleFromProfile) {
+    this.trackRuleFromProfile = trackRuleFromProfile;
   }
 
 }
