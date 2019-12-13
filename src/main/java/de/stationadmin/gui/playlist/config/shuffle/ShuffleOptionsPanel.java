@@ -1,4 +1,4 @@
-package de.stationadmin.gui.playlist.config;
+package de.stationadmin.gui.playlist.config.shuffle;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -39,6 +39,8 @@ import de.stationadmin.base.playlist.ShuffleScriptMeta;
 import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.playlist.config.PlaylistConfigurationModel;
+import de.stationadmin.gui.playlist.config.generate.TagSequenceEditor;
 import de.stationadmin.gui.util.EnumListCellRenderer;
 import de.stationadmin.gui.util.HintLabel;
 

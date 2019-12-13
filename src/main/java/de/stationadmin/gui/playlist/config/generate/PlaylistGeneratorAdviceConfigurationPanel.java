@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.stationadmin.gui.playlist.config;
+package de.stationadmin.gui.playlist.config.generate;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -40,6 +40,7 @@ import de.stationadmin.base.playlist.shuffle.TagSequenceAdvice;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
+import de.stationadmin.gui.playlist.config.PlaylistConfigurationModel;
 import de.stationadmin.gui.util.EnumListCellRenderer;
 
 /**

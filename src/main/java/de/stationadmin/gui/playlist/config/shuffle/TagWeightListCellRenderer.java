@@ -1,4 +1,4 @@
-package de.stationadmin.gui.playlist.config;
+package de.stationadmin.gui.playlist.config.shuffle;
 
 import java.awt.Component;
 

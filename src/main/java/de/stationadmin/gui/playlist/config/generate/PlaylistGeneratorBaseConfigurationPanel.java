@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.stationadmin.gui.playlist.config;
+package de.stationadmin.gui.playlist.config.generate;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
@@ -41,6 +41,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
+import de.stationadmin.gui.playlist.config.PlaylistConfigurationModel;
 
 /**
  * @author korf

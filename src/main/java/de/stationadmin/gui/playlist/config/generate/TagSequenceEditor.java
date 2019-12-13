@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.stationadmin.gui.playlist.config;
+package de.stationadmin.gui.playlist.config.generate;
 
 import java.awt.Color;
 import java.awt.Component;
