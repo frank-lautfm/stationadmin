@@ -61,7 +61,9 @@ import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
 import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorAdviceConfigurationPanel;
 import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorBaseConfigurationPanel;
-import de.stationadmin.gui.playlist.config.shuffle.ShuffleOptionsPanel;
+import de.stationadmin.gui.playlist.config.shuffle.BlockSelectPanel;
+import de.stationadmin.gui.playlist.config.shuffle.StationAdminOptsPanel;
+import de.stationadmin.gui.playlist.config.shuffle.TagPatternPanel;
 import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.EnumListCellRenderer;
@@ -316,14 +318,34 @@ public class PlaylistConfigurationDialog extends JDialog {
 
   }
 
-  private boolean checkIfShuffleOptsEnabled() {
+  private boolean checkIfStationAdminEnabled() {
     return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER)
-        && (model.getShuffleScript().getValue() != null && StringUtils.isNotEmpty(((ShuffleScriptMeta) model.getShuffleScript().getValue()).getOptsKey()))
-        && model.getBean().getType() != PlaylistType.ARCHIVED;
+        && model.getBean().getType() != PlaylistType.ARCHIVED
+        && isOptsKey(ShuffleScriptMeta.STATIONADMIN);
+  }
+
+  private boolean checkIfTagPatternEnabled() {
+    return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER)
+        && model.getBean().getType() != PlaylistType.ARCHIVED
+        && isOptsKey(ShuffleScriptMeta.BUCKET);
+  }
+  
+  private boolean checkIfBlockSelectEnabled() {
+    return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER)
+        && model.getBean().getType() != PlaylistType.ARCHIVED
+        && isOptsKey(ShuffleScriptMeta.BLOCKSELECT);
+  }
+
+  
+  private boolean isOptsKey(String key) {
+    return model.getShuffleScript().getValue() != null && 
+        StringUtils.isNotEmpty(((ShuffleScriptMeta) model.getShuffleScript().getValue()).getOptsKey()) &&
+        ((ShuffleScriptMeta) model.getShuffleScript().getValue()).getOptsKey().equals(key);
   }
 
   private boolean checkIfAutoFillEnabled() {
-    return (model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER) || model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_LOCAL))
+    return ((model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER) && !isOptsKey(ShuffleScriptMeta.BLOCKSELECT))
+        || model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_LOCAL))
         && model.getBean().getType() != PlaylistType.ARCHIVED;
   }
 
@@ -336,8 +358,14 @@ public class PlaylistConfigurationDialog extends JDialog {
     if (checkIfAutoFillEnabled()) {
       newStatus |= AUTOFILL;
     }
-    if (checkIfShuffleOptsEnabled()) {
+    if (checkIfStationAdminEnabled()) {
       newStatus |= SHUFFLE_STATIONADMIN;
+    }
+    else if(checkIfTagPatternEnabled()) {
+      newStatus |= SHUFFLE_TAGPATTERN;
+    }
+    else if(checkIfBlockSelectEnabled()) {
+      newStatus |= SHUFFLE_BLOCKSELECT;
     }
     if (checkIfGenerateEnabled()) {
       newStatus |= GENERATE;
@@ -353,6 +381,16 @@ public class PlaylistConfigurationDialog extends JDialog {
       int index = 0;
       if ((nodeStatus & SHUFFLE_STATIONADMIN) > 0) {
         DefaultMutableTreeNode shuffleOpts = new DefaultMutableTreeNode(panels.get(SHUFFLE_STATIONADMIN));
+        root.add(shuffleOpts);
+        model.insertNodeInto(shuffleOpts, root, index++);
+      }
+      else if ((nodeStatus & SHUFFLE_TAGPATTERN) > 0) {
+        DefaultMutableTreeNode shuffleOpts = new DefaultMutableTreeNode(panels.get(SHUFFLE_TAGPATTERN));
+        root.add(shuffleOpts);
+        model.insertNodeInto(shuffleOpts, root, index++);
+      }
+      else if ((nodeStatus & SHUFFLE_BLOCKSELECT) > 0) {
+        DefaultMutableTreeNode shuffleOpts = new DefaultMutableTreeNode(panels.get(SHUFFLE_BLOCKSELECT));
         root.add(shuffleOpts);
         model.insertNodeInto(shuffleOpts, root, index++);
       }
@@ -384,7 +422,9 @@ public class PlaylistConfigurationDialog extends JDialog {
     this.getContentPane().add(toolbar, cc.xy(2, 2));
 
     panels.put(BASE, new PanelSelection(textProvider.getString("playlistcfg.tab.base"), this.createBasePanel()));
-    panels.put(SHUFFLE_STATIONADMIN, new PanelSelection(textProvider.getString("playlistcfg.tab.shuffleopts"), new ShuffleOptionsPanel(ctx, model)));
+    panels.put(SHUFFLE_STATIONADMIN, new PanelSelection(textProvider.getString("playlistcfg.tab.shuffleopts"), new StationAdminOptsPanel(ctx, model)));
+    panels.put(SHUFFLE_TAGPATTERN, new PanelSelection(textProvider.getString("playlistcfg.tab.tagpattern"), new TagPatternPanel(ctx, model)));
+    panels.put(SHUFFLE_BLOCKSELECT, new PanelSelection(textProvider.getString("playlistcfg.tab.blockselect"), new BlockSelectPanel(ctx, model)));
     panels.put(GENERATE, new PanelSelection(textProvider.getString("playlistcfg.tab.generate.base"), new PlaylistGeneratorBaseConfigurationPanel(ctx, model)));
     panels.put(GENERATE_ADVICE, new PanelSelection(textProvider.getString("playlistcfg.tab.generate.advice"), new PlaylistGeneratorAdviceConfigurationPanel(ctx, model)));
     panels.put(AUTOFILL, new PanelSelection(textProvider.getString("playlistcfg.tab.autofill"), new PlaylistAutoFillPanel(ctx, model)));
