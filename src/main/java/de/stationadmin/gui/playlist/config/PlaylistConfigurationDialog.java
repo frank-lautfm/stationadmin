@@ -3,6 +3,7 @@
  */
 package de.stationadmin.gui.playlist.config;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -16,7 +17,9 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -27,10 +30,16 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreePath;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdesktop.swingx.JXErrorPane;
@@ -56,6 +65,7 @@ import de.stationadmin.gui.playlist.config.shuffle.ShuffleOptionsPanel;
 import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.EnumListCellRenderer;
+import de.stationadmin.gui.util.PanelSelection;
 import de.stationadmin.gui.util.SwingTools;
 
 /**
@@ -66,11 +76,24 @@ import de.stationadmin.gui.util.SwingTools;
 public class PlaylistConfigurationDialog extends JDialog {
 
   private static final long serialVersionUID = 3125298975653805674L;
+
+  private static final int BASE = 0;
+  private static final int AUTOFILL = 1;
+  private static final int SHUFFLE_STATIONADMIN = 2;
+  private static final int SHUFFLE_TAGPATTERN = 4;
+  private static final int SHUFFLE_BLOCKSELECT = 8;
+  private static final int GENERATE = 16;
+  private static final int GENERATE_ADVICE = 32;
+
   private ClientContext ctx;
   private PlaylistService playlistService;
   private TextProvider textProvider;
   private PlaylistConfigurationModel model;
   private ClientConfigurationService clientCfgService;
+
+  private JPanel container = new JPanel(new BorderLayout());
+  private Map<Integer, PanelSelection> panels = new HashMap<Integer, PanelSelection>();
+  private int nodeStatus = 0;
 
   public PlaylistConfigurationDialog(ClientContext ctx, PlaylistConfigurationModel model) {
     this.ctx = ctx;
@@ -216,15 +239,14 @@ public class PlaylistConfigurationDialog extends JDialog {
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
           Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-          if(value == null) {
+          if (value == null) {
             setText(" ");
-          }
-          else {
-            setText(model.getProfileName((String)value));
+          } else {
+            setText(model.getProfileName((String) value));
           }
           return comp;
         }
-        
+
       });
 
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.profile")), cc.xy(2, row));
@@ -309,9 +331,51 @@ public class PlaylistConfigurationDialog extends JDialog {
     return model.getTrackOrderType().getValue().equals(TrackOrderOption.GENERATE) && model.getBean().getType() != PlaylistType.ARCHIVED;
   }
 
+  private boolean rebuildTree(DefaultTreeModel model, DefaultMutableTreeNode root) {
+    int newStatus = 0;
+    if (checkIfAutoFillEnabled()) {
+      newStatus |= AUTOFILL;
+    }
+    if (checkIfShuffleOptsEnabled()) {
+      newStatus |= SHUFFLE_STATIONADMIN;
+    }
+    if (checkIfGenerateEnabled()) {
+      newStatus |= GENERATE;
+    }
+    if (nodeStatus != newStatus) {
+
+      for (int i = root.getChildCount() - 1; i >= 0; i--) {
+        model.removeNodeFromParent((MutableTreeNode) root.getChildAt(i));
+      }
+
+      nodeStatus = newStatus;
+
+      int index = 0;
+      if ((nodeStatus & SHUFFLE_STATIONADMIN) > 0) {
+        DefaultMutableTreeNode shuffleOpts = new DefaultMutableTreeNode(panels.get(SHUFFLE_STATIONADMIN));
+        root.add(shuffleOpts);
+        model.insertNodeInto(shuffleOpts, root, index++);
+      }
+      if ((nodeStatus & GENERATE) > 0) {
+        DefaultMutableTreeNode generate = new DefaultMutableTreeNode(panels.get(GENERATE));
+        DefaultMutableTreeNode generateAdvice = new DefaultMutableTreeNode(panels.get(GENERATE_ADVICE));
+        generate.add(generateAdvice);
+        model.insertNodeInto(generate, root, index++);
+      }
+      if ((nodeStatus & AUTOFILL) > 0) {
+        DefaultMutableTreeNode autofill = new DefaultMutableTreeNode(panels.get(AUTOFILL));
+        model.insertNodeInto(autofill, root, index++);
+      }
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+
   private void init() {
 
-    this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "1dlu,pref,0dlu,pref:grow,3dlu,pref,5dlu"));
+    this.getContentPane().setLayout(new FormLayout("5dlu,130dlu,5dlu,pref:grow,5dlu", "1dlu,pref,0dlu,pref:grow,3dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
 
     JToolBar toolbar = new JToolBar();
@@ -319,45 +383,57 @@ public class PlaylistConfigurationDialog extends JDialog {
     toolbar.add(new PlaylistSettingsCopyAction(ctx, model));
     this.getContentPane().add(toolbar, cc.xy(2, 2));
 
-    final JTabbedPane tabPane = new JTabbedPane();
-    tabPane.addTab(textProvider.getString("playlistcfg.tab.base"), this.createBasePanel());
-    tabPane.addTab(textProvider.getString("playlistcfg.tab.shuffleopts"), new ShuffleOptionsPanel(ctx, model));
-    tabPane.addTab(textProvider.getString("playlistcfg.tab.generate.base"), new PlaylistGeneratorBaseConfigurationPanel(ctx, model));
-    tabPane.addTab(textProvider.getString("playlistcfg.tab.generate.advice"), new PlaylistGeneratorAdviceConfigurationPanel(ctx, model));
-    tabPane.addTab(textProvider.getString("playlistcfg.tab.autofill"), new PlaylistAutoFillPanel(ctx, model));
+    panels.put(BASE, new PanelSelection(textProvider.getString("playlistcfg.tab.base"), this.createBasePanel()));
+    panels.put(SHUFFLE_STATIONADMIN, new PanelSelection(textProvider.getString("playlistcfg.tab.shuffleopts"), new ShuffleOptionsPanel(ctx, model)));
+    panels.put(GENERATE, new PanelSelection(textProvider.getString("playlistcfg.tab.generate.base"), new PlaylistGeneratorBaseConfigurationPanel(ctx, model)));
+    panels.put(GENERATE_ADVICE, new PanelSelection(textProvider.getString("playlistcfg.tab.generate.advice"), new PlaylistGeneratorAdviceConfigurationPanel(ctx, model)));
+    panels.put(AUTOFILL, new PanelSelection(textProvider.getString("playlistcfg.tab.autofill"), new PlaylistAutoFillPanel(ctx, model)));
 
-    tabPane.setEnabledAt(1, checkIfShuffleOptsEnabled());
-    tabPane.setEnabledAt(2, checkIfGenerateEnabled());
-    tabPane.setEnabledAt(3, checkIfGenerateEnabled());
-    tabPane.setEnabledAt(4, checkIfAutoFillEnabled());
+    container.add(panels.get(BASE).getPanel(), BorderLayout.CENTER);
 
-    model.getTrackOrderType().addValueChangeListener(new PropertyChangeListener() {
+    final DefaultMutableTreeNode root = new DefaultMutableTreeNode(panels.get(BASE));
+    final DefaultTreeModel treeModel = new DefaultTreeModel(root);
+    rebuildTree(treeModel, root);
+    final JTree tree = new JTree(treeModel);
+    SwingTools.expandAllTreeNodes(tree, 0, tree.getRowCount());
+    tree.setSelectionRow(0);
+
+    tree.addTreeSelectionListener(new TreeSelectionListener() {
 
       @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        tabPane.setEnabledAt(1, checkIfShuffleOptsEnabled());
-        tabPane.setEnabledAt(2, checkIfGenerateEnabled());
-        tabPane.setEnabledAt(3, checkIfGenerateEnabled());
+      public void valueChanged(TreeSelectionEvent e) {
+        JPanel next = null;
+        TreePath path = tree.getSelectionPath();
+        if (path != null) {
+          PanelSelection selection = (PanelSelection) ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
+          next = selection.getPanel();
+        }
+        container.removeAll();
+        if (next != null) {
+          container.add(next, BorderLayout.CENTER);
+        }
+        validate();
+        repaint();
+
       }
     });
 
-    model.getBufferedModel("shuffle").addPropertyChangeListener(new PropertyChangeListener() {
+    PropertyChangeListener treeRebuildListener = new PropertyChangeListener() {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        tabPane.setEnabledAt(4, checkIfAutoFillEnabled());
+        if (rebuildTree(treeModel, root)) {
+          SwingTools.expandAllTreeNodes(tree, 0, tree.getRowCount());
+        }
       }
-    });
+    };
 
-    model.getBufferedModel("shuffleType").addPropertyChangeListener(new PropertyChangeListener() {
+    model.getTrackOrderType().addValueChangeListener(treeRebuildListener);
+    model.getBufferedModel("shuffle").addPropertyChangeListener(treeRebuildListener);
+    model.getBufferedModel("shuffleType").addPropertyChangeListener(treeRebuildListener);
 
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        tabPane.setEnabledAt(1, checkIfShuffleOptsEnabled());
-      }
-    });
-
-    this.getContentPane().add(tabPane, cc.xy(2, 4));
+    this.getContentPane().add(new JScrollPane(tree), cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
+    this.getContentPane().add(container, cc.xy(4, 4, CellConstraints.FILL, CellConstraints.FILL));
 
     // buttons
     {
@@ -393,11 +469,13 @@ public class PlaylistConfigurationDialog extends JDialog {
       buttonPanel.add(okBtn);
       buttonPanel.add(new JButton(new DisposeAction(this, textProvider.getString("cancel"))));
 
-      this.getContentPane().add(buttonPanel, cc.xy(2, 6, CellConstraints.CENTER, CellConstraints.CENTER));
+      this.getContentPane().add(buttonPanel, cc.xywh(2, 6, 3, 1, CellConstraints.CENTER, CellConstraints.CENTER));
     }
 
-    Dimension prefSize = this.getPreferredSize();
-    this.setSize(Math.max(280, (int) prefSize.getWidth() + 30), (int) prefSize.getHeight() + 80);
+    // Dimension prefSize = this.getPreferredSize();
+    // this.setSize(Math.max(400, (int) prefSize.getWidth() + 30), (int)
+    // prefSize.getHeight() + 80);
+    this.setSize(650, 550);
     this.setTitle(textProvider.getString("playlistcfg.title"));
     SwingTools.centerWithin(ctx.getRootWindow(), this);
 

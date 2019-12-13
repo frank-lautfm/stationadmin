@@ -71,6 +71,7 @@ import de.stationadmin.gui.playlist.GlobalShuffleOptsUpdateAction;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.HintLabel;
 import de.stationadmin.gui.util.Option;
+import de.stationadmin.gui.util.PanelSelection;
 import de.stationadmin.gui.util.SwingTools;
 import de.stationadmin.lfm.backend.LautfmAdminService;
 
@@ -730,38 +731,6 @@ public class SettingsDlg extends JDialog {
 
   }
 
-  private static class PanelSelection {
-    private String label;
-    private JPanel panel;
-
-    /**
-     * @param label
-     * @param panel
-     */
-    PanelSelection(String label, JPanel panel) {
-      super();
-      this.label = label;
-      this.panel = panel;
-    }
-
-    public String toString() {
-      return this.label;
-    }
-
-    /**
-     * @return the label
-     */
-    public String getLabel() {
-      return label;
-    }
-
-    /**
-     * @return the panel
-     */
-    public JPanel getPanel() {
-      return panel;
-    }
-  }
 
   private class ShuffleOptsUpdateDetector implements PropertyChangeListener {
     private boolean changed = false;

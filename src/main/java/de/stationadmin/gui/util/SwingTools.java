@@ -9,6 +9,7 @@ import java.awt.Point;
 import java.awt.Toolkit;
 
 import javax.swing.JFrame;
+import javax.swing.JTree;
 
 /**
  * @author korf
@@ -42,5 +43,15 @@ public class SwingTools {
 
     comp.setLocation(x, y);
   }
+  
+  public static void expandAllTreeNodes(JTree tree, int startingIndex, int rowCount){
+    for(int i=startingIndex;i<rowCount;++i){
+        tree.expandRow(i);
+    }
+
+    if(tree.getRowCount()!=rowCount){
+      expandAllTreeNodes(tree, rowCount, tree.getRowCount());
+    }
+}
 
 }
