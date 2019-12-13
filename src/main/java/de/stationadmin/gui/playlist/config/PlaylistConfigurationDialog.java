@@ -61,9 +61,11 @@ import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
 import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorAdviceConfigurationPanel;
 import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorBaseConfigurationPanel;
+import de.stationadmin.gui.playlist.config.generate.TagSequenceEditor;
 import de.stationadmin.gui.playlist.config.shuffle.BlockSelectPanel;
 import de.stationadmin.gui.playlist.config.shuffle.StationAdminOptsPanel;
 import de.stationadmin.gui.playlist.config.shuffle.TagPatternPanel;
+import de.stationadmin.gui.playlist.config.shuffle.TagSequenceRuleEditor;
 import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.EnumListCellRenderer;
@@ -82,6 +84,7 @@ public class PlaylistConfigurationDialog extends JDialog {
   private static final int BASE = 0;
   private static final int AUTOFILL = 1;
   private static final int SHUFFLE_STATIONADMIN = 2;
+  private static final int SHUFFLE_STATIONADMIN_TAGSEQ = 64;
   private static final int SHUFFLE_TAGPATTERN = 4;
   private static final int SHUFFLE_BLOCKSELECT = 8;
   private static final int GENERATE = 16;
@@ -381,17 +384,16 @@ public class PlaylistConfigurationDialog extends JDialog {
       int index = 0;
       if ((nodeStatus & SHUFFLE_STATIONADMIN) > 0) {
         DefaultMutableTreeNode shuffleOpts = new DefaultMutableTreeNode(panels.get(SHUFFLE_STATIONADMIN));
-        root.add(shuffleOpts);
+        DefaultMutableTreeNode tagSeq = new DefaultMutableTreeNode(panels.get(SHUFFLE_STATIONADMIN_TAGSEQ));
+        shuffleOpts.add(tagSeq);
         model.insertNodeInto(shuffleOpts, root, index++);
       }
       else if ((nodeStatus & SHUFFLE_TAGPATTERN) > 0) {
         DefaultMutableTreeNode shuffleOpts = new DefaultMutableTreeNode(panels.get(SHUFFLE_TAGPATTERN));
-        root.add(shuffleOpts);
         model.insertNodeInto(shuffleOpts, root, index++);
       }
       else if ((nodeStatus & SHUFFLE_BLOCKSELECT) > 0) {
         DefaultMutableTreeNode shuffleOpts = new DefaultMutableTreeNode(panels.get(SHUFFLE_BLOCKSELECT));
-        root.add(shuffleOpts);
         model.insertNodeInto(shuffleOpts, root, index++);
       }
       if ((nodeStatus & GENERATE) > 0) {
@@ -423,6 +425,7 @@ public class PlaylistConfigurationDialog extends JDialog {
 
     panels.put(BASE, new PanelSelection(textProvider.getString("playlistcfg.tab.base"), this.createBasePanel()));
     panels.put(SHUFFLE_STATIONADMIN, new PanelSelection(textProvider.getString("playlistcfg.tab.shuffleopts"), new StationAdminOptsPanel(ctx, model)));
+    panels.put(SHUFFLE_STATIONADMIN_TAGSEQ, new PanelSelection(textProvider.getString("playlistcfg.tab.generate.advice"), new TagSequenceRuleEditor(ctx, model)));
     panels.put(SHUFFLE_TAGPATTERN, new PanelSelection(textProvider.getString("playlistcfg.tab.tagpattern"), new TagPatternPanel(ctx, model)));
     panels.put(SHUFFLE_BLOCKSELECT, new PanelSelection(textProvider.getString("playlistcfg.tab.blockselect"), new BlockSelectPanel(ctx, model)));
     panels.put(GENERATE, new PanelSelection(textProvider.getString("playlistcfg.tab.generate.base"), new PlaylistGeneratorBaseConfigurationPanel(ctx, model)));
