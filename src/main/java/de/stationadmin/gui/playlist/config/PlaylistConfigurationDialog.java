@@ -61,7 +61,6 @@ import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
 import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorAdviceConfigurationPanel;
 import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorBaseConfigurationPanel;
-import de.stationadmin.gui.playlist.config.generate.TagSequenceEditor;
 import de.stationadmin.gui.playlist.config.shuffle.BlockSelectPanel;
 import de.stationadmin.gui.playlist.config.shuffle.StationAdminOptsPanel;
 import de.stationadmin.gui.playlist.config.shuffle.TagPatternPanel;
@@ -322,34 +321,28 @@ public class PlaylistConfigurationDialog extends JDialog {
   }
 
   private boolean checkIfStationAdminEnabled() {
-    return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER)
-        && model.getBean().getType() != PlaylistType.ARCHIVED
+    return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER) && model.getBean().getType() != PlaylistType.ARCHIVED
         && isOptsKey(ShuffleScriptMeta.STATIONADMIN);
   }
 
   private boolean checkIfTagPatternEnabled() {
-    return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER)
-        && model.getBean().getType() != PlaylistType.ARCHIVED
+    return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER) && model.getBean().getType() != PlaylistType.ARCHIVED
         && isOptsKey(ShuffleScriptMeta.BUCKET);
   }
-  
+
   private boolean checkIfBlockSelectEnabled() {
-    return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER)
-        && model.getBean().getType() != PlaylistType.ARCHIVED
+    return model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER) && model.getBean().getType() != PlaylistType.ARCHIVED
         && isOptsKey(ShuffleScriptMeta.BLOCKSELECT);
   }
 
-  
   private boolean isOptsKey(String key) {
-    return model.getShuffleScript().getValue() != null && 
-        StringUtils.isNotEmpty(((ShuffleScriptMeta) model.getShuffleScript().getValue()).getOptsKey()) &&
-        ((ShuffleScriptMeta) model.getShuffleScript().getValue()).getOptsKey().equals(key);
+    return model.getShuffleScript().getValue() != null && StringUtils.isNotEmpty(((ShuffleScriptMeta) model.getShuffleScript().getValue()).getOptsKey())
+        && ((ShuffleScriptMeta) model.getShuffleScript().getValue()).getOptsKey().equals(key);
   }
 
   private boolean checkIfAutoFillEnabled() {
     return ((model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_SERVER) && !isOptsKey(ShuffleScriptMeta.BLOCKSELECT))
-        || model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_LOCAL))
-        && model.getBean().getType() != PlaylistType.ARCHIVED;
+        || model.getTrackOrderType().getValue().equals(TrackOrderOption.SHUFFLE_LOCAL)) && model.getBean().getType() != PlaylistType.ARCHIVED;
   }
 
   private boolean checkIfGenerateEnabled() {
@@ -363,11 +356,9 @@ public class PlaylistConfigurationDialog extends JDialog {
     }
     if (checkIfStationAdminEnabled()) {
       newStatus |= SHUFFLE_STATIONADMIN;
-    }
-    else if(checkIfTagPatternEnabled()) {
+    } else if (checkIfTagPatternEnabled()) {
       newStatus |= SHUFFLE_TAGPATTERN;
-    }
-    else if(checkIfBlockSelectEnabled()) {
+    } else if (checkIfBlockSelectEnabled()) {
       newStatus |= SHUFFLE_BLOCKSELECT;
     }
     if (checkIfGenerateEnabled()) {
@@ -387,12 +378,10 @@ public class PlaylistConfigurationDialog extends JDialog {
         DefaultMutableTreeNode tagSeq = new DefaultMutableTreeNode(panels.get(SHUFFLE_STATIONADMIN_TAGSEQ));
         shuffleOpts.add(tagSeq);
         model.insertNodeInto(shuffleOpts, root, index++);
-      }
-      else if ((nodeStatus & SHUFFLE_TAGPATTERN) > 0) {
+      } else if ((nodeStatus & SHUFFLE_TAGPATTERN) > 0) {
         DefaultMutableTreeNode shuffleOpts = new DefaultMutableTreeNode(panels.get(SHUFFLE_TAGPATTERN));
         model.insertNodeInto(shuffleOpts, root, index++);
-      }
-      else if ((nodeStatus & SHUFFLE_BLOCKSELECT) > 0) {
+      } else if ((nodeStatus & SHUFFLE_BLOCKSELECT) > 0) {
         DefaultMutableTreeNode shuffleOpts = new DefaultMutableTreeNode(panels.get(SHUFFLE_BLOCKSELECT));
         model.insertNodeInto(shuffleOpts, root, index++);
       }

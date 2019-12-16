@@ -67,6 +67,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
 
   private List<PlaylistProfile> profiles;
   private IndirectListModel<String> profileListModel = new IndirectListModel<>();
+  private String currentOptsKey = null;
 
   /**
    * @param bean
@@ -119,22 +120,28 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
     Map<String, Object> shuffleOpts = playlist.getShuffleOpts() != null ? new HashMap<>(playlist.getShuffleOpts()) : new HashMap<>();
     this.getBufferedModel("shuffleOpts").setValue(shuffleOpts);
 
-    this.getBufferedModel("shuffleType").addPropertyChangeListener(new PropertyChangeListener() {
+    ShuffleScriptMeta currentScript = (ShuffleScriptMeta) shuffleScript.getValue();
+    currentOptsKey = currentScript != null ? currentScript.getOptsKey() : null;
+
+    this.getBufferedModel("shuffleType").addValueChangeListener(new PropertyChangeListener() {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
         ShuffleScriptMeta current = (ShuffleScriptMeta) shuffleScript.getValue();
         if (current != null) {
-          Map<String, Object> opts;
-          if (current.getDefaultOpts() != null) {
-            opts = current.getDefaultOpts();
-          } else {
-            opts = new HashMap<>();
+          if (currentOptsKey == null || current.getOptsKey() == null || !current.getOptsKey().equals(currentOptsKey)) {
+            Map<String, Object> opts;
+            if (current.getDefaultOpts() != null) {
+              opts = new HashMap<>(current.getDefaultOpts());
+            } else {
+              opts = new HashMap<>();
+            }
+            if (current.isSupportsGlobalOpts()) {
+              PlaylistService.updateGlobalShuffleOpts(opts, PlaylistConfigurationModel.this.settings);
+            }
+            getBufferedModel("shuffleOpts").setValue(opts);
+            currentOptsKey = current.getOptsKey();
           }
-          if (current.isSupportsGlobalOpts()) {
-            PlaylistService.updateGlobalShuffleOpts(opts, PlaylistConfigurationModel.this.settings);
-          }
-          getBufferedModel("shuffleOpts").setValue(opts);
         }
         updateProfileListModel();
       }
@@ -627,9 +634,13 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
     public void setValue(Object value) {
       ShuffleScriptMeta script = (ShuffleScriptMeta) value;
       if (script != null) {
-        getBufferedModel("shuffleType").setValue(script.getKey());
+        String key = script.getKey();
+        ValueModel shuffleTypeModel = getBufferedModel("shuffleType");
+        if (!key.equals(shuffleTypeModel.getValue())) {
+          shuffleTypeModel.setValue(key);
+        }
         this.script = script;
-        this.shuffleType = script.getKey();
+        this.shuffleType = key;
       } else {
         getBufferedModel("shuffleType").setValue(null);
       }

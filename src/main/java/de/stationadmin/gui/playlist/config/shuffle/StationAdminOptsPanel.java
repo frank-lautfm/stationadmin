@@ -234,7 +234,7 @@ public class StationAdminOptsPanel extends JPanel {
         options.put("newsMin", 59);
       }
       if (!options.containsKey("newsMax")) {
-        options.put("newsMax", 59);
+        options.put("newsMax", 15);
       }
     } else {
       HashMap<String, Object> options = getOptions();
