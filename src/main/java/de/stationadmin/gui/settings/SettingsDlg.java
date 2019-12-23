@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -32,13 +31,10 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -61,13 +57,8 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.Autosynchronisation;
 import de.stationadmin.base.Settings;
 import de.stationadmin.base.backup.BackupFrequency;
-import de.stationadmin.base.playlist.Playlist;
-import de.stationadmin.base.playlist.Playlist.PlaylistType;
-import de.stationadmin.base.playlist.PlaylistService;
-import de.stationadmin.base.playlist.ShuffleScriptMeta;
 import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
 import de.stationadmin.gui.ClientContext;
-import de.stationadmin.gui.playlist.GlobalShuffleOptsUpdateAction;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.HintLabel;
 import de.stationadmin.gui.util.Option;
@@ -126,34 +117,10 @@ public class SettingsDlg extends JDialog {
 
       @Override
       public void actionPerformed(ActionEvent evt) {
-        boolean shuffleOptsChanged = false;
-        boolean hasShufflePlaylists = false;
-        List<ShuffleScriptMeta> shuffleScripts = ctx.getAdminClient().getPlaylistService().getShuffleScripts();
-        for (Playlist pl : ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE)) {
-          ShuffleScriptMeta meta = PlaylistService.getShuffleScriptMeta(shuffleScripts, pl.getShuffleType());
-          if (pl.isShuffle() && meta != null && meta.isSupportsGlobalOpts()) {
-            hasShufflePlaylists = true;
-            break;
-          }
-        }
-        if (hasShufflePlaylists) {
-          ShuffleOptsUpdateDetector detector = new ShuffleOptsUpdateDetector();
-          ctx.getAdminClient().getSettings().addPropertyChangeListener(detector);
-          model.triggerCommit();
-          shuffleOptsChanged = detector.isChanged() || tableContentChanged.getValue().equals(Boolean.TRUE);
-          ctx.getAdminClient().getSettings().removePropertyChangeListener(detector);
-          tableContentChanged.setValue(Boolean.FALSE);
-        } else {
-          model.triggerCommit();
-        }
-
+        model.triggerCommit();
         try {
           ctx.getAdminClient().saveSettings();
           dispose();
-          if (shuffleOptsChanged) {
-            GlobalShuffleOptsUpdateAction action = new GlobalShuffleOptsUpdateAction(ctx);
-            action.actionPerformed(evt);
-          }
         } catch (IOException e) {
           JXErrorPane.showDialog(e);
         }
@@ -183,21 +150,6 @@ public class SettingsDlg extends JDialog {
       logPanel.add(this.createListenerStatsPanel(), cc.xy(2, 2));
       logPanel.add(this.createTitleLogPanel(), cc.xy(2, 4));
       root.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.logging"), logPanel)));
-    }
-
-    // Playlists
-    {
-      JPanel shufflePanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref:grow,5dlu"));
-      shufflePanel.add(this.createShufflePanel(), cc.xy(2, 2, CellConstraints.FILL, CellConstraints.FILL));
-
-      DefaultMutableTreeNode playlists = new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists"), shufflePanel));
-      playlists.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists.normalize"), this.createArtistNormalizePanel())));
-      playlists.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists.weights"), this.createGenerateWeightsPanel())));
-      playlists.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists.preselect"), this.createGenerateArtistPreselectPanel())));
-      playlists.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists.trackrules"), this.createTrackRulePanel())));
-      playlists.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.playlists.adtrigger"), this.createAdTriggerPanel())));
-
-      root.add(playlists);
     }
 
     // Backup
@@ -537,71 +489,10 @@ public class SettingsDlg extends JDialog {
 
   }
 
-  private JPanel createGenerateArtistPreselectPanel() {
-    JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref:grow,3dlu"));
-    panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.gen.preselect")));
-    CellConstraints cc = new CellConstraints();
-
-    panel.add(new ArtistLimitPanel(ctx, model), cc.xy(2, 2, CellConstraints.FILL, CellConstraints.FILL));
-
-    return panel;
-  }
-
-  private JPanel createArtistNormalizePanel() {
-    JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref:grow,3dlu"));
-    panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.gen.normalize")));
-    panel.add(new ArtistNormalizePanel(ctx, model), new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
-
-    return panel;
-  }
-
-  private JPanel createTrackRulePanel() {
-    JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref:grow,3dlu"));
-    panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.gen.trackrules")));
-    panel.add(new TrackRulePanel(ctx, model, tableContentChanged), new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
-
-    return panel;
-
-  }
-
   private JPanel createAdTriggerPanel() {
     JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref:grow,3dlu"));
     panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.gen.adtrigger")));
     panel.add(new AdTriggerPanel(ctx, model), new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
-
-    return panel;
-
-  }
-
-  private JPanel createGenerateWeightsPanel() {
-    JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref,3dlu,pref,8dlu,pref,5dlu,pref:grow,5dlu,pref,3dlu"));
-    panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.gen.weight")));
-    CellConstraints cc = new CellConstraints();
-
-    final ValueModel minRandomValueModel = model.getBufferedModel("generateMinRandomValue");
-    final JSlider minRandomValueSlider = new JSlider(0, 500);
-    minRandomValueSlider.setMinorTickSpacing(25);
-    minRandomValueSlider.setMajorTickSpacing(100);
-    minRandomValueSlider.setSnapToTicks(true);
-    minRandomValueSlider.setPaintTicks(true);
-    minRandomValueSlider.setValue((Integer) minRandomValueModel.getValue());
-    minRandomValueSlider.addChangeListener(new ChangeListener() {
-
-      @Override
-      public void stateChanged(ChangeEvent e) {
-        int value = minRandomValueSlider.getValue();
-        minRandomValueModel.setValue(value);
-      }
-    });
-
-    panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.generateMinRandomValue")), cc.xy(2, 2));
-    panel.add(minRandomValueSlider, cc.xy(2, 4));
-
-    panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.generateWeightTags")), cc.xy(2, 6));
-    panel.add(new TagWeightPanel(ctx, this.model), cc.xy(2, 8, CellConstraints.FILL, CellConstraints.FILL));
-
-    JLabel hint = new HintLabel(ctx.getString("settings.shuffle.hint.generate"));
-    panel.add(hint,  cc.xy(2,  10));
 
     return panel;
   }
@@ -730,7 +621,6 @@ public class SettingsDlg extends JDialog {
     }
 
   }
-
 
   private class ShuffleOptsUpdateDetector implements PropertyChangeListener {
     private boolean changed = false;

@@ -736,140 +736,46 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
   }
 
   /**
-   * Patches the global shuffle options of all playlists that are shuffled on
-   * server with Station Admin shuffle
+   * Updates shuffle opts in affected playlists after profile changed
    * 
-   * @param settings
-   * @throws IOException
+   * @param profileId
    */
-  public void updateGlobalShuffleOpts(Settings settings) throws IOException {
-    for (Playlist pl : playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
-      if (pl.isShuffle()) {
-        ShuffleScriptMeta script = getShuffleScriptMeta(shuffleScripts, pl.getShuffleType());
-        if (script != null && script.isSupportsGlobalOpts()) {
-          Map<String, Object> opts = pl.getShuffleOpts();
-          boolean modified = pl.isMetaDataModified();
-          if (opts == null) {
-            opts = new HashMap<>();
-            pl.setShuffleOpts(opts);
-          }
-          updateGlobalShuffleOpts(opts, settings);
-          if (!modified) {
-            this.savePlaylistAs(pl, Integer.toString(pl.getId()));
-            this.ctx.getServer().updatePlaylistShuffleOpts(ctx.getStationId(), pl.getId(), opts);
-          }
+  public void updateProfileOpts(String profileId) throws PlaylistValidationException, IOException {
+    PlaylistProfile profile = getProfile(profileId);
+    if (profile == null) {
+      return;
+    }
+    HashSet<String> profileIds = new HashSet<>();
+    profileIds.add(profileId);
+    // check for profiles referencing the changed one
+    for (PlaylistProfile prof : getProfiles()) {
+      if (profileId.equals(prof.getArtistNormalizationFromProfile()) || profileId.equals(prof.getTrackRuleFromProfile())) {
+        profileIds.add(prof.getId());
+      }
+    }
+    for (Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
+      if (playlist.getProfileId() != null && profileId.contains(playlist.getProfileId())) {
+        Map<String, Object> opts = playlist.getShuffleOpts();
+        boolean modified = playlist.isMetaDataModified();
+        if (opts == null) {
+          opts = new HashMap<>();
+          playlist.setShuffleOpts(opts);
+        }
+        assignProfileOpts(opts, playlist.getProfileId());
+        if (!modified) {
+          this.savePlaylistAs(playlist, Integer.toString(playlist.getId()));
+          this.ctx.getServer().updatePlaylistShuffleOpts(ctx.getStationId(), playlist.getId(), opts);
         }
       }
     }
-
   }
 
-  public static void updateGlobalShuffleOpts(Map<String, Object> opts, Settings settings) {
-
-    // jingles
-    opts.put("preserveAllJingles", settings.isShuffleProtectAllJingles() ? 1 : 0);
-    if (!settings.isShuffleProtectAllJingles()) {
-      opts.put("jingleInterval", settings.getShuffleJingleInterval());
-      opts.put("jingleOrder", "shuffle_repeat"); // TODO replace by setting if available
-      opts.put("protectFirstJingle", settings.isShuffleProtectFirstJingle() ? 1 : 0);
-    } else {
-      opts.remove("jingleInterval");
-      opts.remove("jingleOrder");
-      opts.remove("protectFirstJingle");
-    }
-
-    // words
-    switch (settings.getShuffleWordDistributionStrategy()) {
-    case RANDOM:
-      opts.put("wordDistribution", "random");
-      break;
-    case PROTECT:
-      opts.put("wordDistribution", "preserve");
-      break;
-    case PREDECESSOR_COUPLING:
-      opts.put("wordDistribution", "link_previous");
-      break;
-    case SUCCESSOR_COUPLING:
-      opts.put("wordDistribution", "link_next");
-      break;
-    }
-
-    // artist alias
-    if (settings.getArtistNormalizerSeperators() != null && settings.getArtistNormalizerSeperators().size() > 0) {
-      opts.put("artistSeparators", settings.getArtistNormalizerSeperators());
-    } else {
-      opts.remove("artistSeparators");
-    }
-    if (settings.getArtistNormalizerAliases() != null && settings.getArtistNormalizerAliases().size() > 0) {
-      opts.put("artistAliases", settings.getArtistNormalizerAliases());
-    } else {
-      opts.remove("artistAliases");
-    }
-
-    // ad triggers
-    if (settings.getAdTriggerPosition1() > -1) {
-      opts.put("adTrigger", settings.getAdTriggerId());
-      if (settings.getAdSeparatorId() > 0) {
-        opts.put("adSeparator", settings.getAdSeparatorId());
-      } else {
-        opts.remove("adSeparator");
-      }
-      opts.put("adPositions", new int[] { settings.getAdTriggerPosition1(), settings.getAdTriggerPosition2() });
-      switch (settings.getAdJingleCollisionStrategy()) {
-      case KEEP_BOTH:
-        opts.put("adJingleCollisionStrategy", "keep_both");
-        break;
-      case MOVE_ADTRIGGER:
-        opts.put("adJingleCollisionStrategy", "move_adtrigger");
-        break;
-      case REMOVE_JINGLE:
-        opts.put("adJingleCollisionStrategy", "remove_jingle");
-        break;
-      }
-
-    } else {
-      opts.remove("adTrigger");
-      opts.remove("adSeparator");
-      opts.remove("adPositions");
-      opts.remove("adJingleCollisionStrategy");
-    }
-
-    // track rules
-    if (settings.getTrackRules() != null && settings.getTrackRules().size() > 0) {
-      opts.put("trackRuleJingleCollisionStrategy", settings.getTrackRuleJingleCollsisionStrategy().name().toLowerCase());
-      opts.put("trackRuleGroupCollisionStrategy", settings.getTrackRuleGroupCollisionStrategy().name().toLowerCase());
-
-      HashMap<String, HashMap<String, Object>> groups = new HashMap<>();
-      for (TrackRuleGroup group : settings.getTrackRuleGroups()) {
-        HashMap<String, Object> groupOpts = new HashMap<>();
-        groupOpts.put("minDistance", group.getMinDistance());
-        groupOpts.put("multiMatchSelection", group.getMultiMatchSelection().name().toLowerCase());
-        groups.put(group.getName(), groupOpts);
-      }
-      opts.put("trackRuleGroups", groups);
-
-      ArrayList<HashMap<String, Object>> rules = new ArrayList<>();
-      for (TrackRule rule : settings.getTrackRules()) {
-        HashMap<String, Object> ruleOpts = new HashMap<>();
-        ruleOpts.put("groupName", rule.getGroupName());
-        ruleOpts.put("trackId", rule.getTrackId());
-        ruleOpts.put("filter", rule.getFilter());
-        ruleOpts.put("filterType", rule.getFilterType().name().toLowerCase());
-        ruleOpts.put("position", rule.getPosition().name().toLowerCase());
-        ruleOpts.put("minDistance", rule.getMinDistance());
-        rules.add(ruleOpts);
-      }
-
-      opts.put("trackRules", rules);
-    } else {
-      opts.remove("trackRuleJingleCollisionStrategy");
-      opts.remove("trackRuleGroupCollisionStrategy");
-      opts.remove("trackRuleGroups");
-      opts.remove("trackRules");
-    }
-
-  }
-
+  /**
+   * Assigns profile options to the given opts map.
+   * 
+   * @param opts map to add settings to
+   * @param profileId id of the profile to read optios from
+   */
   public void assignProfileOpts(Map<String, Object> opts, String profileId) {
 
     PlaylistProfile main = getProfile(profileId);
@@ -1113,11 +1019,35 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
   }
 
   private void migrateGlobalSettingsToProfiles() throws IOException {
-    this.profiles.add(new PlaylistProfile(PlaylistProfileType.Generate, "Generieren", settings));
-    this.profiles.add(new PlaylistProfile(PlaylistProfileType.LocalShuffle, "Shuffeln (lokal)", settings));
-    this.profiles.add(new PlaylistProfile(PlaylistProfileType.StationAdminShuffle, "Shuffeln - Station Admin", settings));
+    PlaylistProfile generate = new PlaylistProfile(PlaylistProfileType.Generate, "Generieren", settings);
+    PlaylistProfile shuffleLocal = new PlaylistProfile(PlaylistProfileType.LocalShuffle, "Shuffeln (lokal)", settings);
+    PlaylistProfile shuffleServer = new PlaylistProfile(PlaylistProfileType.StationAdminShuffle, "Shuffeln - Station Admin", settings);
+
+    this.profiles.add(generate);
+    this.profiles.add(shuffleLocal);
+    this.profiles.add(shuffleServer);
 
     this.saveProfilesToFile();
+
+    for (Playlist pl : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
+      if (pl.getGenerateTags() != null) {
+        pl.setProfileId(generate.getId());
+        System.out.println(pl.getName() + " => " + generate.getName());
+        this.savePlaylistAs(pl, Integer.toString(pl.getId()));
+      } else if (pl.isShuffle()) {
+        ShuffleScriptMeta scriptMeta = getShuffleScriptMeta(shuffleScripts, pl.getShuffleType());
+        if (scriptMeta != null && scriptMeta.isSupportsGlobalOpts()) {
+          pl.setProfileId(shuffleServer.getId());
+          System.out.println(pl.getName() + " => " + shuffleServer.getName());
+          this.savePlaylistAs(pl, Integer.toString(pl.getId()));
+        }
+      } else if (pl.isLocalShuffleAllowed()) {
+        pl.setProfileId(shuffleLocal.getId());
+        System.out.println(pl.getName() + " => " + shuffleLocal.getName());
+        this.savePlaylistAs(pl, Integer.toString(pl.getId()));
+      }
+    }
+
   }
 
   private void saveProfilesToFile() throws IOException {

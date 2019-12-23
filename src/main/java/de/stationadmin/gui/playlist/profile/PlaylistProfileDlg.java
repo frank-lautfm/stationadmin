@@ -230,6 +230,8 @@ public class PlaylistProfileDlg extends StationAdminFrame {
       try {
         profileModel.triggerCommit();
         ctx.getAdminClient().getPlaylistService().saveProfiles();
+        ProfileOptsUpdateAction updateAction = new ProfileOptsUpdateAction(ctx, profileModel.getBean().getId());
+        updateAction.actionPerformed(new ActionEvent(this, 0, "update"));
       } catch (IOException e) {
         ErrorInfo errorInfo = ctx.createErrorInfo(e, "playlistprofilemanager.action.save.failed");
         JXErrorPane.showDialog(PlaylistProfileDlg.this, errorInfo);

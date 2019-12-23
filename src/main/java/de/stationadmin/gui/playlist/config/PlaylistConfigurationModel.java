@@ -27,7 +27,6 @@ import com.jgoodies.binding.value.AbstractValueModel;
 import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
 
-import de.stationadmin.base.Settings;
 import de.stationadmin.base.playlist.AutoFillRule;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.PlaylistService;
@@ -72,8 +71,8 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   /**
    * @param bean
    */
-  public PlaylistConfigurationModel(Playlist playlist, PlaylistService playlistService, TagManager tagManager, List<ShuffleScriptMeta> shuffleScripts, List<PlaylistProfile> profiles,
-      TextProvider textProvider) {
+  public PlaylistConfigurationModel(Playlist playlist, PlaylistService playlistService, TagManager tagManager, List<ShuffleScriptMeta> shuffleScripts,
+      List<PlaylistProfile> profiles, TextProvider textProvider) {
     super(playlist);
     this.tags = new TagsModel();
     this.generateTags = new TrackTagsModel();
@@ -136,9 +135,6 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
             } else {
               opts = new HashMap<>();
             }
-            if (current.isSupportsGlobalOpts()) {
-              // PlaylistService.updateGlobalShuffleOpts(opts, PlaylistConfigurationModel.this.settings);
-            }
             getBufferedModel("shuffleOpts").setValue(opts);
             currentOptsKey = current.getOptsKey();
           }
@@ -146,13 +142,13 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
         updateProfileListModel();
       }
     });
-    
+
     this.getBufferedModel("profileId").addValueChangeListener(new PropertyChangeListener() {
-      
+
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        HashMap<String, Object> opts = (HashMap<String, Object>)getBufferedModel("shuffleOpts").getValue();
-        playlistService.assignProfileOpts(opts, (String)evt.getNewValue());
+        HashMap<String, Object> opts = (HashMap<String, Object>) getBufferedModel("shuffleOpts").getValue();
+        PlaylistConfigurationModel.this.playlistService.assignProfileOpts(opts, (String) evt.getNewValue());
       }
     });
 
@@ -232,8 +228,6 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
       }
     }
 
-    int numActive = activeProfiles.size();
-
     String newSelection = currentSelection;
     if (activeProfiles.size() == 0 && currentSelection != null) {
       newSelection = null;
@@ -247,6 +241,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
 
     if (newSelection != currentSelection) {
       getBufferedModel("profileId").setValue(newSelection);
+      PlaylistConfigurationModel.this.playlistService.assignProfileOpts((Map<String, Object>) getBufferedModel("shuffleOpts").getValue(), newSelection);
     }
 
   }
@@ -621,6 +616,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   }
 
   class ShuffleScriptModel extends AbstractValueModel {
+    private static final long serialVersionUID = -3029339846337699004L;
     private ShuffleScriptMeta script;
     private String shuffleType;
 
