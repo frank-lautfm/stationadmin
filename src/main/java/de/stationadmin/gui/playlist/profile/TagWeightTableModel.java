@@ -116,7 +116,7 @@ public class TagWeightTableModel extends AbstractTableModel {
     case 1:
       if (aValue instanceof String) {
         try {
-          aValue = new Integer((String) aValue);
+          aValue = Integer.valueOf((String)aValue);
         } catch (NumberFormatException e) {
         }
       }

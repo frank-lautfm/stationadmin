@@ -60,7 +60,7 @@ public class PlaylistProfileDlg extends StationAdminFrame {
       }
 
     });
-    
+
     init();
   }
 
@@ -157,7 +157,7 @@ public class PlaylistProfileDlg extends StationAdminFrame {
       tabbedPane.addTab("Werbetrigger", new ProfileAdTriggerPanel(ctx, profileModel));
       tabbedPane.addTab("Gebundene Jingles", new ProfileTrackRulePanel(ctx, profileModel));
       tabbedPane.addTab("Normalisierung", new ArtistNormalizationPanel(ctx, profileModel));
-      
+
       final JPanel tagWeightPanel = new TagWeightPanel(ctx, profileModel);
       final JPanel artistLimitPanel = new ArtistLimitPanel(ctx, profileModel);
 
@@ -193,6 +193,24 @@ public class PlaylistProfileDlg extends StationAdminFrame {
       });
 
       mainPanel.add(container, BorderLayout.CENTER);
+
+      profileModel.getBufferedModel("trackRuleFromProfile").addValueChangeListener(new PropertyChangeListener() {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          boolean externalRef = profileModel.getBean() != null && evt.getNewValue() != null && !evt.getNewValue().equals(profileModel.getBean().getId());
+          tabbedPane.setEnabledAt(2, !externalRef);
+        }
+      });
+
+      profileModel.getBufferedModel("artistNormalizationFromProfile").addValueChangeListener(new PropertyChangeListener() {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          boolean externalRef = profileModel.getBean() != null && evt.getNewValue() != null && !evt.getNewValue().equals(profileModel.getBean().getId());
+          tabbedPane.setEnabledAt(3, !externalRef);
+        }
+      });
 
       this.add(mainPanel, new CellConstraints(4, 2, CellConstraints.FILL, CellConstraints.FILL));
     }

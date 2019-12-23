@@ -1,9 +1,12 @@
 package de.stationadmin.gui.playlist.profile;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -12,8 +15,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
 
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.list.SelectionInList;
@@ -160,7 +161,7 @@ public class ProfileGeneralPanel extends JPanel {
 
       @Override
       public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        Component c  = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         if (value == null) {
           setText(textProvider.getString("playlistprofilemanager.ref.none"));
         } else {
@@ -176,20 +177,52 @@ public class ProfileGeneralPanel extends JPanel {
 
     };
 
-    SelectionInList<String> trackRuleProfileRefSelection = new SelectionInList<>(model.getProfileRefListModel(), model.getBufferedModel("trackRuleFromProfile"));
-    final JComboBox<String> trackRuleRefCmb = BasicComponentFactory.createComboBox(trackRuleProfileRefSelection, profileIdRenderer);
+    final DefaultComboBoxModel<String> trackRuleRefModel = new DefaultComboBoxModel<>();
+    model.updateProfileRefListModel(trackRuleRefModel);
+    final JComboBox<String> trackRuleRefCmb = new JComboBox<>(trackRuleRefModel);
+    trackRuleRefCmb.setRenderer(profileIdRenderer);
+    trackRuleRefCmb.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (model.getBufferedModel("trackRuleFromProfile").getValue() != trackRuleRefCmb.getSelectedItem()) {
+          model.getBufferedModel("trackRuleFromProfile").setValue(trackRuleRefCmb.getSelectedItem());
+        }
+      }
+    });
+
     this.add(new JLabel(this.textProvider.getString("playlistprofilemanager.property.trackRuleRef")), cc.xy(2, row));
     this.add(trackRuleRefCmb, cc.xywh(4, row, 5, 1));
     row += 2;
 
-    SelectionInList<String> artistNormalizationProfileRefSelection = new SelectionInList<>(model.getProfileRefListModel(),
-        model.getBufferedModel("artistNormalizationFromProfile"));
-    final JComboBox<String> artistNormRefCmb = BasicComponentFactory.createComboBox(artistNormalizationProfileRefSelection, profileIdRenderer);
+    final DefaultComboBoxModel<String> artistNormRefModel = new DefaultComboBoxModel<>();
+    model.updateProfileRefListModel(artistNormRefModel);
+    final JComboBox<String> artistNormRefCmb = new JComboBox<>(artistNormRefModel);
+    artistNormRefCmb.setRenderer(profileIdRenderer);
+    artistNormRefCmb.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (model.getBufferedModel("artistNormalizationFromProfile").getValue() != artistNormRefCmb.getSelectedItem()) {
+          model.getBufferedModel("artistNormalizationFromProfile").setValue(artistNormRefCmb.getSelectedItem());
+        }
+      }
+    });
+
     this.add(new JLabel(this.textProvider.getString("playlistprofilemanager.property.aritstNormalizationRef")), cc.xy(2, row));
     this.add(artistNormRefCmb, cc.xywh(4, row, 5, 1));
     row += 2;
-    
 
+    model.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        model.updateProfileRefListModel(trackRuleRefModel);
+        trackRuleRefCmb.setSelectedItem(model.getBean() != null ? model.getBean().getTrackRuleFromProfile() : null);
+        model.updateProfileRefListModel(artistNormRefModel);
+        artistNormRefCmb.setSelectedItem(model.getBean() != null ? model.getBean().getArtistNormalizationFromProfile() : null);
+      }
+    });
 
   }
 

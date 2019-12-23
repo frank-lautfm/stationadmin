@@ -132,6 +132,9 @@ public class PlaylistProfile {
   }
 
   public WordDistributionStrategy getWordDistributionStrategy() {
+    if(this.wordDistributionStrategy == null) {
+      this.wordDistributionStrategy = WordDistributionStrategy.RANDOM;
+    }
     return wordDistributionStrategy;
   }
 

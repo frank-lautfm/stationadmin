@@ -39,7 +39,10 @@ import de.stationadmin.base.config.ClientConfigurationSource;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.exporter.PlaylistBackupExporter;
+import de.stationadmin.base.playlist.profile.AdTriggerCfg;
+import de.stationadmin.base.playlist.profile.ArtistNormalizationCfg;
 import de.stationadmin.base.playlist.profile.PlaylistProfile;
+import de.stationadmin.base.playlist.profile.TrackRuleCfg;
 import de.stationadmin.base.playlist.shuffle.PlaylistProfileType;
 import de.stationadmin.base.playlist.shuffle.TrackRule;
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
@@ -682,12 +685,15 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       return null;
     }
     shuffleType = shuffleType.toLowerCase();
+    ShuffleScriptMeta best = null;
     for (ShuffleScriptMeta script : shuffleScripts) {
-      if (shuffleType.equals(script.getKey().toLowerCase()) || shuffleType.startsWith(script.getKey().toLowerCase() + "_") || shuffleType.equals(script.getAutomationAlgorithm())) {
+      if (shuffleType.equals(script.getKey().toLowerCase()) || shuffleType.equals(script.getAutomationAlgorithm())) {
         return script;
+      } else if (shuffleType.startsWith(script.getKey().toLowerCase() + "_")) {
+        best = script;
       }
     }
-    return null;
+    return best;
   }
 
   private void updateMetaData(ExtendedPlaylistHead head, Playlist playlist) {
@@ -864,6 +870,139 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
 
   }
 
+  public void assignProfileOpts(Map<String, Object> opts, String profileId) {
+
+    PlaylistProfile main = getProfile(profileId);
+    if (main == null) {
+      opts.remove("jingleInterval");
+      opts.remove("jingleOrder");
+      opts.remove("protectFirstJingle");
+      opts.remove("preserveAllJingles");
+      opts.remove("wordDistribution");
+      opts.remove("artistSeparators");
+      opts.remove("artistAliases");
+      opts.remove("adTrigger");
+      opts.remove("adSeparator");
+      opts.remove("adPositions");
+      opts.remove("adJingleCollisionStrategy");
+      opts.remove("trackRuleJingleCollisionStrategy");
+      opts.remove("trackRuleGroupCollisionStrategy");
+      opts.remove("trackRuleGroups");
+      opts.remove("trackRules");
+      return;
+    }
+    PlaylistProfile trackRulesProfile = main.getTrackRuleFromProfile() == null || main.getTrackRuleFromProfile().equals(main.getId()) ? main
+        : getProfile(main.getTrackRuleFromProfile());
+    PlaylistProfile artistNormProfile = main.getArtistNormalizationFromProfile() == null || main.getArtistNormalizationFromProfile().equals(main.getId()) ? main
+        : getProfile(main.getArtistNormalizationFromProfile());
+    ArtistNormalizationCfg artistNorm = artistNormProfile != null ? artistNormProfile.getArtistNormalization() : new ArtistNormalizationCfg();
+
+    // jingles
+    opts.put("preserveAllJingles", main.isProtectAllJingles() ? 1 : 0);
+    if (!main.isProtectAllJingles()) {
+      opts.put("jingleInterval", main.getJingleInterval());
+      opts.put("jingleOrder", "shuffle_repeat"); // TODO replace by setting if available
+      opts.put("protectFirstJingle", main.isProtectFirstJingle() ? 1 : 0);
+    } else {
+      opts.remove("jingleInterval");
+      opts.remove("jingleOrder");
+      opts.remove("protectFirstJingle");
+    }
+
+    // words
+    switch (main.getWordDistributionStrategy()) {
+    case RANDOM:
+      opts.put("wordDistribution", "random");
+      break;
+    case PROTECT:
+      opts.put("wordDistribution", "preserve");
+      break;
+    case PREDECESSOR_COUPLING:
+      opts.put("wordDistribution", "link_previous");
+      break;
+    case SUCCESSOR_COUPLING:
+      opts.put("wordDistribution", "link_next");
+      break;
+    }
+
+    // artist alias
+    if (artistNorm.getSeparators() != null && artistNorm.getSeparators().size() > 0) {
+      opts.put("artistSeparators", artistNorm.getSeparators());
+    } else {
+      opts.remove("artistSeparators");
+    }
+    if (artistNorm.getAliases() != null && artistNorm.getAliases().size() > 0) {
+      opts.put("artistAliases", artistNorm.getAliases());
+    } else {
+      opts.remove("artistAliases");
+    }
+
+    // ad triggers
+    AdTriggerCfg adTrigger = main.getAdTrigger();
+    if (adTrigger.getPos1() > -1) {
+      opts.put("adTrigger", adTrigger.getTriggerId());
+      if (adTrigger.getSeperatorId() > 0) {
+        opts.put("adSeparator", adTrigger.getSeperatorId());
+      } else {
+        opts.remove("adSeparator");
+      }
+      opts.put("adPositions", new int[] { adTrigger.getPos1(), adTrigger.getPos2() });
+      switch (adTrigger.getJingleCollisionStrategy()) {
+      case KEEP_BOTH:
+        opts.put("adJingleCollisionStrategy", "keep_both");
+        break;
+      case MOVE_ADTRIGGER:
+        opts.put("adJingleCollisionStrategy", "move_adtrigger");
+        break;
+      case REMOVE_JINGLE:
+        opts.put("adJingleCollisionStrategy", "remove_jingle");
+        break;
+      }
+
+    } else {
+      opts.remove("adTrigger");
+      opts.remove("adSeparator");
+      opts.remove("adPositions");
+      opts.remove("adJingleCollisionStrategy");
+    }
+
+    // track rules
+    TrackRuleCfg trackRuleCfg = trackRulesProfile != null && trackRulesProfile.getTrackRules() != null ? trackRulesProfile.getTrackRules() : new TrackRuleCfg();
+    if (trackRuleCfg.getRules() != null && trackRuleCfg.getRules().size() > 0) {
+      opts.put("trackRuleJingleCollisionStrategy", trackRuleCfg.getJingleCollisionStrategy().name().toLowerCase());
+      opts.put("trackRuleGroupCollisionStrategy", trackRuleCfg.getGroupCollisionStrategy().name().toLowerCase());
+
+      HashMap<String, HashMap<String, Object>> groups = new HashMap<>();
+      for (TrackRuleGroup group : trackRuleCfg.getGroups()) {
+        HashMap<String, Object> groupOpts = new HashMap<>();
+        groupOpts.put("minDistance", group.getMinDistance());
+        groupOpts.put("multiMatchSelection", group.getMultiMatchSelection().name().toLowerCase());
+        groups.put(group.getName(), groupOpts);
+      }
+      opts.put("trackRuleGroups", groups);
+
+      ArrayList<HashMap<String, Object>> rules = new ArrayList<>();
+      for (TrackRule rule : trackRuleCfg.getRules()) {
+        HashMap<String, Object> ruleOpts = new HashMap<>();
+        ruleOpts.put("groupName", rule.getGroupName());
+        ruleOpts.put("trackId", rule.getTrackId());
+        ruleOpts.put("filter", rule.getFilter());
+        ruleOpts.put("filterType", rule.getFilterType().name().toLowerCase());
+        ruleOpts.put("position", rule.getPosition().name().toLowerCase());
+        ruleOpts.put("minDistance", rule.getMinDistance());
+        rules.add(ruleOpts);
+      }
+
+      opts.put("trackRules", rules);
+    } else {
+      opts.remove("trackRuleJingleCollisionStrategy");
+      opts.remove("trackRuleGroupCollisionStrategy");
+      opts.remove("trackRuleGroups");
+      opts.remove("trackRules");
+    }
+
+  }
+
   public List<ShuffleScriptMeta> getShuffleScripts() {
     return shuffleScripts;
   }
@@ -900,7 +1039,8 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
   public void collectClientConfiguration(ClientConfiguration cfg) {
     List<PlaylistClientCfgData> list = new ArrayList<>();
     for (Playlist pl : playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
-      if ((pl.getAutoFillRule() != null && pl.getAutoFillRule().isConfigured())  || org.apache.commons.lang3.StringUtils.isNotEmpty(pl.getProfileId()) || org.apache.commons.lang3.StringUtils.isNotEmpty(pl.getComment()) || pl.getTags().size() > 0) {
+      if ((pl.getAutoFillRule() != null && pl.getAutoFillRule().isConfigured()) || org.apache.commons.lang3.StringUtils.isNotEmpty(pl.getProfileId())
+          || org.apache.commons.lang3.StringUtils.isNotEmpty(pl.getComment()) || pl.getTags().size() > 0) {
         PlaylistClientCfgData data = new PlaylistClientCfgData();
         data.setId(pl.getId());
         data.setAutoFillRule(pl.getAutoFillRule());
@@ -919,9 +1059,11 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
   }
 
   public PlaylistProfile getProfile(String id) {
-    for (PlaylistProfile p : profiles) {
-      if (p.getId().equals(id)) {
-        return p;
+    if (id != null) {
+      for (PlaylistProfile p : profiles) {
+        if (p.getId().equals(id)) {
+          return p;
+        }
       }
     }
     return null;

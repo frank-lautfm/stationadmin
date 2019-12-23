@@ -55,11 +55,11 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   private AbstractValueModel generateTags;
   private TableModel weightTableModel = new GenerateWeightTableModel();
   private ValueModel advices = new ValueHolder(null, true);
+  private PlaylistService playlistService;
   private TagManager tagManager;
   private ValueHolder titleNameAdviceLimit = new ValueHolder(0);
   private ValueModel trackOrderType = new ValueHolder(TrackOrderOption.MANUAL);
   private PresentationModel<AutoFillRule> autoFillModel;
-  private Settings settings;
   private TextProvider textProvider;
 
   private List<ShuffleScriptMeta> shuffleScripts;
@@ -72,13 +72,13 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   /**
    * @param bean
    */
-  public PlaylistConfigurationModel(Playlist playlist, TagManager tagManager, Settings settings, List<ShuffleScriptMeta> shuffleScripts, List<PlaylistProfile> profiles,
+  public PlaylistConfigurationModel(Playlist playlist, PlaylistService playlistService, TagManager tagManager, List<ShuffleScriptMeta> shuffleScripts, List<PlaylistProfile> profiles,
       TextProvider textProvider) {
     super(playlist);
-    this.settings = settings;
     this.tags = new TagsModel();
     this.generateTags = new TrackTagsModel();
     this.shuffleScript = new ShuffleScriptModel();
+    this.playlistService = playlistService;
     this.tagManager = tagManager;
     this.textProvider = textProvider;
     this.shuffleScripts = shuffleScripts;
@@ -137,13 +137,22 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
               opts = new HashMap<>();
             }
             if (current.isSupportsGlobalOpts()) {
-              PlaylistService.updateGlobalShuffleOpts(opts, PlaylistConfigurationModel.this.settings);
+              // PlaylistService.updateGlobalShuffleOpts(opts, PlaylistConfigurationModel.this.settings);
             }
             getBufferedModel("shuffleOpts").setValue(opts);
             currentOptsKey = current.getOptsKey();
           }
         }
         updateProfileListModel();
+      }
+    });
+    
+    this.getBufferedModel("profileId").addValueChangeListener(new PropertyChangeListener() {
+      
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        HashMap<String, Object> opts = (HashMap<String, Object>)getBufferedModel("shuffleOpts").getValue();
+        playlistService.assignProfileOpts(opts, (String)evt.getNewValue());
       }
     });
 

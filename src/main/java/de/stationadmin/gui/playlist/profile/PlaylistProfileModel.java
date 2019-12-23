@@ -5,6 +5,8 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.DefaultComboBoxModel;
+
 import com.jgoodies.binding.list.IndirectListModel;
 import com.jgoodies.binding.value.ValueModel;
 
@@ -92,6 +94,22 @@ public class PlaylistProfileModel extends NonObservingPresentationModel<Playlist
   public void setProfiles(List<PlaylistProfile> profiles) {
     this.profiles = profiles;
     updateProfileRefModel(getBean() != null ? getBean().getId() : null);
+  }
+  
+  public void updateProfileRefListModel(DefaultComboBoxModel<String> listModel) {
+    String currentProfileId = getBean() != null ? getBean().getId() : null;
+    Object selection = listModel.getSelectedItem();
+    listModel.removeAllElements();
+    listModel.addElement(null);
+
+    for (PlaylistProfile profile : this.profiles) {
+      if (currentProfileId == null || !currentProfileId.equals(profile.getId())) {
+        listModel.addElement(profile.getId());
+      }
+    }
+    if(selection != null) {
+      listModel.setSelectedItem(selection);
+    }
   }
 
   private void updateProfileRefModel(String currentProfileId) {
