@@ -13,6 +13,7 @@ import java.util.Random;
 
 import org.apache.log4j.Logger;
 
+import de.stationadmin.base.tag.TagChecker;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.track.BasicTrack;
 
@@ -25,7 +26,7 @@ import de.stationadmin.base.track.BasicTrack;
 public class WeightedTrackPreselector implements ArtistTrackPreselector {
   private static final Logger log = Logger.getLogger(WeightedTrackPreselector.class);
   private Random random = new Random();
-  private TagManager tagManager;
+  private TagChecker tagManager;
   private Map<Integer, Integer> trackWeights = new HashMap<Integer, Integer>();
   private Map<String, Integer> artistLimits = new HashMap<String, Integer>();
 
@@ -33,7 +34,7 @@ public class WeightedTrackPreselector implements ArtistTrackPreselector {
    * @param tagManager
    * @param weights
    */
-  public WeightedTrackPreselector(TagManager tagManager) {
+  public WeightedTrackPreselector(TagChecker tagManager) {
     super();
     this.tagManager = tagManager;
   }

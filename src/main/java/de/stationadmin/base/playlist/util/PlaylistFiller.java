@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.stationadmin.base.Settings;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
-import de.stationadmin.base.playlist.PlaylistRegistry;
+import de.stationadmin.base.playlist.PlaylistService;
+import de.stationadmin.base.playlist.profile.PlaylistProfile;
 import de.stationadmin.base.playlist.shuffle.TrackRule;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.track.BasicTrack;
@@ -25,16 +25,14 @@ import de.stationadmin.base.track.TrackService;
  * @author fkorf
  */
 public class PlaylistFiller {
-  private Settings settings;
-  private PlaylistRegistry playlistRegistry;
+  private PlaylistService playlistService;
   private TrackService trackService;
   private TrackRegistry trackRegistry;
   private TagManager tagManager;
 
-  public PlaylistFiller(Settings settings, PlaylistRegistry playlistRegistry, TrackService trackService, TagManager tagManager) {
+  public PlaylistFiller(PlaylistService playlistService, TrackService trackService, TagManager tagManager) {
     super();
-    this.settings = settings;
-    this.playlistRegistry = playlistRegistry;
+    this.playlistService = playlistService;
     this.trackService = trackService;
     this.trackRegistry = trackService.getTrackRegistry();
     this.tagManager = tagManager;
@@ -91,7 +89,7 @@ public class PlaylistFiller {
       int[] playlistIds = playlist.getAutoFillRule().getSourcePlaylists();
       if (playlistIds != null) {
         for (int playlistId : playlistIds) {
-          Playlist sourcePlaylist = this.playlistRegistry.getPlaylist(playlistId);
+          Playlist sourcePlaylist = this.playlistService.getPlaylistRegistry().getPlaylist(playlistId);
           if (sourcePlaylist != null) {
             for (Entry entry : sourcePlaylist.getEntries()) {
               if (!tracks.containsKey(entry.getTrackId())) {
@@ -125,23 +123,25 @@ public class PlaylistFiller {
         playlist.addTrack(track);
       }
 
+      PlaylistProfile profile = playlistService.getProfile(playlist.getProfileId());
+
       // add ad separator / ad trigger
-      if (playlist.getAutoFillRule().isIncludeAdTrigger() && settings.getAdTriggerPosition1() > -1) {
-        if (settings.getAdSeparatorId() > 0) {
-          BasicTrack adSeparator = trackRegistry.getTrack(settings.getAdSeparatorId());
+      if (playlist.getAutoFillRule().isIncludeAdTrigger() && profile != null && profile.getAdTrigger() != null && profile.getAdTrigger().getPos1() > -1) {
+        if (profile.getAdTrigger().getSeperatorId() > 0) {
+          BasicTrack adSeparator = trackRegistry.getTrack(profile.getAdTrigger().getSeperatorId());
           if (adSeparator != null) {
             playlist.addTrack(adSeparator);
           }
         }
-        BasicTrack adTrigger = settings.getAdTriggerId() > 0 ? trackRegistry.getTrack(settings.getAdTriggerId()) : trackRegistry.getStandardAdTrigger();
+        BasicTrack adTrigger = profile.getAdTrigger().getTriggerId() > 0 ? trackRegistry.getTrack(profile.getAdTrigger().getTriggerId()) : trackRegistry.getStandardAdTrigger();
         if (adTrigger != null) {
           playlist.addTrack(adTrigger);
         }
       }
 
       // add jingles from track rules
-      if (playlist.getAutoFillRule().isIncludeTrackRules()) {
-        for (TrackRule rule : settings.getTrackRules()) {
+      if (playlist.getAutoFillRule().isIncludeTrackRules() && profile != null && profile.getTrackRules() != null) {
+        for (TrackRule rule : profile.getTrackRules().getRules()) {
           BasicTrack track = trackRegistry.getTrack(rule.getTrackId());
           if (track != null) {
             playlist.addTrack(track);
@@ -159,7 +159,7 @@ public class PlaylistFiller {
    */
   public List<Playlist> fillPlaylists() throws IOException {
     List<Playlist> playlists = new ArrayList<>();
-    for (Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
+    for (Playlist playlist : this.playlistService.getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE)) {
       if (playlist.getAutoFillRule().isEnabled()) {
         fillPlaylist(playlist);
         playlists.add(playlist);

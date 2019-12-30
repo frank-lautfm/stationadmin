@@ -1,19 +1,20 @@
 package de.stationadmin.base.playlist.shuffle;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.base.playlist.profile.AdTriggerCfg;
+import de.stationadmin.base.playlist.profile.PlaylistProfile;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.util.TimeFormat;
 
 public class AdTriggerEngine implements PlaylistEnhancer {
   private Logger log = Logger.getLogger(AdTriggerEngine.class);
-  
+
   public enum AdJingleCollisionStrategy {
     KEEP_BOTH, REMOVE_JINGLE, MOVE_ADTRIGGER
   }
@@ -24,11 +25,30 @@ public class AdTriggerEngine implements PlaylistEnhancer {
   private int adSeparatorId = -1;
   private int adTriggerId = TrackRegistry.STANDARD_AD_TRIGGER_ID;
   private AdJingleCollisionStrategy jingleCollisionStrategy = AdJingleCollisionStrategy.KEEP_BOTH;
-  
+
   private boolean clearExistingTriggers;
 
   public AdTriggerEngine(TrackRegistry trackRegistry) {
     this.trackRegistry = trackRegistry;
+  }
+
+  public AdTriggerEngine(TrackRegistry trackRegistry, AdTriggerCfg cfg) {
+    this.trackRegistry = trackRegistry;
+    configure(cfg);
+  }
+
+  private void configure(AdTriggerCfg cfg) {
+    if (cfg != null) {
+      this.position1 = cfg.getPos1();
+      this.position2 = cfg.getPos2();
+      this.adSeparatorId = cfg.getSeperatorId();
+      this.adTriggerId = cfg.getTriggerId();
+      this.jingleCollisionStrategy = cfg.getJingleCollisionStrategy();
+    }
+    else {
+      this.position1 = -1;
+    }
+
   }
 
   @Override
@@ -63,6 +83,9 @@ public class AdTriggerEngine implements PlaylistEnhancer {
   @Override
   public List<BasicTrack> process(Playlist playlist, List<BasicTrack> tracks, boolean protectFirstJingle) {
     List<BasicTrack> newTracks = new ArrayList<BasicTrack>();
+    if(this.position1 < 0) {
+      return tracks;
+    }
 
     BasicTrack adSeparator = this.adSeparatorId > 0 ? this.trackRegistry.getTrack(this.adSeparatorId) : null;
     BasicTrack adTrigger = this.trackRegistry.getTrack(this.adTriggerId);
@@ -97,12 +120,12 @@ public class AdTriggerEngine implements PlaylistEnhancer {
 
     boolean allowMove = true;
     for (int i = 0; i < tracks.size(); i++) {
-      if(clearExistingTriggers) {
-        if(tracks.get(i).getId() == adTriggerId || tracks.get(i).getId() == 0 || tracks.get(i).getId() == adSeparatorId) {
+      if (clearExistingTriggers) {
+        if (tracks.get(i).getId() == adTriggerId || tracks.get(i).getId() == 0 || tracks.get(i).getId() == adSeparatorId) {
           continue;
         }
       }
-      
+
       boolean addTrigger = currentPosition > nextAdPosition;
       boolean addTrack = true;
 
@@ -134,7 +157,8 @@ public class AdTriggerEngine implements PlaylistEnhancer {
         adCnt++;
         int nextAdBase = adCnt % 2 == 0 ? this.position1 : this.position2;
         nextAdPosition = (nextAdBase * 60) + (adCnt / 2) * 60 * 60;
-        // System.out.println("next ad position " + TimeFormat.format(nextAdPosition / 60, true) + " / " + nextAdBase + " / " + adCnt + " / " + (adCnt / 2));
+        // System.out.println("next ad position " + TimeFormat.format(nextAdPosition /
+        // 60, true) + " / " + nextAdBase + " / " + adCnt + " / " + (adCnt / 2));
         allowMove = true;
       }
       if (addTrack) {
@@ -191,5 +215,10 @@ public class AdTriggerEngine implements PlaylistEnhancer {
 
   public void setClearExistingTriggers(boolean clearExistingTriggers) {
     this.clearExistingTriggers = clearExistingTriggers;
+  }
+
+  @Override
+  public void initialize(PlaylistProfile profile) {
+    configure(profile != null ? profile.getAdTrigger() : null);
   }
 }

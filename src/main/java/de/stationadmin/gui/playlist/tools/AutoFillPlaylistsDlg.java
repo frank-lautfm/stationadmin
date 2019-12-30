@@ -37,8 +37,7 @@ public class AutoFillPlaylistsDlg extends JDialog {
 
   public AutoFillPlaylistsDlg(ClientContext ctx) {
     this.ctx = ctx;
-    this.filler = new PlaylistFiller(ctx.getAdminClient().getSettings(), ctx.getAdminClient().getPlaylistService().getPlaylistRegistry(),
-        ctx.getAdminClient().getTrackService(), ctx.getAdminClient().getTagManager());
+    this.filler = new PlaylistFiller(ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getTrackService(), ctx.getAdminClient().getTagManager());
     this.init();
   }
 

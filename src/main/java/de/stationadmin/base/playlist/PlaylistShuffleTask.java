@@ -40,9 +40,6 @@ public class PlaylistShuffleTask extends AbstractTask {
 		}
 		
 		PlaylistShuffler shuffler = PlaylistGeneratorFactory.createShuffler(client);
-		shuffler.setProtectFirstJingle(client.getSettings().isShuffleProtectFirstJingle());
-		shuffler.setJingleInterval(client.getSettings().getShuffleJingleInterval());
-		shuffler.setWordDistribution(client.getSettings().getShuffleWordDistributionStrategy());
 
 		ArrayList<Playlist> playlists = new ArrayList<Playlist>();
 

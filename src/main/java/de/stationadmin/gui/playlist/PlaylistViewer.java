@@ -996,9 +996,9 @@ public class PlaylistViewer extends JPanel {
     public void actionPerformed(ActionEvent evt) {
       Playlist playlist = (Playlist) playlistHolder.getValue();
       if (playlist != null) {
-        AdTriggerEngine engine = PlaylistGeneratorFactory.createAdTriggerEngine(ctx.getAdminClient());
+        AdTriggerEngine engine = new AdTriggerEngine(ctx.getAdminClient().getTrackService().getTrackRegistry());
+        engine.initialize(ctx.getAdminClient().getPlaylistService().getProfile(playlist.getProfileId()));
         engine.setClearExistingTriggers(true);
-        ;
         ArrayList<BasicTrack> tracks = new ArrayList<BasicTrack>();
         for (Entry entry : playlist.getEntries()) {
           if (entry.getTrack() != null) {

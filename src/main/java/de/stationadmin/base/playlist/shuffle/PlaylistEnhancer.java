@@ -3,9 +3,12 @@ package de.stationadmin.base.playlist.shuffle;
 import java.util.List;
 
 import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.base.playlist.profile.PlaylistProfile;
 import de.stationadmin.base.track.BasicTrack;
 
 public interface PlaylistEnhancer {
+  
+  void initialize(PlaylistProfile profile);
 
   /**
    * Checks if a track should be excluded from the core playlist created by shuffle / generate

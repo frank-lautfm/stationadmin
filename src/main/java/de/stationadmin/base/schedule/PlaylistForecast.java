@@ -165,7 +165,7 @@ public class PlaylistForecast {
       this.playlist = playlistRegistry.getPlaylist(scheduleEntry.getPlaylistId());
       this.playlistEntries = this.playlist.getEntries();
       if (this.playlist.isShuffle() || this.playlist.getId() == 0) {
-        this.playlistEntries = new PlaylistShuffler().randomize(this.playlistEntries);
+        this.playlistEntries = new PlaylistShuffler(null).randomize(this.playlistEntries);
       }
       this.plIdx = 0;
 

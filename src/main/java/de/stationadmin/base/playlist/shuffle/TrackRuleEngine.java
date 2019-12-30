@@ -11,6 +11,8 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.base.playlist.profile.PlaylistProfile;
+import de.stationadmin.base.playlist.profile.TrackRuleCfg;
 import de.stationadmin.base.playlist.shuffle.TrackRule.TrackPosition;
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup.MultiMatchSelection;
 import de.stationadmin.base.tag.TagManager;
@@ -52,8 +54,11 @@ public class TrackRuleEngine implements PlaylistEnhancer {
 
       try {
         if (getFilterType() == FilterType.TAG) {
-          for (int i : tagManager.getTrackIds(getFilter())) {
-            boundTo.add(i);
+          int[] trackIds = tagManager.getTrackIds(getFilter());
+          if (trackIds != null) {
+            for (int i : trackIds) {
+              boundTo.add(i);
+            }
           }
         } else {
           String term = normalize(getFilter());
@@ -132,6 +137,9 @@ public class TrackRuleEngine implements PlaylistEnhancer {
 
   private TrackRegistry trackRegistry;
   private TagManager tagManager;
+
+  private TrackRuleCfg cfg;
+
   private Map<String, TrackRuleGroup> groups = new HashMap<String, TrackRuleGroup>();
   private List<TrackRuleInstance> rules = new ArrayList<TrackRuleInstance>();
   private HashSet<Integer> jingleTrackIds = new HashSet<Integer>();
@@ -145,10 +153,34 @@ public class TrackRuleEngine implements PlaylistEnhancer {
 
   private Random random = new Random();
 
+  private boolean configureFromProfile = true;
+
   public TrackRuleEngine(TrackRegistry trackRegistry, TagManager tagManager) {
     super();
     this.trackRegistry = trackRegistry;
     this.tagManager = tagManager;
+  }
+
+  private void configure(TrackRuleCfg cfg) {
+    if (cfg == null || cfg.getGroups() == null || cfg.getRules() == null) {
+      this.reset();
+      this.cfg = null;
+      this.rules.clear();
+      this.groups.clear();
+    } else if (this.cfg == null || !this.cfg.equals(cfg)) {
+      this.cfg = cfg;
+      this.reset();
+      this.rules.clear();
+      this.groups.clear();
+      for (TrackRuleGroup group : cfg.getGroups()) {
+        register(group);
+      }
+      for (TrackRule rule : cfg.getRules()) {
+        register(rule);
+      }
+      this.jingleCollisionStrategy = cfg.getJingleCollisionStrategy();
+      this.groupCollisionStrategy = cfg.getGroupCollisionStrategy();
+    }
   }
 
   @Override
@@ -213,12 +245,15 @@ public class TrackRuleEngine implements PlaylistEnhancer {
     return jingleCollisionStrategy;
   }
 
-  public List<TrackRule> getRules() {
-    List<TrackRule> rules = new ArrayList<TrackRule>();
-    for (TrackRuleInstance instance : this.rules) {
-      rules.add(instance);
+  @Override
+  public void initialize(PlaylistProfile profile) {
+    if (configureFromProfile) {
+      configure(profile != null ? profile.getTrackRules() : null);
     }
-    return rules;
+  }
+
+  public boolean isConfigureFromProfile() {
+    return configureFromProfile;
   }
 
   protected boolean isIgnoreDistance(BasicTrack track) {
@@ -229,6 +264,10 @@ public class TrackRuleEngine implements PlaylistEnhancer {
 
   @Override
   public List<BasicTrack> process(Playlist playlist, List<BasicTrack> tracks, boolean protectFirstJingle) {
+    if (rules.size() == 0) {
+      return tracks;
+    }
+
     HashSet<Integer> triggers = new HashSet<Integer>();
     List<BasicTrack> newTracks = new ArrayList<BasicTrack>();
     for (TrackRuleInstance rule : this.rules) {
@@ -257,7 +296,6 @@ public class TrackRuleEngine implements PlaylistEnhancer {
 
         if (applicableRules.size() > 0) {
           log.info("applicable rules for " + track);
-          ;
           BasicTrack previousTrack = newTracks.size() > 0 ? newTracks.get(newTracks.size() - 1) : null;
           boolean lastIsJingle = previousTrack != null && previousTrack.getType() == BasicTrack.TYPE_JINGLE && !jingleTrackIds.contains(previousTrack.getId());
           boolean nextIsJingle = i < tracks.size() - 1 && tracks.get(i + 1).getType() == BasicTrack.TYPE_JINGLE && !jingleTrackIds.contains(tracks.get(i + 1).getId());
@@ -349,6 +387,10 @@ public class TrackRuleEngine implements PlaylistEnhancer {
       rule.timeLast = -1;
     }
     this.time = 0;
+  }
+
+  public void setConfigureFromProfile(boolean configureFromProfile) {
+    this.configureFromProfile = configureFromProfile;
   }
 
   public void setGroupCollisionStrategy(MultiMatchSelection groupCollisionStrategy) {

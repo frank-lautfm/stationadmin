@@ -233,9 +233,6 @@ public class MultiPlaylistShuffleDlg extends JFrame {
 
       } else {
         PlaylistShuffler shuffler = PlaylistGeneratorFactory.createShuffler(ctx.getAdminClient());
-        shuffler.setProtectFirstJingle(ctx.getAdminClient().getSettings().isShuffleProtectFirstJingle());
-        shuffler.setJingleInterval(ctx.getAdminClient().getSettings().getShuffleJingleInterval());
-        shuffler.setWordDistribution(ctx.getAdminClient().getSettings().getShuffleWordDistributionStrategy());
         for (Object obj : values) {
           Playlist playlist = (Playlist) obj;
           status = textProvider.getString("multishuffle.playlist", playlist.getDisplayName());

@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
+import de.stationadmin.base.playlist.profile.PlaylistProfile;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.TrackService;
@@ -87,6 +88,10 @@ public class NewsEngine implements PlaylistEnhancer {
   @Override
   public void reset() {
 
+  }
+
+  @Override
+  public void initialize(PlaylistProfile profile) {
   }
 
 }

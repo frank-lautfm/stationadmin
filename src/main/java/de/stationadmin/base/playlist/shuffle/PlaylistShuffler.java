@@ -17,6 +17,9 @@ import org.apache.log4j.Logger;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
+import de.stationadmin.base.playlist.PlaylistProfileRegistry;
+import de.stationadmin.base.playlist.profile.ArtistNormalizationCfg;
+import de.stationadmin.base.playlist.profile.PlaylistProfile;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackRegistry;
 
@@ -28,14 +31,14 @@ import de.stationadmin.base.track.TrackRegistry;
 public class PlaylistShuffler {
   private static final Logger log = Logger.getLogger(PlaylistShuffler.class);
   private Random random = new Random();
-  private boolean protectFirstJingle = true;
-  private boolean protectAllJingles = false;
-  private WordDistributionStrategy wordDistribution = WordDistributionStrategy.RANDOM;
   private ArtistNormalizer artistNormalizer = new DefaultArtistNormalizer();
 
-  private int jingleInterval = 0;
-  
+  private PlaylistProfileRegistry profileRegistry;
   private PlaylistEnhancer playlistEnhancer;
+
+  public PlaylistShuffler(PlaylistProfileRegistry profileRegistry) {
+    this.profileRegistry = profileRegistry;
+  }
 
   /**
    * Builds a map of titles for each artist
@@ -49,7 +52,6 @@ public class PlaylistShuffler {
     int max = 1;
 
     HashSet<Integer> jingleIds = new HashSet<Integer>();
-    
 
     int numSkipped = 0;
     for (int pos = 0; pos < entries.size(); pos++) {
@@ -58,7 +60,7 @@ public class PlaylistShuffler {
       if (title == null) {
         throw new IllegalStateException("Title with id " + entry.getTrackId() + " not known");
       }
-      if(playlistEnhancer != null && playlistEnhancer.excludeFromCorePlaylist(title)) {
+      if (playlistEnhancer != null && playlistEnhancer.excludeFromCorePlaylist(title)) {
         numSkipped++;
         continue;
       }
@@ -66,17 +68,17 @@ public class PlaylistShuffler {
       if (title.getType() != BasicTrack.TYPE_JINGLE) {
         boolean randomTrack = true;
         if (title.getType() == BasicTrack.TYPE_WORD) {
-          if (this.wordDistribution == WordDistributionStrategy.PROTECT) {
+          if (ctx.getProfile().getWordDistributionStrategy() == WordDistributionStrategy.PROTECT) {
             ProtectedTrack fxtitle = new ProtectedTrack(pos - numSkipped, title);
             ctx.addProtectedTrack(fxtitle);
             randomTrack = false;
-          } else if (this.wordDistribution == WordDistributionStrategy.SUCCESSOR_COUPLING && pos < entries.size() - 1) {
+          } else if (ctx.getProfile().getWordDistributionStrategy() == WordDistributionStrategy.SUCCESSOR_COUPLING && pos < entries.size() - 1) {
             BasicTrack nextTitle = playlist.getTrackRegistry().getTrack(entries.get(pos + 1).getTrackId());
             if (nextTitle != null) {
               ctx.addCoupledTitle(title, nextTitle);
               randomTrack = false;
             }
-          } else if (this.wordDistribution == WordDistributionStrategy.PREDECESSOR_COUPLING && pos > 0) {
+          } else if (ctx.getProfile().getWordDistributionStrategy() == WordDistributionStrategy.PREDECESSOR_COUPLING && pos > 0) {
             BasicTrack prevTitle = playlist.getTrackRegistry().getTrack(entries.get(pos - 1).getTrackId());
             if (prevTitle != null) {
               ctx.addCoupledTitle(title, prevTitle);
@@ -101,7 +103,7 @@ public class PlaylistShuffler {
         }
       } else {
         // jingle
-        if (protectAllJingles) {
+        if (ctx.getProfile().isProtectAllJingles()) {
           ProtectedTrack fxtitle = new ProtectedTrack(pos - numSkipped, title);
           ctx.addProtectedTrack(fxtitle);
         } else {
@@ -118,27 +120,6 @@ public class PlaylistShuffler {
 
     return max;
 
-  }
-
-  /**
-   * @return the jingleInterval
-   */
-  public int getJingleInterval() {
-    return jingleInterval;
-  }
-
-  /**
-   * @return the wordDistribution
-   */
-  public WordDistributionStrategy getWordDistribution() {
-    return wordDistribution;
-  }
-
-  /**
-   * @return the protectFirstJingle
-   */
-  public boolean isProtectFirstJingle() {
-    return protectFirstJingle;
   }
 
   /**
@@ -166,27 +147,6 @@ public class PlaylistShuffler {
   }
 
   /**
-   * @param jingleInterval the jingleInterval to set
-   */
-  public void setJingleInterval(int jingleInterval) {
-    this.jingleInterval = jingleInterval;
-  }
-
-  /**
-   * @param protectFirstJingle the protectFirstJingle to set
-   */
-  public void setProtectFirstJingle(boolean protectFirstJingle) {
-    this.protectFirstJingle = protectFirstJingle;
-  }
-
-  /**
-   * @param wordDistribution the wordDistribution to set
-   */
-  public void setWordDistribution(WordDistributionStrategy wordDistribution) {
-    this.wordDistribution = wordDistribution;
-  }
-
-  /**
    * Shuffles a single playlist
    * 
    * @param playlist
@@ -195,6 +155,24 @@ public class PlaylistShuffler {
     log.info("shuffle " + playlist);
 
     ShuffleCtx ctx = new ShuffleCtx();
+    ctx.setProfile(this.profileRegistry.getProfile(playlist.getProfileId()));
+    if(ctx.getProfile() != null) {
+      if(ctx.getProfile().getTrackRuleFromProfile() != null && !ctx.getProfile().getTrackRuleFromProfile().equals(ctx.getProfile().getId())) {
+        PlaylistProfile trProf = profileRegistry.getProfile(ctx.getProfile().getTrackRuleFromProfile());
+        ctx.getProfile().setTrackRules(trProf != null ? trProf.getTrackRules() : null);
+      }
+
+      ArtistNormalizationCfg artistNormCfg = ctx.getProfile().getArtistNormalization();
+      if(ctx.getProfile().getArtistNormalizationFromProfile() != null && !ctx.getProfile().getArtistNormalizationFromProfile().equals(ctx.getProfile().getId())) {
+        PlaylistProfile aProf = profileRegistry.getProfile(ctx.getProfile().getArtistNormalizationFromProfile());
+        artistNormCfg = aProf != null ? aProf.getArtistNormalization() : null;
+      }
+      if (artistNormCfg != null && (artistNormalizer == null || artistNormalizer instanceof DefaultArtistNormalizer)) {
+        artistNormalizer = new DefaultArtistNormalizer(ctx.getProfile().getArtistNormalization());
+      }
+      
+    }
+    playlistEnhancer.initialize(ctx.getProfile());
     int numSegments = this.buildTrackMap(playlist, ctx) * 2;
 
     // initialize segments
@@ -237,19 +215,19 @@ public class PlaylistShuffler {
       List<BasicTrack> segmentTitles = this.randomize(segment.getTitles());
       for (BasicTrack title : segmentTitles) {
         BasicTrack coupledTitle = ctx.getCoupledTitles().get(title);
-        if (coupledTitle != null && this.wordDistribution == WordDistributionStrategy.SUCCESSOR_COUPLING) {
+        if (coupledTitle != null && ctx.getProfile().getWordDistributionStrategy() == WordDistributionStrategy.SUCCESSOR_COUPLING) {
           newTrackList.add(coupledTitle);
           lockedPositions.set(newTrackList.size());
         }
         newTrackList.add(title);
-        if (coupledTitle != null && this.wordDistribution == WordDistributionStrategy.PREDECESSOR_COUPLING) {
+        if (coupledTitle != null && ctx.getProfile().getWordDistributionStrategy() == WordDistributionStrategy.PREDECESSOR_COUPLING) {
           lockedPositions.set(newTrackList.size());
           newTrackList.add(coupledTitle);
         }
       }
     }
 
-    if (ctx.jingles.size() > 0 && !this.protectAllJingles) {
+    if (ctx.jingles.size() > 0 && !ctx.getProfile().isProtectAllJingles()) {
       // insert jingles
       ArrayList<BasicTrack> titleList = new ArrayList<BasicTrack>(newTrackList);
       int timeNextJingle = 0;
@@ -257,7 +235,7 @@ public class PlaylistShuffler {
 
       Set<BasicTrack> unusedJingles = new HashSet<BasicTrack>(ctx.getJingles());
 
-      int jingleInterval = this.jingleInterval;
+      int jingleInterval = ctx.getProfile().getJingleInterval();
       if (jingleInterval == 0) {
         jingleInterval = (playlist.getLength() / ctx.jingles.size()) / 60;
         log.debug(ctx.jingles.size() + " jingles for " + (playlist.getLength() / 60) + " minutes - place jingle every " + jingleInterval + " minutes");
@@ -265,7 +243,7 @@ public class PlaylistShuffler {
 
       int jingleOffset = 0;
 
-      if (protectFirstJingle && ctx.isStartsWithJingle()) {
+      if (ctx.getProfile().isProtectFirstJingle() && ctx.isStartsWithJingle()) {
         log.debug("adding start jingle");
         newTrackList.add(ctx.getJingles().get(0));
         unusedJingles.remove(ctx.getJingles().get(0));
@@ -315,9 +293,9 @@ public class PlaylistShuffler {
         newTrackList.add(fxtitle.getPosition(), fxtitle.getTrack());
       }
     }
-    
-    if(this.playlistEnhancer != null && !this.protectAllJingles) {
-      newTrackList = playlistEnhancer.process(playlist, newTrackList, this.protectFirstJingle);
+
+    if (this.playlistEnhancer != null && !ctx.getProfile().isProtectAllJingles()) {
+      newTrackList = playlistEnhancer.process(playlist, newTrackList, ctx.getProfile().isProtectFirstJingle());
     }
 
     playlist.setTracks(newTrackList);
@@ -376,6 +354,7 @@ public class PlaylistShuffler {
   }
 
   private static class ShuffleCtx {
+    private PlaylistProfile profile = new PlaylistProfile();
     private Map<String, List<BasicTrack>> titleMap = new HashMap<String, List<BasicTrack>>();
     private List<BasicTrack> jingles = new ArrayList<BasicTrack>();
     private List<ProtectedTrack> protectedTracks = new ArrayList<ProtectedTrack>();
@@ -439,6 +418,14 @@ public class PlaylistShuffler {
       this.startsWithJingle = startsWithJingle;
     }
 
+    public PlaylistProfile getProfile() {
+      return profile;
+    }
+
+    public void setProfile(PlaylistProfile profile) {
+      this.profile = profile != null ? profile : new PlaylistProfile();
+    }
+
   }
 
   /**
@@ -453,14 +440,6 @@ public class PlaylistShuffler {
    */
   public void setArtistNormalizer(ArtistNormalizer artistNormalizer) {
     this.artistNormalizer = artistNormalizer;
-  }
-
-  public boolean isProtectAllJingles() {
-    return protectAllJingles;
-  }
-
-  public void setProtectAllJingles(boolean protectAllJingles) {
-    this.protectAllJingles = protectAllJingles;
   }
 
   public PlaylistEnhancer getPlaylistEnhancer() {

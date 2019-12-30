@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.base.playlist.profile.PlaylistProfile;
 import de.stationadmin.base.track.BasicTrack;
 
 public class PlaylistsEnhancerGroup implements PlaylistEnhancer {
@@ -42,6 +43,14 @@ public class PlaylistsEnhancerGroup implements PlaylistEnhancer {
 
   public List<PlaylistEnhancer> getPlaylistEnhancers() {
     return Collections.unmodifiableList(playlistEnhancers);
+  }
+
+  @Override
+  public void initialize(PlaylistProfile profile) {
+    for (int i = 0; i < playlistEnhancers.size(); i++) {
+      playlistEnhancers.get(i).initialize(profile);
+    }
+    
   }
 
 }

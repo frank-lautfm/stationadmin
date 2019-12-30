@@ -65,7 +65,7 @@ import de.stationadmin.lfm.backend.TrackRef;
  * @author Frank
  * 
  */
-public class PlaylistService extends AbstractBean implements Service, ClientConfigurationSource {
+public class PlaylistService extends AbstractBean implements Service, ClientConfigurationSource, PlaylistProfileRegistry {
   public static final int MAX_TRACKS = 10000;
 
   private static final Logger log = Logger.getLogger(PlaylistService.class);
