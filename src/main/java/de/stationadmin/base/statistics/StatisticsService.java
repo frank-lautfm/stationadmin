@@ -12,7 +12,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimerTask;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import de.stationadmin.base.Service;
@@ -44,15 +43,6 @@ public class StatisticsService implements Service {
     this.sessionCtx = ctx;
     this.settings = settings;
     this.logAnalyzerService = logAnalyzerService;
-
-    this.listenerStatsHistory.setLogRank(settings.isLogRank());
-    settings.addPropertyChangeListener("logRank", new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        listenerStatsHistory.setLogRank(StatisticsService.this.settings.isLogRank());
-      }
-    });
 
     initSettingsObserver(settings);
   }
@@ -116,14 +106,6 @@ public class StatisticsService implements Service {
 
     });
 
-    settings.addPropertyChangeListener("statisticsLogFile", new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        listenerStatsHistory.setLogFile(StringUtils.trimToNull((String) evt.getNewValue()));
-      }
-
-    });
 
   }
 

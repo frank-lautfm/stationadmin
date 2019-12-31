@@ -3,25 +3,18 @@
  */
 package de.stationadmin.base.statistics;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-
-import de.stationadmin.base.History;
 
 /**
  * History for the number of listeners
  * 
  * @author Frank Korf
  */
-public class ListenerStatsHistory extends History {
-  private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+public class ListenerStatsHistory {
   private List<Entry> entries = new LinkedList<Entry>();
-  private boolean logRank = false;
 
   public void addFromHistory(long time, int listeners) {
     this.entries.add(new Entry(time, listeners, 0));
@@ -39,12 +32,6 @@ public class ListenerStatsHistory extends History {
 
   public void add(int listeners, int rank) {
     this.entries.add(new Entry(listeners, rank));
-
-    // append to log file
-    if (rank > 0) {
-      String log = dateFormat.format(new Date()) + "\t" + listeners + (this.logRank ? "\t" + rank : "") + System.getProperty("line.separator");
-      this.logToFile(log);
-    }
   }
 
   /**
@@ -117,19 +104,5 @@ public class ListenerStatsHistory extends History {
       return Long.compare(this.time, o.time);
     }
 
-  }
-
-  /**
-   * @return the logRank
-   */
-  public boolean isLogRank() {
-    return logRank;
-  }
-
-  /**
-   * @param logRank the logRank to set
-   */
-  public void setLogRank(boolean logRank) {
-    this.logRank = logRank;
   }
 }

@@ -3,24 +3,18 @@
  */
 package de.stationadmin.base.track;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.stationadmin.base.History;
-
 /**
  * History of played titles
  * 
  * @author Frank Korf
  */
-public class TrackHistory extends History implements TrackCollector {
-	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
+public class TrackHistory implements TrackCollector {
 	private LinkedList<Entry> entries = new LinkedList<Entry>();
 	private int maxSize = 500;
 	private boolean logCurrentListeners = false;
@@ -34,13 +28,6 @@ public class TrackHistory extends History implements TrackCollector {
 		this.entries.add(new Entry(new Date(), title));
 		while (this.entries.size() >= maxSize) {
 			this.entries.removeFirst();
-		}
-		if(this.logCurrentListeners) {
-      this.logToFile(dateFormat.format(new Date()) + "\t" + title.getArtist() + " - " + title.getTitle() + "\t" + this.currentListeners + System.getProperty("line.separator"));
-		}
-		else {
-      this.logToFile(dateFormat.format(new Date()) + "\t" + title.getArtist() + " - " + title.getTitle() + System.getProperty("line.separator"));
-		  
 		}
 	}
 

@@ -76,8 +76,6 @@ public class TrackService implements Service {
         }
       }
     });
-    this.initSettingsObserver(settings);
-
   }
 
   /**
@@ -209,27 +207,6 @@ public class TrackService implements Service {
         this.ctx.updateStatus(null);
       }
     }
-  }
-
-  private void initSettingsObserver(Settings settings) {
-    settings.addPropertyChangeListener("titleLogFile", new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        trackHistory.setLogFile(StringUtils.trimToNull((String) evt.getNewValue()));
-      }
-
-    });
-
-    settings.addPropertyChangeListener("logTitleWithListeners", new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        trackHistory.setLogCurrentListeners((Boolean) evt.getNewValue());
-      }
-
-    });
-
   }
 
   /**
@@ -521,7 +498,7 @@ public class TrackService implements Service {
     }
     return registeredTrack;
   }
-  
+
   /**
    * Reloads a track from the server and updates the entry in the track registry
    * 

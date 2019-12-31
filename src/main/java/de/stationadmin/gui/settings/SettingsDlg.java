@@ -1,6 +1,5 @@
 package de.stationadmin.gui.settings;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -14,7 +13,6 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.HashSet;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -30,16 +28,10 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -57,12 +49,10 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.Autosynchronisation;
 import de.stationadmin.base.Settings;
 import de.stationadmin.base.backup.BackupFrequency;
-import de.stationadmin.base.playlist.shuffle.WordDistributionStrategy;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.HintLabel;
 import de.stationadmin.gui.util.Option;
-import de.stationadmin.gui.util.PanelSelection;
 import de.stationadmin.gui.util.SwingTools;
 import de.stationadmin.lfm.backend.LautfmAdminService;
 
@@ -71,8 +61,6 @@ public class SettingsDlg extends JDialog {
   private static final long serialVersionUID = -1412608764831045129L;
   private ClientContext ctx;
   private PresentationModel<Settings> model;
-  private JPanel container = new JPanel(new BorderLayout());
-  private ValueHolder tableContentChanged = new ValueHolder(Boolean.FALSE);
 
   public SettingsDlg(ClientContext ctx) {
     this.ctx = ctx;
@@ -82,34 +70,13 @@ public class SettingsDlg extends JDialog {
 
   private void init() {
 
-    this.getContentPane().setLayout(new FormLayout("5dlu,130dlu,5dlu,pref:grow,5dlu", "5dlu,pref:grow,8dlu,pref,5dlu"));
+    this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref:grow,8dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
+    
+    JTabbedPane tabPane = new JTabbedPane();
+    this.initTabs(tabPane);
 
-    DefaultMutableTreeNode root = new DefaultMutableTreeNode(new PanelSelection("Einstellungen", null));
-    this.initTreeModel(root);
-    final JTree tree = new JTree(new DefaultTreeModel(root));
-    tree.addTreeSelectionListener(new TreeSelectionListener() {
-
-      @Override
-      public void valueChanged(TreeSelectionEvent e) {
-        JPanel next = null;
-        TreePath path = tree.getSelectionPath();
-        if (path != null) {
-          PanelSelection selection = (PanelSelection) ((DefaultMutableTreeNode) path.getLastPathComponent()).getUserObject();
-          next = selection.getPanel();
-        }
-        container.removeAll();
-        if (next != null) {
-          container.add(next, BorderLayout.CENTER);
-        }
-        validate();
-        repaint();
-
-      }
-    });
-
-    this.getContentPane().add(new JScrollPane(tree), cc.xy(2, 2, CellConstraints.FILL, CellConstraints.FILL));
-    this.getContentPane().add(this.container, cc.xy(4, 2, CellConstraints.FILL, CellConstraints.FILL));
+    this.getContentPane().add(tabPane, cc.xy(2, 2, CellConstraints.FILL, CellConstraints.FILL));
 
     JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 10));
     JButton ok = new JButton("Ok");
@@ -131,32 +98,33 @@ public class SettingsDlg extends JDialog {
     buttonPanel.add(ok);
     buttonPanel.add(cancel);
 
-    this.getContentPane().add(buttonPanel, cc.xywh(2, 4, 3, 1, CellConstraints.CENTER, CellConstraints.FILL));
+    this.getContentPane().add(buttonPanel, cc.xy(2, 4, CellConstraints.CENTER, CellConstraints.FILL));
 
     // Dimension pref = this.getContentPane().getPreferredSize();
-    this.setSize(850, 500);
+    this.setSize(650, 500);
     this.setTitle(ctx.getTextProvider().getString("settings.title"));
     SwingTools.centerOnScreen(this);
 
-    tree.setSelectionRow(1);
-
   }
 
-  private void initTreeModel(DefaultMutableTreeNode root) {
+  private void initTabs(JTabbedPane tabPane) {
     CellConstraints cc = new CellConstraints();
     // logging
     {
-      JPanel logPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref,5dlu,pref,5dlu"));
+      JPanel logPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
       logPanel.add(this.createListenerStatsPanel(), cc.xy(2, 2));
-      logPanel.add(this.createTitleLogPanel(), cc.xy(2, 4));
-      root.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.logging"), logPanel)));
+      logPanel.add(this.createAutologinPanel(), cc.xy(2, 4));
+      logPanel.add(this.createAutosynchronizePanel(), cc.xy(2, 6));
+      logPanel.add(this.createLookAndFeelPanel(), cc.xy(2, 8));
+      logPanel.add(this.createLoggingPanel(), cc.xy(2, 10));
+      tabPane.addTab(ctx.getTextProvider().getString("settings.tab.general"), logPanel);
     }
 
     // Backup
     {
       JPanel backupPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref,5dlu"));
       backupPanel.add(this.createBackupPanel(), cc.xy(2, 2));
-      root.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.backup"), backupPanel)));
+      tabPane.addTab(ctx.getTextProvider().getString("settings.tab.backup"), backupPanel);
     }
 
     // MP3
@@ -164,18 +132,7 @@ public class SettingsDlg extends JDialog {
       JPanel logPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref,5dlu,pref,5dlu"));
       logPanel.add(this.createMP3PlayerPanel(), cc.xy(2, 2));
       logPanel.add(this.createMP3RootPanel(), cc.xy(2, 4));
-      root.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.mp3"), logPanel)));
-    }
-
-    // misc
-    {
-      JPanel logPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
-      logPanel.add(this.createAutologinPanel(), cc.xy(2, 2));
-      logPanel.add(this.createAutosynchronizePanel(), cc.xy(2, 4));
-      logPanel.add(this.createLookAndFeelPanel(), cc.xy(2, 6));
-      logPanel.add(this.createLoggingPanel(), cc.xy(2, 8));
-      // logPanel.add(this.createLogDownloadPanel(), cc.xy(2, 4));
-      root.add(new DefaultMutableTreeNode(new PanelSelection(ctx.getTextProvider().getString("settings.tab.misc"), logPanel)));
+      tabPane.addTab(ctx.getTextProvider().getString("settings.tab.mp3"), logPanel);
     }
 
   }
@@ -289,28 +246,6 @@ public class SettingsDlg extends JDialog {
     return panel;
   }
 
-  private JPanel createTitleLogPanel() {
-    JPanel panel = new JPanel(new FormLayout("3dlu,max(pref;60dlu),5dlu,pref,3dlu,pref,3dlu", "3dlu,pref,3dlu,pref,3dlu"));
-    panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.title")));
-    CellConstraints cc = new CellConstraints();
-    int row = 2;
-
-    JTextField titleLogTf = ctx.getComponentFactory().createTextField(model.getBufferedModel("titleLogFile"));
-    titleLogTf.setColumns(30);
-
-    panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.titlelogdir")), cc.xy(2, row));
-    panel.add(titleLogTf, cc.xy(4, row));
-    String titleLogDefault = ctx.getAdminClient().getStation() + "-titles-%day%.log";
-    panel.add(new JButton(new FileSelectionAction(model.getBufferedModel("titleLogFile"), titleLogDefault)), cc.xy(6, row));
-    row += 2;
-
-    JCheckBox logListenersCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("logTitleWithListeners"),
-        ctx.getTextProvider().getString("settings.property.logTitleWithListeners"));
-    panel.add(logListenersCb, cc.xy(4, row));
-
-    return panel;
-  }
-
   private JPanel createBackupPanel() {
     JPanel panel = new JPanel(new FormLayout("3dlu,max(pref;60dlu),5dlu,pref,3dlu,pref,3dlu", "3dlu,pref,3dlu,pref,3dlu"));
     panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.backup")));
@@ -400,105 +335,9 @@ public class SettingsDlg extends JDialog {
     return panel;
   }
 
-  private JPanel createShufflePanel() {
-    JPanel panel = new JPanel(new FormLayout("3dlu,60dlu,5dlu,pref,2dlu,pref,pref,pref:grow,3dlu", "3dlu,pref,3dlu,pref,3dlu,pref,3dlu,pref,10dlu:grow,pref,3dlu"));
-    panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.shuffle")));
-    CellConstraints cc = new CellConstraints();
-
-    final ValueHolder jingleIntervalEnable = new ValueHolder(((Integer) this.model.getValue("shuffleJingleInterval")).intValue() > 0);
-    jingleIntervalEnable.addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        if (((Boolean) evt.getNewValue()).booleanValue() == false) {
-          model.getBufferedModel("shuffleJingleInterval").setValue(0);
-        }
-      }
-
-    });
-
-    this.model.getBufferedModel("shuffleJingleInterval").addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        int value = (Integer) evt.getNewValue();
-        jingleIntervalEnable.setValue(value > 0);
-      }
-
-    });
-
-    final JCheckBox protect1stCb = BasicComponentFactory.createCheckBox(this.model.getBufferedModel("shuffleProtectFirstJingle"), null);
-    ValueModel protectAllJinglesModel = this.model.getBufferedModel("shuffleProtectAllJingles");
-    final JCheckBox protectAllCb = BasicComponentFactory.createCheckBox(protectAllJinglesModel, null);
-    final JCheckBox jingleIntervalEnableCb = BasicComponentFactory.createCheckBox(jingleIntervalEnable, null);
-    final JTextField jingleIntervalTf = BasicComponentFactory.createIntegerField(this.model.getBufferedModel("shuffleJingleInterval"), 0);
-    jingleIntervalTf.setColumns(3);
-
-    panel.add(protect1stCb, cc.xy(4, 2));
-    panel.add(new JLabel(ctx.getTextProvider().getString("settings.shuffle.protectFirstJingle")), cc.xywh(6, 2, 3, 1));
-
-    panel.add(jingleIntervalEnableCb, cc.xy(4, 4));
-    panel.add(new JLabel(ctx.getTextProvider().getString("settings.shuffle.interval.every") + " "), cc.xy(6, 4));
-    panel.add(jingleIntervalTf, cc.xy(7, 4));
-    panel.add(new JLabel(" " + ctx.getTextProvider().getString("settings.shuffle.interval.minute")), cc.xy(8, 4));
-
-    panel.add(protectAllCb, cc.xy(4, 6));
-    panel.add(new JLabel(ctx.getTextProvider().getString("settings.shuffle.protectAllJingles")), cc.xywh(6, 6, 3, 1));
-
-    boolean enableJingleOptions = !ctx.getAdminClient().getSettings().isShuffleProtectAllJingles();
-    protect1stCb.setEnabled(enableJingleOptions);
-    jingleIntervalEnableCb.setEnabled(enableJingleOptions);
-    jingleIntervalTf.setEditable(enableJingleOptions);
-
-    protectAllJinglesModel.addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        boolean enable = !evt.getNewValue().equals(Boolean.TRUE);
-        protect1stCb.setEnabled(enable);
-        jingleIntervalEnableCb.setEnabled(enable);
-        jingleIntervalTf.setEditable(enable);
-        if (!enable) {
-          protect1stCb.setSelected(false);
-          jingleIntervalEnableCb.setSelected(false);
-        }
-
-      }
-    });
-
-    SelectionInList<WordDistributionStrategy> wordDistSelection = new SelectionInList<WordDistributionStrategy>(WordDistributionStrategy.values(),
-        this.model.getBufferedModel("shuffleWordDistributionStrategy"));
-    JComboBox wordDistCmb = BasicComponentFactory.createComboBox(wordDistSelection, new DefaultListCellRenderer() {
-      private static final long serialVersionUID = 7985870900294296891L;
-
-      @Override
-      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-        String val = ((WordDistributionStrategy) value).name().toLowerCase();
-        setText(ctx.getTextProvider().getString("settings.property.shuffleWordDistribution." + val));
-        return this;
-      }
-    });
-    panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.shuffleWordDistribution")), cc.xy(2, 8));
-    panel.add(wordDistCmb, cc.xywh(4, 8, 5, 1));
-
-    JLabel hint = new HintLabel(ctx.getString("settings.shuffle.hint"));
-    panel.add(hint, cc.xywh(2, 10, 7, 1));
-
-    return panel;
-
-  }
-
-  private JPanel createAdTriggerPanel() {
-    JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref:grow,3dlu"));
-    panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.gen.adtrigger")));
-    panel.add(new AdTriggerPanel(ctx, model), new CellConstraints(2, 2, CellConstraints.FILL, CellConstraints.FILL));
-
-    return panel;
-  }
 
   private JPanel createListenerStatsPanel() {
-    JPanel panel = new JPanel(new FormLayout("3dlu,max(pref;60dlu),5dlu,pref,3dlu,pref,3dlu", "3dlu,pref,3dlu,pref,5dlu,pref,5dlu,pref,3dlu"));
+    JPanel panel = new JPanel(new FormLayout("3dlu,max(pref;60dlu),5dlu,pref,3dlu,pref,3dlu", "3dlu,pref,3dlu,pref,3dlu"));
     panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.stats")));
     CellConstraints cc = new CellConstraints();
     int row = 2;
@@ -523,9 +362,6 @@ public class SettingsDlg extends JDialog {
     JTextField statsRefreshTf = BasicComponentFactory.createIntegerField(model.getBufferedModel("statisticsRefreshInterval"), fmt, -1);
     statsRefreshTf.setColumns(3);
 
-    JTextField statsLogTf = ctx.getComponentFactory().createTextField(model.getBufferedModel("statisticsLogFile"));
-    statsLogTf.setColumns(30);
-
     panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.statsrefresh")), cc.xy(2, row));
     JPanel refresh = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
     refresh.add(intervalBtn);
@@ -541,15 +377,6 @@ public class SettingsDlg extends JDialog {
     row += 2;
     panel.add(refresh2, cc.xy(4, row));
     row += 2;
-
-    panel.add(new JLabel(this.ctx.getTextProvider().getString("settings.property.statslogdir")), cc.xy(2, row));
-    panel.add(statsLogTf, cc.xy(4, row));
-    String statsLogDefault = ctx.getAdminClient().getStation() + "-listeners-%day%.log";
-    panel.add(new JButton(new FileSelectionAction(model.getBufferedModel("statisticsLogFile"), statsLogDefault)), cc.xy(6, row));
-    row += 2;
-
-    JCheckBox logRankCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("logRank"), ctx.getTextProvider().getString("settings.property.logRank"));
-    panel.add(logRankCb, cc.xy(4, row));
 
     return panel;
   }
@@ -622,37 +449,4 @@ public class SettingsDlg extends JDialog {
 
   }
 
-  private class ShuffleOptsUpdateDetector implements PropertyChangeListener {
-    private boolean changed = false;
-    HashSet<String> properties = new HashSet<>();
-
-    private ShuffleOptsUpdateDetector() {
-      this.properties.add("shuffleJingleInterval");
-      this.properties.add("shuffleProtectAllJingles");
-      this.properties.add("shuffleProtectFirstJingle");
-      this.properties.add("shuffleWordDistributionStrategy");
-      this.properties.add("adTriggerId");
-      this.properties.add("adSeparatorId");
-      this.properties.add("adTriggerPosition1");
-      this.properties.add("adTriggerPosition2");
-      this.properties.add("artistNormalizerSeperators");
-      this.properties.add("artistNormalizerAliases");
-      this.properties.add("trackRuleGroups");
-      this.properties.add("trackRules");
-      this.properties.add("trackRuleJingleCollsisionStrategy");
-      this.properties.add("trackRuleGroupCollisionStrategy");
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      if (this.properties.contains(evt.getPropertyName())) {
-        changed = true;
-      }
-    }
-
-    public boolean isChanged() {
-      return changed;
-    }
-
-  }
 }
