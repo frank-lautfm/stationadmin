@@ -79,6 +79,8 @@ public class Settings extends AbstractBean {
 
   private String backupDirectory;
   private int backupFrequency;
+  
+  private boolean saveClientSettings = true;
 
   @JsonIgnore
   private boolean logDownloadPermitted = false;
@@ -125,6 +127,13 @@ public class Settings extends AbstractBean {
   }
 
   public void copyFrom(Settings settings) {
+    this.setMp3Player(settings.getMp3Player());
+    this.setMp3Root(settings.getMp3Root());
+    this.setBackupDirectory(settings.getBackupDirectory());
+    this.setBackupFrequency(settings.getBackupFrequency());
+    this.setSaveClientSettings(settings.isSaveClientSettings());
+    this.setMp3ExplorerMaxFiles(settings.getMp3ExplorerMaxFiles());
+    this.setAutoSynchronisation(settings.getAutoSynchronisation());
     this.setStatisticsLogFile(settings.getStatisticsLogFile());
     this.setStatisticsRefreshInterval(settings.getStatisticsRefreshInterval());
     this.setTitleLogFile(settings.getTitleLogFile());
@@ -137,16 +146,10 @@ public class Settings extends AbstractBean {
     this.setGenerateArtistPreselectTagWeights(settings.getGenerateArtistPreselectTagWeights());
     this.setGenerateGlobalTagWeights(settings.getGenerateGlobalTagWeights());
     this.setAutoUpdateCheckEnabled(settings.isAutoUpdateCheckEnabled());
-    this.setMp3ExplorerMaxFiles(settings.getMp3ExplorerMaxFiles());
     this.setLogTitleWithListeners(settings.isLogTitleWithListeners());
     this.setLogRank(settings.isLogRank());
-    this.setMp3Player(settings.getMp3Player());
-    this.setMp3Root(settings.getMp3Root());
-    this.setBackupDirectory(settings.getBackupDirectory());
-    this.setBackupFrequency(settings.getBackupFrequency());
     this.setArtistNormalizerAliases(settings.getArtistNormalizerAliases());
     this.setArtistNormalizerSeperators(settings.getArtistNormalizerSeperators());
-    this.setAutoSynchronisation(settings.getAutoSynchronisation());
     this.setTrackRuleGroups(settings.getTrackRuleGroups());
     this.setTrackRules(settings.getTrackRules());
     this.setTrackRuleJingleCollsisionStrategy(settings.getTrackRuleJingleCollsisionStrategy());
@@ -660,6 +663,16 @@ public class Settings extends AbstractBean {
     AdJingleCollisionStrategy old = adJingleCollisionStrategy;
     this.adJingleCollisionStrategy = adJingleCollisionStrategy;
     this.firePropertyChange("adJingleCollisionStrategy", old, adJingleCollisionStrategy);
+  }
+
+  public boolean isSaveClientSettings() {
+    return saveClientSettings;
+  }
+
+  public void setSaveClientSettings(boolean saveClientSettings) {
+    boolean old = this.saveClientSettings;
+    this.saveClientSettings = saveClientSettings;
+    this.firePropertyChange("saveClientSettings", old, saveClientSettings);
   }
 
 }

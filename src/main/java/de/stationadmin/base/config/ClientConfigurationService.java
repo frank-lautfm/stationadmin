@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
+import de.stationadmin.base.Settings;
 
 public class ClientConfigurationService implements Service {
   private static final String tsfile = "clientconfigts";
@@ -22,16 +23,15 @@ public class ClientConfigurationService implements Service {
   private SessionCtx sessionCtx;
   private List<ClientConfigurationSource> sources = new ArrayList<>();
   private Date timestamp;
+  private Settings settings;
 
-  public ClientConfigurationService(SessionCtx ctx) {
+  public ClientConfigurationService(SessionCtx ctx, Settings settings) {
     this.sessionCtx = ctx;
+    this.settings = settings;
   }
 
   public boolean isSupported() {
-    return !sessionCtx.isDJOnly() 
-        // activate only for test station during development
-        // TODO remove if feature is ready
-        && sessionCtx.getStation().equals("42");
+    return !sessionCtx.isDJOnly() && this.settings.isSaveClientSettings();
   }
 
   public void register(ClientConfigurationSource source) {
@@ -53,6 +53,15 @@ public class ClientConfigurationService implements Service {
     }
     sessionCtx.getServer().updateClientConfiguration(sessionCtx.getStationId(), cfg, ClientConfiguration.class);
     updateTimestamp(cfg.getTimmestamp());
+  }
+  
+  public boolean isClientConfigurationAvailableOnServer() {
+    try {
+      sessionCtx.getServer().getClientConfiguration(sessionCtx.getStationId(), ClientConfiguration.class);
+      return true;
+    } catch(IOException e) {
+      return false;
+    }
   }
 
   /**

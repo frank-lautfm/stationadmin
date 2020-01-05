@@ -93,7 +93,7 @@ public class StationAdminClient {
 
     TrackRegistry titleRegistry = new TrackRegistry();
     PlaylistRegistry playlistRegistry = new PlaylistRegistry();
-    this.clientConfigService = new ClientConfigurationService(sessionCtx);
+    this.clientConfigService = new ClientConfigurationService(sessionCtx, this.settings);
     this.trackService = new TrackService(this.sessionCtx, titleRegistry, this.settings);
     this.playlistService = new PlaylistService(this.sessionCtx, titleRegistry, playlistRegistry, this.settings);
     this.schedule = new Schedule(sessionCtx, playlistRegistry);
@@ -111,6 +111,7 @@ public class StationAdminClient {
         this.backupService, this.subscriptionService, this.logAnalyzerService, this.clientConfigService));
 
     this.loadSettings();
+
   }
 
   private Properties readStationAdminConfig() {
@@ -357,16 +358,15 @@ public class StationAdminClient {
     }
     return previous;
   }
-  
+
   private void loadSettings() {
     try {
       File settingsFile = new File(this.sessionCtx.getSettingsDirectory() + File.separatorChar + "settings.json");
       if (settingsFile.exists()) {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.readValue(settingsFile, Settings.class);
+        Settings settings = mapper.readValue(settingsFile, Settings.class);
         this.settings.copyFrom(settings);
-      }
-      else {
+      } else {
         loadSettingsLegacy();
       }
     } catch (IOException e) {
@@ -374,7 +374,6 @@ public class StationAdminClient {
     }
 
   }
-
 
   private void loadSettingsLegacy() {
     try {
@@ -391,6 +390,7 @@ public class StationAdminClient {
           settings.setBackupDirectory(this.backupService.getBackupDirectory());
         }
         this.settings.copyFrom(settings);
+        this.settings.setSaveClientSettings(false);
         saveSettings();
       }
     } catch (IOException e) {

@@ -109,14 +109,14 @@ public class SettingsDlg extends JDialog {
 
   private void initTabs(JTabbedPane tabPane) {
     CellConstraints cc = new CellConstraints();
-    // logging
+    // general
     {
       JPanel logPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
-      logPanel.add(this.createListenerStatsPanel(), cc.xy(2, 2));
-      logPanel.add(this.createAutologinPanel(), cc.xy(2, 4));
-      logPanel.add(this.createAutosynchronizePanel(), cc.xy(2, 6));
-      logPanel.add(this.createLookAndFeelPanel(), cc.xy(2, 8));
-      logPanel.add(this.createLoggingPanel(), cc.xy(2, 10));
+      logPanel.add(this.createLookAndFeelPanel(), cc.xy(2, 2));
+      logPanel.add(this.createAutosynchronizePanel(), cc.xy(2, 4));
+      logPanel.add(this.createClientConfigurationPanel(), cc.xy(2, 6));
+      logPanel.add(this.createAutologinPanel(), cc.xy(2, 8));
+      logPanel.add(this.createListenerStatsPanel(), cc.xy(2, 10));
       tabPane.addTab(ctx.getTextProvider().getString("settings.tab.general"), logPanel);
     }
 
@@ -134,6 +134,14 @@ public class SettingsDlg extends JDialog {
       logPanel.add(this.createMP3RootPanel(), cc.xy(2, 4));
       tabPane.addTab(ctx.getTextProvider().getString("settings.tab.mp3"), logPanel);
     }
+    
+    // debug
+    {
+      JPanel logPanel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "5dlu,pref,5dlu"));
+      logPanel.add(this.createLoggingPanel(), cc.xy(2, 2));
+      tabPane.addTab(ctx.getTextProvider().getString("settings.tab.misc"), logPanel);
+    }
+
 
   }
 
@@ -219,6 +227,18 @@ public class SettingsDlg extends JDialog {
 
     return panel;
   }
+  
+  private JPanel createClientConfigurationPanel() {
+    JPanel panel = new JPanel(new FormLayout("3dlu,pref,5dlu,pref,3dlu", "3dlu,pref,3dlu"));
+    panel.setBorder(BorderFactory.createTitledBorder(ctx.getTextProvider().getString("settings.section.clientsettings")));
+    
+    JCheckBox clientSettingsCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("saveClientSettings"), this.ctx.getTextProvider().getString("settings.property.saveClientSettings"));
+    panel.add(clientSettingsCb, new CellConstraints(2, 2));
+
+    
+    return panel;
+  }
+
 
   private JPanel createAutosynchronizePanel() {
     JPanel panel = new JPanel(new FormLayout("3dlu,pref,5dlu,pref,3dlu", "3dlu,pref,3dlu"));

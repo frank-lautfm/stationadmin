@@ -20,6 +20,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -312,6 +313,40 @@ public class StationAdminWindow extends StationAdminFrame {
         JOptionPane.showMessageDialog(ctx.getRootWindow(), msg, ctx.getString("subscription.info.new.title"), JOptionPane.INFORMATION_MESSAGE);
       }
     });
+
+    ctx.getAdminClient().getSettings().addPropertyChangeListener("saveClientSettings", new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        if (ctx.getAdminClient().getSettings().isSaveClientSettings()) {
+          activateSaveClientSettings();
+        }
+      }
+    });
+
+  }
+
+  private void activateSaveClientSettings() {
+    boolean loaded = false;
+    if (ctx.getAdminClient().getClientConfigService().isClientConfigurationAvailableOnServer()) {
+      if (JOptionPane.showConfirmDialog(AppUtils.getRootFrame(), ctx.getTextProvider().getString("clientsettings.confirm"), "", JOptionPane.YES_NO_OPTION,
+          JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+        System.out.println("load client settings");
+        try {
+          ctx.getAdminClient().getClientConfigService().read();
+          loaded = true;
+        } catch (IOException e) {
+          JXErrorPane.showDialog(ctx.getRootWindow(), ctx.createErrorInfo(e, "clientsettings.load.error"));
+        }
+      }
+    }
+    if (!loaded) {
+      try {
+        ctx.getAdminClient().getClientConfigService().write();
+      } catch (IOException e) {
+        JXErrorPane.showDialog(ctx.getRootWindow(), ctx.createErrorInfo(e, "clientsettings.save.error"));
+      }
+    }
 
   }
 
