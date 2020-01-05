@@ -729,12 +729,6 @@ public class Playlist extends AbstractBean {
     this.localData = localData;
   }
 
-  public void setLocalDataFromXML(String xml) {
-    XStream xstream = XStreamFactory.newXStream();
-    xstream.alias("playlistcfg", ExtendedPlaylistData.class);
-    this.localData = (ExtendedPlaylistData) xstream.fromXML(xml);
-  }
-
   public void setLocalShuffleAllowed(boolean shuffleAllowed) {
     this.ensureLocalDataExists();
     boolean old = this.isLocalShuffleAllowed();

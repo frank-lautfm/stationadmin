@@ -3,7 +3,7 @@
  */
 package de.stationadmin.base.schedule;
 
-import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,7 +20,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimerTask;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
 
 import com.thoughtworks.xstream.XStream;
@@ -70,8 +74,7 @@ public class Schedule extends AbstractBean implements Service {
   }
 
   /**
-   * @param entries
-   *          the entries to set
+   * @param entries the entries to set
    */
   public void addEntry(Entry entry) {
     this.entries.add(entry);
@@ -136,7 +139,8 @@ public class Schedule extends AbstractBean implements Service {
   }
 
   /**
-   * Gets the entries of the next hours, starting with the entry after the one referred by the start date
+   * Gets the entries of the next hours, starting with the entry after the one
+   * referred by the start date
    * 
    * @param startDate
    * @param hours
@@ -360,8 +364,23 @@ public class Schedule extends AbstractBean implements Service {
     Collections.sort(this.events);
   }
 
-  @SuppressWarnings("unchecked")
   private List<Schedule.Entry> load(File file) throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      return Arrays.asList(mapper.readValue(file, Schedule.Entry[].class));
+    } catch (JsonParseException e) {
+      try {
+        return loadXml(file);
+      } catch (Exception e2) {
+        // rethrow original exception
+        throw e;
+      }
+    }
+
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<Schedule.Entry> loadXml(File file) throws IOException {
     XStream xstream = this.getXStream();
     FileInputStream schedStream = new FileInputStream(file);
     List<Schedule.Entry> entries = (List<Schedule.Entry>) xstream.fromXML(schedStream);
@@ -372,8 +391,17 @@ public class Schedule extends AbstractBean implements Service {
 
   @SuppressWarnings("unchecked")
   public void load(InputStream stream) throws IOException {
-    XStream xstream = this.getXStream();
-    List<Schedule.Entry> entries = (List<Schedule.Entry>) xstream.fromXML(stream);
+    byte[] data = IOUtils.toByteArray(stream);
+    stream = new ByteArrayInputStream(data);
+    List<Schedule.Entry> entries = null;
+    if (new String(data).trim().startsWith("<")) {
+      XStream xstream = this.getXStream();
+      entries = (List<Schedule.Entry>) xstream.fromXML(stream);
+    } else {
+      ObjectMapper mapper = new ObjectMapper();
+      entries = Arrays.asList(mapper.readValue(stream, Schedule.Entry[].class));
+    }
+
     this.clear();
     for (Schedule.Entry entry : entries) {
       if (entry.getHour() > -1) {
@@ -413,7 +441,7 @@ public class Schedule extends AbstractBean implements Service {
   public void save() throws IOException {
     checkAccess();
     log.info("save schedule");
-    this.save(new File(this.ctx.getStationDirectory() + "schedule.xml"));
+    this.save(new File(this.ctx.getStationDirectory() + "schedule.json"));
   }
 
   private void save(File file) throws IOException {
@@ -430,13 +458,13 @@ public class Schedule extends AbstractBean implements Service {
   }
 
   public void save(OutputStream stream) throws IOException {
-    XStream xstream = this.getXStream();
     ArrayList<Entry> entries = new ArrayList<Schedule.Entry>();
     entries.add(new Entry(basePlaylistId, Weekday.MONDAY, -1));
     entries.addAll(this.getEntries());
-    BufferedOutputStream out = new BufferedOutputStream(stream, 2048);
-    xstream.toXML(entries, out);
-    out.flush();
+
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.writeValue(stream, entries.toArray(new Schedule.Entry[entries.size()]));
+    stream.flush();
   }
 
   public void save(String file) throws IOException {
@@ -445,8 +473,7 @@ public class Schedule extends AbstractBean implements Service {
   }
 
   /**
-   * @param entries
-   *          the entries to set
+   * @param entries the entries to set
    */
   public void setEntries(List<Entry> entries) {
     this.entries = Collections.synchronizedList(new ArrayList<Entry>(entries));
@@ -629,13 +656,18 @@ public class Schedule extends AbstractBean implements Service {
   }
 
   /**
-   * Entry of playlist schedule - contains of a playlist and a time at which it is played
+   * Entry of playlist schedule - contains of a playlist and a time at which it is
+   * played
    */
   public static class Entry implements Comparable<Entry> {
     private int playlistId;
     private Weekday weekday;
     private int hour;
     private boolean event;
+    
+    public Entry() {
+      
+    }
 
     public Entry(int playlistId, Weekday weekday, int hour) {
       this(playlistId, weekday, hour, false);
@@ -702,6 +734,7 @@ public class Schedule extends AbstractBean implements Service {
       return this.weekday.ordinal() * 10 + this.hour;
     }
 
+    @JsonIgnore
     public boolean isToday() {
       return this.weekday == getTodaysWeekday();
     }
@@ -810,8 +843,7 @@ public class Schedule extends AbstractBean implements Service {
     }
 
     /**
-     * @param id
-     *          the id to set
+     * @param id the id to set
      */
     public void setId(int id) {
       this.id = id;

@@ -1,9 +1,7 @@
 package de.stationadmin.base;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -13,6 +11,7 @@ import java.util.Properties;
 import java.util.prefs.Preferences;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
 
 import com.thoughtworks.xstream.XStream;
@@ -104,10 +103,10 @@ public class StationAdminClient {
     this.subscriptionService = new SubscriptionService(this.sessionCtx, titleRegistry);
 
     this.backupService = new BackupService(sessionCtx, this.playlistService, this.trackService, this.tagManager, this.schedule, this.taskExecutionService, this.settings);
-    
+
     this.clientConfigService.register(this.playlistService);
     this.clientConfigService.register(this.tagManager);
-    
+
     this.services.addAll(Arrays.asList(this.taskExecutionService, this.trackService, this.tagManager, this.playlistService, this.schedule, this.statisticsService,
         this.backupService, this.subscriptionService, this.logAnalyzerService, this.clientConfigService));
 
@@ -358,8 +357,26 @@ public class StationAdminClient {
     }
     return previous;
   }
-
+  
   private void loadSettings() {
+    try {
+      File settingsFile = new File(this.sessionCtx.getSettingsDirectory() + File.separatorChar + "settings.json");
+      if (settingsFile.exists()) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.readValue(settingsFile, Settings.class);
+        this.settings.copyFrom(settings);
+      }
+      else {
+        loadSettingsLegacy();
+      }
+    } catch (IOException e) {
+      log.error("failed to load settings", e);
+    }
+
+  }
+
+
+  private void loadSettingsLegacy() {
     try {
       File settingsFile = new File(this.sessionCtx.getSettingsDirectory() + File.separatorChar + "settings.xml");
       if (new File(this.sessionCtx.getDataDirectory() + "settings.xml").lastModified() > settingsFile.lastModified()) {
@@ -374,6 +391,7 @@ public class StationAdminClient {
           settings.setBackupDirectory(this.backupService.getBackupDirectory());
         }
         this.settings.copyFrom(settings);
+        saveSettings();
       }
     } catch (IOException e) {
       log.error("failed to load settings", e);
@@ -391,13 +409,8 @@ public class StationAdminClient {
       log.info("save settings");
       String dir = this.sessionCtx.getSettingsDirectory();
       new File(dir).mkdirs();
-      XStream xstream = this.getXStream();
-      FileOutputStream settingsStream = new FileOutputStream(dir + "settings.xml");
-      BufferedOutputStream out = new BufferedOutputStream(settingsStream, 2048);
-      xstream.toXML(this.settings, out);
-      out.flush();
-      settingsStream.flush();
-      settingsStream.close();
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.writeValue(new File(this.sessionCtx.getSettingsDirectory() + File.separatorChar + "settings.json"), this.settings);
     } catch (IOException e) {
       log.error("error while saving setting", e);
       throw e;

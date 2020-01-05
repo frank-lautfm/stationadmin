@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.prefs.Preferences;
 
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import de.stationadmin.base.playlist.shuffle.AdTriggerEngine.AdJingleCollisionStrategy;
 import de.stationadmin.base.playlist.shuffle.TagWeight;
@@ -26,28 +28,47 @@ import de.stationadmin.base.util.AbstractBean;
  * 
  * @author Frank Korf
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Settings extends AbstractBean {
   private int statisticsRefreshInterval = 3;
+  @JsonIgnore
   private String statisticsLogFile;
+  @JsonIgnore
   private String titleLogFile;
+  @JsonIgnore
   private boolean logTitleWithListeners = false;
+  @JsonIgnore
   private boolean logRank = false;
 
+  @JsonIgnore
   private boolean shuffleProtectFirstJingle = false;
+  @JsonIgnore
   private boolean shuffleProtectAllJingles = false;
+  @JsonIgnore
   private int shuffleJingleInterval = 0;
+  @JsonIgnore
   private WordDistributionStrategy shuffleWordDistributionStrategy = WordDistributionStrategy.RANDOM;
+  @JsonIgnore
   private int generateMinRandomValue = 100;
+  @JsonIgnore
   private List<TagWeight> generateGlobalTagWeights = new ArrayList<TagWeight>();
+  @JsonIgnore
   private Map<String, Integer> generateArtistPreselectTagWeights = new HashMap<String, Integer>();
+  @JsonIgnore
   private Map<String, Integer> generateArtistPreselectLimits = new HashMap<String, Integer>();
 
+  @JsonIgnore
   private List<String> artistNormalizerSeperators = Arrays.asList(" feat");
+  @JsonIgnore
   private Map<String, String> artistNormalizerAliases = new HashMap<String, String>();
 
+  @JsonIgnore
   private List<TrackRuleGroup> trackRuleGroups = new ArrayList<TrackRuleGroup>();
+  @JsonIgnore
   private List<TrackRule> trackRules = new ArrayList<TrackRule>();
+  @JsonIgnore
   private JingleCollisionStratagy trackRuleJingleCollsisionStrategy = JingleCollisionStratagy.KEEP_BOTH;
+  @JsonIgnore
   private MultiMatchSelection trackRuleGroupCollisionStrategy = MultiMatchSelection.ALL;
 
   private boolean autoUpdateCheckDisabled = false;
@@ -59,17 +80,26 @@ public class Settings extends AbstractBean {
   private String backupDirectory;
   private int backupFrequency;
 
+  @JsonIgnore
   private boolean logDownloadPermitted = false;
+  @JsonIgnore
   private boolean logAutodownloadPermitted = false;
 
+  @JsonIgnore
   private int adTriggerPosition1 = -1;
+  @JsonIgnore
   private int adTriggerPosition2 = -1;
+  @JsonIgnore
   private int adSeparatorId = -1;
+  @JsonIgnore
   private int adTriggerId = 0;
+  @JsonIgnore
   private AdJingleCollisionStrategy adJingleCollisionStrategy = AdJingleCollisionStrategy.KEEP_BOTH;
 
+  @JsonIgnore
   private Autosynchronisation autoSynchronisation = Autosynchronisation.NONE;
   
+  @JsonIgnore
   private int newsLength = 150;
 
   public int getStatisticsRefreshInterval() {
@@ -82,10 +112,12 @@ public class Settings extends AbstractBean {
     this.getPcs().firePropertyChange("statisticsRefreshInterval", old, statisticsRefreshInterval);
   }
 
+  @Deprecated
   public String getStatisticsLogFile() {
     return statisticsLogFile;
   }
 
+  @Deprecated
   public void setStatisticsLogFile(String statisticsLogFile) {
     String old = this.statisticsLogFile;
     this.statisticsLogFile = statisticsLogFile;
@@ -126,10 +158,12 @@ public class Settings extends AbstractBean {
     this.setAdTriggerPosition2(settings.getAdTriggerPosition2() > 0 ? settings.getAdTriggerPosition2() : -1);
   }
 
+  @Deprecated
   public String getTitleLogFile() {
     return titleLogFile;
   }
 
+  @Deprecated
   public void setTitleLogFile(String titleLogFile) {
     String old = this.titleLogFile;
     this.titleLogFile = titleLogFile;
@@ -139,6 +173,7 @@ public class Settings extends AbstractBean {
   /**
    * @return the shuffleProtectFirstJingle
    */
+  @Deprecated
   public boolean isShuffleProtectFirstJingle() {
     return shuffleProtectFirstJingle;
   }
@@ -146,6 +181,7 @@ public class Settings extends AbstractBean {
   /**
    * @param shuffleProtectFirstJingle the shuffleProtectFirstJingle to set
    */
+  @Deprecated
   public void setShuffleProtectFirstJingle(boolean shuffleProtectFirstJingle) {
     boolean old = this.shuffleProtectFirstJingle;
     this.shuffleProtectFirstJingle = shuffleProtectFirstJingle;
@@ -155,6 +191,7 @@ public class Settings extends AbstractBean {
   /**
    * @return the shuffleJingleInterval
    */
+  @Deprecated
   public int getShuffleJingleInterval() {
     return shuffleJingleInterval;
   }
@@ -162,6 +199,7 @@ public class Settings extends AbstractBean {
   /**
    * @param shuffleJingleInterval the shuffleJingleInterval to set
    */
+  @Deprecated
   public void setShuffleJingleInterval(int shuffleJingleInterval) {
     int old = this.shuffleJingleInterval;
     this.shuffleJingleInterval = shuffleJingleInterval;
@@ -171,6 +209,7 @@ public class Settings extends AbstractBean {
   /**
    * @return the logTitleWithListeners
    */
+  @Deprecated
   public boolean isLogTitleWithListeners() {
     return logTitleWithListeners;
   }
@@ -178,6 +217,7 @@ public class Settings extends AbstractBean {
   /**
    * @param logTitleWithListeners the logTitleWithListeners to set
    */
+  @Deprecated
   public void setLogTitleWithListeners(boolean logTitleWithListeners) {
     boolean old = this.logTitleWithListeners;
     this.logTitleWithListeners = logTitleWithListeners;
@@ -187,6 +227,7 @@ public class Settings extends AbstractBean {
   /**
    * @return the autoUpdateCheckDisabled
    */
+  @Deprecated
   public boolean isAutoUpdateCheckEnabled() {
     return !autoUpdateCheckDisabled;
   }
@@ -194,6 +235,7 @@ public class Settings extends AbstractBean {
   /**
    * @param autoUpdateCheckDisabled the autoUpdateCheckDisabled to set
    */
+  @Deprecated
   public void setAutoUpdateCheckEnabled(boolean autoUpdateCheckEnabled) {
     boolean old = !this.autoUpdateCheckDisabled;
     this.autoUpdateCheckDisabled = !autoUpdateCheckEnabled;
@@ -253,6 +295,7 @@ public class Settings extends AbstractBean {
   /**
    * @return the shuffleWordDistributionStrategy
    */
+  @Deprecated
   public WordDistributionStrategy getShuffleWordDistributionStrategy() {
     return shuffleWordDistributionStrategy != null ? this.shuffleWordDistributionStrategy : WordDistributionStrategy.RANDOM;
   }
@@ -261,6 +304,7 @@ public class Settings extends AbstractBean {
    * @param shuffleWordDistributionStrategy the shuffleWordDistributionStrategy to
    *        set
    */
+  @Deprecated
   public void setShuffleWordDistributionStrategy(WordDistributionStrategy shuffleWordDistributionStrategy) {
     WordDistributionStrategy old = this.shuffleWordDistributionStrategy;
     this.shuffleWordDistributionStrategy = shuffleWordDistributionStrategy;
@@ -322,6 +366,7 @@ public class Settings extends AbstractBean {
   /**
    * @return the generateMinRandomValue
    */
+  @Deprecated
   public int getGenerateMinRandomValue() {
     return this.generateMinRandomValue > 0 ? this.generateMinRandomValue : 100;
   }
@@ -329,6 +374,7 @@ public class Settings extends AbstractBean {
   /**
    * @param generateMinRandomValue the generateMinRandomValue to set
    */
+  @Deprecated
   public void setGenerateMinRandomValue(int generateMinRandomValue) {
     int old = this.generateMinRandomValue;
     this.generateMinRandomValue = generateMinRandomValue;
@@ -338,6 +384,7 @@ public class Settings extends AbstractBean {
   /**
    * @return the logRank
    */
+  @Deprecated
   public boolean isLogRank() {
     return logRank;
   }
@@ -345,6 +392,7 @@ public class Settings extends AbstractBean {
   /**
    * @param logRank the logRank to set
    */
+  @Deprecated
   public void setLogRank(boolean logRank) {
     boolean old = this.logRank;
     this.logRank = logRank;
@@ -356,6 +404,7 @@ public class Settings extends AbstractBean {
     return logDownloadPermitted;
   }
 
+  @Deprecated
   public void setLogDownloadPermitted(boolean logDownloadPermitted) {
     boolean old = this.logDownloadPermitted;
     this.logDownloadPermitted = logDownloadPermitted;
@@ -367,6 +416,7 @@ public class Settings extends AbstractBean {
     return logAutodownloadPermitted;
   }
 
+  @Deprecated
   public void setLogAutodownloadPermitted(boolean logAutodownloadPermitted) {
     boolean old = this.logAutodownloadPermitted;
     this.logAutodownloadPermitted = logAutodownloadPermitted;
@@ -376,6 +426,7 @@ public class Settings extends AbstractBean {
   /**
    * @return the generateGlobalTagWeights
    */
+  @Deprecated
   public List<TagWeight> getGenerateGlobalTagWeights() {
     return generateGlobalTagWeights;
   }
@@ -383,6 +434,7 @@ public class Settings extends AbstractBean {
   /**
    * @param generateGlobalTagWeights the generateGlobalTagWeights to set
    */
+  @Deprecated
   public void setGenerateGlobalTagWeights(List<TagWeight> generateGlobalTagWeights) {
     if (generateGlobalTagWeights == null) {
       generateGlobalTagWeights = new ArrayList<TagWeight>();
@@ -395,6 +447,7 @@ public class Settings extends AbstractBean {
   /**
    * @return the generateArtistPreselectTagWeights
    */
+  @Deprecated
   public Map<String, Integer> getGenerateArtistPreselectTagWeights() {
     return generateArtistPreselectTagWeights;
   }
@@ -403,6 +456,7 @@ public class Settings extends AbstractBean {
    * @param generateArtistPreselectTagWeights the
    *        generateArtistPreselectTagWeights to set
    */
+  @Deprecated
   public void setGenerateArtistPreselectTagWeights(Map<String, Integer> generateArtistPreselectTagWeights) {
     if (generateArtistPreselectTagWeights == null) {
       generateArtistPreselectTagWeights = new HashMap<String, Integer>();
@@ -415,6 +469,7 @@ public class Settings extends AbstractBean {
   /**
    * @return the generateArtistPreselectLimits
    */
+  @Deprecated
   public Map<String, Integer> getGenerateArtistPreselectLimits() {
     return generateArtistPreselectLimits;
   }
@@ -422,6 +477,7 @@ public class Settings extends AbstractBean {
   /**
    * @param generateArtistPreselectLimits the generateArtistPreselectLimits to set
    */
+  @Deprecated
   public void setGenerateArtistPreselectLimits(Map<String, Integer> generateArtistPreselectLimits) {
     if (generateArtistPreselectLimits == null) {
       generateArtistPreselectLimits = new HashMap<String, Integer>();
@@ -434,6 +490,7 @@ public class Settings extends AbstractBean {
   /**
    * @return the artistNormalizerSeperators
    */
+  @Deprecated
   public List<String> getArtistNormalizerSeperators() {
     if (this.artistNormalizerSeperators == null) {
       this.artistNormalizerSeperators = Arrays.asList(" feat");
@@ -444,6 +501,7 @@ public class Settings extends AbstractBean {
   /**
    * @param artistNormalizerSeperators the artistNormalizerSeperators to set
    */
+  @Deprecated
   public void setArtistNormalizerSeperators(List<String> artistNormalizerSeperators) {
     List<String> old = this.artistNormalizerSeperators;
     this.artistNormalizerSeperators = artistNormalizerSeperators;
@@ -453,6 +511,7 @@ public class Settings extends AbstractBean {
   /**
    * @return the artistNormalizerAliass
    */
+  @Deprecated
   public Map<String, String> getArtistNormalizerAliases() {
     return artistNormalizerAliases;
   }
@@ -460,6 +519,7 @@ public class Settings extends AbstractBean {
   /**
    * @param artistNormalizerAliass the artistNormalizerAliass to set
    */
+  @Deprecated
   public void setArtistNormalizerAliases(Map<String, String> artistNormalizerAliass) {
     Map<String, String> old = this.artistNormalizerAliases;
     this.artistNormalizerAliases = artistNormalizerAliass;
@@ -482,100 +542,120 @@ public class Settings extends AbstractBean {
     this.firePropertyChange("autoSynchronisation", old, autoSynchronization);
   }
 
+  @Deprecated
   public boolean isShuffleProtectAllJingles() {
     return shuffleProtectAllJingles;
   }
 
+  @Deprecated
   public void setShuffleProtectAllJingles(boolean shuffleProtectAllJingles) {
     boolean old = this.shuffleProtectAllJingles;
     this.shuffleProtectAllJingles = shuffleProtectAllJingles;
     this.firePropertyChange("shuffleProtectAllJingles", old, shuffleProtectAllJingles);
   }
 
+  @Deprecated
   public List<TrackRuleGroup> getTrackRuleGroups() {
     return trackRuleGroups;
   }
 
+  @Deprecated
   public void setTrackRuleGroups(List<TrackRuleGroup> trackRuleGroups) {
     List<TrackRuleGroup> old = this.trackRuleGroups;
     this.trackRuleGroups = trackRuleGroups;
     this.firePropertyChange("trackRuleGroups", old, trackRuleGroups);
   }
 
+  @Deprecated
   public List<TrackRule> getTrackRules() {
     return trackRules;
   }
 
+  @Deprecated
   public void setTrackRules(List<TrackRule> trackRules) {
     List<TrackRule> old = this.trackRules;
     this.trackRules = trackRules;
     this.firePropertyChange("trackRules", old, trackRules);
   }
 
+  @Deprecated
   public JingleCollisionStratagy getTrackRuleJingleCollsisionStrategy() {
     return trackRuleJingleCollsisionStrategy;
   }
 
+  @Deprecated
   public void setTrackRuleJingleCollsisionStrategy(JingleCollisionStratagy trackRuleJingleCollsisionStrategy) {
     JingleCollisionStratagy old = this.trackRuleJingleCollsisionStrategy;
     this.trackRuleJingleCollsisionStrategy = trackRuleJingleCollsisionStrategy;
     this.firePropertyChange("trackRuleJingleCollsisionStrategy", old, trackRuleJingleCollsisionStrategy);
   }
 
+  @Deprecated
   public MultiMatchSelection getTrackRuleGroupCollisionStrategy() {
     return trackRuleGroupCollisionStrategy;
   }
 
+  @Deprecated
   public void setTrackRuleGroupCollisionStrategy(MultiMatchSelection trackRuleGroupCollsisionStrategy) {
     MultiMatchSelection old = this.trackRuleGroupCollisionStrategy;
     this.trackRuleGroupCollisionStrategy = trackRuleGroupCollsisionStrategy;
     this.firePropertyChange("trackRuleGroupCollisionStrategy", old, trackRuleGroupCollisionStrategy);
   }
 
+  @Deprecated
   public int getAdTriggerPosition1() {
     return adTriggerPosition1;
   }
 
+  @Deprecated
   public void setAdTriggerPosition1(int adTriggerPosition1) {
     int old = this.adTriggerPosition1;
     this.adTriggerPosition1 = adTriggerPosition1;
     this.firePropertyChange("adTriggerPosition1", old, adTriggerPosition1);
   }
 
+  @Deprecated
   public int getAdTriggerPosition2() {
     return adTriggerPosition2;
   }
 
+  @Deprecated
   public void setAdTriggerPosition2(int adTriggerPosition2) {
     int old = this.adTriggerPosition2;
     this.adTriggerPosition2 = adTriggerPosition2;
     this.firePropertyChange("adTriggerPosition2", old, adTriggerPosition2);
   }
 
+  @Deprecated
   public int getAdSeparatorId() {
     return adSeparatorId;
   }
 
+  @Deprecated
   public void setAdSeparatorId(int adSeparatorId) {
     int old = this.adSeparatorId;
     this.adSeparatorId = adSeparatorId;
     this.firePropertyChange("adSeparatorId", old, adSeparatorId);
   }
 
+  @Deprecated
   public int getAdTriggerId() {
     return adTriggerId;
   }
 
+  @Deprecated
   public void setAdTriggerId(int adTriggerId) {
     int old = this.adTriggerId;
     this.adTriggerId = adTriggerId;
     this.firePropertyChange("adTriggerId", old, adTriggerId);
   }
 
+  @Deprecated
   public AdJingleCollisionStrategy getAdJingleCollisionStrategy() {
     return adJingleCollisionStrategy != null ? adJingleCollisionStrategy : AdJingleCollisionStrategy.KEEP_BOTH;
   }
 
+  @Deprecated
   public void setAdJingleCollisionStrategy(AdJingleCollisionStrategy adJingleCollisionStrategy) {
     AdJingleCollisionStrategy old = adJingleCollisionStrategy;
     this.adJingleCollisionStrategy = adJingleCollisionStrategy;

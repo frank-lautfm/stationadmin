@@ -342,52 +342,36 @@ public class BackupService implements Service {
   @SuppressWarnings("unchecked")
   private boolean restorePlaylistLocalData(Playlist playlist, String playlistStr) {
     String[] lines = StringUtils.split(playlistStr, "\n\r");
-    if (playlistStr.contains("<playlistcfg")) {
-      // < Version 2.3
-      StringBuilder xmlBuf = new StringBuilder();
-      for (int i = 0; i < lines.length && lines[i].startsWith("# "); i++) {
-        xmlBuf.append(lines[i].substring(2));
-        xmlBuf.append('\n');
-      }
-      try {
-        playlist.setLocalDataFromXML(xmlBuf.toString());
-        return true;
-      } catch (Exception e) {
-        log.error("unable to restore local data for " + playlist.getName(), e);
-        return false;
-      }
-    } else {
-      List<String> properties = new ArrayList<String>();
-      StringBuffer tsMapBuffer = new StringBuffer();
-      for (int i = 0; i < lines.length && lines[i].startsWith("# "); i++) {
-        if (!lines[i].startsWith("# id")) {
-          if (lines[i].startsWith("# tsmap")) {
-            int p = lines[i].indexOf('=');
-            if (p > 0 && p < lines[i].length() - 2) {
-              tsMapBuffer.append(lines[i].substring(p + 1).trim());
-            }
-          } else {
-            properties.add(lines[i].substring(2));
+    List<String> properties = new ArrayList<String>();
+    StringBuffer tsMapBuffer = new StringBuffer();
+    for (int i = 0; i < lines.length && lines[i].startsWith("# "); i++) {
+      if (!lines[i].startsWith("# id")) {
+        if (lines[i].startsWith("# tsmap")) {
+          int p = lines[i].indexOf('=');
+          if (p > 0 && p < lines[i].length() - 2) {
+            tsMapBuffer.append(lines[i].substring(p + 1).trim());
           }
+        } else {
+          properties.add(lines[i].substring(2));
         }
       }
-
-      // restore timestamp map
-      Map<Integer, Long> timestampMap = null;
-      if (tsMapBuffer.length() > 0) {
-        try (ByteArrayInputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(tsMapBuffer.toString()))) {
-          try (ObjectInputStream objIn = new ObjectInputStream(in)) {
-            timestampMap = (Map<Integer, Long>) objIn.readObject();
-          }
-        } catch (Exception e) {
-          log.error("unable to restore timestampes for playlist " + playlist.getName(), e);
-        }
-      }
-
-      playlist.setTimestampMap(timestampMap);
-      playlist.setProperties(properties);
-      return true;
     }
+
+    // restore timestamp map
+    Map<Integer, Long> timestampMap = null;
+    if (tsMapBuffer.length() > 0) {
+      try (ByteArrayInputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(tsMapBuffer.toString()))) {
+        try (ObjectInputStream objIn = new ObjectInputStream(in)) {
+          timestampMap = (Map<Integer, Long>) objIn.readObject();
+        }
+      } catch (Exception e) {
+        log.error("unable to restore timestampes for playlist " + playlist.getName(), e);
+      }
+    }
+
+    playlist.setTimestampMap(timestampMap);
+    playlist.setProperties(properties);
+    return true;
   }
 
   public void restoreSchedule(File file) throws IOException, JSONException {
