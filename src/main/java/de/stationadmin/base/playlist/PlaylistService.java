@@ -949,7 +949,9 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
           || org.apache.commons.lang3.StringUtils.isNotEmpty(pl.getComment()) || pl.getTags().size() > 0) {
         PlaylistClientCfgData data = new PlaylistClientCfgData();
         data.setId(pl.getId());
-        data.setAutoFillRule(pl.getAutoFillRule());
+        if (pl.getAutoFillRule() != null && pl.getAutoFillRule().isEnabled()) {
+          data.setAutoFillRule(pl.getAutoFillRule());
+        }
         data.setComment(pl.getComment());
         data.setProfileId(pl.getProfileId());
         data.setTags(pl.getTags().toArray(new String[pl.getTags().size()]));
