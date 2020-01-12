@@ -230,6 +230,7 @@ public class PlaylistProfileDlg extends StationAdminFrame {
       try {
         profileModel.triggerCommit();
         ctx.getAdminClient().getPlaylistService().saveProfiles();
+        ctx.getAdminClient().getClientConfigService().write();
         ProfileOptsUpdateAction updateAction = new ProfileOptsUpdateAction(ctx, profileModel.getBean().getId());
         updateAction.actionPerformed(new ActionEvent(this, 0, "update"));
       } catch (IOException e) {
@@ -268,6 +269,7 @@ public class PlaylistProfileDlg extends StationAdminFrame {
         try {
           ctx.getAdminClient().getPlaylistService().removeProfile(profile.getId());
           ctx.getAdminClient().getPlaylistService().saveProfiles();
+          ctx.getAdminClient().getClientConfigService().write();
         } catch (IOException e) {
           ErrorInfo errorInfo = ctx.createErrorInfo(e, "playlistprofilemanager.action.delete.failed");
           JXErrorPane.showDialog(PlaylistProfileDlg.this, errorInfo);

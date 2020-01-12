@@ -269,7 +269,7 @@ public class LautfmAdminService {
 
     ObjectMapper mapper = new ObjectMapper();
     String contentStr = mapper.writeValueAsString(content);
-    // System.out.println("PUT " + path + " " + contentStr.length() + " chars");
+    System.out.println("PUT " + path + " " + contentStr.length() + " chars");
 
     if (log.isInfoEnabled()) {
       log.info("PUT " + BASE_URL + path);

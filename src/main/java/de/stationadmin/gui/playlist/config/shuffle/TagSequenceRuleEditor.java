@@ -93,7 +93,7 @@ public class TagSequenceRuleEditor extends JPanel {
     int row = 2;
 
     {
-      JXLabel infoLabel = new JXLabel(ctx.getString("playlistcfg.property.generateInfo.advice"));
+      JXLabel infoLabel = new JXLabel(ctx.getString("playlistcfg.property.tagsequence"));
       infoLabel.setLineWrap(true);
       this.add(infoLabel, cc.xy(2, row));
       row += 2;
