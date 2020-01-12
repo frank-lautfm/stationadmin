@@ -61,6 +61,7 @@ import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
 import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorAdviceConfigurationPanel;
 import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorBaseConfigurationPanel;
+import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorNewsPanel;
 import de.stationadmin.gui.playlist.config.shuffle.BlockSelectPanel;
 import de.stationadmin.gui.playlist.config.shuffle.StationAdminOptsPanel;
 import de.stationadmin.gui.playlist.config.shuffle.TagPatternPanel;
@@ -88,6 +89,7 @@ public class PlaylistConfigurationDialog extends JDialog {
   private static final int SHUFFLE_BLOCKSELECT = 8;
   private static final int GENERATE = 16;
   private static final int GENERATE_ADVICE = 32;
+  private static final int GENERATE_NEWS = 128;
 
   private ClientContext ctx;
   private PlaylistService playlistService;
@@ -389,6 +391,8 @@ public class PlaylistConfigurationDialog extends JDialog {
         DefaultMutableTreeNode generate = new DefaultMutableTreeNode(panels.get(GENERATE));
         DefaultMutableTreeNode generateAdvice = new DefaultMutableTreeNode(panels.get(GENERATE_ADVICE));
         generate.add(generateAdvice);
+        DefaultMutableTreeNode generateNews = new DefaultMutableTreeNode(panels.get(GENERATE_NEWS));
+        generate.add(generateNews);
         model.insertNodeInto(generate, root, index++);
       }
       if ((nodeStatus & AUTOFILL) > 0) {
@@ -419,7 +423,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     panels.put(SHUFFLE_BLOCKSELECT, new PanelSelection(textProvider.getString("playlistcfg.tab.blockselect"), new BlockSelectPanel(ctx, model)));
     panels.put(GENERATE, new PanelSelection(textProvider.getString("playlistcfg.tab.generate.base"), new PlaylistGeneratorBaseConfigurationPanel(ctx, model)));
     panels.put(GENERATE_ADVICE, new PanelSelection(textProvider.getString("playlistcfg.tab.generate.advice"), new PlaylistGeneratorAdviceConfigurationPanel(ctx, model)));
-    panels.put(AUTOFILL, new PanelSelection(textProvider.getString("playlistcfg.tab.autofill"), new PlaylistAutoFillPanel(ctx, model)));
+    panels.put(GENERATE_NEWS, new PanelSelection(textProvider.getString("playlistcfg.tab.generate.news"), new PlaylistGeneratorNewsPanel(ctx, model)));
 
     container.add(panels.get(BASE).getPanel(), BorderLayout.CENTER);
 
