@@ -15,6 +15,7 @@ public class DailySummary implements Serializable {
 
   private Date day;
   private int listeners;
+  private int uniqs;
   private int duration;
   private int avgListeningTime;
   private boolean estimated = false;
@@ -25,13 +26,15 @@ public class DailySummary implements Serializable {
     this.duration = duration;
     this.estimated = true;
   }
-  public DailySummary(Date day, int listeners, int duration, int avgListeningTime) {
+  
+  public DailySummary(Date day, int listeners, int duration, int avgListeningTime, int uniqs) {
     super();
     this.day = day;
     this.listeners = listeners;
     this.duration = duration;
     this.avgListeningTime = avgListeningTime;
     this.estimated = false;
+    this.uniqs = uniqs;
   }
 
   public int getAvgListeningTime() {
@@ -51,6 +54,12 @@ public class DailySummary implements Serializable {
   }
   public Date getDay() {
     return day;
+  }
+  public int getUniqs() {
+    return uniqs;
+  }
+  public void setUniqs(int uniqs) {
+    this.uniqs = uniqs;
   }
 
 }

@@ -49,6 +49,7 @@ public class DailySummaryTableModel extends AbstractTableModel {
     case AVG_LISTENING_TIME:
     case DURATION:
     case LISTENERS:
+    case UNIQS:
       return Integer.class;
     }
     return super.getColumnClass(columnIndex);
@@ -84,6 +85,8 @@ public class DailySummaryTableModel extends AbstractTableModel {
       return entry.getDay();
     case DURATION:
       return entry.getDuration() / 60;
+    case UNIQS:
+      return entry.getUniqs();
     case LISTENERS:
       return entry.getListeners() > 0 ? entry.getListeners() : null;
     }
@@ -91,7 +94,7 @@ public class DailySummaryTableModel extends AbstractTableModel {
   }
   
   enum Column {
-    DAY, DURATION, LISTENERS, AVG_LISTENING_TIME
+    DAY, DURATION, LISTENERS, UNIQS, AVG_LISTENING_TIME
   }
   
 }

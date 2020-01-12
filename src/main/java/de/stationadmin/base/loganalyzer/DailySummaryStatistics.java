@@ -16,6 +16,7 @@ public class DailySummaryStatistics extends AbstractBean {
   private int duration;
   private int listeners;
   private int avgListeningTime;
+  private int uniqs;
 
   public int getAvgListeningTime() {
     return avgListeningTime;
@@ -27,6 +28,10 @@ public class DailySummaryStatistics extends AbstractBean {
 
   public int getListeners() {
     return listeners;
+  }
+
+  public int getUniqs() {
+    return uniqs;
   }
 
   public void setAvgListeningTime(int avgListeningTime) {
@@ -47,10 +52,18 @@ public class DailySummaryStatistics extends AbstractBean {
     this.firePropertyChange("listeners", old, listeners);
   }
 
+  public void setUniqs(int uniqs) {
+    int old = this.uniqs;
+    this.uniqs = uniqs;
+    this.firePropertyChange("uniqs", old, uniqs);
+  }
+
   public void update(List<DailySummary> entries) {
     int sumDuration = 0;
     int sumListeners = 0;
     int sumAvg = 0;
+    int sumUnqis = 0;
+    int cntUniqs = 0;
     int cntListeners = 0;
 
     for (DailySummary summary : entries) {
@@ -59,6 +72,10 @@ public class DailySummaryStatistics extends AbstractBean {
         cntListeners++;
         sumListeners += summary.getListeners();
         sumAvg += summary.getAvgListeningTime();
+        if(summary.getUniqs() > -1) {
+          sumUnqis += summary.getUniqs();
+          cntUniqs++;
+        }
       }
     }
 
@@ -69,6 +86,9 @@ public class DailySummaryStatistics extends AbstractBean {
     else {
       this.setAvgListeningTime(0);
       this.setListeners(0);
+    }
+    if(cntUniqs > 0) {
+      this.setUniqs(sumUnqis / cntUniqs);
     }
     if(entries.size() > 0) {
       this.setDuration(sumDuration / entries.size());

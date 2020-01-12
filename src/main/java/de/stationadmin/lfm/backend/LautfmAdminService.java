@@ -320,7 +320,7 @@ public class LautfmAdminService {
     }
   }
   
-  public ListenerStatsEntry[] getListenerStatus(int stationId, Date from, Date to, ListenerStatsPeriod period) throws IOException {
+  public ListenerStatsEntry[] getListenerStatistics(int stationId, Date from, Date to, ListenerStatsPeriod period) throws IOException {
     SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
     CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/listener_stats/" + period.name().toLowerCase() + "/"  + dateFmt.format(from) + "," + dateFmt.format(to));
     try {

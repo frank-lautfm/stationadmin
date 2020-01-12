@@ -26,6 +26,8 @@ import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.TrackService;
+import de.stationadmin.lfm.backend.ListenerStatsEntry;
+import de.stationadmin.lfm.backend.ListenerStatsPeriod;
 import de.stationadmin.lfm.backend.Statistics;
 import de.stationadmin.lfm.backend.TrackStatsEntry;
 
@@ -54,7 +56,6 @@ public class LogAnalyzerService implements Service {
     this.trackService = trackService;
     this.trackRegistry = trackService.getTrackRegistry();
     this.logCacheDir = ctx.getStationDirectory() + "log" + File.separatorChar;
-
 
   }
 
@@ -370,7 +371,7 @@ public class LogAnalyzerService implements Service {
     // check if local copy exists
     if (file.exists()) {
       String raw = FileUtils.readFileToString(file, "UTF-8");
-      int listeners = 0, duration = 0, avg = 0;
+      int listeners = 0, duration = 0, avg = 0, uniqs = -1;
       for (String line : StringUtils.split(raw, "\n")) {
         String[] keyValue = StringUtils.split(line, "\t", 2);
         try {
@@ -384,12 +385,14 @@ public class LogAnalyzerService implements Service {
             // else: Stats from Station Admin 3 have been in minutes anyway
           } else if (keyValue[0].equals("avg")) {
             avg = Integer.parseInt(keyValue[1]);
+          } else if (keyValue[0].equals("uniqs")) {
+            uniqs = Integer.parseInt(keyValue[1]);
           }
         } catch (NumberFormatException e) {
           log.warn("corrupted entry for " + date, e);
         }
       }
-      return new DailySummary(cal.getTime(), listeners, duration, avg);
+      return new DailySummary(cal.getTime(), listeners, duration, avg, uniqs);
     } else {
       // try to estimate duration based on listeners log
       List<ListenersEntry> listenersEntries = this.getListenersOf(day);
@@ -413,6 +416,19 @@ public class LogAnalyzerService implements Service {
     }
 
     return null;
+  }
+
+  public List<MonthlySummary> getMonthlySummary() throws IOException {
+    Calendar cal = Calendar.getInstance();
+    cal.set(Calendar.YEAR, 2011);
+    cal.set(Calendar.MONTH, Calendar.JANUARY);
+    cal.set(Calendar.DAY_OF_MONTH, 1);
+    ListenerStatsEntry[] entries = ctx.getServer().getListenerStatistics(ctx.getStationId(), cal.getTime(), new Date(), ListenerStatsPeriod.Monthly);
+    ArrayList<MonthlySummary> summaries = new ArrayList<>();
+    for (ListenerStatsEntry entry : entries) {
+      summaries.add(new MonthlySummary(entry));
+    }
+    return summaries;
   }
 
   public List<ListenersEntry> getListenersOf(Date day) throws IOException {
@@ -539,13 +555,17 @@ public class LogAnalyzerService implements Service {
     }
 
     Statistics stats = ctx.getServer().getStatistics(ctx.getStationId());
-
+    Date today = new Date();
     Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.DAY_OF_MONTH, -6);
+    ListenerStatsEntry[] listenerStats = ctx.getServer().getListenerStatistics(ctx.getStationId(), cal.getTime(), today, ListenerStatsPeriod.Daily);
+
     cal.setTimeInMillis(System.currentTimeMillis());
 
+    SimpleDateFormat dateFmt = new SimpleDateFormat(DATE_FORMAT);
     for (int i = 0; i < 5; i++) {
       cal.add(Calendar.DAY_OF_MONTH, -1);
-      String date = new SimpleDateFormat(DATE_FORMAT).format(cal.getTime());
+      String date = dateFmt.format(cal.getTime());
       String filename = this.logCacheDir + "station_dailysummary" + "-" + date + ".log";
 
       if (!new File(filename).exists() && stats.getTlhLog().containsKey(date)) {
@@ -554,10 +574,18 @@ public class LogAnalyzerService implements Service {
         Integer listeners = stats.getSwitchonsLog().get(date);
         Integer hours = stats.getTlhLog().get(date);
         int avg = listeners != null ? hours.intValue() * 60 / listeners.intValue() : 0;
+        int uniqs = -1;
+        for (int j = 0; j < listenerStats.length; j++) {
+          if (dateFmt.format(listenerStats[j].getDate()).equals(date)) {
+            uniqs = listenerStats[j].getSources().get("all").getUniqs();
+            break;
+          }
+        }
 
         buf.append("listeners\t" + (listeners != null ? listeners.intValue() : 0) + "\n");
         buf.append("duration\t" + hours + "\n");
         buf.append("avg\t" + avg + "\n");
+        buf.append("uniqs\t" + uniqs + "\n");
         FileUtils.writeStringToFile(new File(filename), buf.toString(), "UTF-8");
       }
 

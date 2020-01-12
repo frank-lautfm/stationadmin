@@ -73,7 +73,7 @@ public class DailySummariesDlg extends StationAdminFrame {
 
   @Override
   protected Dimension getDefaultSize() {
-    return new Dimension(500, 400);
+    return new Dimension(550, 400);
   }
 
   private void init() {
@@ -91,6 +91,7 @@ public class DailySummariesDlg extends StationAdminFrame {
     table.getColumn(Column.DURATION.ordinal()).setCellRenderer(
         new IntTableCellRenderer(0, " " + ctx.getTextProvider().getString("dailysummaries.column.duration.unit")));
     table.getColumn(Column.AVG_LISTENING_TIME.ordinal()).setCellRenderer(new IntTableCellRenderer(0));
+    table.getColumn(Column.UNIQS.ordinal()).setCellRenderer(new IntTableCellRenderer(-1));
 
     table.addHighlighter(new AbstractHighlighter() {
 
@@ -139,6 +140,10 @@ public class DailySummariesDlg extends StationAdminFrame {
     JXStatusBar.Constraint listenersConst = new JXStatusBar.Constraint(new Insets(0, 2, 0, 2));
     PropertyPanel listeners = new PropertyPanel(ctx.getTextProvider().getString("dailysummaries.column.listeners") + ":", model.getModel("listeners"));
     statusBar.add(listeners, listenersConst);
+
+    JXStatusBar.Constraint uniqsConst = new JXStatusBar.Constraint(new Insets(0, 2, 0, 2));
+    PropertyPanel uniqs = new PropertyPanel(ctx.getTextProvider().getString("dailysummaries.column.uniqs") + ":", model.getModel("uniqs"));
+    statusBar.add(uniqs, uniqsConst);
 
     JXStatusBar.Constraint avgConst = new JXStatusBar.Constraint(new Insets(0, 2, 0, 2));
     PropertyPanel avg = new PropertyPanel(ctx.getTextProvider().getString("dailysummaries.column.avg_listening_time") + ":",
