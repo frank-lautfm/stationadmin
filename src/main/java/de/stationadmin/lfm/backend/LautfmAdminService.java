@@ -319,16 +319,17 @@ public class LautfmAdminService {
       response.close();
     }
   }
-  
+
   public ListenerStatsEntry[] getListenerStatistics(int stationId, Date from, Date to, ListenerStatsPeriod period) throws IOException {
     SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
-    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/listener_stats/" + period.name().toLowerCase() + "/"  + dateFmt.format(from) + "," + dateFmt.format(to));
+    CloseableHttpResponse response = this
+        .doGet("/stations/" + stationId + "/listener_stats/" + period.name().toLowerCase() + "/" + dateFmt.format(from) + "," + dateFmt.format(to));
     try {
       return deserializeJson(response, ListenerStatsEntry[].class);
     } finally {
       response.close();
     }
-    
+
   }
 
   public void start(int stationId) throws IOException {
@@ -417,6 +418,17 @@ public class LautfmAdminService {
     Playlist playlist = deserializeJson(response, Playlist.class);
     response.close();
     return playlist;
+  }
+
+  public String getPlaylistJson(int stationId, int playlistId) throws IOException {
+    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/playlists/" + playlistId);
+    InputStream stream = response.getEntity().getContent();
+    String content = IOUtils.toString(stream, "UTF-8");
+    response.close();
+    
+    ObjectMapper mapper = new ObjectMapper();
+    Object json = mapper.readValue(content, Object.class);   
+    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);    
   }
 
   private TrackList getTracks(CloseableHttpResponse response) throws IOException {
@@ -543,7 +555,7 @@ public class LautfmAdminService {
     response.close();
     return playlist;
   }
-  
+
   public Playlist setAutomationAlgorithm(int stationId, int playlistId, String alg) throws IOException {
     Map<String, Object> map = new HashMap<String, Object>();
     map.put("automation_algorithm_name", alg);
@@ -552,7 +564,6 @@ public class LautfmAdminService {
     response.close();
     return playlist;
   }
-
 
   public Playlist updatePlaylistShuffleOpts(int stationId, int playlistId, Map<String, Object> opts) throws IOException {
     Map<String, Object> map = new HashMap<String, Object>();

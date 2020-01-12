@@ -1056,5 +1056,9 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     String file = ctx.getStationDirectory() + "playlistprofiles.json";
     FileUtils.write(new File(file), convertProfilesToJson(), Charset.forName("UTF-8"));
   }
+  
+  public String getPlaylistJson(int playlistId) throws IOException {
+    return this.ctx.getServer().getPlaylistJson(this.ctx.getStationId(), playlistId);
+  }
 
 }
