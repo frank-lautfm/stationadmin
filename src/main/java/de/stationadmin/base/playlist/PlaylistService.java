@@ -1019,6 +1019,13 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       this.migrateGlobalSettingsToProfiles();
     }
   }
+  
+  public void reloadProfiles() throws IOException {
+    String file = ctx.getStationDirectory() + "playlistprofiles.json";
+    if (new File(file).exists()) {
+      this.profiles = convertJsonToProfiles(org.apache.commons.io.FileUtils.readFileToString(new File(file), Charset.forName("UTF-8")));
+    }
+  }
 
   private void migrateGlobalSettingsToProfiles() throws IOException {
     PlaylistProfile generate = new PlaylistProfile(PlaylistProfileType.Generate, "Generieren", settings);

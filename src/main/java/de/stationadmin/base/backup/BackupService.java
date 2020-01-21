@@ -29,6 +29,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -137,6 +138,12 @@ public class BackupService implements Service {
     zip.close();
     return availability;
   }
+  
+  public boolean checkPlaylistProfileAvailability(File file) throws IOException {
+    try(ZipFile zip = new ZipFile(file)) {
+      return zip.getEntry("playlistprofiles.json") != null;
+    }
+  }
 
   /**
    * @see de.stationadmin.base.Service#close()
@@ -189,7 +196,15 @@ public class BackupService implements Service {
             in.close();
             zip.write(data);
           }
+        }
 
+        // playlist profiles
+        File profilesFile = new File(sessionCtx.getStationDirectory() + "playlistprofiles.json");
+        if (profilesFile.exists()) {
+          ZipEntry entry = new ZipEntry("playlistprofiles.json");
+          zip.putNextEntry(entry);
+          byte[] data = FileUtils.readFileToByteArray(profilesFile);
+          zip.write(data);
         }
       }
     }
@@ -314,6 +329,7 @@ public class BackupService implements Service {
   public boolean restorePlaylist(File file, int playlistId) throws IOException, JSONException, PlaylistValidationException {
     return restorePlaylist(file, playlistId, false);
   }
+  
 
   public boolean restorePlaylist(File file, int playlistId, boolean legacy) throws IOException, JSONException, PlaylistValidationException {
     try (ZipFile zip = new ZipFile(file)) {
@@ -338,6 +354,22 @@ public class BackupService implements Service {
       return false;
     }
   }
+  
+  public void restorePlaylistProfile(File file) throws IOException {
+    try (ZipFile zip = new ZipFile(file)) {
+      ZipEntry entry = zip.getEntry("playlistprofiles.json");
+      if(entry != null) {
+        try(InputStream in = zip.getInputStream(entry)) {
+          File profilesFile = new File(sessionCtx.getStationDirectory() + "playlistprofiles.json");
+          try(FileOutputStream out = new FileOutputStream(profilesFile)) {
+            IOUtils.copy(in, out);
+          }
+        }
+        this.playlistService.reloadProfiles();
+      }
+    }
+  }
+
 
   @SuppressWarnings("unchecked")
   private boolean restorePlaylistLocalData(Playlist playlist, String playlistStr) {

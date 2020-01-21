@@ -28,6 +28,8 @@ import javax.swing.JToolBar;
 
 import org.jdesktop.swingx.JXErrorPane;
 
+import com.jgoodies.binding.adapter.BasicComponentFactory;
+import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -54,13 +56,14 @@ public class PlaylistRestorePanel extends JPanel {
   private TextProvider textProvider;
   private StationAdminClient adminClient;
   private Map<Integer, JCheckBox> playlistCbs = new HashMap<Integer, JCheckBox>();
+  private ValueHolder profileImport = new ValueHolder(Boolean.FALSE);
 
   /**
-     * @param file
-     * @param rootWindow
-     * @param textProvider
-     * @param adminClient
-     */
+   * @param file
+   * @param rootWindow
+   * @param textProvider
+   * @param adminClient
+   */
   public PlaylistRestorePanel(TextProvider textProvider, StationAdminClient adminClient, File file) {
     super();
     this.file = file;
@@ -73,7 +76,7 @@ public class PlaylistRestorePanel extends JPanel {
 
   private void init() {
 
-    this.setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,50dlu:grow,5dlu,pref,5dlu,pref,5dlu"));
+    this.setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,50dlu:grow,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
 
     {
@@ -98,32 +101,32 @@ public class PlaylistRestorePanel extends JPanel {
 
       this.add(new JScrollPane(playlistPanel), cc.xy(2, 4, CellConstraints.FILL, CellConstraints.TOP));
     }
-    
+
     {
       JToolBar toolbar = new JToolBar();
       toolbar.setFloatable(false);
-      
+
       JButton selectAll = new JButton(textProvider.getString("backup.restore.playlist.selectall"));
       selectAll.addActionListener(new ActionListener() {
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
-          for(JCheckBox cb : playlistCbs.values()) {
+          for (JCheckBox cb : playlistCbs.values()) {
             cb.setSelected(true);
           }
         }
       });
       JButton selectNone = new JButton(textProvider.getString("backup.restore.playlist.selectnone"));
       selectNone.addActionListener(new ActionListener() {
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
-          for(JCheckBox cb : playlistCbs.values()) {
+          for (JCheckBox cb : playlistCbs.values()) {
             cb.setSelected(false);
           }
         }
       });
-      
+
       toolbar.add(selectAll);
       toolbar.add(selectNone);
 
@@ -131,6 +134,15 @@ public class PlaylistRestorePanel extends JPanel {
 
     }
 
+    {
+      JCheckBox cbProfile = BasicComponentFactory.createCheckBox(profileImport, textProvider.getString("backup.restore.playlist.profiles"));
+      this.add(cbProfile, cc.xy(2, 8));
+      try {
+        cbProfile.setEnabled(adminClient.getBackupService().checkPlaylistProfileAvailability(file));
+      } catch (Exception e) {
+        cbProfile.setEnabled(false);
+      }
+    }
 
     {
       JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -139,7 +151,7 @@ public class PlaylistRestorePanel extends JPanel {
       bottom.add(importBtn);
 
       bottom.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-      this.add(bottom, cc.xy(2, 8));
+      this.add(bottom, cc.xy(2, 10));
 
     }
 
@@ -192,8 +204,7 @@ public class PlaylistRestorePanel extends JPanel {
     @Override
     protected void onSuccess() {
       if (cnt > 0) {
-        JOptionPane.showMessageDialog(AppUtils.getRootFrame(),
-            textProvider.getString("backup.restore.playlist.import.succeeded", Integer.toString(cnt)));
+        JOptionPane.showMessageDialog(AppUtils.getRootFrame(), textProvider.getString("backup.restore.playlist.import.succeeded", Integer.toString(cnt)));
         for (JCheckBox cb : playlistCbs.values()) {
           if (cb.isEnabled() && cb.isSelected()) {
             cb.setSelected(false);
@@ -215,6 +226,9 @@ public class PlaylistRestorePanel extends JPanel {
           tool.restorePlaylist(file, playlist.getId(), legacyBackup);
           cnt++;
         }
+      }
+      if(profileImport.getValue().equals(Boolean.TRUE)) {
+        tool.restorePlaylistProfile(file);
       }
 
     }
