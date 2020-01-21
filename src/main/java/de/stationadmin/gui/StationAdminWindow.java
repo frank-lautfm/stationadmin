@@ -65,6 +65,7 @@ import de.stationadmin.gui.help.HomepageAction;
 import de.stationadmin.gui.live.MP3StreamerOpenAction;
 import de.stationadmin.gui.loganalyzer.dailysummary.DailySummariesOpenAction;
 import de.stationadmin.gui.loganalyzer.listeners.ListenersAnalyzerOpenAction;
+import de.stationadmin.gui.loganalyzer.monthly.MonthlySummariesOpenAction;
 import de.stationadmin.gui.loganalyzer.plays.PlaysAnalyzerOpenAction;
 import de.stationadmin.gui.loganalyzer.plays.UnplayedTracksViewerOpenAction;
 import de.stationadmin.gui.logs.LogViewerDisplayAction;
@@ -549,6 +550,7 @@ public class StationAdminWindow extends StationAdminFrame {
       menuAnalyze.add(new UnplayedTracksViewerOpenAction(this.ctx));
       menuAnalyze.add(new ListenersAnalyzerOpenAction(this.ctx));
       menuAnalyze.add(new DailySummariesOpenAction(this.ctx));
+      menuAnalyze.add(new MonthlySummariesOpenAction(this.ctx));
 
       menuBar.add(menuAnalyze);
     }

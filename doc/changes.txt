@@ -6,6 +6,16 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 5.0.0
+-------------
+[+] Speichern von Station Admin-Konfigurationsdaten auf dem Server (optional)
+[#] Grundeinstellungen für Playlists als Ersatz für globale Playlist-Einstellungen - verschiedene Profile möglich
+[#] Überarbeiteter Konfigurationsdialog für Playlists
+[+] Regeln für Titelreihenfolge im Station Admin-Shuffle-Verfahren
+[+] Tagesstatistik enthält die Uniq Listeners (Hörer)
+[#] Änderung der internen Dateiformate für Konfiguration und Sendepläne
+[+] Rohansicht (Json-Format) der Playlist aus dem Kontextmenü heraus
+
 Version 4.11.2
 --------------
 [*] Werbetrigger soll fest positionierte Wortbeiträge nicht verschieben

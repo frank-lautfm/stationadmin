@@ -23,7 +23,8 @@ public class MonthlySummary {
     year = cal.get(Calendar.YEAR);
     month = cal.get(Calendar.MONTH) + 1;
     
-    int days = (int) (entry.getDateTo().getTime() - entry.getDateFrom().getTime()) / (1000 * 60 * 60 * 24);
+    long diff = entry.getDateTo().getTime() - entry.getDateFrom().getTime();
+    int days = (int)(diff / (1000 * 60 * 60 * 24));
     ListenerStatsSource src = entry.getSources().get("all");
     tlh = src.getTlh();
     if (days > 0) {
