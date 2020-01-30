@@ -247,7 +247,7 @@
 		artists.sort(function(a, b) { return a.score - b.score });
 		
 		if(remainingDuration / (60 * 60) < maxTracksPerArtist) {
-			maxTracksPerArtist = Math.floor(remainingDuration / (60 * 60));
+			maxTracksPerArtist = Math.max(1, Math.floor(remainingDuration / (60 * 60)));
 		}
 		
 		var tracksDurationHours = Math.floor(tracksDuration / (60 * 60));
