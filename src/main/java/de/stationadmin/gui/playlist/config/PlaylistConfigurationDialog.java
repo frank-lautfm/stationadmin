@@ -239,7 +239,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     // profile
     {
       SelectionInList<String> profileSelection = new SelectionInList<>(model.getProfileListModel(), model.getBufferedModel("profileId"));
-      JComboBox<String> profileCmb = BasicComponentFactory.createComboBox(profileSelection, new DefaultListCellRenderer() {
+      final JComboBox<String> profileCmb = BasicComponentFactory.createComboBox(profileSelection, new DefaultListCellRenderer() {
         private static final long serialVersionUID = 8912776835119146763L;
 
         @Override
@@ -257,6 +257,15 @@ public class PlaylistConfigurationDialog extends JDialog {
 
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.profile")), cc.xy(2, row));
       panel.add(profileCmb, cc.xy(4, row));
+      profileCmb.setEnabled((Boolean)model.getProfilesEnabled().getValue());
+      model.getProfilesEnabled().addValueChangeListener(new PropertyChangeListener() {
+        
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          profileCmb.setEnabled((Boolean)evt.getNewValue());
+          
+        }
+      });
       row += 2;
     }
 
@@ -417,6 +426,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     this.getContentPane().add(toolbar, cc.xy(2, 2));
 
     panels.put(BASE, new PanelSelection(textProvider.getString("playlistcfg.tab.base"), this.createBasePanel()));
+    panels.put(AUTOFILL, new PanelSelection(textProvider.getString("playlistcfg.tab.autofill"), new PlaylistAutoFillPanel(ctx, model)));
     panels.put(SHUFFLE_STATIONADMIN, new PanelSelection(textProvider.getString("playlistcfg.tab.shuffleopts"), new StationAdminOptsPanel(ctx, model)));
     panels.put(SHUFFLE_STATIONADMIN_TAGSEQ, new PanelSelection(textProvider.getString("playlistcfg.tab.generate.advice"), new TagSequenceRuleEditor(ctx, model)));
     panels.put(SHUFFLE_TAGPATTERN, new PanelSelection(textProvider.getString("playlistcfg.tab.tagpattern"), new TagPatternPanel(ctx, model)));

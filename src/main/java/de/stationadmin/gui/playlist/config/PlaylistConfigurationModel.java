@@ -54,6 +54,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
   private AbstractValueModel generateTags;
   private TableModel weightTableModel = new GenerateWeightTableModel();
   private ValueModel advices = new ValueHolder(null, true);
+  private ValueModel profilesEnabled = new ValueHolder(Boolean.FALSE);
   private PlaylistService playlistService;
   private TagManager tagManager;
   private ValueHolder titleNameAdviceLimit = new ValueHolder(0);
@@ -235,7 +236,11 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
       newSelection = activeProfiles.get(0);
     }
 
-    activeProfiles.add(0, null);
+    boolean enabled = true;
+    if (activeProfiles.size() == 0) {
+      activeProfiles.add(0, null);
+      enabled = false;
+    }
 
     profileListModel.setList(activeProfiles);
 
@@ -243,6 +248,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
       getBufferedModel("profileId").setValue(newSelection);
       PlaylistConfigurationModel.this.playlistService.assignProfileOpts((Map<String, Object>) getBufferedModel("shuffleOpts").getValue(), newSelection);
     }
+    profilesEnabled.setValue(enabled);
 
   }
 
@@ -722,6 +728,10 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
       }
     }
     return id;
+  }
+
+  public ValueModel getProfilesEnabled() {
+    return profilesEnabled;
   }
 
 }
