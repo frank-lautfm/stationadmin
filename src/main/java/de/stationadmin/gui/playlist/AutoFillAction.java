@@ -33,15 +33,14 @@ public class AutoFillAction extends AbstractAction {
     this.putValue(Action.SHORT_DESCRIPTION, ctx.getTextProvider().getString("action.playlist.fill.tooltip"));
     this.ctx = ctx;
     this.playlistHolder = playlistHolder;
-    this.filler = new PlaylistFiller(ctx.getAdminClient().getPlaylistService(),
-        ctx.getAdminClient().getTrackService(), ctx.getAdminClient().getTagManager());
+    this.filler = new PlaylistFiller(ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getTrackService(), ctx.getAdminClient().getTagManager());
     this.setEnabled(false);
     playlistHolder.addValueChangeListener(new PropertyChangeListener() {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        setEnabled(evt.getNewValue() instanceof Playlist && ((Playlist) evt.getNewValue()).getType() == PlaylistType.ONLINE
-            && ((Playlist) evt.getNewValue()).getAutoFillRule().isEnabled());
+        Playlist pl = evt.getNewValue() instanceof Playlist ? (Playlist) evt.getNewValue() : null;
+        setEnabled(pl != null && pl.getType() == PlaylistType.ONLINE && pl.getAutoFillRule() != null && pl.getAutoFillRule().isEnabled());
       }
     });
   }

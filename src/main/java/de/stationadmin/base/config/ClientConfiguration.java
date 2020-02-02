@@ -12,6 +12,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import de.stationadmin.base.Version;
 import de.stationadmin.base.playlist.PlaylistClientCfgData;
+import de.stationadmin.base.playlist.profile.PlaylistProfile;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement(name = "ClientCfg")
@@ -19,8 +20,9 @@ public class ClientConfiguration {
 
   private String version = Version.MAJOR + "." + Version.MINOR;
   private List<String> dynamicTags = new ArrayList<>();
-  private Map<String,String> tagGroups = new HashMap<>();
+  private Map<String, String> tagGroups = new HashMap<>();
   private List<PlaylistClientCfgData> playlistData = new ArrayList<>();
+  private List<PlaylistProfile> playlistProfiles = new ArrayList<>();
   private Date timmestamp = new Date();
 
   public List<String> getDynamicTags() {
@@ -61,6 +63,14 @@ public class ClientConfiguration {
 
   public void setVersion(String version) {
     this.version = version;
+  }
+
+  public List<PlaylistProfile> getPlaylistProfiles() {
+    return playlistProfiles;
+  }
+
+  public void setPlaylistProfiles(List<PlaylistProfile> playlistProfiles) {
+    this.playlistProfiles = playlistProfiles;
   }
 
 }

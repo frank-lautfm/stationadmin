@@ -367,7 +367,10 @@ public class StationAdminClient {
         Settings settings = mapper.readValue(settingsFile, Settings.class);
         this.settings.copyFrom(settings);
       } else {
-        loadSettingsLegacy();
+        if(!loadSettingsLegacy()) {
+          // create a new file
+          saveSettings();
+        }
       }
     } catch (IOException e) {
       log.error("failed to load settings", e);
@@ -375,7 +378,7 @@ public class StationAdminClient {
 
   }
 
-  private void loadSettingsLegacy() {
+  private boolean loadSettingsLegacy() {
     try {
       File settingsFile = new File(this.sessionCtx.getSettingsDirectory() + File.separatorChar + "settings.xml");
       if (new File(this.sessionCtx.getDataDirectory() + "settings.xml").lastModified() > settingsFile.lastModified()) {
@@ -392,10 +395,12 @@ public class StationAdminClient {
         this.settings.copyFrom(settings);
         this.settings.setSaveClientSettings(false);
         saveSettings();
+        return true;
       }
     } catch (IOException e) {
       log.error("failed to load settings", e);
     }
+    return false;
 
   }
 

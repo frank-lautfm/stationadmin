@@ -16,13 +16,10 @@ import javax.swing.event.ChangeListener;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.thoughtworks.xstream.XStream;
-
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.util.AbstractBean;
-import de.stationadmin.base.util.XStreamFactory;
 
 /**
  * Playlist
@@ -841,7 +838,7 @@ public class Playlist extends AbstractBean {
       this.metaDataModified = true;
     }
     if (!shuffle && !isLocalShuffleAllowed()) {
-      if (localData != null) {
+      if (localData != null && localData.getAutoFillRule() != null) {
         // turn auto fill rule off
         localData.getAutoFillRule().setEnabled(false);
       }

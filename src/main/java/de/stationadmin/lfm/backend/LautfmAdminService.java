@@ -269,7 +269,7 @@ public class LautfmAdminService {
 
     ObjectMapper mapper = new ObjectMapper();
     String contentStr = mapper.writeValueAsString(content);
-    System.out.println("PUT " + path + " " + contentStr.length() + " chars");
+    log.info("PUT " + path + " " + contentStr.length() + " chars");
 
     if (log.isInfoEnabled()) {
       log.info("PUT " + BASE_URL + path);
@@ -772,7 +772,6 @@ public class LautfmAdminService {
           map.put(key, value);
         }
         offset += result.size();
-        System.out.println(result.size() + "/" + map.size() + " tracks");
       } finally {
         response.close();
       }
@@ -808,9 +807,7 @@ public class LautfmAdminService {
     UploadAbortMonitor monitor = new UploadAbortMonitor(filePost, progressListener);
     monitor.start();
     try {
-      System.out.println("start upload of " + track.getFile().getName());
       CloseableHttpResponse response = uploadClient.execute(filePost);
-      System.out.println("upload completed");
       this.checkResponse(response);
       if (response.getStatusLine().getStatusCode() == 201) {
         UploadResponse uploadResponse = deserializeJson(response, UploadResponse.class);

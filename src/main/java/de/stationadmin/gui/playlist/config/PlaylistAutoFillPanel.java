@@ -18,6 +18,7 @@ import javax.swing.event.ListSelectionListener;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
+import com.jgoodies.binding.value.BufferedValueModel;
 import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
@@ -39,24 +40,23 @@ public class PlaylistAutoFillPanel extends JPanel {
 
   private void init(PlaylistConfigurationModel playlistCfgModel) {
     PresentationModel<AutoFillRule> model = playlistCfgModel.getAutoFillModel();
-    
+
     final ArrayList<JComponent> dependentComponents = new ArrayList<>();
-    
+
     this.setLayout(new FormLayout("5dlu,pref,5dlu,170dlu,5dlu", "5dlu,pref,8dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
     int row = 2;
-    
-    
+
     {
       JCheckBox enabledCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("enabled"), ctx.getString("playlistcfg.property.autofill.enabled"));
       this.add(enabledCb, cc.xywh(2, row, 3, 1));
-      
+
       model.getBufferedModel("enabled").addValueChangeListener(new PropertyChangeListener() {
-        
+
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-          for(JComponent comp : dependentComponents) {
-            comp.setEnabled((Boolean)evt.getNewValue());
+          for (JComponent comp : dependentComponents) {
+            comp.setEnabled((Boolean) evt.getNewValue());
           }
         }
       });
@@ -64,9 +64,8 @@ public class PlaylistAutoFillPanel extends JPanel {
       row += 2;
     }
 
-    
     this.add(new JLabel(ctx.getString("playlistcfg.property.autofill.source")), cc.xywh(2, row, 3, 1));
-    row+=2;
+    row += 2;
 
     // source tags
     {
@@ -115,7 +114,7 @@ public class PlaylistAutoFillPanel extends JPanel {
       this.add(new JScrollPane(list), cc.xy(4, row, CellConstraints.FILL, CellConstraints.FILL));
       row += 2;
     }
-    
+
     {
       final ValueModel playlistModel = model.getBufferedModel("sourcePlaylists");
 
@@ -135,7 +134,7 @@ public class PlaylistAutoFillPanel extends JPanel {
           if (evt.getNewValue() instanceof int[]) {
             updateSelection(list, playlists, (int[]) evt.getNewValue());
 
-          } 
+          }
         }
       });
 
@@ -148,7 +147,7 @@ public class PlaylistAutoFillPanel extends JPanel {
             try {
               List<Playlist> values = list.getSelectedValuesList();
               int[] ids = new int[values.size()];
-              for(int i = 0; i < values.size(); i++) {
+              for (int i = 0; i < values.size(); i++) {
                 ids[i] = values.get(i).getId();
               }
               playlistModel.setValue(ids);
@@ -181,16 +180,17 @@ public class PlaylistAutoFillPanel extends JPanel {
     }
 
     {
-      final JCheckBox jinglesCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("includeTrackRules"), ctx.getString("playlistcfg.property.autofill.includeTrackRules"));
-      ShuffleScriptMeta script = playlistCfgModel.getShuffleScript() != null ? (ShuffleScriptMeta)playlistCfgModel.getShuffleScript().getValue() : null;
+      final JCheckBox jinglesCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("includeTrackRules"),
+          ctx.getString("playlistcfg.property.autofill.includeTrackRules"));
+      ShuffleScriptMeta script = playlistCfgModel.getShuffleScript() != null ? (ShuffleScriptMeta) playlistCfgModel.getShuffleScript().getValue() : null;
       jinglesCb.setEnabled(script != null && script.isSupportsGlobalOpts());
       playlistCfgModel.getBufferedModel("shuffleType").addValueChangeListener(new PropertyChangeListener() {
-        
+
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-          ShuffleScriptMeta script = playlistCfgModel.getShuffleScript() != null ? (ShuffleScriptMeta)playlistCfgModel.getShuffleScript().getValue() : null;
+          ShuffleScriptMeta script = playlistCfgModel.getShuffleScript() != null ? (ShuffleScriptMeta) playlistCfgModel.getShuffleScript().getValue() : null;
           jinglesCb.setEnabled(script != null && script.isSupportsGlobalOpts());
-          
+
         }
       });
       this.add(jinglesCb, cc.xywh(2, row, 3, 1));
@@ -199,8 +199,13 @@ public class PlaylistAutoFillPanel extends JPanel {
       row += 2;
     }
 
-    for(JComponent comp : dependentComponents) {
-      comp.setEnabled(model.getBufferedModel("enabled").booleanValue());
+    BufferedValueModel enabled = model.getBufferedModel("enabled");
+    for (JComponent comp : dependentComponents) {
+      if (enabled != null && enabled.getValue() instanceof Boolean) {
+        comp.setEnabled(enabled.booleanValue());
+      } else {
+        comp.setEnabled(false);
+      }
     }
 
   }
@@ -219,7 +224,6 @@ public class PlaylistAutoFillPanel extends JPanel {
     }
   }
 
-  
   private void updateSelection(JList<Playlist> list, List<Playlist> playlists, int[] selection) {
     if (!updateInProgress) {
       if (selection == null) {

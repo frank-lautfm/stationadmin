@@ -754,7 +754,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       }
     }
     for (Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
-      if (playlist.getProfileId() != null && profileId.contains(playlist.getProfileId())) {
+      if (playlist.isShuffle() && playlist.getProfileId() != null && profileId.contains(playlist.getProfileId())) {
         Map<String, Object> opts = playlist.getShuffleOpts();
         boolean modified = playlist.isMetaDataModified();
         if (opts == null) {
@@ -779,7 +779,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
   public void assignProfileOpts(Map<String, Object> opts, String profileId) {
 
     PlaylistProfile main = getProfile(profileId);
-    if (main == null) {
+    if (main == null || main.getType() == PlaylistProfileType.Generate) {
       opts.remove("jingleInterval");
       opts.remove("jingleOrder");
       opts.remove("protectFirstJingle");
@@ -797,6 +797,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       opts.remove("trackRules");
       return;
     }
+        
     PlaylistProfile trackRulesProfile = main.getTrackRuleFromProfile() == null || main.getTrackRuleFromProfile().equals(main.getId()) ? main
         : getProfile(main.getTrackRuleFromProfile());
     PlaylistProfile artistNormProfile = main.getArtistNormalizationFromProfile() == null || main.getArtistNormalizationFromProfile().equals(main.getId()) ? main
@@ -915,10 +916,20 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
 
   @Override
   public void applyClientConfiguration(ClientConfiguration cfg) {
+
+    if (cfg.getPlaylistProfiles() != null && cfg.getPlaylistProfiles().size() > 0) {
+      this.profiles = cfg.getPlaylistProfiles();
+      try {
+        this.saveProfilesToFile();
+      } catch (Exception e) {
+        log.info("unable to update playlist profiles from client configuration", e);
+      }
+    }
+
     HashMap<Integer, PlaylistClientCfgData> map = new HashMap<>();
     cfg.getPlaylistData().forEach(c -> map.put(c.getId(), c));
     if (map.size() == 0) {
-      // TODO
+      // no data available - leave it as it is
       return;
     }
     for (Playlist pl : playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
@@ -929,11 +940,11 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
         pl.setComment(data.getComment());
         pl.setTags(new HashSet<>(Arrays.asList(data.getTags())));
       } else {
-        // TODO clear out data
+        // no data from server available - leave it as it is
       }
       if (!pl.isModified()) {
         try {
-          savePlaylist(pl);
+          this.savePlaylistAs(pl, pl.getType() == PlaylistType.ONLINE ? Integer.toString(pl.getId()) : pl.getName());
         } catch (Exception e) {
           log.info("unable to update playlist meta data from client configuration", e);
         }
@@ -943,6 +954,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
 
   @Override
   public void collectClientConfiguration(ClientConfiguration cfg) {
+    cfg.setPlaylistProfiles(this.profiles);
     List<PlaylistClientCfgData> list = new ArrayList<>();
     for (Playlist pl : playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
       if ((pl.getAutoFillRule() != null && pl.getAutoFillRule().isConfigured()) || org.apache.commons.lang3.StringUtils.isNotEmpty(pl.getProfileId())
@@ -1019,7 +1031,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       this.migrateGlobalSettingsToProfiles();
     }
   }
-  
+
   public void reloadProfiles() throws IOException {
     String file = ctx.getStationDirectory() + "playlistprofiles.json";
     if (new File(file).exists()) {
@@ -1063,7 +1075,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     String file = ctx.getStationDirectory() + "playlistprofiles.json";
     FileUtils.write(new File(file), convertProfilesToJson(), Charset.forName("UTF-8"));
   }
-  
+
   public String getPlaylistJson(int playlistId) throws IOException {
     return this.ctx.getServer().getPlaylistJson(this.ctx.getStationId(), playlistId);
   }
