@@ -1,4 +1,4 @@
-// StationAdmin v1.3
+// StationAdmin v1.4
 ( function( tracks, opts, trackStats ){
 	
 	var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -18,6 +18,7 @@
 	var newsMin = 'newsMin' in opts ? opts.newsMin : 59;
 	var newsMax = 'newsMax' in opts ? opts.newsMax : 15;
 	var firstJingleAfterNews = 'firstJingleAfterNews' in opts ? opts.firstJingleAfterNews : true;
+	var tagSequenceRules = 'tagSequences' in opts ? opts.tagSequences : [];
 
 	var firstJingle;
 	var adTrigger;
@@ -27,6 +28,7 @@
 	var lastPlays = {};
 	var recentArtists = {}; // last artists of history / previous iteration
 	var preservedTracks = [];
+	var hasPreservedTracks = false;
 	var hasLinkedTracks = false;
 	var tracksAfter = {};
 	var tracksBefore = {};
@@ -178,6 +180,7 @@
 					}
 					else if(preserveAllJingles) {
 						preservedTracks[i] = tracks[i];
+						hasPreservedTracks = true;
 					}
 					else if((i == 0 || (i == 1 && tracks[0].id == 1)) && 'protectFirstJingle' in opts && opts.protectFirstJingle) {
 						firstJingle = tracks[i];
@@ -191,6 +194,7 @@
 			else if(tracks[i].type == 'moderation') {
 				if(wordDistribution == 'preserve' && iteration == 0) {
 					preservedTracks[i] = tracks[i];
+					hasPreservedTracks = true;
 					continue;
 				}
 				else if(wordDistribution == 'link_next' && i < tracks.length - 1 && iteration == 0) {
@@ -243,7 +247,7 @@
 		artists.sort(function(a, b) { return a.score - b.score });
 		
 		if(remainingDuration / (60 * 60) < maxTracksPerArtist) {
-			maxTracksPerArtist = Math.floor(remainingDuration / (60 * 60));
+			maxTracksPerArtist = Math.max(1, Math.floor(remainingDuration / (60 * 60)));
 		}
 		
 		var tracksDurationHours = Math.floor(tracksDuration / (60 * 60));
@@ -322,28 +326,74 @@
 			segmentTracks.sort(function(a, b) { return a.penalty - b.penalty });
 			
 			for(var t = 0; t < segmentTracks.length; t++) {
-				var next = segmentTracks[t];
-				if(buffer.length > 0 && !recentTrackNames.includes(buffer[0].normTitle)) {
-					// use next track from buffer
-					next = buffer.shift();
-					t--;
+				playlistTracks.push(segmentTracks[t]);
+			}
+		}
+
+		// apply tag sequence rules
+		if(tagSequenceRules.length > 0) {
+			for(var r = 0; r < tagSequenceRules.length; r++) {
+				tagSequenceRules[r].index = 0;
+			}
+			var matchingRules = [];
+			for(var t = 1; t < playlistTracks.length ; t++) {
+				var previous = playlistTracks[t - 1];
+				matchingRules.length = 0;
+				for(var r = 0; r < tagSequenceRules.length; r++) {
+					var rule = tagSequenceRules[r];
+					if(previous.tags.includes(rule.pattern[rule.index])) {
+						rule.index++;
+						if(rule.index == rule.pattern.length) {
+							rule.index = 0;
+							matchingRules.push(rule);
+						}
+					}
+					else {
+						rule.index = 0;
+					}
 				}
-				// check if preserved track needs to be inserted
-				if(typeof preservedTracks[playlistTracks.length] != 'undefined') {
-					playlistTracks.push(preservedTracks[playlistTracks.length]);
-				}
-				if(trackNameLimit > 0 && recentTrackNames.includes(next.normTitle)) {
-					buffer.push(next);
-					continue;
-				}
-				playlistTracks.push(next);
-				if(trackNameLimit > 0) {
-					recentTrackNames.push(next.normTitle);
-					if(recentTrackNames.length > trackNameLimit) {
-						recentTrackNames.shift();
-					} 
+				if(matchingRules.length > 0 || trackNameLimit > 0) {
+					for(var t2 = t; t2 < playlistTracks.length && t2 < t + 5; t2++) {
+						var check = playlistTracks[t2];
+						var accept = true;
+						if(trackNameLimit > 0 && recentTrackNames.includes(check.normTitle)) {
+							accept = false;
+						}						
+						for(var r = 0; r < matchingRules.length && accept; r++) {
+							var result = check.tags.includes(matchingRules[r].next);
+							if((matchingRules[r].not && result) ||(!matchingRules[r].not && !result))  {
+								accept = false;
+							}
+						}
+						if(accept) {
+							if(t2 > t) { 
+								// swap
+								playlistTracks[t2] = playlistTracks[t];
+								playlistTracks[t] = check;
+							}
+							break;
+						}
+					}
+					if(trackNameLimit > 0) {
+						recentTrackNames.push(playlistTracks[t]);
+						if(recentTrackNames.length > trackNameLimit) {
+							recentTrackNames.shift();
+						} 
+					}
 				}
 			}
+		}
+
+		// insert protected tracks
+		if(hasPreservedTracks) {
+			var newTracks = [];
+			for(var i = 0; i < playlistTracks.length; i++) {
+				if(typeof preservedTracks[newTracks.length] != 'undefined') {
+					newTracks.push(preservedTracks[newTracks.length]);
+				}
+				newTracks.push(playlistTracks[i]);
+			}
+			playlistTracks = newTracks;
 		}
 		
 		return playlistTracks;
