@@ -143,11 +143,14 @@ public class SynchronizationDialog extends JDialog {
         adminClient.synchronize();
       }
       else {
+        boolean syncClientCfg = false;
         if(synchronizePlaylistsModified.booleanValue()) {
           adminClient.getPlaylistService().synchronize(modifiedPlaylistsIds);
+          syncClientCfg = true;
         }
         if(synchronizePlaylistsAll.booleanValue()) {
           adminClient.getPlaylistService().synchronize();
+          syncClientCfg = true;
         }
         if(synchronizeTags.booleanValue()) {
           adminClient.getTagManager().synchronize();
@@ -157,6 +160,9 @@ public class SynchronizationDialog extends JDialog {
         }
         if(synchronizeTracks.booleanValue()) {
           adminClient.getTrackService().synchronize();
+        }
+        if(syncClientCfg) {
+          adminClient.getClientConfigService().synchronize();
         }
       }
       

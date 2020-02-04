@@ -43,6 +43,7 @@ public class SynchronizePlaylistsModifiedAction extends SynchronizeFullAction {
     if (playlistIds != null && playlistIds.length > 0) {
       this.getAdminClient().getPlaylistService().synchronize(playlistIds);
       this.getAdminClient().getPlaylistService().getPlaylistModificationDetector().markClean();
+      this.getAdminClient().getClientConfigService().synchronize();
     }
   }
 

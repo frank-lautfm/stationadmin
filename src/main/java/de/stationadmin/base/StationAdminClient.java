@@ -165,6 +165,7 @@ public class StationAdminClient {
       int[] modified = this.playlistService.getPlaylistModificationDetector().detectModifiedPlaylists();
       if (modified != null && modified.length > 0) {
         this.playlistService.synchronize(modified);
+        this.clientConfigService.synchronize();
       }
       break;
     case NONE:
