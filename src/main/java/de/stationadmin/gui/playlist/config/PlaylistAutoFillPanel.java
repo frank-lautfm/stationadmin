@@ -56,7 +56,11 @@ public class PlaylistAutoFillPanel extends JPanel {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
           for (JComponent comp : dependentComponents) {
-            comp.setEnabled((Boolean) evt.getNewValue());
+            if (evt.getNewValue() instanceof Boolean) {
+              comp.setEnabled((Boolean) evt.getNewValue());
+            } else {
+              comp.setEnabled(false);
+            }
           }
         }
       });
