@@ -304,6 +304,41 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     this.loadPlaylists(PlaylistType.ONLINE);
     this.loadPlaylists(PlaylistType.ARCHIVED);
     this.loadProfilesFromFile();
+    this.checkIntegrity();
+  }
+
+  private void checkIntegrity() {
+    for (Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
+      if (playlist.getProfileId() != null && this.getProfile(playlist.getProfileId()) == null) {
+        // illegal reference
+        if (playlist.isShuffle()) {
+          if (playlist.getShuffleType() != null && playlist.getShuffleType().equals(SHUFFLE_STATIONADMIN)) {
+            this.autoAssignProfile(playlist, PlaylistProfileType.StationAdminShuffle);
+          }
+        } else {
+          if (playlist.isGenerate()) {
+            this.autoAssignProfile(playlist, PlaylistProfileType.Generate);
+          } else if (playlist.isLocalShuffleAllowed()) {
+            this.autoAssignProfile(playlist, PlaylistProfileType.LocalShuffle);
+          }
+        }
+      }
+    }
+  }
+
+  private void autoAssignProfile(Playlist playlist, PlaylistProfileType type) {
+    for (PlaylistProfile profile : this.profiles) {
+      if (profile.getType().equals(type)) {
+        playlist.setProfileId(profile.getId());
+        try {
+          this.savePlaylistAs(playlist, Integer.toString(playlist.getId()));
+          log.info("illegal profile reference - changed profile to " + profile.getName() + " for " + playlist.getName());
+        } catch (Exception e) {
+        }
+
+        break;
+      }
+    }
   }
 
   private void loadShuffleScripts() throws IOException {
@@ -777,6 +812,9 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
    * @param profileId id of the profile to read optios from
    */
   public void assignProfileOpts(Map<String, Object> opts, String profileId) {
+    if(opts == null) {
+      return;
+    }
 
     PlaylistProfile main = getProfile(profileId);
     if (main == null || main.getType() == PlaylistProfileType.Generate) {
@@ -797,7 +835,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       opts.remove("trackRules");
       return;
     }
-        
+
     PlaylistProfile trackRulesProfile = main.getTrackRuleFromProfile() == null || main.getTrackRuleFromProfile().equals(main.getId()) ? main
         : getProfile(main.getTrackRuleFromProfile());
     PlaylistProfile artistNormProfile = main.getArtistNormalizationFromProfile() == null || main.getArtistNormalizationFromProfile().equals(main.getId()) ? main

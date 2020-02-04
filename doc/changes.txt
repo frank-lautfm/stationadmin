@@ -13,6 +13,7 @@ Version 5.0.0
 [#] Überarbeiteter Konfigurationsdialog für Playlists
 [+] Regeln für Titelreihenfolge im Station Admin-Shuffle-Verfahren
 [+] Tagesstatistik enthält die Uniq Listeners (Hörer)
+[+] Monatsstatistik
 [#] Änderung der internen Dateiformate für Konfiguration und Sendepläne
 [+] Rohansicht (Json-Format) der Playlist aus dem Kontextmenü heraus
 
