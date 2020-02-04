@@ -179,6 +179,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     }
 
     // shuffle
+    if(model.getBean() != null && model.getBean().getType() == PlaylistType.ONLINE)
     {
 
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.trackOrder")), cc.xy(2, row));
@@ -237,6 +238,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     }
 
     // profile
+    if(model.getBean() != null && model.getBean().getType() == PlaylistType.ONLINE)
     {
       SelectionInList<String> profileSelection = new SelectionInList<>(model.getProfileListModel(), model.getBufferedModel("profileId"));
       final JComboBox<String> profileCmb = BasicComponentFactory.createComboBox(profileSelection, new DefaultListCellRenderer() {
