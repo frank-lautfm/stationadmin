@@ -129,10 +129,15 @@ public class ProfileAdTriggerPanel extends JPanel {
         jingleCmb.setEnabled(enabled);
 
         if (enabled) {
-          model.getBufferedModel("pos1").setValue(20);
-          model.getBufferedModel("pos2").setValue(50);
+          if (model.getBufferedModel("pos1").intValue() < 0) {
+            model.getBufferedModel("pos1").setValue(20);
+          }
+          if (model.getBufferedModel("pos2").intValue() < 0) {
+            model.getBufferedModel("pos2").setValue(50);
+          }
         } else {
           model.getBufferedModel("pos1").setValue(-1);
+          model.getBufferedModel("pos2").setValue(-1);
         }
 
       }
@@ -142,26 +147,28 @@ public class ProfileAdTriggerPanel extends JPanel {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        int pos1 = (Integer) evt.getNewValue();
-        int pos2 = (Integer) model.getBufferedModel("pos2").getValue();
+        if (enabledModel.getValue().equals(Boolean.TRUE)) {
+          int pos1 = (Integer) evt.getNewValue();
+          int pos2 = (Integer) model.getBufferedModel("pos2").getValue();
 
-        if (pos1 > 30) {
-          model.getBufferedModel("pos1").setValue(30);
-          pos1 = 30;
-          if (!profileModel.isInitializing()) {
-            Toolkit.getDefaultToolkit().beep();
+          if (pos1 > 30) {
+            model.getBufferedModel("pos1").setValue(30);
+            pos1 = 30;
+            if (!profileModel.isInitializing()) {
+              Toolkit.getDefaultToolkit().beep();
+            }
           }
-        }
 
-        if (pos2 - pos1 < 20) {
-          model.getBufferedModel("pos2").setValue(pos1 + 20);
-          if (!profileModel.isInitializing()) {
-            Toolkit.getDefaultToolkit().beep();
-          }
-        } else if (pos2 - pos1 > 40) {
-          model.getBufferedModel("pos2").setValue(Math.min(59, pos1 + 40));
-          if (!profileModel.isInitializing()) {
-            Toolkit.getDefaultToolkit().beep();
+          if (pos2 - pos1 < 20) {
+            model.getBufferedModel("pos2").setValue(pos1 + 20);
+            if (!profileModel.isInitializing()) {
+              Toolkit.getDefaultToolkit().beep();
+            }
+          } else if (pos2 - pos1 > 40) {
+            model.getBufferedModel("pos2").setValue(Math.min(59, pos1 + 40));
+            if (!profileModel.isInitializing()) {
+              Toolkit.getDefaultToolkit().beep();
+            }
           }
         }
       }
@@ -171,34 +178,36 @@ public class ProfileAdTriggerPanel extends JPanel {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        int pos2 = (Integer) evt.getNewValue();
-        int pos1 = (Integer) model.getBufferedModel("pos1").getValue();
+        if (enabledModel.getValue().equals(Boolean.TRUE)) {
+          int pos2 = (Integer) evt.getNewValue();
+          int pos1 = (Integer) model.getBufferedModel("pos1").getValue();
 
-        if (pos2 < 30) {
-          model.getBufferedModel("pos2").setValue(30);
-          pos2 = 30;
-          if (!profileModel.isInitializing()) {
-            Toolkit.getDefaultToolkit().beep();
+          if (pos2 < 30) {
+            model.getBufferedModel("pos2").setValue(30);
+            pos2 = 30;
+            if (!profileModel.isInitializing()) {
+              Toolkit.getDefaultToolkit().beep();
+            }
           }
-        }
 
-        if (pos2 > 59) {
-          model.getBufferedModel("pos2").setValue(59);
-          pos2 = 59;
-          if (!profileModel.isInitializing()) {
-            Toolkit.getDefaultToolkit().beep();
+          if (pos2 > 59) {
+            model.getBufferedModel("pos2").setValue(59);
+            pos2 = 59;
+            if (!profileModel.isInitializing()) {
+              Toolkit.getDefaultToolkit().beep();
+            }
           }
-        }
 
-        if (pos2 - pos1 < 20) {
-          model.getBufferedModel("pos1").setValue(pos2 - 20);
-          if (!profileModel.isInitializing()) {
-            Toolkit.getDefaultToolkit().beep();
-          }
-        } else if (pos2 - pos1 > 40) {
-          model.getBufferedModel("pos1").setValue(Math.min(30, pos2 - 40));
-          if (!profileModel.isInitializing()) {
-            Toolkit.getDefaultToolkit().beep();
+          if (pos2 - pos1 < 20) {
+            model.getBufferedModel("pos1").setValue(pos2 - 20);
+            if (!profileModel.isInitializing()) {
+              Toolkit.getDefaultToolkit().beep();
+            }
+          } else if (pos2 - pos1 > 40) {
+            model.getBufferedModel("pos1").setValue(Math.min(30, pos2 - 40));
+            if (!profileModel.isInitializing()) {
+              Toolkit.getDefaultToolkit().beep();
+            }
           }
         }
       }
