@@ -14,6 +14,9 @@ public class StreamingServerResolver {
       if(station.startsWith("-")) {
         station = station.substring(1);
       }
+      if(station.endsWith("-")) {
+        station = station.substring(0, station.length() - 1);
+      }
       if (SystemUtils.IS_OS_WINDOWS) {
         // For Windows
         cmd = "ping -n 1 " + station + ".stream.laut.fm";
