@@ -332,7 +332,6 @@ public class StationAdminWindow extends StationAdminFrame {
     if (ctx.getAdminClient().getClientConfigService().isClientConfigurationAvailableOnServer()) {
       if (JOptionPane.showConfirmDialog(AppUtils.getRootFrame(), ctx.getTextProvider().getString("clientsettings.confirm"), "", JOptionPane.YES_NO_OPTION,
           JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
-        System.out.println("load client settings");
         try {
           ctx.getAdminClient().getClientConfigService().read();
           loaded = true;
