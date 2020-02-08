@@ -11,6 +11,9 @@ public class StreamingServerResolver {
   public static String getStreamingServer(String station) {
     try {
       String cmd;
+      if(station.startsWith("-")) {
+        station = station.substring(1);
+      }
       if (SystemUtils.IS_OS_WINDOWS) {
         // For Windows
         cmd = "ping -n 1 " + station + ".stream.laut.fm";

@@ -16,6 +16,7 @@ Version 5.0.0
 [+] Monatsstatistik
 [#] Änderung der internen Dateiformate für Konfiguration und Sendepläne
 [+] Rohansicht (Json-Format) der Playlist aus dem Kontextmenü heraus
+[*] Ermittlung des Streamingservers für Stationen die mit Bindestrich beginnen funktionierte nicht
 
 Version 4.11.2
 --------------
