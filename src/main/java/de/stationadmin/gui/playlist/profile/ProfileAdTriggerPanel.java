@@ -70,7 +70,7 @@ public class ProfileAdTriggerPanel extends JPanel {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        enabledModel.setValue(model.getBean().getPos1() > -1);
+        enabledModel.setValue(model.getBean() != null && model.getBean().getPos1() > -1);
       }
     });
 
@@ -117,37 +117,40 @@ public class ProfileAdTriggerPanel extends JPanel {
     jingleCmb.setEnabled(enabled);
     row += 2;
 
-    enabledModel.addValueChangeListener(new PropertyChangeListener() {
+    final PropertyChangeListener editableListener = new PropertyChangeListener() {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        boolean enabled = Boolean.TRUE.equals(evt.getNewValue());
+        boolean enabled = Boolean.TRUE.equals(enabledModel.getValue());
         pos1Tf.setEditable(enabled);
         pos2Tf.setEditable(enabled);
         separatorCmb.setEnabled(enabled);
         triggerCmb.setEnabled(enabled);
         jingleCmb.setEnabled(enabled);
 
-        if (enabled) {
-          if (model.getBufferedModel("pos1").intValue() < 0) {
-            model.getBufferedModel("pos1").setValue(20);
+        if (!profileModel.isInitializing()) {
+          if (enabled) {
+            if (model.getBufferedModel("pos1").intValue() < 0) {
+              model.getBufferedModel("pos1").setValue(20);
+            }
+            if (model.getBufferedModel("pos2").intValue() < 0) {
+              model.getBufferedModel("pos2").setValue(50);
+            }
+          } else {
+            model.getBufferedModel("pos1").setValue(-1);
+            model.getBufferedModel("pos2").setValue(-1);
           }
-          if (model.getBufferedModel("pos2").intValue() < 0) {
-            model.getBufferedModel("pos2").setValue(50);
-          }
-        } else {
-          model.getBufferedModel("pos1").setValue(-1);
-          model.getBufferedModel("pos2").setValue(-1);
         }
 
       }
-    });
+    };
+    enabledModel.addValueChangeListener(editableListener);
 
     model.getBufferedModel("pos1").addValueChangeListener(new PropertyChangeListener() {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        if (enabledModel.getValue().equals(Boolean.TRUE)) {
+        if (enabledModel.getValue().equals(Boolean.TRUE) && !profileModel.isInitializing()) {
           int pos1 = (Integer) evt.getNewValue();
           int pos2 = (Integer) model.getBufferedModel("pos2").getValue();
 
@@ -178,7 +181,7 @@ public class ProfileAdTriggerPanel extends JPanel {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
-        if (enabledModel.getValue().equals(Boolean.TRUE)) {
+        if (enabledModel.getValue().equals(Boolean.TRUE) && !profileModel.isInitializing()) {
           int pos2 = (Integer) evt.getNewValue();
           int pos1 = (Integer) model.getBufferedModel("pos1").getValue();
 
