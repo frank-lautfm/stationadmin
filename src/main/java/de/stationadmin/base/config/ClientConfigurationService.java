@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.Settings;
+import de.stationadmin.lfm.backend.ResourceNotFoundException;
 
 public class ClientConfigurationService implements Service {
   private static final String tsfile = "clientconfigts";
@@ -54,12 +55,12 @@ public class ClientConfigurationService implements Service {
     sessionCtx.getServer().updateClientConfiguration(sessionCtx.getStationId(), cfg, ClientConfiguration.class);
     updateTimestamp(cfg.getTimmestamp());
   }
-  
+
   public boolean isClientConfigurationAvailableOnServer() {
     try {
       sessionCtx.getServer().getClientConfiguration(sessionCtx.getStationId(), ClientConfiguration.class);
       return true;
-    } catch(IOException e) {
+    } catch (IOException e) {
       return false;
     }
   }
@@ -74,11 +75,15 @@ public class ClientConfigurationService implements Service {
       return;
     }
     log.info("Reading client configuration from server");
-    ClientConfiguration cfg = sessionCtx.getServer().getClientConfiguration(sessionCtx.getStationId(), ClientConfiguration.class);
-    for (ClientConfigurationSource src : sources) {
-      src.applyClientConfiguration(cfg);
+    try {
+      ClientConfiguration cfg = sessionCtx.getServer().getClientConfiguration(sessionCtx.getStationId(), ClientConfiguration.class);
+      for (ClientConfigurationSource src : sources) {
+        src.applyClientConfiguration(cfg);
+      }
+      updateTimestamp(cfg.getTimmestamp());
+    } catch (ResourceNotFoundException e) {
+      // no configuration available
     }
-    updateTimestamp(cfg.getTimmestamp());
   }
 
   private void updateTimestamp(Date ts) {
