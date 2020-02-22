@@ -12,7 +12,7 @@
 Vorraussetzungen
 </p>
 <p>
-Du kannst Playlists von Station Admin shuffeln lassen - d. h. die einer Playlist werden in eine zufällige Reihenfolge gebracht. Enthält die Playlist mehrere Titel eines Artists so werden diese einigermaßen gleichtmäßig über die Playlist verteilt.
+Du kannst Playlists lokal von Station Admin shuffeln lassen - d. h. die einer Playlist werden in eine zufällige Reihenfolge gebracht. Enthält die Playlist mehrere Titel eines Artists so werden diese einigermaßen gleichmäßig über die Playlist verteilt.
 </p>
 <p>
 Du kannst in den Playlist-Eigenschaften festlegen ob Playlists durch Station Admin geshuffelt werden dürfen oder nicht:
@@ -21,6 +21,10 @@ Du kannst in den Playlist-Eigenschaften festlegen ob Playlists durch Station Adm
 <li>Klicke auf <img src="../icons/configure.png">
 <li>W&auml;hle <span class="menuref">durch Station Admin shuffeln</span> als Option f&uuml;r <span class="menuref">Titelreihenfolge</span>
 </ul>
+</p>
+<p>
+	Du kannst der Playlist ein passendes Profil aus den <a href="grundeinstellungen.html">Grundeinstellungen</a> zuweisen um den Umgang mit Jingles oder das Setzen von Ad-Triggern zu steuern.<br>
+	Wenn Du der Playlist die laut.fm-Nachrichten hinzuf&uuml;gst werden diese st&uuml;ndlich gespielt.
 </p>
 
 <p class="subheading">
@@ -42,94 +46,8 @@ Wähle im <span class="menuref">Playlists</span>-Menü <span class="menuref">Playl
 <p>
 Die Playlists die auf diese Weise geshuffelt werden werden automatisch auch abgespeichert.
 </p>
-
-<p class="subheading">
-Umgang mit Jingles und Wortbeitr&auml;gen
-</p>
-<img src="../images/einstellungen-playlists.jpg">
-<p>
-Es gibt einige Konfigurationsm&ouml;glichkeiten die den Umgang mit Jingles und Wortbeitr&auml;gen steuern. &Ouml;ffne dazu im <span class="menuref">Extras</span>-Men&uuml; <span class="menuref">Einstellungen</span> und w&auml;hle <span class="menuref">Playlist shuffeln / generieren</span>.
-</p>
-<p>
-Alle in einer Playlist enthaltenen Jingles werden normalerweise beim Shufflen gleichm&auml;&szlig;ig und in zuf&auml;lliger Reihenfolge &uuml;ber die Playlist verteilt. Mit folgenden Optionen l&auml;&szlig;t sich das Verhalten &auml;ndern:
-<ul>
-<li><span class="menuref">Jingle am Anfang der Playlist nicht verschieben</span> sorgt daf&uuml;r dass wenn eine Playlist mit einem Jingle beginnt dieses Jingle beim Shuffeln nicht verschoben wird. Dies ist sinnvoll f&uuml;r Show-Opener. F&uuml;r Playlists die nicht mit einem Jingle beginnen hat diese Option keinerlei Wirkung.
-<li><span class="menuref">alle [ ] Minuten ein Jingle einstreuen</span> sorgt daf&uuml;r dass in festen Zeitabst&auml;nden Jingles eingestreut werden. Grundlage hierf&uuml;r sind alle in der Playlist enthaltenen Jingles. Wurden alle Jingles einmal verwendet so wird als n&auml;chstes das zuerst verwendete Jingle erneut eingestreut - die Jingles wiederholen sich also. Sind in der Playlist so viele Jingles vorhanden dass eigentlich nicht alle Jingles eingestreut werden k&ouml;nnen werden die verbleibenden Jingles ans Ende der Playlist geh&auml;ngt damit sie nicht verloren gehen.
-<li><span class="menuref">Jingles generell nicht verschieben</span> f&uuml;hrt dazu dass Jingles in der Playlist an den Positionen stehen bleiben an denen sie sind. Bei Auswahl dieser Option werden die anderen Optionen deaktiviert dies nicht kombinierbar ist.
-</ul>
-</p>
-<p>
-F&uuml;r Wortbeitr&auml;ge gibt es folgende M&ouml;glichkeiten:
-<ul>
-<li><span class="menuref">zuf&auml;llig verteilen</span>: Die Wortbeitr&auml;ge werden wie normale Musiktitel zuf&auml;llig verteilt.
-<li><span class="menuref">nicht verschieben</span>: Die Wortbeitr&auml;ge bleiben an den Positionen an denen sie sind. Kommt also z. B. an 5. Stelle in einer Playlist ein Wortbeitrag so steht nach dem Shuffeln auch genau dieser Wortbeitrag wieder an 5. Stelle.
-<li><span class="menuref">an folgenden Titel koppeln</span>: Die Wortbeitr&auml;ge werden an die nachfolgenden Musiktitel gekoppelt: Werden beim Shuffeln Musiktitel verschoben so verschieben sich Wortbeitr&auml;ge die vor diesen Titeln platziert sind entsprechend mit. Diese Option sollte gew&auml;hlt werden wenn die Wortbeitr&auml;ge Anmoderationen nachfolgender Titel beinhalten.
-<li><span class="menuref">an vorherigen Titel koppeln</span>: Die Wortbeitr&auml;ge werden an die vorherigen Musiktitel gekoppelt: Werden beim Shuffeln Musiktitel verschoben so verschieben sich Wortbeitr&auml;ge die nach diesen Titeln platziert sind entsprechend mit. Diese Option sollte gew&auml;hlt werden wenn die Wortbeitr&auml;ge Information vorhergehenden Titeln beinhalten.
-</ul>
-</p>
-
-<p class="subheading">
-Gebundene Jingles oder Wortbeitr&auml;ge
-</p>
-<p>
-Einen Sonderfall stellen Jingles oder Wortbeitr&auml;ge dar die an bestimmte Titel gebunden werden sollen und entweder vor oder nach den entsprechenden Titeln platziert werden sollen. Entsprechende Regeln lassen sich über <span class="menuref">Gebunden Jingles</span> konfigurieren.
-</p>
-<p>
-Die Regeln f&uuml;r gebundene Jingles k&ouml;nnen in Gruppen organisiert werden. F&uuml;r jede Gruppe kann ein Mindestabstand in Minuten konfiguriert werden. Angenommen Du hast mehrere Jingles die jeweils an bestimmte K&uuml;nstler gebunden werden, m&ouml;chtest aber nicht dass zwei solcher Jingles innerhalb einer halben Stunde vorkommen: Dann organisierst Du die Regeln f&uuml;r diese Jingles in einer Gruppe und setzt den Abstand auf 30 Minuten.
-</p>
-<p>
-Eine Regel legt f&uuml;r ein einzelnes Jingle oder einen Wortbeitrag fest an welche Titel es gebunden wird. Folgende Einstellungen sind verf&uuml;gbar:
-<ul>
-<li>Die <span class="menuref">Gruppe</span> zu der eine Regel geh&ouml;rt</li>
-<li>Die <span class="menuref">Position</span> - ob das Jingle oder der Wortbeitrag vor oder nach den entsprechenden Titeln platziert werden soll</li>
-<li>Der <span class="menuref">Typ</span> des Filters der passende Titel festlegt - m&ouml;glich sind K&uuml;nstler, K&uuml;nstler + Titel, Album oder Tag</li>
-<li>Der <span class="menuref">Name</span> des K&uuml;nstlers, Titels, Albums oder Tags an den das Jingle gebunden wird</li>
-<li>Der minimale <span class="menuref">Abstand</span> zwischen zwei Platzierungen dieses Jingles oder Wortbeitrags in Minuten</li>
-</ul>
-</p>
-<p>
-Wenn Regeln f&uuml;r K&uuml;nstler erstellt werden reicht ein Teil des Namens - d. h. eine Regel f&uuml;r &quot;Foo&quot; w&uuml;rde auch &quot;Foo feat. Bar&quot; akzeptieren. F&uuml;r Alben und K&uuml;nstler + Titel muss der gesamte Begriff passen - allerdings werden Gro&szlig;-/Kleinschreibung sowie Leer- und Sonderzeichen ignoriert. 
-</p>
-<p>
-Wenn durch eine Regel ein gebundenes Jingle an eine Position eingef&uuml;gt werde w&uuml;rde an der sich bereits ein Jingle befindet gibt es folgende M&ouml;glichkeiten:
-<ul>
-<li>Es werden beide Jingles beibehalten - wenn also etwa ein Jingle vor einem Titel eingef&uuml;gt werden soll und dort befindet sich schon ein Standardjingle wird das gebundene Jingle hinter das bestehende Jingle und vor den Titel eingef&uuml;gt.</li>
-<li>Das gebundene Jingle wird nicht eingef&uuml;gt.</li>
-<li>Das gebundene Jingle wird eingef&uuml;gt und das Standardjingle wird entfernt. Hier gilt jedoch eine Ausnahme: Wenn das bestehende Jingle das erste Jingle der Playlist ist und als solches nicht verschoben werden soll bleibt es stehen.</li>
-</ul>
-</p>
-<p>
-Die Verwendung von gebundenen Jingles und Wortbeitr&auml;gen f&uuml;hrt dazu dass die entsprechenden Jingles oder Wortbeitr&auml;ge in die Playlist eingef&uuml;gt oder daraus entfernt werden k&ouml;nnen. Dadurch kann sich die L&auml;nge der Playlist leicht &auml;ndern.
-</p>
-
-<p class="subheading">
-Werbetrigger
-</p>
-<img src="../images/einstellungen-playlists-adtrigger.jpg">
-<p>
-Wenn du nichts weiter konfigurierst wird auf dem Server der Standard-Ad-Trigger zu Standardzeiten in Deine Playlist eingef&uuml;gt. M&ouml;chtest Du die Zeiten selber kontrollieren, einen eigenen Trigger verwenden oder ein Jingle vor den Trigger setzen gehe in die Einstellungen zu <span class="menuref">Werbetrigger</span> und aktiviere <span class="menuref">Werbetrigger beim Shuffeln oder Generieren einf&uuml;gen</span>.
-</p>
-<p>
-W&auml;hle die Zeiten aus zu denen Werbung gespielt werden soll. Die Positionen sind relativ zum Playlistanfang und wiederholen sich jede Stunde - d. h. bei 20 / 50 w&uuml;rde ein Trigger jeweils nach dem ersten Track platziert der 20 bzw 50 Minuten nach der vollen Stunde endet. Beachte bitte das in jeder vollen halben Stunde ein Trigger enthalten sein mu&szlig; und das der Mindestabstand 20 Minuten betragen mu&szlig; - sonst werden die Trigger auf dem Server verworfen.<br>
-Es wird empfohlen die Trigger nicht gegen Ende der vollen Stunde zu setzen weil sonst die Gefahr besteht dass ein lang laufender Ttiel das rechtzeitige Setzen des Triggers verhindert.
-</p>
-<p>
-Wenn ein Jingle als Werbetrenner vor den Trigger platziert werden soll w&auml;hle unter <span class="menuref">Werbetrenner</span> ein Jingle aus.
-</p>
-
-<p>
-W&auml;hle unter <span class="menuref">Werbetrigger</span> ein Jingle das als Ad-Trigger verwendet werden soll. Normalerweise kann das Standardjingle verwendet werden. M&ouml;chtest Du dass ein bestimmtes Jingle nach der Werbung l&auml;ft so verwende dieses Jingle als Ad-Trigger - es muss jedoch "START_AD_BREAK" als Artist oder Titel gesetzt sein. In dem Fall l&ouml;st das Jingle die Werbung aus, nach der Werbung l&auml;uft ist dann das Jingle zu h&ouml;ren.
-</p>
-<p>
-Beachte bei der Verwendung von eigenen Werbetrennern oder -triggern bitte dass nicht zwangsl&auml;ufig Werbung gespielt wird. Es kann also passieren dass die H&ouml;rer nur die Jingles, aber keine Werbung h&ouml;ren.
-</p>
-<p>
-Weiterhin kannst Du festlegen was passieren soll wenn an der Stelle wo ein Werbetrigger eingef&uuml;gt werden soll schon ein Jingle steht:
-<ul>
-	<li><span class="menuref">Jingle und Werbetrigger einf&uuml;gen</span> - beides wird eingef&uuml;gt</li>
-	<li><span class="menuref">nur Werbetrigger einf&uuml;gen</span> - Werbetrigger wird eingef&uuml;gt, Jingle wird verworfen</li>
-	<li><span class="menuref">Werbetrigger einen Song einf&uuml;gen</span> - Werbetrigger verschiebt sich nach hinten</li>
-</ul>
+<p class='hint'>
+	Das lokale Shuffeln von Playlists ist ein &auml;ltere Funktion des Station Admin die gegen&uuml;ber dem Shuffeln auf dem Server mit dem Station Admin-Verfahren eigentlich keine Vorteile mehr bietet. 
 </p>
 
 </body>

@@ -6,34 +6,28 @@
 	</head>
 	<body>
 
-<h1>Titel taggen</h1>
+<h1>Titel taggen und filtern</h1>
 
 <p class="subheading">
-Was sind Titel-Tags?
+Was sind Tags und Filter?
 </p>
 <p>
-Station Admin erlaubt Dir Titel mit beliebigen Tags (Schlagw&ouml;rtern) zu versehen. Diese kannst Du zum Filtern in der <a href="meinetitel.html">Titelansicht</a> verwenden. Vor allem sind Tags aber die Grundlage f&uuml;r die <a href="../playlists/generieren.html">Generierung</a> von Playlists.
-</p>
+	Um Deinen Bestand an Titeln organisieren zu können und Gruppen von Titeln z. B. beim Shuffeln oder Generieren von Playlists gesondert behandeln zu können bietet Station Admin Dir zwei Ansätze an:
+	<ul>
+		<li> 
+			Du kannst Titel mit Tags versehen. Tags werden den Titeln individuell zugewiesen, d. h. Du entscheidest an irgendeinem Punkt das Titel X mit Tag Y versehen werden soll. Diese Tags werden auch auf dem Server hinterlegt und können genutzt werden um das Verhalten desn Shuffelns auf dem Server zu steuern.
+		</li>
+		<li>
+			Du kannst Filter für Titel anlegen. Hier gibst Du nur Kriterien an die die Titel erfüllen müssen. Die Möglichkeiten reichen von der Länge über das Vorkommen in Playlists oder wann sie zuletzt gespielt wurden. Filter können beim Generieren von Playlists verwendet werden um Gruppen von Titeln gesondert zu behandeln, stehen beim Shuffeln auf dem Server aber nicht zur Verfügung.
+		</li>
+	</ul>
+</li>
+	</p>
 <p>
-Es macht z. B. Sinn Tags anzulegen
-<ul>
-<li>die alle Titel beinhalten die f&uuml;r eine bestimmte Sendung verwendet werden k&ouml;nnen
-<li>die beim Generieren h&auml;ufiger (z. B. "Neue CDs") oder weniger h&auml;ufig ("Lange Titel" oder "Alte Kamellen") verwendet werden sollen 
-</ul>
-</p>
-<p>
-Station Admin unterst&uuml;tzt zwei Arten von Tags:
-<ul>
-<li>Statische Tags: Du legst selber ausdr&uuml;cklich fest welche Titel mit diesem Tag versehen werden.
-<li>Dynamische Tags: Du legst nur Suchkriterien wie z. B. Artists oder L&auml;nge fest. Alle passenden Titel sind automatisch mit diesem Tag getaggt.
-</ul>
-</p>
-<p>
-Tags k&ouml;nnen Gruppen zugewiesen werden. Das Men&uuml; zum Taggen von Titeln (siehe unten) enth&auml;lt die Gruppen dann als Untermen&uuml; - das kann
-&uuml;bersichtlicher sein als eine einzige lange Liste. Auch im MP3-Explorer kannst Du die angezeigten Tags nach Gruppen filtern.
+Tags und Filter k&ouml;nnen in Gruppen organisiert werden. Das Men&uuml; zum Taggen von Titeln (siehe unten) enth&auml;lt die Gruppen dann als Untermen&uuml; - das kann &uuml;bersichtlicher sein als eine einzige lange Liste. Auch im MP3-Explorer kannst Du die angezeigten Tags nach Gruppen filtern.
 </p>
 <p class="subheading">
-Statische Tags: Titel taggen
+Titel taggen
 </p>
 <img src="../images/titel-taggen.jpg">
 <p>
@@ -46,20 +40,19 @@ Tags verwalten
 </p>
 <img src="../images/titel-tagverwaltung.jpg">
 <p>
-&Uuml;ber <span class="menuref">Tags verwalten</span> im <span class="menuref">Titel</span>-Men&uuml; &ouml;ffnest Du einen Dialog in dem Du Deine Tags verwalten kannst.
+&Uuml;ber <span class="menuref">Tags und Filter verwalten</span> im <span class="menuref">Titel</span>-Men&uuml; &ouml;ffnest Du einen Dialog in dem Du Deine Tags und Filter verwalten kannst.
 </p>
 <p>
-Links siehst Du eine Liste aller Tags. Wenn Du eines ausw&auml;hlst werden die Detailinformationen rechts dargestellt. Bei statischen Tags ist das nur der Name, bei dynamischen Tags die Filterkriterien. Du kannst den Namen bzw. die Filterkriterin &auml;ndern und durck Klick auf den <img src="../icons/save.png"> Speichern-Button speichern. Durch Klicken auf den <img src="../icons/delete.png"> L&ouml;schen-Button kannst Du das Tag l&ouml;schen.
+Links siehst Du eine Liste aller Tags und Filter. Wenn Du eines ausw&auml;hlst werden die Detailinformationen rechts dargestellt. Bei Tags ist das nur der Name und die Gruppe, bei Filtern sind das die Filterkriterien. Du kannst den Namen bzw. die Filterkriterin &auml;ndern und durck Klick auf den <img src="../icons/save.png"> Speichern-Button speichern. Durch Klicken auf den <img src="../icons/delete.png"> L&ouml;schen-Button kannst Du das Tag oder den Filter l&ouml;schen.
 </p>
-<img src="../images/titel-tag-anlegen.jpg">
 <p>
-Zum Erzeugen eines neuen Tags klickst Du auf <img src="../icons/filenew.png"> und w&auml;hlst den Typ des Tags aus. Danach kannst Du Namen bzw. Filterkiterien eingeben und das Tag speichern.
+Zum Erzeugen eines neuen Tags oder Filter klickst Du auf <img src="../icons/filenew.png"> und w&auml;hlst aus ob Du ein Tag oder einen Filter anlegen m&ouml;chtest. Danach kannst Du Namen bzw. Filterkiterien eingeben und Deine Konfiguration speichern.
 </p>
 <p class="subheading">
-Konfiguration eines dynamischen Tags
+Konfiguration eines Filters
 </p>
 <p>
-F&uuml;r dynamische Tags kannst Du neben dem Namen und der Gruppe noch einige Kriterien angeben. Diese sind auf verschiedenen Tabs gruppiert.
+F&uuml;r Filter kannst Du neben dem Namen und der Gruppe noch einige Kriterien angeben. Diese sind auf verschiedenen Tabs gruppiert.
 </p>
 <p>
 Auf dem <span class="menuref">Metadaten</span>-Tab kannst Du Titel auf Basis von Metadaten wie Artist, Titel oder L&auml;nge ausw&auml;hlen:
@@ -99,8 +92,7 @@ Auf dem <span class="menuref">Playlists</span>-Tab kannst Du eine oder mehrere P
 dynamische Tag ausgew&auml;hlt und mit den anderen Kriterien abgeglichen. Auf diese Weise kannst Du Playlists auf Tags mappen.
 </p>
 <p>
-Auf dem <span class="menuref">Tags</span>-Tab kannst Du eine oder mehrere statische Tags ausw&auml;hlen. Alle mit diesen Tags versehenen Titel werden dann f&uuml;r das
-dynamische Tag ausgew&auml;hlt und mit den anderen Kriterien abgeglichen. 
+Auf dem <span class="menuref">Tags</span>-Tab kannst Du eine oder mehrere statische Tags ausw&auml;hlen. Alle mit diesen Tags versehenen Titel werden dann durch diesen Filter ausgew&auml;hlt und mit den anderen Kriterien abgeglichen. 
 </p>
 
 

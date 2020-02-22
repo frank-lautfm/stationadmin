@@ -1,0 +1,182 @@
+<html>
+	<head>
+		<title>Station Admin: Grundeinstellungen f&uuml;r Playlists</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>Grundeinstellungen f&uuml;r Playlists</h1>
+
+<img src="../images/playlistproflies.jpg">
+
+<p class="subheading">
+Was ist das?
+</p>
+<p>
+	Viele Einstellungen k&ouml;nne auf Ebene einer einzelnen Playlist konfiguriert werden. Andere Einstellungen hingegen k&ouml;nnen zwischen mehreren Playlists geteilt werden. Das ist sinnvoll wenn die Konfiguration aufw&auml;ndig ist oder ein generelles Verhalten definiert werden soll das &uuml;ber Playlistgrenzen hinweg beibehalten werden soll. Das beinhaltet z. B. die Platzierung von Jingles oder Ad-Triggern oder die Normalisierung von K&uuml;nstlernamen.
+</p>
+<p>
+	Ob Grundeinstellungen für eine Playlist verwendet werden können hängt davon ab wie die Titelreihenfolge festgelegt wird. Grundeinstellungen werden verwendet für Playlists
+	<ul>
+		<li>die auf dem Server mit dem Station Admin-Verfahren geshuffelt werden</li>
+		<li>die lokal durch Station Admin geshuffelt werden</li>
+		<li>die lokal durch Station Admin generiert werden</li>
+	</ul>
+</p>
+<p>
+	In den Grundeinstellungen k&ouml;nnen f&uuml;r alle diese Ans&auml;tze ein oder mehrere Profile angelegt werden die dann in den Playlists auswgew&auml;hlt werden. Die verf&uuml;gbaren Einstellungen h&auml;ngen vom gew&auml;hlten Profiltyp ab - f&uuml;r die Generierung stehen z. B. Einstellungen zur Verf&uuml;gung die es f&uuml;r das Shuffeln auf dem Server nicht gibt.
+</p>
+
+<p class="subheading">
+Anlegen von Profilen
+</p>
+<p>
+	F&uuml;r jeden Verwendungstyp ist standardm&auml;&szlig;ig bereits ein Profil angelegt. Dar&uuml;ber hinaus kannst Du bei Bedarf weitere Profile anlegen. Klicke dazu auf <img src="../icons/filenew.png"> und w&auml;hle aus wof&uuml;r das neue Profil verwendet werden soll. Dann nimst Du die Einstellungen wie gew&uuml;nscht vor und klickst auf <img src="../icons/save.png"> zum Speichern.
+</p>
+
+<p class="subheading">
+	Einstellungsm&ouml;glichkeiten innerhalb eines Profils
+</p>
+
+
+<p class="subheading2">
+Umgang mit Jingles und Wortbeitr&auml;gen
+</p>
+<p>
+Es gibt einige Konfigurationsm&ouml;glichkeiten die den Umgang mit Jingles und Wortbeitr&auml;gen steuern. Diese findest Du auf dem Reiter <span class="menuref">Allgemein</span>.
+</p>
+<p>
+Alle in einer Playlist enthaltenen Jingles werden normalerweise beim Shuffeln oder Generieren gleichm&auml;&szlig;ig und in zuf&auml;lliger Reihenfolge &uuml;ber die Playlist verteilt. Mit folgenden Optionen l&auml;&szlig;t sich das Verhalten &auml;ndern:
+<ul>
+<li><span class="menuref">Jingle am Anfang der Playlist nicht verschieben</span> sorgt daf&uuml;r dass wenn eine Playlist mit einem Jingle beginnt dieses Jingle beim Shuffeln nicht verschoben wird. Dies ist sinnvoll f&uuml;r Show-Opener. F&uuml;r Playlists die nicht mit einem Jingle beginnen hat diese Option keinerlei Wirkung.
+<li><span class="menuref">alle [ ] Minuten ein Jingle einstreuen</span> sorgt daf&uuml;r dass in festen Zeitabst&auml;nden Jingles eingestreut werden. Grundlage hierf&uuml;r sind alle in der Playlist enthaltenen Jingles. Wurden alle Jingles einmal verwendet so wird als n&auml;chstes das zuerst verwendete Jingle erneut eingestreut - die Jingles wiederholen sich also. Sind in der Playlist so viele Jingles vorhanden dass eigentlich nicht alle Jingles eingestreut werden k&ouml;nnen werden die verbleibenden Jingles ans Ende der Playlist geh&auml;ngt damit sie nicht verloren gehen.
+<li><span class="menuref">Jingles generell nicht verschieben</span> f&uuml;hrt dazu dass Jingles in der Playlist an den Positionen stehen bleiben an denen sie sind. Bei Auswahl dieser Option werden die anderen Optionen deaktiviert dies nicht kombinierbar ist.
+</ul>
+</p>
+<p>
+F&uuml;r Wortbeitr&auml;ge gibt es folgende M&ouml;glichkeiten:
+<ul>
+<li><span class="menuref">zuf&auml;llig verteilen</span>: Die Wortbeitr&auml;ge werden wie normale Musiktitel zuf&auml;llig verteilt.
+<li><span class="menuref">nicht verschieben</span>: Die Wortbeitr&auml;ge bleiben an den Positionen an denen sie sind. Kommt also z. B. an 5. Stelle in einer Playlist ein Wortbeitrag so steht nach dem Shuffeln auch genau dieser Wortbeitrag wieder an 5. Stelle.
+<li><span class="menuref">an folgenden Titel koppeln</span>: Die Wortbeitr&auml;ge werden an die nachfolgenden Musiktitel gekoppelt: Werden beim Shuffeln Musiktitel verschoben so verschieben sich Wortbeitr&auml;ge die vor diesen Titeln platziert sind entsprechend mit. Diese Option sollte gew&auml;hlt werden wenn die Wortbeitr&auml;ge Anmoderationen nachfolgender Titel beinhalten.
+<li><span class="menuref">an vorherigen Titel koppeln</span>: Die Wortbeitr&auml;ge werden an die vorherigen Musiktitel gekoppelt: Werden beim Shuffeln Musiktitel verschoben so verschieben sich Wortbeitr&auml;ge die nach diesen Titeln platziert sind entsprechend mit. Diese Option sollte gew&auml;hlt werden wenn die Wortbeitr&auml;ge Information vorhergehenden Titeln beinhalten.
+</ul>
+</p>
+
+
+<p class="subheading2">
+Gebundene Jingles oder Wortbeitr&auml;ge
+</p>
+<p>
+Einen Sonderfall stellen Jingles oder Wortbeitr&auml;ge dar die an bestimmte Titel gebunden werden sollen und entweder vor oder nach den entsprechenden Titeln platziert werden sollen. Entsprechende Regeln lassen sich über <span class="menuref">Gebunden Jingles</span> konfigurieren.
+</p>
+<p>
+Du kannst entweder eigene Regeln f&uuml;r das ausw&auml;hlte Profil konfigurieren oder Regeln aus einem anderen Profil &uuml;bernehmen. Um Regeln aus einem anderen Profile zu &uuml;bernehmen wechsele auf den Reiter <span class="menuref">Allgemein</span> und w&auml;hlte unter <span class="menuref">Gebundene Jingles</span> das entsprechende Profil aus. Um eigene Regeln festzulegen w&auml;hle <span class="menuref">hier festlegen</span> aus.
+</p>
+<p>
+Die Regeln f&uuml;r gebundene Jingles k&ouml;nnen in Gruppen organisiert werden. F&uuml;r jede Gruppe kann ein Mindestabstand in Minuten konfiguriert werden. Angenommen Du hast mehrere Jingles die jeweils an bestimmte K&uuml;nstler gebunden werden, m&ouml;chtest aber nicht dass zwei solcher Jingles innerhalb einer halben Stunde vorkommen: Dann organisierst Du die Regeln f&uuml;r diese Jingles in einer Gruppe und setzt den Abstand auf 30 Minuten.
+</p>
+<p>
+Eine Regel legt f&uuml;r ein einzelnes Jingle oder einen Wortbeitrag fest an welche Titel es gebunden wird. Folgende Einstellungen sind verf&uuml;gbar:
+<ul>
+<li>Die <span class="menuref">Gruppe</span> zu der eine Regel geh&ouml;rt</li>
+<li>Die <span class="menuref">Position</span> - ob das Jingle oder der Wortbeitrag vor oder nach den entsprechenden Titeln platziert werden soll</li>
+<li>Der <span class="menuref">Typ</span> des Filters der passende Titel festlegt - m&ouml;glich sind K&uuml;nstler, K&uuml;nstler + Titel, Album oder Tag</li>
+<li>Der <span class="menuref">Name</span> des K&uuml;nstlers, Titels, Albums oder Tags an den das Jingle gebunden wird</li>
+<li>Der minimale <span class="menuref">Abstand</span> zwischen zwei Platzierungen dieses Jingles oder Wortbeitrags in Minuten</li>
+</ul>
+</p>
+<p>
+Wenn Regeln f&uuml;r K&uuml;nstler erstellt werden reicht ein Teil des Namens - d. h. eine Regel f&uuml;r &quot;Foo&quot; w&uuml;rde auch &quot;Foo feat. Bar&quot; akzeptieren. F&uuml;r Alben und K&uuml;nstler + Titel muss der gesamte Begriff passen - allerdings werden Gro&szlig;-/Kleinschreibung sowie Leer- und Sonderzeichen ignoriert. 
+</p>
+<p>
+Wenn durch eine Regel ein gebundenes Jingle an eine Position eingef&uuml;gt werde w&uuml;rde an der sich bereits ein Jingle befindet gibt es folgende M&ouml;glichkeiten:
+<ul>
+<li>Es werden beide Jingles beibehalten - wenn also etwa ein Jingle vor einem Titel eingef&uuml;gt werden soll und dort befindet sich schon ein Standardjingle wird das gebundene Jingle hinter das bestehende Jingle und vor den Titel eingef&uuml;gt.</li>
+<li>Das gebundene Jingle wird nicht eingef&uuml;gt.</li>
+<li>Das gebundene Jingle wird eingef&uuml;gt und das Standardjingle wird entfernt. Hier gilt jedoch eine Ausnahme: Wenn das bestehende Jingle das erste Jingle der Playlist ist und als solches nicht verschoben werden soll bleibt es stehen.</li>
+</ul>
+</p>
+<p class="hint">
+	Für das Shuffeln von Playlists auf dem Server gilt: Du musst die gebundenen Jingles in die Playlist einf&uuml;gen da beim Shuffeln keine Tracks verwendet werden k&ouml;nnen die nicht schon in der Playlist enhalten sind. Es wird empfohlen die Playlist automatisch bef&uuml;llen zu lassen.
+</p>
+
+
+<p class="subheading2">
+Werbetrigger
+</p>
+<img src="../images/einstellungen-playlists-adtrigger.jpg">
+<p>
+Wenn du nichts weiter konfigurierst wird auf dem Server der Standard-Ad-Trigger zu Standardzeiten in Deine Playlist eingef&uuml;gt. M&ouml;chtest Du die Zeiten selber kontrollieren, einen eigenen Trigger verwenden oder ein Jingle vor den Trigger setzen gehe in die Einstellungen zu <span class="menuref">Werbetrigger</span> und aktiviere <span class="menuref">Werbetrigger beim Shuffeln oder Generieren einf&uuml;gen</span>. 
+</p>
+<p>
+W&auml;hle die Zeiten aus zu denen Werbung gespielt werden soll. Die Positionen sind relativ zum Playlistanfang und wiederholen sich jede Stunde - d. h. bei 20 / 50 w&uuml;rde ein Trigger jeweils nach dem ersten Track platziert der 20 bzw 50 Minuten nach der vollen Stunde endet. Beachte bitte das in jeder vollen halben Stunde ein Trigger enthalten sein mu&szlig; und das der Mindestabstand 20 Minuten betragen mu&szlig; - sonst werden die Trigger auf dem Server verworfen.<br>
+Es wird empfohlen die Trigger nicht gegen Ende der vollen Stunde zu setzen weil sonst die Gefahr besteht dass ein lang laufender Ttiel das rechtzeitige Setzen des Triggers verhindert.
+</p>
+<p>
+Wenn ein Jingle als Werbetrenner vor den Trigger platziert werden soll w&auml;hle unter <span class="menuref">Werbetrenner</span> ein Jingle aus.
+</p>
+
+<p>
+W&auml;hle unter <span class="menuref">Werbetrigger</span> ein Jingle das als Ad-Trigger verwendet werden soll. Normalerweise kann das Standardjingle verwendet werden. M&ouml;chtest Du dass ein bestimmtes Jingle nach der Werbung l&auml;ft so verwende dieses Jingle als Ad-Trigger - es muss jedoch "START_AD_BREAK" als Artist oder Titel gesetzt sein. In dem Fall l&ouml;st das Jingle die Werbung aus, nach der Werbung l&auml;uft ist dann das Jingle zu h&ouml;ren.
+</p>
+<p>
+Beachte bei der Verwendung von eigenen Werbetrennern oder -triggern bitte dass nicht zwangsl&auml;ufig Werbung gespielt wird. Es kann also passieren dass die H&ouml;rer nur die Jingles, aber keine Werbung h&ouml;ren.
+</p>
+<p>
+Weiterhin kannst Du festlegen was passieren soll wenn an der Stelle wo ein Werbetrigger eingef&uuml;gt werden soll schon ein Jingle steht:
+<ul>
+	<li><span class="menuref">Jingle und Werbetrigger einf&uuml;gen</span> - beides wird eingef&uuml;gt</li>
+	<li><span class="menuref">nur Werbetrigger einf&uuml;gen</span> - Werbetrigger wird eingef&uuml;gt, Jingle wird verworfen</li>
+	<li><span class="menuref">Werbetrigger einen Song einf&uuml;gen</span> - Werbetrigger verschiebt sich nach hinten</li>
+</ul>
+</p>
+<p class="hint">
+	Für das Shuffeln von Playlists auf dem Server gilt: Du musst den Ad-Trigger und gegebenenfalls den Trenner in die Playlist einf&uuml;gen da beim Shuffeln keine Tracks verwendet werden k&ouml;nnen die nicht schon in der Playlist enhalten sind. Es wird empfohlen die Playlist automatisch bef&uuml;llen zu lassen.
+</p>
+
+<p class="subheading2">
+Normalisierung von K&uuml;nstlernamen
+</p>
+<img src="../images/profil-normalisierung.jpg">
+<p>
+	K&uuml;nstlernamen kommen h&auml;ufiger in verschiedenen Schreibeweisen vor. Dennoch sollte verschiedene Schreibweisen beim Shuffen oder Generieren von Playlists als ein und derselbe K&uuml;nstler gewertet werden um Abwechselung und die Einhaltung der GVL-Regeln zu gew&auml;hrleisten.
+</p>
+<p>
+	Stammt ein Titel von mehreren K&uuml;nstlern hat man h&auml;ufig ein Zeichen oder ein bestimmtes Schl&uuml;sselwort an dem sich er Name aus den Titelinformationen auftrennen l&auml;sst - das kann z. B. so etwas sei wie &quot;Artist One feat. Xyz&quot;.
+	<br>
+	Auf dem Reiter <span class="menuref">Normalisierung</span> kannst Du in der oberen Tabelle festlegen welche solche Trenner konfigurieren. Enth&auml;lt ein K&uuml;nstlername aus den Titelinformationen einen dieser Trenner dann wird dahinter abgeschnitten. Um bei dem &quot;feat&quot;-Beispiel zu bleiben: Aus &quot;Artist One feat. Xyz&quot; w&uuml;rde dann einfach &quot;Artist One&quot;, d. h. der Titel w&uuml;rde als ein Titel von &quot;Artist One&quot; gewertet. Was allerdings nicht geht ist den Titel zwei K&uuml;nstlern zuzurechnen - d. h. er kann nicht &quot;Arist One&quot; und &quot;Xyz&quot; zugerechnet werden.
+</p>
+<p>
+	Dar&uuml;ber hinaus k&ouml;nnen in der unteren Tabelle noch Gleichsetzungsregeln angelegt werden &uuml;ber die festgelegt wird das zwei Schreibweisen ein und derselbe K&uuml;nstler sind.	
+</p>
+
+
+<p class="subheading2">
+Gewichtung (nur beim Generieren)
+</p>
+<img src="../images/profil-gen-gewichtung.jpg">
+<p>
+	Wenn Du eine Playlist konfigurierst die durch Station Admin generiert werden soll kannst Du anhand von Tags und Filtern festlegen welche Titel h&auml;ufiger oder nicht so h&auml;ufig vorkommen sollen. Diese Tags steuern die Wahrscheinlichkeit mit der ein Titel ausgew&auml;hlt wird.	
+</p>
+<p>
+	Auf dem Reiter <span class="menuref">Gewichtung</span> kannst Du &uuml;ber den Schieberegler festlegen wie stark diese Gewichtungsregeln wirken sollen. Schiebst Du den Regler weiter nach rechts wird die Wirkung st&auml;rker - d. h. die Wahrscheinlichkeit das mit &quot;sehr viel h&auml;ufiger&quot; oder &quot;h&auml;ufiger&quot; markierte Titel auch wirklich in die generierte Playlist aufgenommen werden steigt. 
+</p>
+<p>
+	Desweiteren kannst Du globale Gewichtungsregeln angeben die f&uuml;r alle generierten Playlists greifen. Diese werden zus&auml;tzlich zu den Regeln angwendet die auf Ebene der Playlists konfiguriert sind.
+</p>
+
+<p class="subheading2">
+Vorauswahl (nur beim Generieren)
+</p>
+<img src="../images/profil-gen-vorauswahl.jpg">
+<p>
+	Beim Generieren von Playlists l&auml;sst sich steuern wie viele Tracks eines K&uuml;nstlers maximal verwendet werden sollen. Zum einen kann man ein globales Limit angeben, zum anderen kann man aber auch individuelle Limits f&uuml;r einzelne K&uuml;nstler angeben. Du kannst z. B. sagen dass generall bis zu 3 Tracks eines K&uuml;nstlers in einer Playlist vorkommen d&uuml;rfen, Du von &quot;Artist One&quot; aber maximal einen Titel spielen m&ouml;chtest. 
+</p>
+<p>
+	Wenn denn durch ein solches Limit eine Vorauswahl getroffen werden muss weil es mehr Tracks f&uuml;r einen bestimmmten K&uuml;nstler gibt dann stellt sich als n&auml;chstes die Frage ob hier irgendwelche Titel bevorzug werden sollen. Wenn nichts weiter konfiguriert ist gelangt eine vollkommen zuf&auml;llige Auswahl an Titelen dieses K&uuml;nstlers in die Auswahl f&uuml;r die Playlist. Du kannst aber auch anhand von Tags Gewichtungen angeben. Du kannst also z. B. &uuml;ber ein Tag die Top-Tracks der K&uuml;nstler markieren und diese bei der Vorauswahl bevorzugen.
+</p>
+
+</body>
+</html>
