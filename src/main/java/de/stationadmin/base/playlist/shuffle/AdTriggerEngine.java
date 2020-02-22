@@ -20,8 +20,8 @@ public class AdTriggerEngine implements PlaylistEnhancer {
   }
 
   private TrackRegistry trackRegistry;
-  private int position1 = 0;
-  private int position2 = 30;
+  private int position1 = 20;
+  private int position2 = 50;
   private int adSeparatorId = -1;
   private int adTriggerId = TrackRegistry.STANDARD_AD_TRIGGER_ID;
   private AdJingleCollisionStrategy jingleCollisionStrategy = AdJingleCollisionStrategy.KEEP_BOTH;

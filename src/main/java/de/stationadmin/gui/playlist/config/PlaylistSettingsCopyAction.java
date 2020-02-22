@@ -48,7 +48,7 @@ public class PlaylistSettingsCopyAction extends AbstractAction {
     this.ctx = ctx;
     this.model = model;
     this.putValue(Action.SMALL_ICON, ctx.getIcon("editcopy.png"));
-    this.putValue(Action.SHORT_DESCRIPTION, "Einstellung von anderer Playlists kopieren");
+    this.putValue(Action.SHORT_DESCRIPTION, "Einstellung von anderer Playlist kopieren");
     this.setEnabled(model.getBean().getType() == PlaylistType.ONLINE);
   }
 

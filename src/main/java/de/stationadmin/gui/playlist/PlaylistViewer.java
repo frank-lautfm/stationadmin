@@ -64,6 +64,7 @@ import de.stationadmin.base.playlist.exporter.PlaylistBackupExporter;
 import de.stationadmin.base.playlist.exporter.PlaylistCSVExporter;
 import de.stationadmin.base.playlist.exporter.PlaylistExcelExporter;
 import de.stationadmin.base.playlist.exporter.PlaylistTxtExporter;
+import de.stationadmin.base.playlist.profile.PlaylistProfile;
 import de.stationadmin.base.playlist.shuffle.AdTriggerEngine;
 import de.stationadmin.base.playlist.shuffle.PlaylistGenerator;
 import de.stationadmin.base.playlist.shuffle.PlaylistShuffler;
@@ -997,7 +998,22 @@ public class PlaylistViewer extends JPanel {
       Playlist playlist = (Playlist) playlistHolder.getValue();
       if (playlist != null) {
         AdTriggerEngine engine = new AdTriggerEngine(ctx.getAdminClient().getTrackService().getTrackRegistry());
-        engine.initialize(ctx.getAdminClient().getPlaylistService().getProfile(playlist.getProfileId()));
+        
+        List<PlaylistProfile> profiles = ctx.getAdminClient().getPlaylistService().getProfiles();
+        List<PlaylistProfile> profilesWithTrigger = new ArrayList<>();
+        for(PlaylistProfile p : profiles) {
+          if(p.getAdTrigger() != null && p.getAdTrigger().getPos1() > -1) {
+            profilesWithTrigger.add(p);
+          }
+        }
+        profilesWithTrigger.sort((p1, p2) -> Integer.compare(p1.getType().ordinal(), p2.getType().ordinal()));
+        if(profilesWithTrigger.size() > 0) {
+          engine.initialize(profilesWithTrigger.get(0));
+        }
+        else {
+          engine.setPosition1(15);
+          engine.setPosition1(45);
+        }
         engine.setClearExistingTriggers(true);
         ArrayList<BasicTrack> tracks = new ArrayList<BasicTrack>();
         for (Entry entry : playlist.getEntries()) {
