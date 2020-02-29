@@ -567,8 +567,8 @@ public class LogAnalyzerService implements Service {
       cal.add(Calendar.DAY_OF_MONTH, -1);
       String date = dateFmt.format(cal.getTime());
       String filename = this.logCacheDir + "station_dailysummary" + "-" + date + ".log";
-
-      if (!new File(filename).exists() && stats.getTlhLog().containsKey(date)) {
+      
+      if (stats.getTlhLog().containsKey(date)) {
         StringBuilder buf = new StringBuilder();
 
         Integer listeners = stats.getSwitchonsLog().get(date);
@@ -586,6 +586,9 @@ public class LogAnalyzerService implements Service {
         buf.append("duration\t" + hours + "\n");
         buf.append("avg\t" + avg + "\n");
         buf.append("uniqs\t" + uniqs + "\n");
+        if(i == 0) {
+          buf.append("reload");
+        }
         FileUtils.writeStringToFile(new File(filename), buf.toString(), "UTF-8");
       }
 
