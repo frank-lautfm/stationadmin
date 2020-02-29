@@ -421,7 +421,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     if ((playlist.getId() == -1 || playlist.isModified() || playlist.isMetaDataModified()) && playlist.getType().isSaveToServerSupported()) {
       this.savePlaylistToServer(playlist);
     }
-    this.savePlaylistAs(playlist, playlist.getType() == PlaylistType.ONLINE ? Integer.toString(playlist.getId()) : playlist.getName());
+    this.savePlaylistAs(playlist, playlist.getType() == PlaylistType.ONLINE ? Integer.toString(playlist.getId()) : playlist.getFileName());
   }
 
   /**

@@ -17,6 +17,7 @@ Version 5.0.0
 [#] Änderung der internen Dateiformate für Konfiguration und Sendepläne
 [+] Rohansicht (Json-Format) der Playlist aus dem Kontextmenü heraus
 [*] Ermittlung des Streamingservers für Stationen die mit Bindestrich beginnen funktionierte nicht
+[*] Fehler beim Kopieren ins Archiv von Playlists mit / oder \ im Namen behoben
 
 Version 4.11.2
 --------------

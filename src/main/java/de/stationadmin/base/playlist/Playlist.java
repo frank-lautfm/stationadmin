@@ -285,6 +285,32 @@ public class Playlist extends AbstractBean {
     return name;
   }
 
+  String getFileName() {
+    if (this.type == PlaylistType.ARCHIVED) {
+      StringBuilder buf = new StringBuilder();
+      for (int i = 0; i < this.name.length(); i++) {
+        char c = this.name.charAt(i);
+        switch (c) {
+        case '/':
+        case '\\':
+        case ':':
+        case '?':
+          buf.append("_");
+          break;
+        default:
+          buf.append(c);
+          break;
+        }
+      }
+
+      return buf.toString();
+
+    } else {
+      return Integer.toString(this.id);
+    }
+
+  }
+
   /**
    * Gets the number of different artists used in this playlist
    * 
@@ -300,7 +326,7 @@ public class Playlist extends AbstractBean {
     }
     return artists.size();
   }
-  
+
   public String getProfileId() {
     this.ensureLocalDataExists();
     return localData.getProfileId();
@@ -822,7 +848,7 @@ public class Playlist extends AbstractBean {
       this.shuffleType = map.get("shuffleType");
     }
   }
-  
+
   public void setProfileId(String profileId) {
     this.ensureLocalDataExists();
     String old = this.localData.getProfileId();
@@ -1149,8 +1175,7 @@ public class Playlist extends AbstractBean {
           localData.setGenerateAdvices(advices.toArray(new String[advices.size()]));
         }
         this.shuffleOpts = null;
-      }
-      else {
+      } else {
         this.shuffleOpts = shuffleOpts;
         this.metaDataModified = true;
       }
