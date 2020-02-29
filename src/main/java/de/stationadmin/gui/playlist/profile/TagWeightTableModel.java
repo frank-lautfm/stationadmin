@@ -95,6 +95,9 @@ public class TagWeightTableModel extends AbstractTableModel {
   void updateModel() {
     Set<String> used = new HashSet<String>();
     this.tagWeights.clear();
+    if(this.entriesMap != null) {
+      this.entriesMap.clear();
+    }
     for(TagWeight entry : this.entries) {
       if(StringUtils.isNotEmpty(entry.getTag()) && !used.contains(entry.getTag()) && entry.getWeight() != 0) {
         this.tagWeights.add(entry);
