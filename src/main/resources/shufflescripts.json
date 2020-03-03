@@ -21,7 +21,7 @@
       "key":"StationAdmin",
       "automationAlgorithm": "stationadmin_shuffle",
       "optsKey":"StationAdmin",
-      "file":"StationAdmin_v1_2.js",
+      "file":null,
       "defaultOpts":{
 	      "avoidRepeat": 2
       },
@@ -31,7 +31,14 @@
       "key":"BlockSelect",
       "automationAlgorithm": "blockselect",
       "optsKey":"BlockSelect",
-      "file":"BlockSelect_v1.js",
+      "file":null,
+      "defaultOpts":null,
+      "supportsGlobalOpts":false
+   },
+   {  
+      "key":"resume",
+      "automationAlgorithm": "Resume",
+      "optsKey":null,
       "defaultOpts":null,
       "supportsGlobalOpts":false
    }
