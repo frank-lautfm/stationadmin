@@ -3,7 +3,6 @@
  */
 package de.stationadmin.gui;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
@@ -12,8 +11,7 @@ import java.awt.event.ComponentEvent;
 import java.util.TimerTask;
 import java.util.prefs.Preferences;
 
-import javax.swing.JComponent;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 
 import de.stationadmin.gui.util.SwingTools;
 
@@ -21,42 +19,32 @@ import de.stationadmin.gui.util.SwingTools;
  * @author Frank
  *
  */
-public class StationAdminFrame extends JFrame {
+public class StationAdminDialog extends JDialog {
   private static final long serialVersionUID = -6620750221420097655L;
   protected ClientContext ctx;
   private String name = null;
+  private WindowSizePositionPersister persisterTask;
   private boolean windowSizePositionChanged = false;
-  
+
   /**
    * @param ctx
    * @throws HeadlessException
    */
-  public StationAdminFrame(ClientContext ctx) throws HeadlessException {
+  public StationAdminDialog(ClientContext ctx) throws HeadlessException {
     this(ctx, null);
   }
-  
-  public StationAdminFrame(ClientContext ctx, String name) throws HeadlessException {
+
+  public StationAdminDialog(ClientContext ctx, String name) throws HeadlessException {
     super();
     this.ctx = ctx;
     this.name = name;
     this.initFrame();
   }
 
-
-  public StationAdminFrame(ClientContext ctx, String name, JComponent content) throws HeadlessException {
-    super();
-    this.ctx = ctx;
-    this.name = name;
-    this.getContentPane().setLayout(new BorderLayout());
-    this.getContentPane().add(content, BorderLayout.CENTER);
-    this.setTitle(ctx.getTextProvider().getString("tab." + name));
-    this.initFrame();
-  }
-  
   protected Dimension getDefaultSize() {
     return new Dimension(900, 712);
   }
-  
+
   private void initFrame() {
     String prefix = this.name != null ? this.name + ".window." : "window.";
     Dimension defaultDim = getDefaultSize();
@@ -64,7 +52,7 @@ public class StationAdminFrame extends JFrame {
     if (Preferences.userRoot().getInt(prefix + "x", -1) > 0) {
       this.setLocation(Preferences.userRoot().getInt(prefix + "x", 10), Preferences.userRoot().getInt(prefix + "y", 10));
     } else {
-      SwingTools.centerWithin(ctx.getRootWindow(), this);
+      SwingTools.centerOnScreen(this);
     }
 
     this.addComponentListener(new ComponentAdapter() {
@@ -80,10 +68,10 @@ public class StationAdminFrame extends JFrame {
       }
 
     });
-    this.ctx.getAdminClient().getSessionCtx().getTimer().schedule(new WindowSizePositionPersister(), 5000, 5000);
-    
-    this.setIconImage(Toolkit.getDefaultToolkit().getImage(
-        this.getClass().getClassLoader().getResource("icons/trayicon.png")));
+    persisterTask = new WindowSizePositionPersister();
+    this.ctx.getAdminClient().getSessionCtx().getTimer().schedule(persisterTask, 5000, 5000);
+
+    this.setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getClassLoader().getResource("icons/trayicon.png")));
 
   }
 
@@ -102,6 +90,15 @@ public class StationAdminFrame extends JFrame {
 
     }
 
+  }
+
+  public void dispose() {
+    super.dispose();
+    try {
+      this.persisterTask.cancel();
+    } catch (Exception e) {
+
+    }
   }
 
 }

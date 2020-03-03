@@ -4,6 +4,7 @@
 package de.stationadmin.gui.playlist.tools;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import de.stationadmin.base.playlist.util.PlaylistEntry;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackComparator;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.StationAdminDialog;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
 import de.stationadmin.gui.playlist.PlaylistSelector;
 import de.stationadmin.gui.playlist.SimplePlaylistListCellRender;
@@ -42,14 +44,12 @@ import de.stationadmin.gui.util.SwingTools;
  * 
  * @author Frank Korf
  */
-public class DupeFinderDlg extends JDialog {
+public class DupeFinderDlg extends StationAdminDialog {
   private static final long serialVersionUID = 7874344180522967799L;
-  private ClientContext ctx;
   private DupeFinder dupeFinder = new DupeFinder();
 
   public DupeFinderDlg(ClientContext ctx) {
-    super();
-    this.ctx = ctx;
+    super(ctx, "DupeFinderDlg");
     this.init();
   }
 
@@ -69,8 +69,7 @@ public class DupeFinderDlg extends JDialog {
       private static final long serialVersionUID = -2990430763178027052L;
 
       @Override
-      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
-          boolean cellHasFocus) {
+      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         if (value instanceof BasicTrack) {
           this.setFont(ComponentFactory.boldLabelFont);
@@ -91,10 +90,8 @@ public class DupeFinderDlg extends JDialog {
         if (!e.getValueIsAdjusting()) {
           if (list.getSelectedValue() instanceof PlaylistEntry) {
             PlaylistEntry entry = (PlaylistEntry) list.getSelectedValue();
-            BasicTrack title = ctx.getAdminClient().getTrackService().getTrackRegistry()
-                .getTrack(entry.getEntry().getTrackId());
-            ctx.getJumpHandler().jumpTo(
-                new PlaylistEntryJumpTarget(entry.getPlaylist(), title, entry.getEntry().getStart()));
+            BasicTrack title = ctx.getAdminClient().getTrackService().getTrackRegistry().getTrack(entry.getEntry().getTrackId());
+            ctx.getJumpHandler().jumpTo(new PlaylistEntryJumpTarget(entry.getPlaylist(), title, entry.getEntry().getStart()));
           }
         }
       }
@@ -103,9 +100,7 @@ public class DupeFinderDlg extends JDialog {
 
     this.getContentPane().add(new JScrollPane(list), cc.xy(4, 2, CellConstraints.FILL, CellConstraints.FILL));
 
-    this.setSize(600, 400);
     this.setTitle(ctx.getTextProvider().getString("dupefinder.title"));
-    SwingTools.centerOnScreen(this);
 
     selectionHolder.addValueChangeListener(new PropertyChangeListener() {
 
@@ -145,6 +140,11 @@ public class DupeFinderDlg extends JDialog {
 
     this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
+  }
+
+  @Override
+  protected Dimension getDefaultSize() {
+    return new Dimension(600, 400);
   }
 
 }

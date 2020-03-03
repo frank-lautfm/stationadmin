@@ -5,14 +5,13 @@ package de.stationadmin.gui.playlist.tools;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import javax.swing.JFrame;
 
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.AbstractHighlighter;
@@ -23,9 +22,9 @@ import com.jgoodies.binding.value.ValueHolder;
 import de.stationadmin.base.StationAdminClient;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.StationAdminFrame;
 import de.stationadmin.gui.playlist.PlaylistViewer;
 import de.stationadmin.gui.util.ComponentFactory;
-import de.stationadmin.gui.util.SwingTools;
 import de.stationadmin.lfm.backend.LogEntry;
 
 /**
@@ -36,17 +35,19 @@ import de.stationadmin.lfm.backend.LogEntry;
  *
  * @author Frank Korf
  */
-public class CurrentPlaylistWindow extends JFrame {
+public class CurrentPlaylistWindow extends StationAdminFrame {
   private static final long serialVersionUID = -8958610268442701703L;
 
   public CurrentPlaylistWindow(ClientContext ctx, Playlist playlist) throws HeadlessException {
-    super();
+    super(ctx, "CurrentPlaylist");
     PlaylistViewer viewer = new CurrentPlaylistViewer(ctx, playlist);
     this.getContentPane().setLayout(new BorderLayout());
     this.getContentPane().add(viewer, BorderLayout.CENTER);
-    this.setSize(500, 600);
     this.setTitle("Aktuelle Playlist: " + playlist.getName());
-    SwingTools.centerWithin(ctx.getRootWindow(), this);
+  }
+  
+  public Dimension getDefaultSize() {
+    return new Dimension(500, 600);
   }
 
   public static class CurrentPlaylistViewer extends PlaylistViewer {

@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -78,6 +79,7 @@ import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.tag.TagNameComparator;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.StationAdminFrame;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.mp3explorer.MP3DirectoryTableModel.Column;
 import de.stationadmin.gui.track.SearchPanel;
@@ -92,9 +94,8 @@ import de.stationadmin.gui.util.SwingTools;
  * 
  * @author Frank Korf
  */
-public class MP3Explorer extends JFrame {
+public class MP3Explorer extends StationAdminFrame {
   private static final long serialVersionUID = 9151876964742449054L;
-  private ClientContext ctx;
   private TextProvider textProvider;
   private ValueHolder mp3Holder = new ValueHolder();
   private TrackImportHandler importHandler;
@@ -108,7 +109,7 @@ public class MP3Explorer extends JFrame {
   private Map<String, Set<File>> taggedFiles = new HashMap<String, Set<File>>();
 
   public MP3Explorer(ClientContext ctx) {
-    this.ctx = ctx;
+    super(ctx, "MP3Explorer");
     this.textProvider = ctx.getTextProvider();
     this.mp3Launcher = new MP3Launcher(ctx);
     this.mp3TableModel = new MP3DirectoryTableModel(ctx.getTextProvider(), ctx.getAdminClient().getTrackService(), ctx.getAdminClient()
@@ -124,11 +125,13 @@ public class MP3Explorer extends JFrame {
     this.getContentPane().add(this.createDetailsPanel(), BorderLayout.CENTER);
     this.initMenu();
 
-    this.setSize(800, 700);
     this.setTitle("MP3 Explorer");
-
-    SwingTools.centerOnScreen(this);
   }
+  
+  protected Dimension getDefaultSize() {
+    return new Dimension(800, 700);
+  }
+
 
   private void initMenu() {
     JMenuBar menuBar = new JMenuBar();

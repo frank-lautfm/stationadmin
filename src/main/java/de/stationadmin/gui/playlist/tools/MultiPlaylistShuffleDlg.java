@@ -3,6 +3,7 @@
  */
 package de.stationadmin.gui.playlist.tools;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
@@ -16,7 +17,6 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -40,6 +40,7 @@ import de.stationadmin.base.playlist.shuffle.PlaylistGenerator;
 import de.stationadmin.base.playlist.shuffle.PlaylistShuffler;
 import de.stationadmin.base.util.PlaylistGeneratorFactory;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.StationAdminFrame;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.SimplePlaylistListCellRender;
 import de.stationadmin.gui.util.AppUtils;
@@ -51,9 +52,8 @@ import de.stationadmin.gui.util.ThreadedAction;
  * @author Frank Korf
  * 
  */
-public class MultiPlaylistShuffleDlg extends JFrame {
+public class MultiPlaylistShuffleDlg extends StationAdminFrame {
   private static final long serialVersionUID = 7485702692678090322L;
-  private ClientContext ctx;
   private TextProvider textProvider;
   private ValueModel hoursModel = new ValueHolder(24);
   private ValueModel generate = new ValueHolder(false);
@@ -65,8 +65,7 @@ public class MultiPlaylistShuffleDlg extends JFrame {
   private ValueModel titlePenaltyStrictEnabled = new ValueHolder(false);
 
   public MultiPlaylistShuffleDlg(ClientContext ctx) throws HeadlessException {
-    super();
-    this.ctx = ctx;
+    super(ctx, "MultiPlaylistShuffleDlg");
     this.textProvider = ctx.getTextProvider();
     this.init();
   }
@@ -165,9 +164,12 @@ public class MultiPlaylistShuffleDlg extends JFrame {
       this.getContentPane().add(buttonPanel, cc.xy(2, 8, CellConstraints.CENTER, CellConstraints.CENTER));
     }
 
-    this.setSize(400, 400);
     this.setTitle(textProvider.getString("multishuffle.title"));
-    AppUtils.centerWithinRoot(this);
+  }
+  
+  @Override
+  protected Dimension getDefaultSize() {
+    return new Dimension(400, 400);
   }
 
   private void updatePlaylists() {

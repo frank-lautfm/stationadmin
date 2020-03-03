@@ -1,5 +1,6 @@
 package de.stationadmin.gui.playlist.tools;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -8,7 +9,6 @@ import java.util.Collections;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -26,17 +26,17 @@ import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.PlaylistNameCompator;
 import de.stationadmin.base.playlist.util.PlaylistFiller;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.StationAdminDialog;
 import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.DisposeAction;
 
-public class AutoFillPlaylistsDlg extends JDialog {
+public class AutoFillPlaylistsDlg extends StationAdminDialog {
   private static final long serialVersionUID = 5509519002944425083L;
-  private ClientContext ctx;
   private JList<Playlist> list;
   private PlaylistFiller filler;
 
   public AutoFillPlaylistsDlg(ClientContext ctx) {
-    this.ctx = ctx;
+    super(ctx, "AutoFill");
     this.filler = new PlaylistFiller(ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getTrackService(), ctx.getAdminClient().getTagManager());
     this.init();
   }
@@ -72,11 +72,14 @@ public class AutoFillPlaylistsDlg extends JDialog {
       this.getContentPane().add(buttonPanel, cc.xy(2, 6, CellConstraints.CENTER, CellConstraints.CENTER));
     }
 
-    this.setSize(400, 400);
     this.setTitle(ctx.getString("autofill.dlg.title"));
-    AppUtils.centerWithinRoot(this);
-
   }
+  
+  @Override
+  protected Dimension getDefaultSize() {
+    return new Dimension(400, 400);
+  }
+
 
   private class FillAction extends AbstractAction {
     private static final long serialVersionUID = 4730621907525954549L;

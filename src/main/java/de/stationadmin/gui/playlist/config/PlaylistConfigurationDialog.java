@@ -25,7 +25,6 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -57,6 +56,7 @@ import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.ShuffleScriptMeta;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.StationAdminDialog;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PlaylistEntryJumpTarget;
 import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorAdviceConfigurationPanel;
@@ -77,7 +77,7 @@ import de.stationadmin.gui.util.SwingTools;
  * 
  * @author Frank Korf
  */
-public class PlaylistConfigurationDialog extends JDialog {
+public class PlaylistConfigurationDialog extends StationAdminDialog {
 
   private static final long serialVersionUID = 3125298975653805674L;
 
@@ -91,7 +91,6 @@ public class PlaylistConfigurationDialog extends JDialog {
   private static final int GENERATE_ADVICE = 32;
   private static final int GENERATE_NEWS = 128;
 
-  private ClientContext ctx;
   private PlaylistService playlistService;
   private TextProvider textProvider;
   private PlaylistConfigurationModel model;
@@ -102,7 +101,7 @@ public class PlaylistConfigurationDialog extends JDialog {
   private int nodeStatus = 0;
 
   public PlaylistConfigurationDialog(ClientContext ctx, PlaylistConfigurationModel model) {
-    this.ctx = ctx;
+    super(ctx, "PlaylistCfg");
     this.textProvider = ctx.getTextProvider();
     this.playlistService = ctx.getAdminClient().getPlaylistService();
     this.clientCfgService = ctx.getAdminClient().getClientConfigService();
@@ -179,8 +178,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     }
 
     // shuffle
-    if(model.getBean() != null && model.getBean().getType() == PlaylistType.ONLINE)
-    {
+    if (model.getBean() != null && model.getBean().getType() == PlaylistType.ONLINE) {
 
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.trackOrder")), cc.xy(2, row));
       SelectionInList<TrackOrderOption> trackOrderSelection = new SelectionInList<>(TrackOrderOption.values(), model.getTrackOrderType());
@@ -238,8 +236,7 @@ public class PlaylistConfigurationDialog extends JDialog {
     }
 
     // profile
-    if(model.getBean() != null && model.getBean().getType() == PlaylistType.ONLINE)
-    {
+    if (model.getBean() != null && model.getBean().getType() == PlaylistType.ONLINE) {
       SelectionInList<String> profileSelection = new SelectionInList<>(model.getProfileListModel(), model.getBufferedModel("profileId"));
       final JComboBox<String> profileCmb = BasicComponentFactory.createComboBox(profileSelection, new DefaultListCellRenderer() {
         private static final long serialVersionUID = 8912776835119146763L;
@@ -259,13 +256,13 @@ public class PlaylistConfigurationDialog extends JDialog {
 
       panel.add(new JLabel(this.textProvider.getString("playlistcfg.property.profile")), cc.xy(2, row));
       panel.add(profileCmb, cc.xy(4, row));
-      profileCmb.setEnabled((Boolean)model.getProfilesEnabled().getValue());
+      profileCmb.setEnabled((Boolean) model.getProfilesEnabled().getValue());
       model.getProfilesEnabled().addValueChangeListener(new PropertyChangeListener() {
-        
+
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-          profileCmb.setEnabled((Boolean)evt.getNewValue());
-          
+          profileCmb.setEnabled((Boolean) evt.getNewValue());
+
         }
       });
       row += 2;
@@ -520,13 +517,12 @@ public class PlaylistConfigurationDialog extends JDialog {
       this.getContentPane().add(buttonPanel, cc.xywh(2, 6, 3, 1, CellConstraints.CENTER, CellConstraints.CENTER));
     }
 
-    // Dimension prefSize = this.getPreferredSize();
-    // this.setSize(Math.max(400, (int) prefSize.getWidth() + 30), (int)
-    // prefSize.getHeight() + 80);
-    this.setSize(650, 550);
     this.setTitle(textProvider.getString("playlistcfg.title"));
-    SwingTools.centerWithin(ctx.getRootWindow(), this);
 
+  }
+
+  protected Dimension getDefaultSize() {
+    return new Dimension(650, 550);
   }
 
   private class ColorButton extends JLabel {

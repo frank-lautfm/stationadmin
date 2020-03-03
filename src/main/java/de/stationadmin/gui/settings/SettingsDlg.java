@@ -1,6 +1,7 @@
 package de.stationadmin.gui.settings;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -22,7 +23,6 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -50,20 +50,19 @@ import de.stationadmin.base.Autosynchronisation;
 import de.stationadmin.base.Settings;
 import de.stationadmin.base.backup.BackupFrequency;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.StationAdminDialog;
 import de.stationadmin.gui.util.DisposeAction;
 import de.stationadmin.gui.util.HintLabel;
 import de.stationadmin.gui.util.Option;
-import de.stationadmin.gui.util.SwingTools;
 import de.stationadmin.lfm.backend.LautfmAdminService;
 
 @SuppressWarnings("rawtypes")
-public class SettingsDlg extends JDialog {
+public class SettingsDlg extends StationAdminDialog {
   private static final long serialVersionUID = -1412608764831045129L;
-  private ClientContext ctx;
   private PresentationModel<Settings> model;
 
   public SettingsDlg(ClientContext ctx) {
-    this.ctx = ctx;
+    super(ctx, "SettingsDlg");
     this.model = new PresentationModel<Settings>(ctx.getAdminClient().getSettings());
     this.init();
   }
@@ -100,11 +99,17 @@ public class SettingsDlg extends JDialog {
 
     this.getContentPane().add(buttonPanel, cc.xy(2, 4, CellConstraints.CENTER, CellConstraints.FILL));
 
-    // Dimension pref = this.getContentPane().getPreferredSize();
-    this.setSize(650, 500);
+    /*
+    this.setSize(680, 550);
     this.setTitle(ctx.getTextProvider().getString("settings.title"));
     SwingTools.centerOnScreen(this);
+    */
 
+  }
+  
+  @Override
+  protected Dimension getDefaultSize() {
+    return new Dimension(680,  550);
   }
 
   private void initTabs(JTabbedPane tabPane) {

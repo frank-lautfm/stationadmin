@@ -4,6 +4,7 @@
 package de.stationadmin.gui.tag;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -13,7 +14,6 @@ import java.io.IOException;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -37,16 +37,15 @@ import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.base.tag.Tag;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.gui.ClientContext;
-import de.stationadmin.gui.util.SwingTools;
+import de.stationadmin.gui.StationAdminFrame;
 
 /**
  * 
  * @author Frank Korf
  * 
  */
-public class TagManagerDlg extends JFrame {
+public class TagManagerDlg extends StationAdminFrame {
   private static final long serialVersionUID = -8023463627796934049L;
-  private ClientContext ctx;
   private TagManager tagManager;
   private ValueHolder selection = new ValueHolder();
 
@@ -56,8 +55,7 @@ public class TagManagerDlg extends JFrame {
   private DynamicTagEditor dynamicTagEditor;
 
   public TagManagerDlg(ClientContext ctx) {
-    super();
-    this.ctx = ctx;
+    super(ctx, "TagManager");
     this.tagManager = ctx.getAdminClient().getTagManager();
     this.init();
   }
@@ -163,9 +161,10 @@ public class TagManagerDlg extends JFrame {
       this.add(mainPanel, new CellConstraints(4, 2, CellConstraints.FILL, CellConstraints.FILL));
 
     }
-
-    this.setSize(600, 400);
-    SwingTools.centerWithin(ctx.getRootWindow(), this);
+  }
+  
+  protected Dimension getDefaultSize() {
+    return new Dimension(600, 400);
   }
 
   private class AddAction extends AbstractAction {
