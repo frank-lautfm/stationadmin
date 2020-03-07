@@ -10,6 +10,7 @@ Station Admin für laut.fm - Änderungen
 Version 5.0.1
 -------------
 [#] Mehr Fenster / Dialoge merken sich Position und Größe
+[*] Löschen von Archiv-Playlists mit /, \, : oder ? im Namen funktionierte nicht
 [+] Shuffle-Verfahren "Originalreihenfolge mit Fortsetzung"
 
 Version 5.0.0

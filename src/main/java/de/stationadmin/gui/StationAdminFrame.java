@@ -63,8 +63,11 @@ public class StationAdminFrame extends JFrame {
     this.setSize(Preferences.userRoot().getInt(prefix + "w", defaultDim.width), Preferences.userRoot().getInt(prefix + "h", defaultDim.height));
     if (Preferences.userRoot().getInt(prefix + "x", -1) > 0) {
       this.setLocation(Preferences.userRoot().getInt(prefix + "x", 10), Preferences.userRoot().getInt(prefix + "y", 10));
-    } else {
+    } else if(ctx.getRootWindow() != null) {
       SwingTools.centerWithin(ctx.getRootWindow(), this);
+    }
+    else {
+      SwingTools.centerOnScreen(this);
     }
 
     this.addComponentListener(new ComponentAdapter() {

@@ -119,12 +119,12 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
         throw new IOException("Unable to delete " + file);
       }
       this.ctx.getServer().deletePlaylist(ctx.getStationId(), playlist.getId());
-    }
-
-    File file = new File(this.dirArchive + File.separatorChar + playlist.getName() + ".lfm");
-    if (file.exists()) {
-      if (!file.delete()) {
-        throw new IOException("Unable to delete " + file);
+    } else {
+      File file = new File(this.dirArchive + File.separatorChar + playlist.getFileName() + ".lfm");
+      if (file.exists()) {
+        if (!file.delete()) {
+          throw new IOException("Unable to delete " + file);
+        }
       }
     }
 
@@ -812,7 +812,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
    * @param profileId id of the profile to read optios from
    */
   public void assignProfileOpts(Map<String, Object> opts, String profileId) {
-    if(opts == null) {
+    if (opts == null) {
       return;
     }
 
