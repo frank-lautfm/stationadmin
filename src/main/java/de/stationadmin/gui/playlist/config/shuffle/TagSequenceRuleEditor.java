@@ -30,6 +30,7 @@ import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
+import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.playlist.config.PlaylistConfigurationModel;
 import de.stationadmin.gui.playlist.config.generate.TagSequenceEditor;
@@ -127,8 +128,12 @@ public class TagSequenceRuleEditor extends JPanel {
     JPanel panel = new JPanel(new FormLayout("75dlu,2dlu,pref:grow", "pref,3dlu,20dlu,3dlu,pref"));
     CellConstraints cc = new CellConstraints();
 
-    List<String> tagList = ctx.getAdminClient().getTagManager().getTags();
-    String[] tags = tagList.toArray(new String[tagList.size()]);
+    List<StaticTag> tagList = ctx.getAdminClient().getTagManager().getStaticTags();
+    tagList.sort((c1, c2) -> c1.getName().compareToIgnoreCase(c2.getName()));
+    String[] tags = new String[tagList.size()];
+    for(int i = 0; i < tagList.size(); i++) {
+      tags[i] = tagList.get(i).getName();
+    }
 
     Boolean[] options = new Boolean[] { Boolean.TRUE, Boolean.FALSE };
     SelectionInList<Boolean> optionSelection = new SelectionInList<Boolean>(options, this.tagAdviceMode);

@@ -7,6 +7,11 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
+Version 5.1.0
+-------------
+[*] Keine Filter als Auswahl für Titelabfolge-Regeln für das Shuffeln auf dem Server
+
+
 Version 5.0.1
 -------------
 [#] Mehr Fenster / Dialoge merken sich Position und Größe
