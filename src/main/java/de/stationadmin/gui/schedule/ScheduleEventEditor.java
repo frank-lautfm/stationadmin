@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXTable;
 
@@ -72,8 +73,8 @@ public class ScheduleEventEditor extends JPanel {
 
       final JXTable table = new JXTable(tableModel);
 
-      int timeWidth = ComponentFactory.getTableColumnWidthTime();
-      int dateWidth = ComponentFactory.getTableColumnWidthDate();
+      int timeWidth = ComponentFactory.getTableFontWidth(15);
+      int dateWidth = ComponentFactory.getTableFontWidth(20);
       table.getColumnModel().getColumn(Column.STARTDATE.ordinal()).setPreferredWidth(dateWidth);
       table.getColumnModel().getColumn(Column.STARTDATE.ordinal()).setMaxWidth(dateWidth);
       table.getColumn(Column.STARTDATE.ordinal()).setCellRenderer(new DateTableCellRenderer(new SimpleDateFormat(ctx.getTextProvider().getString("extDateFormat"))));
@@ -148,8 +149,10 @@ public class ScheduleEventEditor extends JPanel {
     int row = 2;
 
     panel.add(new JLabel(ctx.getString("scheduleeditor.event.create.date")), cc.xy(2, row));
+    
+    String hourWidth = SystemUtils.IS_OS_LINUX ? "35dlu" : "pref";
 
-    JPanel timeDurationPanel = new JPanel(new FormLayout("pref,3dlu,pref,3dlu,pref,3dlu,pref,3dlu,pref,3dlu,pref,3dlu,pref", "pref"));
+    JPanel timeDurationPanel = new JPanel(new FormLayout("pref,3dlu,pref,3dlu," + hourWidth + ",3dlu,pref,3dlu,pref,3dlu,pref,3dlu,pref", "pref"));
 
     this.dateChooser = new JDateChooser();
     this.dateChooser.setLocale(ctx.getTextProvider().getLocale());

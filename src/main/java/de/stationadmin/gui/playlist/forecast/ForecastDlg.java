@@ -16,7 +16,6 @@ import java.util.List;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -36,6 +35,7 @@ import de.stationadmin.base.schedule.PlaylistForecast;
 import de.stationadmin.base.schedule.PlaylistForecast.ScheduledTrack;
 import de.stationadmin.base.schedule.Schedule.Weekday;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.StationAdminFrame;
 import de.stationadmin.gui.playlist.forecast.ForecastTableModel.Column;
 import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.SwingTools;
@@ -45,16 +45,14 @@ import de.stationadmin.gui.util.SwingTools;
  * @author Frank Korf
  * 
  */
-public class ForecastDlg extends JFrame {
+public class ForecastDlg extends StationAdminFrame {
   private static final long serialVersionUID = 6065961410236107681L;
-  private ClientContext ctx;
   private PlaylistForecast forecast;
   private ForecastSettings settings = new ForecastSettings();
   private ForecastTableModel model;
 
   public ForecastDlg(ClientContext ctx) throws HeadlessException {
-    super();
-    this.ctx = ctx;
+    super(ctx, "Forecast");
     this.forecast = new PlaylistForecast(ctx.getAdminClient().getPlaylistRegistry(), ctx.getAdminClient().getSchedule());
     this.model = new ForecastTableModel(ctx);
     this.init();
