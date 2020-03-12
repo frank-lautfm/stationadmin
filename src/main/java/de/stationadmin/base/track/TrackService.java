@@ -548,11 +548,11 @@ public class TrackService implements Service {
         } else {
           this.trackRegistry.getTrack(track.getId()).update(track);
         }
-        if (newest == null) {
+        if (newest == null && track.getCreatedAt() != null) {
           newest = track.getCreatedAt(); // sorted by created_at desc, so first
                                          // one is newest one
         }
-        if (requestMore && this.synchronizedOwnTill != null && track.getCreatedAt().getTime() < this.synchronizedOwnTill.getTime()) {
+        if (requestMore && this.synchronizedOwnTill != null && track.getCreatedAt() != null && track.getCreatedAt().getTime() < this.synchronizedOwnTill.getTime()) {
           requestMore = false;
         }
 
