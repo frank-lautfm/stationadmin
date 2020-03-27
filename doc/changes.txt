@@ -7,9 +7,11 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
-Version 5.1.0
+Version 5.0.2
 -------------
-[*] Keine Filter als Auswahl für Titelabfolge-Regeln für das Shuffeln auf dem Server
+[*] Profile für Grundeinstellungen konnten unter Umständen nicht angezeigt werden
+[*] Beim Laden neuer eigener Titel kam es sporadisch zu Abbrüchen
+[*] Tag-Auswahl für Titelabfolge-Regeln für das Shuffeln auf dem Server enthielt auch Track-Filter
 
 
 Version 5.0.1

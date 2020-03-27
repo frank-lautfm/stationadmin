@@ -8,6 +8,7 @@ import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 
 import com.jgoodies.binding.list.IndirectListModel;
+import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
 
 import de.stationadmin.base.playlist.profile.AdTriggerCfg;
@@ -24,6 +25,8 @@ public class PlaylistProfileModel extends NonObservingPresentationModel<Playlist
 
   private List<PlaylistProfile> profiles;
   private IndirectListModel<String> profileRefListModel = new IndirectListModel<>();
+  
+  private ValueHolder exception = new ValueHolder();
 
   public PlaylistProfileModel(ValueModel selection) {
     super((PlaylistProfile) null);
@@ -43,6 +46,8 @@ public class PlaylistProfileModel extends NonObservingPresentationModel<Playlist
           trackRuleModel.setBean(profile != null ? profile.getTrackRules() : null);
           artistNormalization.setBean(profile != null ? profile.getArtistNormalization() : null);
           updateProfileRefModel(profile != null ? profile.getId() : null);
+        } catch(Exception e) {
+          exception.setValue(e);
         } finally {
           initializing = false;
         }
@@ -130,6 +135,10 @@ public class PlaylistProfileModel extends NonObservingPresentationModel<Playlist
     this.profileRefListModel.setList(list);
     // getBufferedModel("trackRuleFromProfile").setValue(trackRuleFromProfile);
     // getBufferedModel("artistNormalizationFromProfile").setValue(artistNormalizationFromProfile);
+  }
+
+  public ValueHolder getException() {
+    return exception;
   }
 
 }

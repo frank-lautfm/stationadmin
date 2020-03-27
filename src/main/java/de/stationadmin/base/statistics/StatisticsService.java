@@ -106,7 +106,6 @@ public class StatisticsService implements Service {
 
     });
 
-
   }
 
   /**
@@ -126,8 +125,10 @@ public class StatisticsService implements Service {
    */
   @Override
   public void load() throws IOException {
-    for (ListenersEntry entry : this.logAnalyzerService.getListenersOf(new Date())) {
-      this.listenerStatsHistory.addFromHistory(entry.getTime().getTime(), entry.getListeners());
+    if (!sessionCtx.isDJOnly()) {
+      for (ListenersEntry entry : this.logAnalyzerService.getListenersOf(new Date())) {
+        this.listenerStatsHistory.addFromHistory(entry.getTime().getTime(), entry.getListeners());
+      }
     }
     this.listenerStatsHistory.sortEntries();
   }

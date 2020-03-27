@@ -5,6 +5,7 @@ package de.stationadmin.gui.playlist.profile;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -165,9 +166,9 @@ public class TagWeightTableModel extends AbstractTableModel {
   }
 
   public void setEntriesMap(Map<String, Integer> entriesMap) {
-    this.entriesMap = entriesMap;
+    this.entriesMap = entriesMap != null ? entriesMap : new HashMap<String, Integer>();
     tagWeights = new ArrayList<>();
-    for(Entry<String, Integer> entry : entriesMap.entrySet()) {
+    for(Entry<String, Integer> entry : this.entriesMap.entrySet()) {
       tagWeights.add(new TagWeight(entry.getKey(), entry.getValue(), 1f));
     }
     boolean changed = this.showMax;

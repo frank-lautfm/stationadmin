@@ -20,7 +20,6 @@ import com.jgoodies.binding.value.ValueHolder;
 import de.stationadmin.base.Settings;
 import de.stationadmin.gui.TextProvider;
 
-
 /**
  * Table model for {@link Settings#getGenerateArtistPreselectLimits()}
  * 
@@ -57,14 +56,16 @@ public class ArtistLimitTableModel extends AbstractTableModel {
     });
 
   }
-  
+
   private void rebuildEntries() {
     this.entries.clear();
     for (java.util.Map.Entry<String, Integer> entry : artistLimits.entrySet()) {
-      if (entry.getKey().equals("*")) {
-        this.defaultLimit.setValue(entry.getValue());
-      } else {
-        this.entries.add(new Entry(entry.getKey(), entry.getValue()));
+      if (entry.getKey() != null && entry.getValue() != null) {
+        if (entry.getKey().equals("*")) {
+          this.defaultLimit.setValue(entry.getValue());
+        } else {
+          this.entries.add(new Entry(entry.getKey(), entry.getValue()));
+        }
       }
     }
     Collections.sort(entries);
@@ -150,7 +151,7 @@ public class ArtistLimitTableModel extends AbstractTableModel {
     for (Entry entry : this.entries) {
       if (StringUtils.isNotEmpty(entry.artist) && entry.limit > 0) {
         this.artistLimits.put(entry.artist, entry.limit);
-      } 
+      }
     }
   }
 
@@ -195,7 +196,7 @@ public class ArtistLimitTableModel extends AbstractTableModel {
   }
 
   public void setArtistLimits(Map<String, Integer> artistLimits) {
-    this.artistLimits = artistLimits;
+    this.artistLimits = artistLimits != null ? artistLimits : new HashMap<>();
     this.rebuildEntries();
     this.fireTableDataChanged();
   }

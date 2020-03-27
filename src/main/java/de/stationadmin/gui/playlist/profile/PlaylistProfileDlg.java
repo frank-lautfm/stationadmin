@@ -35,6 +35,7 @@ import de.stationadmin.base.playlist.profile.PlaylistProfile;
 import de.stationadmin.base.playlist.shuffle.PlaylistProfileType;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.StationAdminFrame;
+import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.SwingTools;
 
 public class PlaylistProfileDlg extends StationAdminFrame {
@@ -59,6 +60,14 @@ public class PlaylistProfileDlg extends StationAdminFrame {
         profileModel.setProfiles(ctx.getAdminClient().getPlaylistService().getProfiles());
       }
 
+    });
+    
+    this.profileModel.getException().addValueChangeListener(new PropertyChangeListener() {
+      
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo((Exception)evt.getNewValue(), "action.error.generic"));
+      }
     });
 
     init();
