@@ -6,27 +6,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.DefaultListModel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
+import javax.swing.TransferHandler;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import org.jdesktop.swingx.JXList;
 
+import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
+
+import de.stationadmin.gui.TextProvider;
+import de.stationadmin.gui.playlist.PopupListener;
+import de.stationadmin.gui.util.ClipboardAction;
 
 public class TagPatternEditor extends JPanel {
   private static final long serialVersionUID = -4288748303926186908L;
   private List<String> tags;
   private ValueModel tagPattern;
+  private TextProvider teaxtProvider;
   private DefaultListModel<String> tagPatternListModel;
   private boolean isUpdating = false;
 
-  public TagPatternEditor(List<String> tags, ValueModel tagPattern) {
+  public TagPatternEditor(TextProvider teaxtProvider, List<String> tags, ValueModel tagPattern) {
+    this.teaxtProvider = teaxtProvider;
     this.tags = tags;
     this.tagPattern = tagPattern;
     this.init();
@@ -45,36 +57,58 @@ public class TagPatternEditor extends JPanel {
     tagPatternListModel = new DefaultListModel<>();
     rebuildListModel();
 
-    JXList tagsList = new JXList(sourceModel);
-    tagsList.setTransferHandler(new TagPatternTransferHandler(tagsList, true));
-    tagsList.setDragEnabled(true);
-    this.add(new JScrollPane(tagsList), cc.xy(1, 1, CellConstraints.FILL, CellConstraints.FILL));
+    {
+      final ValueHolder sourceSelection = new ValueHolder();
+      JXList tagsList = new JXList(sourceModel);
+      tagsList.setTransferHandler(new TagPatternTransferHandler(tagsList, true));
+      tagsList.setDragEnabled(true);
+      tagsList.addListSelectionListener(new SelectionListener(tagsList, sourceSelection));
 
-    JXList tagPatternList = new JXList(tagPatternListModel);
-    tagPatternList.setTransferHandler(new TagPatternTransferHandler(tagPatternList, false));
-    tagPatternList.setDragEnabled(true);
-    tagPatternList.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
-    tagPatternList.getActionMap().put("delete", new DeleteAction(tagPatternList));
-    
-    this.add(new JScrollPane(tagPatternList), cc.xy(5, 1, CellConstraints.FILL, CellConstraints.FILL));
+      final JPopupMenu sourcePopup = new JPopupMenu();
+      sourcePopup.add(new ClipboardAction(this.teaxtProvider, tagsList, sourceSelection, TransferHandler.getCopyAction()));
+      tagsList.addMouseListener(new PopupListener(tagsList, sourcePopup));
 
-    tagPatternListModel.addListDataListener(new ListDataListener() {
+      this.add(new JScrollPane(tagsList), cc.xy(1, 1, CellConstraints.FILL, CellConstraints.FILL));
+    }
 
-      @Override
-      public void intervalRemoved(ListDataEvent e) {
-        rebuildTagPattern();
-      }
+    {
+      final ValueHolder targetSelection = new ValueHolder();
 
-      @Override
-      public void intervalAdded(ListDataEvent e) {
-        rebuildTagPattern();
-      }
+      JXList tagPatternList = new JXList(tagPatternListModel);
+      tagPatternList.setTransferHandler(new TagPatternTransferHandler(tagPatternList, false));
+      tagPatternList.setDragEnabled(true);
+      tagPatternList.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
+      tagPatternList.getActionMap().put("delete", new DeleteAction(tagPatternList));
+      tagPatternList.addListSelectionListener(new SelectionListener(tagPatternList, targetSelection));
 
-      @Override
-      public void contentsChanged(ListDataEvent e) {
-        rebuildTagPattern();
-      }
-    });
+      final JPopupMenu targetPopup = new JPopupMenu();
+      targetPopup.add(new ClipboardAction(this.teaxtProvider, tagPatternList, targetSelection, TransferHandler.getCutAction()));
+      targetPopup.add(new ClipboardAction(this.teaxtProvider, tagPatternList, targetSelection, TransferHandler.getCopyAction()));
+      targetPopup.add(new ClipboardAction(this.teaxtProvider, tagPatternList, targetSelection, TransferHandler.getPasteAction()));
+      targetPopup.addSeparator();
+      targetPopup.add(new DeleteAction(tagPatternList));
+      tagPatternList.addMouseListener(new PopupListener(tagPatternList, targetPopup));
+
+      this.add(new JScrollPane(tagPatternList), cc.xy(5, 1, CellConstraints.FILL, CellConstraints.FILL));
+
+      tagPatternListModel.addListDataListener(new ListDataListener() {
+
+        @Override
+        public void intervalRemoved(ListDataEvent e) {
+          rebuildTagPattern();
+        }
+
+        @Override
+        public void intervalAdded(ListDataEvent e) {
+          rebuildTagPattern();
+        }
+
+        @Override
+        public void contentsChanged(ListDataEvent e) {
+          rebuildTagPattern();
+        }
+      });
+    }
 
   }
 
@@ -108,32 +142,64 @@ public class TagPatternEditor extends JPanel {
       }
     }
   }
-  
+
   private class DeleteAction extends AbstractAction {
     private static final long serialVersionUID = -4795810683654044027L;
     private JXList list;
-    
+
     public DeleteAction(JXList list) {
       super();
+      this.putValue(Action.NAME, teaxtProvider.getString(("delete")));
       this.list = list;
+      this.setEnabled(false);
+      list.addListSelectionListener(new ListSelectionListener() {
+        
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+          setEnabled(list.getSelectedIndex() > - 1);
+        }
+      });
     }
-
-
-      
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      if(list.getSelectedIndices().length > 0) {
+      if (list.getSelectedIndices().length > 0) {
         ArrayList<Integer> rows = new ArrayList<>();
-        for(int row : list.getSelectedIndices()) {
+        for (int row : list.getSelectedIndices()) {
           rows.add(list.convertIndexToModel(row));
         }
         rows.sort((r1, r2) -> -Integer.compare(r1, r2));
         rows.forEach(r -> tagPatternListModel.remove(r));
       }
-      
+
     }
-    
+
+  }
+
+  private class SelectionListener implements ListSelectionListener {
+    private JXList source;
+    private ValueHolder selectionHolder;
+
+    public SelectionListener(JXList source, ValueHolder selectionHolder) {
+      super();
+      this.source = source;
+      this.selectionHolder = selectionHolder;
+    }
+
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+      if (!e.getValueIsAdjusting()) {
+        int[] rows = source.getSelectedIndices();
+        List<String> entries = new ArrayList<String>();
+        for (int i = 0; i < rows.length; i++) {
+          int row = source.convertIndexToModel(rows[i]);
+          entries.add((String) source.getModel().getElementAt(row));
+        }
+        selectionHolder.setValue(entries);
+      }
+
+    }
+
   }
 
 }

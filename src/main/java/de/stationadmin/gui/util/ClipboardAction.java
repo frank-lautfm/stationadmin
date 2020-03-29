@@ -32,10 +32,14 @@ public class ClipboardAction extends AbstractAction {
   private JComponent component;
 
   public ClipboardAction(ClientContext ctx, JComponent component, ValueModel selectionHolder, Action action) {
+    this(ctx.getTextProvider(), component, selectionHolder, action);
+  }
+
+  public ClipboardAction(TextProvider textProvider, JComponent component, ValueModel selectionHolder, Action action) {
     super();
     this.action = action;
     this.component = component;
-    this.putValue(Action.NAME, ctx.getString("action.clipboard." + action.getValue(Action.NAME)));
+    this.putValue(Action.NAME, textProvider.getString("action.clipboard." + action.getValue(Action.NAME)));
     if (!action.getValue(Action.NAME).equals("paste")) {
       this.setEnabled(false);
       selectionHolder.addValueChangeListener(new PropertyChangeListener() {

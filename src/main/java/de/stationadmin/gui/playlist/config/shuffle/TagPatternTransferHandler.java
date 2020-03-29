@@ -46,11 +46,15 @@ public class TagPatternTransferHandler extends TransferHandler {
       return false;
     }
 
-    int index = 0;
+    int index = -1;
     if (support.isDrop()) {
       // fetch the drop location
       JList.DropLocation dl = (JList.DropLocation) support.getDropLocation();
       index = dl.getIndex();
+    }
+    else if(list.getSelectedIndices().length > 0) {
+      int[] selected = list.getSelectedIndices();
+      index = selected[selected.length - 1] < list.getModel().getSize() - 1 ? selected[selected.length - 1] + 1 : -1; 
     }
 
     boolean ok = false;
@@ -134,7 +138,7 @@ public class TagPatternTransferHandler extends TransferHandler {
         tags.add(tag);
       }
 
-      if (!readOnly) {
+      if (!readOnly && action != COPY) {
         indicesToRemove.sort((i1, i2) -> -Integer.compare(i1, i2));
         for (int i = 0; i < indicesToRemove.size(); i++) {
           model.remove(indicesToRemove.get(i));
