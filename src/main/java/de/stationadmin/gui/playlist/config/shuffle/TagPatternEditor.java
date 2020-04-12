@@ -1,13 +1,17 @@
 package de.stationadmin.gui.playlist.config.shuffle;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -19,6 +23,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.jdesktop.swingx.JXList;
+import org.jdesktop.swingx.decorator.AbstractHighlighter;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
 
 import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
@@ -36,6 +42,7 @@ public class TagPatternEditor extends JPanel {
   private TextProvider teaxtProvider;
   private DefaultListModel<String> tagPatternListModel;
   private boolean isUpdating = false;
+  private HashSet<String> validTags = new HashSet<>();
 
   public TagPatternEditor(TextProvider teaxtProvider, List<String> tags, ValueModel tagPattern) {
     this.teaxtProvider = teaxtProvider;
@@ -46,12 +53,13 @@ public class TagPatternEditor extends JPanel {
 
   private void init() {
 
-    this.setLayout(new FormLayout("150dlu,5dlu,pref,5dlu,150dlu", "200dlu"));
+    this.setLayout(new FormLayout("150dlu,5dlu,pref,5dlu,150dlu", "pref,2dlu,200dlu,5dlu,pref"));
     CellConstraints cc = new CellConstraints();
 
     DefaultListModel<String> sourceModel = new DefaultListModel<>();
     for (String tag : tags) {
       sourceModel.addElement(tag);
+      this.validTags.add(tag);
     }
 
     tagPatternListModel = new DefaultListModel<>();
@@ -68,13 +76,14 @@ public class TagPatternEditor extends JPanel {
       sourcePopup.add(new ClipboardAction(this.teaxtProvider, tagsList, sourceSelection, TransferHandler.getCopyAction()));
       tagsList.addMouseListener(new PopupListener(tagsList, sourcePopup));
 
-      this.add(new JScrollPane(tagsList), cc.xy(1, 1, CellConstraints.FILL, CellConstraints.FILL));
+      this.add(new JLabel(teaxtProvider.getString("tagpattern.available")), cc.xy(1, 1));
+      this.add(new JScrollPane(tagsList), cc.xy(1, 3, CellConstraints.FILL, CellConstraints.FILL));
     }
 
     {
       final ValueHolder targetSelection = new ValueHolder();
 
-      JXList tagPatternList = new JXList(tagPatternListModel);
+      final JXList tagPatternList = new JXList(tagPatternListModel);
       tagPatternList.setTransferHandler(new TagPatternTransferHandler(tagPatternList, false));
       tagPatternList.setDragEnabled(true);
       tagPatternList.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
@@ -89,7 +98,21 @@ public class TagPatternEditor extends JPanel {
       targetPopup.add(new DeleteAction(tagPatternList));
       tagPatternList.addMouseListener(new PopupListener(tagPatternList, targetPopup));
 
-      this.add(new JScrollPane(tagPatternList), cc.xy(5, 1, CellConstraints.FILL, CellConstraints.FILL));
+      tagPatternList.addHighlighter(new AbstractHighlighter() {
+
+        @Override
+        protected Component doHighlight(Component comp, ComponentAdapter adapter) {
+          int row = tagPatternList.convertIndexToModel(adapter.row);
+          String tag = (String) tagPatternList.getModel().getElementAt(row);
+          if (!validTags.contains(tag)) {
+            comp.setForeground(new Color(255, 0, 0));
+          }
+          return comp;
+        }
+      });
+
+      this.add(new JLabel(teaxtProvider.getString("tagpattern.pattern")), cc.xy(5, 1));
+      this.add(new JScrollPane(tagPatternList), cc.xy(5, 3, CellConstraints.FILL, CellConstraints.FILL));
 
       tagPatternListModel.addListDataListener(new ListDataListener() {
 
@@ -109,6 +132,8 @@ public class TagPatternEditor extends JPanel {
         }
       });
     }
+    
+    this.add(new JLabel(teaxtProvider.getString("tagpattern.instruction")), cc.xywh(1, 5, 5, 1, CellConstraints.FILL, CellConstraints.FILL));
 
   }
 
@@ -153,10 +178,10 @@ public class TagPatternEditor extends JPanel {
       this.list = list;
       this.setEnabled(false);
       list.addListSelectionListener(new ListSelectionListener() {
-        
+
         @Override
         public void valueChanged(ListSelectionEvent e) {
-          setEnabled(list.getSelectedIndex() > - 1);
+          setEnabled(list.getSelectedIndex() > -1);
         }
       });
     }
