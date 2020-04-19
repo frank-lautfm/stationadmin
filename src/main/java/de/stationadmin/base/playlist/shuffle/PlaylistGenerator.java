@@ -239,7 +239,7 @@ public class PlaylistGenerator {
   public void generate(Playlist playlist, boolean append) throws IOException {
     log.info("generate " + playlist);
     this.prepareNextPlaylist();
-
+    
     GeneratorCtx ctx = new GeneratorCtx();
     ctx.setProfile(profileRegistry.getProfile(playlist.getProfileId()));
     if(ctx.getProfile() != null) {

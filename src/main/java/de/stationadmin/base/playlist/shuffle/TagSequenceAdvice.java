@@ -112,6 +112,9 @@ public class TagSequenceAdvice implements Advice {
     int t = titles.size() - 1;
     for (int p = pattern.length - 1; p >= 0; p--) {
       Set<Integer> tagTitles = this.taggedTitles.get(pattern[p]);
+      if(t < 0) {
+        return true;
+      }
       BasicTrack title = titles.get(t);
       while (title.getType() != BasicTrack.TYPE_MUSIC) {
         t--;

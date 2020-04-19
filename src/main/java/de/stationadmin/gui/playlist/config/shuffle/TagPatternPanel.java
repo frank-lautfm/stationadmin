@@ -19,6 +19,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.tag.StaticTag;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.playlist.config.PlaylistConfigurationModel;
+import de.stationadmin.gui.playlist.config.generate.TagSequenceEditor;
 
 public class TagPatternPanel extends JPanel {
   private static final long serialVersionUID = -5555289920437431308L;
@@ -73,9 +74,9 @@ public class TagPatternPanel extends JPanel {
     Collections.sort(staticTags, (c1, c2) -> c1.getName().compareTo(c2.getName()));
     staticTags.forEach(t -> tags.add(t.getName()));
 
-    TagPatternEditor editor = new TagPatternEditor(ctx.getTextProvider(), tags, sequence);
-    // TagSequenceEditor editor = new TagSequenceEditor(tags.toArray(new
-    // String[tags.size()]), sequence, true);
+    // TagPatternEditor editor = new TagPatternEditor(ctx.getTextProvider(), tags, sequence);
+    TagSequenceEditor editor = new TagSequenceEditor(tags.toArray(new
+    String[tags.size()]), sequence, true);
 
     this.add(new JLabel(this.ctx.getTextProvider().getString("playlistcfg.property.tagSequence")), cc.xy(2, row));
     row += 2;

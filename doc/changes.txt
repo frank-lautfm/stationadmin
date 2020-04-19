@@ -7,6 +7,12 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
+Version 5.0.3
+-------------
+
+[*] Beim Generieren mit Regeln zur Titelabfolge konnte es unter Umständen zu einem Fehler und zu einem Abbruch der Generierung kommen
+
+
 Version 5.0.2
 -------------
 [*] Profile für Grundeinstellungen konnten unter Umständen nicht angezeigt werden

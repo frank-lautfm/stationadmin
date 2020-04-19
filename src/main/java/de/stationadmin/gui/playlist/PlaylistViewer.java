@@ -963,7 +963,7 @@ public class PlaylistViewer extends JPanel {
         PlaylistGenerator generator = PlaylistGeneratorFactory.createGenerator(ctx.getAdminClient());
         try {
           generator.generate(playlist);
-        } catch (IOException e) {
+        } catch (Exception e) {
           JXErrorPane.showDialog(null, textProvider.createErrorInfo(e, "action.playlist.generate.error", playlist.getDisplayName()));
         }
       }
