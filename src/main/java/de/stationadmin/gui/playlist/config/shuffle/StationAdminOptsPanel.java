@@ -305,23 +305,6 @@ public class StationAdminOptsPanel extends JPanel {
 
     }
 
-    final ValueModel firstJingleAfterNews = new ValueHolder(getOptions().containsKey("firstJingleAfterNews") ? getOptions().get("firstJingleAfterNews") : false);
-    {
-      JCheckBox repeatJingleCb = BasicComponentFactory.createCheckBox(firstJingleAfterNews, ctx.getTextProvider().getString("playlistcfg.property.firstJingleAfterNews"));
-      panel.add(repeatJingleCb, cc.xy(4, row, CellConstraints.LEFT, CellConstraints.CENTER));
-      repeatJingleCb.setEnabled(containsNews && ctx.getAdminClient().getSettings().isShuffleProtectFirstJingle());
-
-      firstJingleAfterNews.addValueChangeListener(new PropertyChangeListener() {
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-          Boolean value = (Boolean) evt.getNewValue();
-          getOptions().put("firstJingleAfterNews", value);
-        }
-      });
-      row += 2;
-
-    }
-
     model.getBufferedModel("shuffleOpts").addValueChangeListener(new PropertyChangeListener() {
 
       @Override
@@ -334,7 +317,6 @@ public class StationAdminOptsPanel extends JPanel {
         newsInterval.setValue(opts.containsKey("newsInterval") ? opts.get("newsInterval") : 60);
         newsMin.setValue(opts.containsKey("newsMin") ? opts.get("newsMin") : 59);
         newsMax.setValue(opts.containsKey("newsMax") ? opts.get("newsMax") : 15);
-        firstJingleAfterNews.setValue(opts.containsKey("firstJingleAfterNews") ? opts.get("firstJingleAfterNews") : false);
         tagWeightsModel.rebuild();
       }
 

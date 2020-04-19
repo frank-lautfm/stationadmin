@@ -13,7 +13,7 @@ Version 5.0.3
 [*] Beim Synchronisieren aller Playlists ging bei Playlists die zum Generieren konfiguriert waren die Zuordnung zum Profil der Grundeinstellungen verloren
 [#] Automatische Zuweisung eines Profils aus den Grundeinstellungen beim Programmstart bei Playlists die kein Profil haben
 [*] Beim Generieren mit Regeln zur Titelabfolge konnte es unter Umständen zu einem Fehler und zu einem Abbruch der Generierung kommen
-
+[#] Option "danach erstes Jingle wiederholen" in den Shuffle-Einstellungen entfernt - funktionierte nicht mehr und ist auch nicht notwendig
 
 Version 5.0.2
 -------------
