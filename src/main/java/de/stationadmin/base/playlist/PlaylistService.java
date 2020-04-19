@@ -309,7 +309,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
 
   private void checkIntegrity() {
     for (Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
-      if (playlist.getProfileId() != null && this.getProfile(playlist.getProfileId()) == null) {
+      if (playlist.getProfileId() == null || (playlist.getProfileId() != null && this.getProfile(playlist.getProfileId()) == null)) {
         // illegal reference
         if (playlist.isShuffle()) {
           if (playlist.getShuffleType() != null && playlist.getShuffleType().equals(SHUFFLE_STATIONADMIN)) {
@@ -331,8 +331,8 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       if (profile.getType().equals(type)) {
         playlist.setProfileId(profile.getId());
         try {
+          log.info("no or illegal profile reference - changed profile to " + profile.getName() + " for " + playlist.getName());
           this.savePlaylistAs(playlist, Integer.toString(playlist.getId()));
-          log.info("illegal profile reference - changed profile to " + profile.getName() + " for " + playlist.getName());
         } catch (Exception e) {
         }
 
@@ -572,9 +572,12 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
 
       // prepare basic information
       Playlist playlist = new Playlist(this.trackRegistry, PlaylistType.ONLINE);
-      this.initOnlinePlaylist(playlist, playlistInfo);
+      this.initOnlinePlaylist(playlist, playlistInfo, false);
       playlist.setTimestampMap(timestampMaps.get(playlist.getId()));
       this.playlistRegistry.register(playlist);
+      // defer setting of shuffleOpts as it might create local data too early otherwise
+      playlist.setShuffleOpts(playlistInfo.getShuffleOpts(), true);
+      playlist.setShuffleType(getShuffleType(playlistInfo));
 
       // add tracks to playlist
       try {
@@ -661,7 +664,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
           // remove all old titles - will be filled with new ones
           playlist.removeEntries(new ArrayList<Playlist.Entry>(playlist.getEntries()));
         }
-        this.initOnlinePlaylist(playlist, playlistInfo);
+        this.initOnlinePlaylist(playlist, playlistInfo, true);
         this.playlistRegistry.register(playlist);
 
         // add titles to playlist
@@ -741,7 +744,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     playlist.setShuffleType(getShuffleType(head));
   }
 
-  private void initOnlinePlaylist(Playlist playlist, ExtendedPlaylistHead playlistInfo) {
+  private void initOnlinePlaylist(Playlist playlist, ExtendedPlaylistHead playlistInfo, boolean withOpts) {
     playlist.setId(playlistInfo.getId());
     playlist.setName(playlistInfo.getTitle());
     playlist.setDescription(playlistInfo.getDescription());
@@ -749,8 +752,10 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     playlist.setColor(playlistInfo.getColor());
     playlist.setCreatedAt(playlistInfo.getCreatedAt());
     playlist.setUpdatedAt(playlist.getUpdatedAt());
-    playlist.setShuffleOpts(playlistInfo.getShuffleOpts(), true);
-    playlist.setShuffleType(getShuffleType(playlistInfo));
+    if(withOpts) {
+      playlist.setShuffleOpts(playlistInfo.getShuffleOpts(), true);
+      playlist.setShuffleType(getShuffleType(playlistInfo));
+    }
   }
 
   /**
