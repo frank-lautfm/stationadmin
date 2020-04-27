@@ -40,6 +40,7 @@ public class PlaylistNewAction extends AbstractAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     Playlist playlist = new Playlist(ctx.getAdminClient().getTrackService().getTrackRegistry(), PlaylistType.ONLINE);
+    playlist.setColor("#FF0000");
     if (playlistHolder != null) {
       playlistHolder.setValue(playlist);
     }

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
@@ -538,6 +539,7 @@ public class PlaylistConfigurationDialog extends StationAdminDialog {
       this.setBackground(parseColor((String) colorModel.getValue()));
       this.setOpaque(true);
       this.setPreferredSize(new Dimension(20, 20));
+      this.setBorder(BorderFactory.createEtchedBorder());
       colorModel.addValueChangeListener(new PropertyChangeListener() {
 
         @Override

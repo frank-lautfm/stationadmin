@@ -7,6 +7,11 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
+Version 5.1.0
+-------------
+[#] Neuer Editor für Tag-Patterns
+[+] Rand um Button zur Farbauswahl für Playlists 
+
 Version 5.0.3
 -------------
 
