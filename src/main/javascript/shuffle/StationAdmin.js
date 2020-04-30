@@ -1,8 +1,8 @@
-// StationAdmin v1.4
+// StationAdmin v2.0
 ( function( tracks, opts, trackStats ){
 	
 	var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
-	var blockLength = 'blockLength' in opts ? opts.blockLength : duration;
+	var blockLength = 'blockLength' in opts ? opts.blockLength : (duration / 3600) + 1;
 	var maxTracksPerArtist = 'maxTracksPerArtist' in opts && opts.maxTracksPerArtist < Math.floor(duration / (60 * 60)) ? opts.maxTracksPerArtist : Math.floor(duration / (60 * 60)); 
 	var tagWeights = 'tagWeights' in opts ? opts.tagWeights : null;
 	var artistSeparators = 'artistSeparators' in opts ? opts.artistSeparators : [' feat'];
@@ -19,6 +19,11 @@
 	var newsMax = 'newsMax' in opts ? opts.newsMax : 15;
 	var firstJingleAfterNews = 'firstJingleAfterNews' in opts ? opts.firstJingleAfterNews : true;
 	var tagSequenceRules = 'tagSequences' in opts ? opts.tagSequences : [];
+	var tagPattern = 'tagPattern' in opts ? opts.tagPattern : [];
+	var tagPatternPtr = 0;
+	var jinglesInsertedByPattern = false;
+	var patternTags = {};
+	var tagTracks = {};
 
 	var firstJingle;
 	var adTrigger;
@@ -223,6 +228,7 @@
 			}
 			
 			var artistName = normalizeArtist(tracks[i].artist);
+			tracks[i].artistNormalized = artistName;
 			var artist;
 			if(artistName in artistMap) {
 				artist = artistMap[artistName];
@@ -265,14 +271,144 @@
 		candidates.sort(function(a, b) { return a.score - b.score });
 		var cDuration = 0;
 		var cIdx = 0;
-		while(cDuration < remainingDuration && cIdx < candidates.length) {
+		while((tagPattern.length > 0 || cDuration < remainingDuration) && cIdx < candidates.length) {
 			cDuration += candidates[cIdx].duration;
 			candidates[cIdx].use = true;
 			cIdx++;
 		}
 	}
 	
-	function buildPlaylist() {
+	/* tag pattern - start */
+
+	function indexTracks(tracks, patternIndex, start) {
+		var i;
+		for(i = start; i < tracks.length; i++) {
+			var track = tracks[i];
+			for(var t = 0; t < track.tags.length; t++) {
+				if(track.tags[t] in patternTags) {
+					patternIndex[track.tags[t]].push(i);
+				}
+			}
+			patternIndex[track.type].push(i);
+		}
+		// console.log("indexed tracks " + start + " => " + i);
+		return i;
+	}
+	
+	function applyTagPattern(tracks, duration) {
+		var playlist = [];
+		// console.log("applyTagPattern " + tracks.length + " / " +  duration);
+
+		tracks = tracks.concat(jingles);
+		
+		var patternIndex = {};
+		patternIndex["song"] = [];
+		patternIndex["jingle"] = [];
+		patternIndex["moderation"] = [];
+		patternIndex["news"] = [];
+		for(var i = 0; i < tagPattern.length; i++) {
+			if(!(tagPattern[i] in patternIndex)) {
+				patternIndex[tagPattern[i]] = [];
+			}
+		}
+		var patternIndexPtr = indexTracks(tracks, patternIndex, 0);
+
+		var artistBlocked = {};
+		var recentTrackNames = [];
+
+		var playlistLen = 0;
+		var failed = 0;
+		var matchingRules = [];
+		while(playlistLen < duration && failed < tagPattern.length) {
+			failed++;
+			var candidates = patternIndex[tagPattern[tagPatternPtr]];
+			// console.log("next: " + tagPattern[tagPatternPtr] + " - " + candidates.length + " of " + tracks.length);
+			var bestIdx = -1;
+			var bestPenalty = 9999;
+			var penalty = 0;
+			if(candidates.length == 0 && patternIndexPtr < tracks.length) {
+				patternIndexPtr = indexTracks(tracks, patternIndex, patternIndexPtr);
+			}
+			var checkedMatches = 0;
+			for(var cIdx = 0; cIdx < candidates.length; cIdx++)
+			{
+				var track = tracks[candidates[cIdx]];
+				if(track != null) { 
+					var artistCheck = track.type == 'song' && 'artistNormalized' in track && track.artistNormalized in artistBlocked ? playlistLen > artistBlocked[track.artistNormalized] : true;
+					if(artistCheck) {
+						penalty = 0;
+						checkedMatches++;
+						if(track.type == 'song') {
+							for(var r = 0; r < matchingRules.length; r++) {
+								var result = track.tags.includes(matchingRules[r].next);
+								if((matchingRules[r].not && result) ||(!matchingRules[r].not && !result))  {
+									penalty++;
+								}
+							}
+							if(recentTrackNames.includes(track.normTitle)) {
+								penalty += 3;
+							}
+						}
+						if(penalty < bestPenalty) {
+							bestPenalty = penalty;
+							bestIdx = cIdx;
+						}
+						if(penalty == 0 || checkedMatches == 5) {
+							break;
+						}  // otherwise: check for better matches
+					}
+				}
+				if(cIdx == candidates.length - 1 && patternIndexPtr < tracks.length) {
+					patternIndexPtr = indexTracks(tracks, patternIndex, patternIndexPtr);
+				}
+			}
+			if(bestIdx > -1) {
+				var track = tracks[candidates[bestIdx]];
+				playlist.push(track);
+				playlistLen += track.duration;
+				tracks.push(track); 
+				tracks[candidates[bestIdx]] = null;
+				candidates.splice(bestIdx, 1);
+				failed = 0;
+				if(track.type == 'song' && 'artistNormalized' in track) {
+					artistBlocked[track.artistNormalized] = playlistLen + 60 * 60;
+					matchingRules = checkTagSequenceRules(track);
+					if(trackNameLimit > 0) {
+						recentTrackNames.push(track.normTitle);
+						if(recentTrackNames.length > trackNameLimit) {
+							recentTrackNames.shift();
+						} 
+					}
+				}
+				jinglesInsertedByPattern = jinglesInsertedByPattern || track.type == 'jingle';
+			}
+			tagPatternPtr = (tagPatternPtr + 1) % tagPattern.length;
+		}
+		
+		return playlist.length > 0 ? playlist : tracks;
+	}
+
+	/* tag pattern - end */
+
+	function checkTagSequenceRules(track) {
+		var matchingRules = [];
+		for(var r = 0; r < tagSequenceRules.length; r++) {
+			var rule = tagSequenceRules[r];
+			if(track.tags.includes(rule.pattern[rule.index])) {
+				rule.index++;
+				if(rule.index == rule.pattern.length) {
+					rule.index = 0;
+					matchingRules.push(rule);
+				}
+			}
+			else {
+				rule.index = 0;
+			}
+		}
+		return matchingRules;
+	}
+	
+	function buildPlaylist(duration) {
 		var numSegments = maxTracksPerArtist * 2;
 		
 		var segments = [];
@@ -330,35 +466,24 @@
 			}
 		}
 
+		for(var r = 0; r < tagSequenceRules.length; r++) {
+			tagSequenceRules[r].index = 0;
+		}
+		
+		if(tagPattern.length > 0) {
+			playlistTracks = applyTagPattern(playlistTracks, duration);
+		}
 		// apply tag sequence rules
-		if(tagSequenceRules.length > 0) {
-			for(var r = 0; r < tagSequenceRules.length; r++) {
-				tagSequenceRules[r].index = 0;
-			}
-			var matchingRules = [];
+		else if(tagSequenceRules.length > 0 || trackNameLimit > 0) {
 			for(var t = 1; t < playlistTracks.length ; t++) {
-				var previous = playlistTracks[t - 1];
-				matchingRules.length = 0;
-				for(var r = 0; r < tagSequenceRules.length; r++) {
-					var rule = tagSequenceRules[r];
-					if(previous.tags.includes(rule.pattern[rule.index])) {
-						rule.index++;
-						if(rule.index == rule.pattern.length) {
-							rule.index = 0;
-							matchingRules.push(rule);
-						}
-					}
-					else {
-						rule.index = 0;
-					}
-				}
+				var matchingRules = checkTagSequenceRules(playlistTracks[t - 1]);
 				if(matchingRules.length > 0 || trackNameLimit > 0) {
 					for(var t2 = t; t2 < playlistTracks.length && t2 < t + 5; t2++) {
 						var check = playlistTracks[t2];
 						var accept = true;
 						if(trackNameLimit > 0 && recentTrackNames.includes(check.normTitle)) {
 							accept = false;
-						}						
+						}
 						for(var r = 0; r < matchingRules.length && accept; r++) {
 							var result = check.tags.includes(matchingRules[r].next);
 							if((matchingRules[r].not && result) ||(!matchingRules[r].not && !result))  {
@@ -375,7 +500,7 @@
 						}
 					}
 					if(trackNameLimit > 0) {
-						recentTrackNames.push(playlistTracks[t]);
+						recentTrackNames.push(playlistTracks[t].normTitle);
 						if(recentTrackNames.length > trackNameLimit) {
 							recentTrackNames.shift();
 						} 
@@ -404,7 +529,7 @@
 			// nothing to do
 			return playlistTracks;
 		}
-		else if(firstJingle != null && jingles.length == 0) {
+		else if(firstJingle != null && (jingles.length == 0  || jinglesInsertedByPattern)) {
 			// just insert first jingle 
 			playlistTracks.splice(0, 0, firstJingle);
 			return playlistTracks;
@@ -892,6 +1017,10 @@
 	for(var i = 0; i < artistSeparators.length; i++) {
 		artistSeparators[i] = artistSeparators[i].toLowerCase();
 	}
+	
+	for(var i = 0; i < tagPattern.length; i++) {
+		patternTags[tagPattern[i]] = true;
+	}
 
 	/* Execution */
 	var sumTrackDuration = 0;
@@ -902,7 +1031,7 @@
 	while(remainingDuration > 0 && iteration < 20) {
 		artists = [];
 		initTracksAndArtists(Math.min(blockLength * 60 * 60, remainingDuration), iteration);
-		var selectedTracks = buildPlaylist();
+		var selectedTracks = buildPlaylist(Math.min(blockLength * 60 * 60, remainingDuration));
 		selectedTracks.forEach(t => sumTrackDuration += t.duration);
 		playlistTracks = playlistTracks.concat(selectedTracks);
 		remainingDuration = duration - sumTrackDuration;

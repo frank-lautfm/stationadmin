@@ -10,6 +10,7 @@ Station Admin für laut.fm - Änderungen
 Version 5.1.0
 -------------
 [#] Neuer Editor für Tag-Patterns
+[+] Tag-Patterns als Option für Shuffeln mit Station Admin-Verfahren
 [+] Rand um Button zur Farbauswahl für Playlists 
 
 Version 5.0.3
