@@ -47,11 +47,16 @@ public class TracksReloadAction extends ThreadedAction {
     return trackIds;
   }
 
-  protected void setTracks(List<BasicTrack> tracks) {
+  public void setTracks(List<BasicTrack> tracks) {
     int[] trackIds = new int[tracks != null ? tracks.size() : 0];
     for(int i = 0; i < tracks.size(); i++) {
       trackIds[i] = tracks.get(i).getId();
     }
+    this.trackIds = trackIds;
+    this.setEnabled(trackIds.length > 0);
+  }
+  
+  public void setTrackIds(int[] trackIds) {
     this.trackIds = trackIds;
     this.setEnabled(trackIds.length > 0);
   }

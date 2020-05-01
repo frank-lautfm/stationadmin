@@ -12,7 +12,6 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,6 +91,7 @@ import de.stationadmin.gui.track.TagMenu;
 import de.stationadmin.gui.track.TrackTypeRenderer;
 import de.stationadmin.gui.track.TrackViewAction;
 import de.stationadmin.gui.track.TrackViewer;
+import de.stationadmin.gui.track.TracksReloadAction;
 import de.stationadmin.gui.util.AbstractFileDialogAction;
 import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ClipboardAction;
@@ -323,6 +323,8 @@ public class PlaylistViewer extends JPanel {
     final TrackTypeRenderer typeRenderer = new TrackTypeRenderer();
     final DateTableCellRenderer timeRenderer = new DateTableCellRenderer(new SimpleDateFormat(this.ctx.getTextProvider().getString("timeFormat")));
     this.table = new JXTable(tableModel) {
+      private static final long serialVersionUID = 7268892380668597541L;
+
       @Override
       public String getToolTipText(MouseEvent evt) {
         int col = columnAtPoint(evt.getPoint());
@@ -452,6 +454,7 @@ public class PlaylistViewer extends JPanel {
     final TrackViewAction viewAction = new TrackViewAction(ctx);
     final ValueModel titleHolder = new ValueHolder(new ArrayList<BasicTrack>());
     final FollowArtistsAction followAction = new FollowArtistsAction(this.ctx);
+    final TracksReloadAction reloadAction = new TracksReloadAction(ctx);
     this.entryHolder.addValueChangeListener(new PropertyChangeListener() {
 
       @Override
@@ -477,6 +480,7 @@ public class PlaylistViewer extends JPanel {
             titleHolder.setValue(titles);
             viewAction.setTitles(titles);
             followAction.setTracks(titles);
+            reloadAction.setTracks(titles);
           } else {
             distributeAction.setTitles(new ArrayList<BasicTrack>());
           }
@@ -501,6 +505,7 @@ public class PlaylistViewer extends JPanel {
       popup.addSeparator();
     }
     popup.add(viewAction);
+    popup.add(reloadAction);
     popup.add(new PlaySnippetAction(ctx, titleHolder));
 
     table.addMouseListener(new MouseAdapter() {

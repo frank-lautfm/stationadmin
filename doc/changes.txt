@@ -12,6 +12,7 @@ Version 5.1.0
 [#] Neuer Editor für Tag-Patterns
 [+] Tag-Patterns als Option für Shuffeln mit Station Admin-Verfahren
 [+] Rand um Button zur Farbauswahl für Playlists 
+[+] "Titelinformationen neu laden" auch innerhalb des Playlistviewers verfügbar
 
 Version 5.0.3
 -------------
