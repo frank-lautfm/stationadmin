@@ -28,7 +28,7 @@ import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.lfm.backend.ListenerStatsEntry;
 import de.stationadmin.lfm.backend.ListenerStatsPeriod;
-import de.stationadmin.lfm.backend.Statistics;
+import de.stationadmin.lfm.backend.ListenerStatsSource;
 import de.stationadmin.lfm.backend.TrackStatsEntry;
 
 /**
@@ -554,42 +554,39 @@ public class LogAnalyzerService implements Service {
       return;
     }
 
-    Statistics stats = ctx.getServer().getStatistics(ctx.getStationId());
+    // Statistics stats = ctx.getServer().getStatistics(ctx.getStationId());
     Date today = new Date();
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.DAY_OF_MONTH, -6);
+    cal.add(Calendar.DAY_OF_MONTH, -10);
     ListenerStatsEntry[] listenerStats = ctx.getServer().getListenerStatistics(ctx.getStationId(), cal.getTime(), today, ListenerStatsPeriod.Daily);
 
     cal.setTimeInMillis(System.currentTimeMillis());
 
     SimpleDateFormat dateFmt = new SimpleDateFormat(DATE_FORMAT);
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 10; i++) {
       cal.add(Calendar.DAY_OF_MONTH, -1);
       String date = dateFmt.format(cal.getTime());
       String filename = this.logCacheDir + "station_dailysummary" + "-" + date + ".log";
-      
-      if (stats.getTlhLog().containsKey(date)) {
-        StringBuilder buf = new StringBuilder();
+      File file = new File(filename);
+      if(i > 3 && file.exists()) {
+        // we have already data and it shouldn't change anymore
+        break;
+      }
 
-        Integer listeners = stats.getSwitchonsLog().get(date);
-        Integer hours = stats.getTlhLog().get(date);
-        int avg = listeners != null ? hours.intValue() * 60 / listeners.intValue() : 0;
-        int uniqs = -1;
-        for (int j = 0; j < listenerStats.length; j++) {
-          if (dateFmt.format(listenerStats[j].getDate()).equals(date)) {
-            uniqs = listenerStats[j].getSources().get("all").getUniqs();
-            break;
-          }
-        }
+      for (int j = 0; j < listenerStats.length; j++) {
+        if (dateFmt.format(listenerStats[j].getDate()).equals(date) && listenerStats[j].getSources().containsKey("all")) {
+          ListenerStatsSource all = listenerStats[j].getSources().get("all");
 
-        buf.append("listeners\t" + (listeners != null ? listeners.intValue() : 0) + "\n");
-        buf.append("duration\t" + hours + "\n");
-        buf.append("avg\t" + avg + "\n");
-        buf.append("uniqs\t" + uniqs + "\n");
-        if(i == 0) {
-          buf.append("reload");
+          int avg = all.getSessions() > 0 ? all.getTlh() * 60 / all.getSessions() : 0;
+
+          StringBuilder buf = new StringBuilder();
+          buf.append("listeners\t" + all.getSessions() + "\n");
+          buf.append("duration\t" + all.getTlh() + "\n");
+          buf.append("avg\t" + avg + "\n");
+          buf.append("uniqs\t" + all.getUniqs() + "\n");
+          FileUtils.writeStringToFile(file, buf.toString(), "UTF-8");
+          break;
         }
-        FileUtils.writeStringToFile(new File(filename), buf.toString(), "UTF-8");
       }
 
     }

@@ -13,6 +13,7 @@ Version 5.1.0
 [+] Tag-Patterns als Option für Shuffeln mit Station Admin-Verfahren
 [+] Rand um Button zur Farbauswahl für Playlists 
 [+] "Titelinformationen neu laden" auch innerhalb des Playlistviewers verfügbar
+[#] Tagesstatistik wird jetzt vollständig aus neuer API geladen
 
 Version 5.0.3
 -------------
