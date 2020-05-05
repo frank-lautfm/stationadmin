@@ -58,7 +58,7 @@ public class MP3StreamerTask extends AbstractTask {
       streamer.configureServer(account.getServer(), account.getPort(), client.getStation(), account.getUser(), account.getPassword());
       streamer.setUserAgent("Station Admin " + Version.VERSION + "; " + System.getProperty("os.name"));
       if(adTriggerPosition1 > -1 && adTriggerPosition2 > 0) {
-        streamer.addAdTriggers(adTriggerPosition1, adTriggerPosition1);
+        streamer.addAdTriggers(adTriggerPosition1, adTriggerPosition2);
       }
       client.setMp3Streamer(streamer);
 

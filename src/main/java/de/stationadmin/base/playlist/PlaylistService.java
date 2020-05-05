@@ -58,6 +58,7 @@ import de.stationadmin.base.util.AbstractBean;
 import de.stationadmin.lfm.backend.CurrentPlaylist;
 import de.stationadmin.lfm.backend.ExtendedPlaylistHead;
 import de.stationadmin.lfm.backend.PlaylistHead;
+import de.stationadmin.lfm.backend.ResourceNotFoundException;
 import de.stationadmin.lfm.backend.Track;
 import de.stationadmin.lfm.backend.TrackRef;
 
@@ -118,7 +119,11 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       if (!file.delete()) {
         throw new IOException("Unable to delete " + file);
       }
-      this.ctx.getServer().deletePlaylist(ctx.getStationId(), playlist.getId());
+      try {
+        this.ctx.getServer().deletePlaylist(ctx.getStationId(), playlist.getId());
+      } catch (ResourceNotFoundException e) {
+        // playlist was already deleted - ignore silently
+      }
     } else {
       File file = new File(this.dirArchive + File.separatorChar + playlist.getFileName() + ".lfm");
       if (file.exists()) {
@@ -575,7 +580,8 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       this.initOnlinePlaylist(playlist, playlistInfo, false);
       playlist.setTimestampMap(timestampMaps.get(playlist.getId()));
       this.playlistRegistry.register(playlist);
-      // defer setting of shuffleOpts as it might create local data too early otherwise
+      // defer setting of shuffleOpts as it might create local data too early
+      // otherwise
       playlist.setShuffleOpts(playlistInfo.getShuffleOpts(), true);
       playlist.setShuffleType(getShuffleType(playlistInfo));
 
@@ -752,7 +758,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     playlist.setColor(playlistInfo.getColor());
     playlist.setCreatedAt(playlistInfo.getCreatedAt());
     playlist.setUpdatedAt(playlist.getUpdatedAt());
-    if(withOpts) {
+    if (withOpts) {
       playlist.setShuffleOpts(playlistInfo.getShuffleOpts(), true);
       playlist.setShuffleType(getShuffleType(playlistInfo));
     }
