@@ -16,6 +16,7 @@ Version 5.1.0
 [#] Tagesstatistik wird jetzt vollständig aus neuer API geladen
 [*] Löschen von einer bereits auf dem Server gelöschten Playlist erzeugt keinen Fehler mehr - lokale Kopie wird einfach gelöscht
 [*] Fehlerhafes Setzen von Ad-Triggern bei Live-Senden-Aufgabe korrigiert
+[#] Menüpunkt "Shuffle-Scripte aktualisieren" entfernt
 
 Version 5.0.3
 -------------

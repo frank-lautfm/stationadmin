@@ -41,6 +41,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXStatusBar;
@@ -54,6 +55,7 @@ import de.stationadmin.base.StationStatus;
 import de.stationadmin.base.Status;
 import de.stationadmin.base.Version;
 import de.stationadmin.base.playlist.Playlist;
+import de.stationadmin.base.playlist.ShuffleScriptMeta;
 import de.stationadmin.base.schedule.Schedule;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.RegisteredTrack;
@@ -120,6 +122,7 @@ public class StationAdminWindow extends StationAdminFrame {
   private JTabbedPane tabPane = new JTabbedPane(JTabbedPane.TOP);
   private Map<String, JFrame> externalWindows = new HashMap<String, JFrame>();
   private boolean minimizesToTray = false;
+  private JMenu menuExtra; 
 
   public StationAdminWindow(ClientContext ctx) throws HeadlessException {
     super(ctx);
@@ -562,11 +565,10 @@ public class StationAdminWindow extends StationAdminFrame {
         menuBackup.add(new BackupCreateAction(ctx.getTextProvider(), ctx.getAdminClient()));
         menuBackup.add(new BackupRestoreAction(this.ctx));
         menuBackup.addSeparator();
-        menuBackup.add(new UpdateShuffleFuncsAction(this.ctx));
-        menuBackup.addSeparator();
       }
       menuBackup.add(new SettingsDisplayAction(this.ctx));
       menuBar.add(menuBackup);
+      this.menuExtra = menuBackup;
     }
 
     {
@@ -659,6 +661,23 @@ public class StationAdminWindow extends StationAdminFrame {
     @Override
     protected void showError(Exception e) {
       JXErrorPane.showDialog(null, ctx.getTextProvider().createErrorInfo(e, "action.clientinit.error"));
+    }
+
+    @Override
+    protected void onSuccess() {
+      super.onSuccess();
+      
+      boolean displayUpdateShuffleScripts = false;
+      for(ShuffleScriptMeta meta : ctx.getAdminClient().getPlaylistService().getShuffleScripts()) {
+        if(StringUtils.isEmpty(meta.getAutomationAlgorithm())) {
+          displayUpdateShuffleScripts = true;
+        }
+      }
+      if(displayUpdateShuffleScripts && menuExtra != null) {
+        menuExtra.addSeparator();
+        menuExtra.add(new UpdateShuffleFuncsAction(ctx));
+      }
+      
     }
 
   }

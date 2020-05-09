@@ -13,7 +13,7 @@ public interface Version {
   int MAJOR = 5;
   int MINOR = 1;
   int STEP = 0;
-  String STATUS = "Preview 1";
+  String STATUS = "";
 
   String VERSION = MAJOR + "." + MINOR + "." + STEP + " " + STATUS;
   
