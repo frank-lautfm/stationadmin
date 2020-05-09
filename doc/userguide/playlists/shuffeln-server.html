@@ -44,7 +44,7 @@ Bei diesem Verfahren gibst Du ein Muster (Pattern) f&uuml;r die Titelreihenfolge
 Neben den Tags die Du selbst vergeben hast gibt es noch "song", "jingle" oder "moderation" als "magic Tags" die einfach alle Tracks des entsprechenden Typs selektieren. Wenn Du also z. B. nach jedem zweiten Titel ein Jingle platzieren m&ouml;chtest setzt Du einfach "song song jingle" als Pattern.
 </p>
 <p>
-Um einen Eintrag zu dem Muster hinzuzuf&uuml;gen klicke auf die letzte graue Box und w&auml;hle ein Tag aus. Um einen Eintrag zu &auml;ndern oder zu l&ouml;schen klicke auf den Eintrag und w&auml;hle entweder ein neues Tag oder die leere Option aus.
+	Um ein Muster festzulegen ziehe oder kopiere Tags aus der linken Liste in die Rechte Liste. Innerhalb der linken Liste kannst Du Tags per Drag &amp; Drop oder Ausschneiden / Kopieren / Einf&uuml;gen umsortieren.
 </p>
 
 <p class="subheading">
@@ -60,11 +60,19 @@ F&uuml;r das Shuffeln mit dem Station Admin-Verfahren hast Du folgende Optionen:
 <li><span class="menuref">Bevorzugte Titel</span>: Optional kannst Du noch Regeln angeben um bestimmte Titel bei der Auswahl zu bevorzugen oder die Wahrscheinlichkeit f&uuml;r eine Auswahl zu reduzieren.<br> 
 Das funktioniert wieder auf Basis von Titeltags: W&auml;hle ein Tag und eine H&auml;ufigkeitsstufe f&uuml;r Titel die mit diesem Tag versehen sind. Entsprechende Titel k&ouml;nnen h&auml;ufiger oder seltener gespielt werden als &quot;normale&quot; Titel - f&uuml;r beide Varianten stehen jeweils drei Stufen zur Verf&uuml;gung.</li>
 <li>Optional kann die kurzfristige Wiederholung von <span class="menuref">gleichnamigen Titeln</span> (etwa verschiedene Versionen des gleichen Songs) unterbunden werden. Ausschlaggebend hierf&uuml;r ist alleine der Titel des Tracks. Es wird nur auf Buchstaben und Ziffern geschaut - Komma, Klammern etc spielen beim Vergleich keine Rolle.</li>
-<li><span class="menuref">laut.fm-Nachrichten</span> k&ouml;nnen st&uuml;ndlich oder in einem vorgegebenen Abstand eingef&uuml;gt werden. Die Nachrichten werden innerhalb des vorgegebenen Zeitfensters so fr&uuml;h wie m&ouml;glich platziert. Optional kann das erste Jingle in der Playlist nach den Nachrichten wiederholt werden - dazu mu&szlig; 
-aber in den globalen Einstellungen <span class="menuref">Jingle am Anfang der Playlist nicht verschieben</span> aktiviert sein.
-Diese Optionen sind nur verf&uuml;gbar wenn der Nachrichten-Track in der Playlist enthalten ist. 
+<li><span class="menuref">laut.fm-Nachrichten</span> k&ouml;nnen st&uuml;ndlich oder in einem vorgegebenen Abstand eingef&uuml;gt werden. Die Nachrichten werden innerhalb des vorgegebenen Zeitfensters so fr&uuml;h wie m&ouml;glich platziert. Diese Optionen sind nur verf&uuml;gbar wenn der Nachrichten-Track in der Playlist enthalten ist. Ein am Playlistanfang positioniertes Muster aus Nachrichten und Jingles wird bei der Wiederholung der Nachrichten beibehalten. D. h. stehen z. B. am Playlist Anfang ein Jingle und dann die Nachrichten so wird dieses Jingle jedes Mal vor den Nachrichten platziert. Steht ein Jingle nach den Nachrichten so wird dieses Jingle immer nach den Nachrichten wiederholt.
 </ul>
 </p>
+<img src="../images/playlistcfg-shuffle-sa3.jpg">
+<p>
+Im Bereich <span class="menuref">Tag-Pattern</span> kannst Du optional ein Muster auf Basis von Tags vorgeben das beim Aufbau der Playlist befolgt werden soll. Diese funktioniert genauso wie beim &quot;laut.fm - Tag-Pattern&quot;-Verfahren (siehe oben).
+Gibst Du kein Muster an wird gem&auml;&szlig; der &uuml;brigen Vorgaben eine zuf&auml;llige Titelreihenfolge erzeugt.
+</p>
+<p>
+	Achtung: Solltest Du ein Tag-Muster angeben und &uuml;ber dieses Tag-Muster Jingles einf&uuml;gen greifen die Regeln f&uuml;r die Jingle-Platzierungen aus den Grundeinstellungen nicht mehr.<br>
+	Hast Du also z. B. in den Grundeinstellungen festgelegt dass alle 20 Minuten ein Jingle platziert werden soll und f&uuml;gst &uuml;ber das Tag-Muster keine Jingles ein so wird gem&auml;&szlig; den Grundeinstellungen alle 20 Minuten ein Jingle platziert. Gibst Du dagegen ein Muster wie song-song-jingle an w&uuml;rde nach jedem zweiten Song ein Jingle platziert - die 20 Minuten-Regel aus den Grundeinstellungen ist dann hinf&auml;llig.
+</p>
+
 <img src="../images/playlistcfg-shuffle-sa2.jpg">
 <p>
 Im Bereich <span class="menuref">Regeln für Titelabfolge</span> kannst Du Soll-Regeln auf Basis von Tags angeben die nach Möglichkeit eingehalten werden sollen. 
