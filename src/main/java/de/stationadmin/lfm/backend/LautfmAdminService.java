@@ -477,7 +477,7 @@ public class LautfmAdminService {
 
     String basePath = "/stations/" + stationId + "/tracks/";
     int baseLen = BASE_URL.length() + basePath.length();
-    int maxLen = 800 - baseLen - 10;
+    int maxLen = 700 - baseLen - 10;
 
     StringBuilder idLIst = new StringBuilder();
     for (int trackId : trackIds) {
