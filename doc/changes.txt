@@ -7,6 +7,11 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
+Version 5.1.1
+-------------
+[*] Fehler beim Generieren mit ungültigen Regeln für gebundene Jingles behoben. 
+[#] Gespielte Titel und Hörerzahlen lassen sich für bis zu 100 statt 31 Tage rückwirkend abrufen insofern sie nicht ohnehin schon geladen wurden. 
+
 Version 5.1.0
 -------------
 [#] Neuer Editor für Tag-Patterns

@@ -51,6 +51,9 @@ public class LogAnalyzerService implements Service {
   private TrackStatsEntry[] bufferedEntries;
   private int bufferedEntriesDays = 0;
 
+  private long lastServerRequest;
+  private int serverRequestCnt;
+
   public LogAnalyzerService(SessionCtx ctx, TrackService trackService) {
     this.ctx = ctx;
     this.trackService = trackService;
@@ -115,7 +118,7 @@ public class LogAnalyzerService implements Service {
 
     int numLiveTracksBefore = this.trackRegistry.getNumLiveTracks();
 
-    if (day.getTime() > System.currentTimeMillis() - (DAY_IN_MS * 32l)) {
+    if (day.getTime() > System.currentTimeMillis() - (DAY_IN_MS * 100l)) {
 
       SimpleDateFormat timeFmt = new SimpleDateFormat(TIME_FORMAT);
 
@@ -130,7 +133,22 @@ public class LogAnalyzerService implements Service {
       TrackStatsEntry[] stats = null;
 
       // try get by day
+      if (System.currentTimeMillis() - this.lastServerRequest < 1000 * 60) {
+        if (this.serverRequestCnt > 30) {
+          try {
+            // add a delay in order to avoid flooding server with requests
+            Thread.sleep(100);
+          } catch (Exception e) {
+          }
+        }
+      }
+      else {
+        this.serverRequestCnt = 0;
+      }
       stats = this.ctx.getServer().getTrackStatisticsByDate(this.ctx.getStationId(), day);
+
+      this.serverRequestCnt++;
+      this.lastServerRequest = System.currentTimeMillis();
 
       // on failure: try get from recent stats
       if (stats == null || stats.length == 0) {
@@ -568,7 +586,7 @@ public class LogAnalyzerService implements Service {
       String date = dateFmt.format(cal.getTime());
       String filename = this.logCacheDir + "station_dailysummary" + "-" + date + ".log";
       File file = new File(filename);
-      if(i > 3 && file.exists()) {
+      if (i > 3 && file.exists()) {
         // we have already data and it shouldn't change anymore
         break;
       }
