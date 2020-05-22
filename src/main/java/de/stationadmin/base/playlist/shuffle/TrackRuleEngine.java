@@ -95,6 +95,10 @@ public class TrackRuleEngine implements PlaylistEnhancer {
       }
     }
 
+    boolean isValid() {
+      return this.track != null && this.boundTo.size() > 0;
+    }
+
     boolean isApplicable(BasicTrack track, int time) {
       boolean ignoreDistance = isIgnoreDistance(track);
       if (track != null && boundTo.contains(track.getId())) {
@@ -270,9 +274,13 @@ public class TrackRuleEngine implements PlaylistEnhancer {
 
     HashSet<Integer> triggers = new HashSet<Integer>();
     List<BasicTrack> newTracks = new ArrayList<BasicTrack>();
+    List<TrackRuleInstance> validRules = new ArrayList<>();
     for (TrackRuleInstance rule : this.rules) {
       rule.initialize(tracks);
-      triggers.addAll(rule.getBoundTo());
+      if (rule.isValid()) {
+        validRules.add(rule);
+        triggers.addAll(rule.getBoundTo());
+      }
     }
 
     List<BasicTrack> after = new ArrayList<BasicTrack>();
@@ -283,7 +291,7 @@ public class TrackRuleEngine implements PlaylistEnhancer {
       List<TrackRuleInstance> applicableRules = new ArrayList<TrackRuleInstance>();
       if (triggers.contains(track.getId())) {
         applicableRules.clear();
-        for (TrackRuleInstance rule : this.rules) {
+        for (TrackRuleInstance rule : validRules) {
           if (rule.isApplicable(track, time)) {
             applicableRules.add(rule);
           }
