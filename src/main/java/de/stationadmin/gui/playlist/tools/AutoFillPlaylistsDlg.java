@@ -24,6 +24,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.PlaylistNameCompator;
+import de.stationadmin.base.playlist.util.MissingSourceTracksException;
 import de.stationadmin.base.playlist.util.PlaylistFiller;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.StationAdminDialog;
@@ -96,6 +97,9 @@ public class AutoFillPlaylistsDlg extends StationAdminDialog {
           filler.fillPlaylist(playlist);
           ctx.getAdminClient().getPlaylistService().savePlaylist(playlist);
           dispose();
+        } catch(MissingSourceTracksException e) {
+          JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo(e, "action.playlist.fill.error.missingsource", e.getMessage()));
+          
         } catch (Exception e) {
           JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo(e, "action.playlist.fill.error"));
         }

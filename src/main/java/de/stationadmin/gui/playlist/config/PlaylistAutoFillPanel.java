@@ -11,10 +11,13 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import org.jdesktop.swingx.JXLabel;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
@@ -43,13 +46,23 @@ public class PlaylistAutoFillPanel extends JPanel {
 
     final ArrayList<JComponent> dependentComponents = new ArrayList<>();
 
-    this.setLayout(new FormLayout("5dlu,pref,5dlu,170dlu,5dlu", "5dlu,pref,8dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
+    this.setLayout(
+        new FormLayout("5dlu,pref,5dlu,250dlu,5dlu", "5dlu,pref,5dlu,pref,1dlu,pref,8dlu,pref,5dlu,min(pref;50dlu),5dlu,min(pref;50dlu),5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
     int row = 2;
 
+    this.add(new JLabel(ctx.getString("playlistcfg.property.autofill.description")), cc.xywh(2, row, 3, 1));
+    row += 2;
+
     {
-      JCheckBox enabledCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("enabled"), ctx.getString("playlistcfg.property.autofill.enabled"));
-      this.add(enabledCb, cc.xywh(2, row, 3, 1));
+      // JCheckBox enabledCb =
+      // BasicComponentFactory.createCheckBox(model.getBufferedModel("enabled"),
+      // ctx.getString("playlistcfg.property.autofill.enabled"));
+      JRadioButton offRb = BasicComponentFactory.createRadioButton(model.getBufferedModel("enabled"), Boolean.FALSE, ctx.getString("playlistcfg.property.autofill.disabled"));
+      this.add(offRb, cc.xywh(2, row, 3, 1));
+      row += 2;
+      JRadioButton onRb = BasicComponentFactory.createRadioButton(model.getBufferedModel("enabled"), Boolean.TRUE, ctx.getString("playlistcfg.property.autofill.enabled"));
+      this.add(onRb, cc.xywh(2, row, 3, 1));
 
       model.getBufferedModel("enabled").addValueChangeListener(new PropertyChangeListener() {
 

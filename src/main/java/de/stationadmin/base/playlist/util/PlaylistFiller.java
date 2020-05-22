@@ -44,7 +44,7 @@ public class PlaylistFiller {
    * @param playlist playlist to fill
    * @throws IOException
    */
-  public void fillPlaylist(Playlist playlist) throws IOException {
+  public void fillPlaylist(Playlist playlist) throws IOException, MissingSourceTracksException {
     if (playlist.getAutoFillRule().isEnabled()) {
       BasicTrack preNewsJingle = null;
       BasicTrack firstJingle = null;
@@ -64,7 +64,6 @@ public class PlaylistFiller {
         }
       }
 
-      playlist.removeEntries(new ArrayList<Entry>(playlist.getEntries()));
       Map<Integer, BasicTrack> tracks = new HashMap<>();
 
       // Source: Tgas
@@ -100,6 +99,12 @@ public class PlaylistFiller {
           }
         }
       }
+
+      if (playlist.getEntries().size() > 0 && trackList.size() == 0) {
+        throw new MissingSourceTracksException(playlist.getName());
+      }
+
+      playlist.removeEntries(new ArrayList<Entry>(playlist.getEntries()));
 
       if (playlist.getAutoFillRule().isIncludeNews()) {
         if (preNewsJingle != null) {
@@ -161,8 +166,11 @@ public class PlaylistFiller {
     List<Playlist> playlists = new ArrayList<>();
     for (Playlist playlist : this.playlistService.getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE)) {
       if (playlist.getAutoFillRule().isEnabled()) {
-        fillPlaylist(playlist);
-        playlists.add(playlist);
+        try {
+          fillPlaylist(playlist);
+          playlists.add(playlist);
+        } catch (MissingSourceTracksException e) {
+        }
       }
     }
     return playlists;

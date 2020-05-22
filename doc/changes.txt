@@ -11,6 +11,8 @@ Version 5.1.1
 -------------
 [*] Fehler beim Generieren mit ungültigen Regeln für gebundene Jingles behoben. 
 [#] Gespielte Titel und Hörerzahlen lassen sich für bis zu 100 statt 31 Tage rückwirkend abrufen insofern sie nicht ohnehin schon geladen wurden. 
+[#] Automatisches Befüllen bricht mit Fehler ab wenn keine neuen Tracks für die Playlist gefunden wurden.
+[#] Konfiguration der Regeln zum Befüllen mit ausführlicherer Erklärung
 
 Version 5.1.0
 -------------

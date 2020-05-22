@@ -13,6 +13,7 @@ import com.jgoodies.binding.value.ValueModel;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
+import de.stationadmin.base.playlist.util.MissingSourceTracksException;
 import de.stationadmin.base.playlist.util.PlaylistFiller;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.util.AppUtils;
@@ -51,6 +52,8 @@ public class AutoFillAction extends AbstractAction {
     if (playlist != null) {
       try {
         filler.fillPlaylist(playlist);
+      } catch(MissingSourceTracksException e) {
+        JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo(e, "action.playlist.fill.error.missingsource", e.getMessage()));
       } catch (Exception e) {
         JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo(e, "action.playlist.fill.error"));
       }
