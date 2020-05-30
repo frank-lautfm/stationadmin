@@ -41,13 +41,6 @@
       "optsKey":null,
       "defaultOpts":null,
       "supportsGlobalOpts":false
-   },
-      {  
-      "key":"StationAdmin2",
-      "automationAlgorithm": "stationadmin_2",
-      "optsKey":"StationAdmin",
-      "defaultOpts":null,
-      "supportsGlobalOpts":true
    }
    
 ]

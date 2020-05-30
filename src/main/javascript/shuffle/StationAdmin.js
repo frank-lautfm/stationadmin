@@ -1,4 +1,4 @@
-// StationAdmin v2.0
+// StationAdmin v2.0.1
 ( function( tracks, opts, trackStats ){
 	
 	var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -264,7 +264,10 @@
 		
 		var candidates = [];
 		for(var i = 0; i < artists.length; i++) {
-			for(var j = 0; j < artists[i].tracks.length && j < maxTracksPerArtist; j++) {
+			for(var j = 0; 
+                j < artists[i].tracks.length 
+                && (j < maxTracksPerArtist || (tagPattern.length > 0 && artists[i].tracks[j].type == 'moderation')); 
+                j++) {
 				candidates.push(artists[i].tracks[j]);
 			}
 		}
@@ -322,7 +325,7 @@
 		while(playlistLen < duration && failed < tagPattern.length) {
 			failed++;
 			var candidates = patternIndex[tagPattern[tagPatternPtr]];
-			// console.log("next: " + tagPattern[tagPatternPtr] + " - " + candidates.length + " of " + tracks.length);
+			// console.log("next: " + tagPattern[tagPatternPtr] + " - " + candidates.length + " / " + tracks.length);
 			var bestIdx = -1;
 			var bestPenalty = 9999;
 			var penalty = 0;
@@ -534,6 +537,9 @@
 			playlistTracks.splice(0, 0, firstJingle);
 			return playlistTracks;
 		}
+        else if(jinglesInsertedByPattern) {
+            return playlistTracks
+        }
 		
 		var jingleOrder = 'shuffle';
 		if('jingleOrder' in opts) {
