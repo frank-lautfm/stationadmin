@@ -9,7 +9,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.plaf.PopupMenuUI;
 
 import com.jgoodies.binding.value.ValueHolder;
 
@@ -51,6 +50,7 @@ public class PlaylistContainer extends JPanel {
     popupOnline.add(new PlaylistJsonAction(ctx, playlistSelectionHolder));
     popupOnline.addSeparator();
     popupOnline.add(new PlaylistEditPropertiesAction(ctx, playlistSelectionHolder, false));
+    popupOnline.add(new PlaylistConfigExplainAction(ctx, playlistSelectionHolder));
     selectorOnline.enableContextMenu(popupOnline);
     
     

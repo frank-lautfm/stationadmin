@@ -7,6 +7,11 @@ Station Admin für laut.fm - Änderungen
 [#] = Änderung
 
 
+Version 5.1.2
+-------------
+[#] URL für Shuffle-Tester-Aufruf angepasst
+[+] Erklärfunktion für Playlistkonfiguration
+
 Version 5.1.1
 -------------
 [*] Fehler beim Generieren mit ungültigen Regeln für gebundene Jingles behoben. 

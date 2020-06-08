@@ -1211,7 +1211,7 @@ public class Playlist extends AbstractBean {
   }
 
   public String getShuffleType() {
-    return shuffleType != null ? shuffleType : "basic_v1";
+    return shuffleType != null ? shuffleType : "basic";
   }
 
   public void setShuffleType(String shuffleType) {

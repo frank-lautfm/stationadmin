@@ -22,6 +22,7 @@ import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.DropMode;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -93,6 +94,7 @@ import de.stationadmin.gui.track.TrackViewAction;
 import de.stationadmin.gui.track.TrackViewer;
 import de.stationadmin.gui.track.TracksReloadAction;
 import de.stationadmin.gui.util.AbstractFileDialogAction;
+import de.stationadmin.gui.util.ActionLabel;
 import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ClipboardAction;
 import de.stationadmin.gui.util.ComponentFactory;
@@ -196,8 +198,11 @@ public class PlaylistViewer extends JPanel {
   private JComponent createStatusBar() {
     JXStatusBar statusBar = new JXStatusBar();
     statusBar.setOpaque(false);
+    
+    statisticsLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 
     final JLabel lengthLabel = new JLabel("00:00:00");
+    lengthLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
     this.presentationModel.getModel("length").addValueChangeListener(new PropertyChangeListener() {
 
       @Override
@@ -211,20 +216,51 @@ public class PlaylistViewer extends JPanel {
       }
     });
 
-    final JLabel shuffleLabel = new JLabel("");
-    this.presentationModel.getModel("shuffle").addValueChangeListener(new PropertyChangeListener() {
+    final JLabel shuffleLabel = new ActionLabel(new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        Playlist playlist = (Playlist)playlistHolder.getValue();
+        if(playlist != null) {
+          PlaylistConfigExplainDlg dlg = new PlaylistConfigExplainDlg(ctx, playlist);
+          dlg.setVisible(true);
+        }
+        
+      }
+    });
+    this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
 
       @Override
       public void propertyChange(PropertyChangeEvent evt) {
+        Playlist playlist = (Playlist)evt.getNewValue();
+        if(playlist != null) {
+          if (playlist.isShuffle()) {
+            shuffleLabel.setText(ctx.getString("playlistcfg.explain.short.shuffle.server"));
+          } else if (playlist.isGenerate()) {
+            shuffleLabel.setText(ctx.getString("playlistcfg.explain.short.generate"));
+          } else if (playlist.isLocalShuffleAllowed()) {
+            shuffleLabel.setText(ctx.getString("playlistcfg.explain.short.shuffle.local"));
+          }
+          else {
+            shuffleLabel.setText(ctx.getString("playlistcfg.explain.short.unshuffled"));
+          }
+
+        }
+        else {
+          shuffleLabel.setText("");
+        }
+        /*
         if (evt.getNewValue() instanceof Boolean && ((Boolean) evt.getNewValue()).booleanValue()) {
           shuffleLabel.setText("shuffle");
         } else {
           shuffleLabel.setText("");
         }
+        */
       }
     });
 
     final JLabel warningLabel = BasicComponentFactory.createLabel(warningMessage);
+    warningLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
     warningLabel.setForeground(Color.RED);
 
     this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
@@ -248,6 +284,7 @@ public class PlaylistViewer extends JPanel {
     });
 
     final JLabel type = new JLabel("");
+    type.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
     this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
 
       @Override
