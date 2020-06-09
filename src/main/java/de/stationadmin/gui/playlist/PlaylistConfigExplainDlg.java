@@ -1,6 +1,7 @@
 package de.stationadmin.gui.playlist;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.HeadlessException;
@@ -19,6 +20,7 @@ import de.stationadmin.base.playlist.util.PlaylistConfigExplain;
 import de.stationadmin.base.playlist.util.PlaylistConfigExplain.ConfigItem;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.StationAdminDialog;
+import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ComponentFactory;
 
 public class PlaylistConfigExplainDlg extends StationAdminDialog {
@@ -44,6 +46,7 @@ public class PlaylistConfigExplainDlg extends StationAdminDialog {
     final Style style = sc.addStyle("Standard", null);
     style.addAttribute(StyleConstants.FontSize, font.getSize() + 2);
     style.addAttribute(StyleConstants.FontFamily, font.getFamily());
+    style.addAttribute(StyleConstants.Foreground, pane.getForeground());
     style.addAttribute(StyleConstants.SpaceBelow, 4f);
 
     List<ConfigItem> items = explain.explain(playlist);
