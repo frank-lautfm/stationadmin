@@ -64,6 +64,7 @@ import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorAdviceConfi
 import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorBaseConfigurationPanel;
 import de.stationadmin.gui.playlist.config.generate.PlaylistGeneratorNewsPanel;
 import de.stationadmin.gui.playlist.config.shuffle.BlockSelectPanel;
+import de.stationadmin.gui.playlist.config.shuffle.ScheduledItemPanel;
 import de.stationadmin.gui.playlist.config.shuffle.StationAdminOptsPanel;
 import de.stationadmin.gui.playlist.config.shuffle.TagPatternPanel;
 import de.stationadmin.gui.playlist.config.shuffle.TagPatternPanelStationAdmin;
@@ -88,6 +89,7 @@ public class PlaylistConfigurationDialog extends StationAdminDialog {
   private static final int SHUFFLE_STATIONADMIN = 2;
   private static final int SHUFFLE_STATIONADMIN_TAGSEQ = 64;
   private static final int SHUFFLE_STATIONADMIN_TAGPATTERN = 256;
+  private static final int SHUFFLE_STATIONADMIN_ITEMS = 512;
   private static final int SHUFFLE_TAGPATTERN = 4;
   private static final int SHUFFLE_BLOCKSELECT = 8;
   private static final int GENERATE = 16;
@@ -390,8 +392,10 @@ public class PlaylistConfigurationDialog extends StationAdminDialog {
         DefaultMutableTreeNode shuffleOpts = new DefaultMutableTreeNode(panels.get(SHUFFLE_STATIONADMIN));
         DefaultMutableTreeNode tagPattern = new DefaultMutableTreeNode(panels.get(SHUFFLE_STATIONADMIN_TAGPATTERN));
         DefaultMutableTreeNode tagSeq = new DefaultMutableTreeNode(panels.get(SHUFFLE_STATIONADMIN_TAGSEQ));
+        DefaultMutableTreeNode schedItems = new DefaultMutableTreeNode(panels.get(SHUFFLE_STATIONADMIN_ITEMS));
         shuffleOpts.add(tagPattern);
         shuffleOpts.add(tagSeq);
+        shuffleOpts.add(schedItems);
         model.insertNodeInto(shuffleOpts, root, index++);
       } else if ((nodeStatus & SHUFFLE_TAGPATTERN) > 0) {
         DefaultMutableTreeNode shuffleOpts = new DefaultMutableTreeNode(panels.get(SHUFFLE_TAGPATTERN));
@@ -434,6 +438,7 @@ public class PlaylistConfigurationDialog extends StationAdminDialog {
     panels.put(SHUFFLE_STATIONADMIN, new PanelSelection(textProvider.getString("playlistcfg.tab.shuffleopts"), new StationAdminOptsPanel(ctx, model)));
     panels.put(SHUFFLE_STATIONADMIN_TAGSEQ, new PanelSelection(textProvider.getString("playlistcfg.tab.generate.advice"), new TagSequenceRuleEditor(ctx, model)));
     panels.put(SHUFFLE_STATIONADMIN_TAGPATTERN, new PanelSelection(textProvider.getString("playlistcfg.tab.tagpattern"), new TagPatternPanelStationAdmin(ctx, model)));
+    panels.put(SHUFFLE_STATIONADMIN_ITEMS, new PanelSelection(textProvider.getString("playlistcfg.tab.scheduleditems"), new ScheduledItemPanel(ctx, model)));
     panels.put(SHUFFLE_TAGPATTERN, new PanelSelection(textProvider.getString("playlistcfg.tab.tagpattern"), new TagPatternPanel(ctx, model)));
     panels.put(SHUFFLE_BLOCKSELECT, new PanelSelection(textProvider.getString("playlistcfg.tab.blockselect"), new BlockSelectPanel(ctx, model)));
     panels.put(GENERATE, new PanelSelection(textProvider.getString("playlistcfg.tab.generate.base"), new PlaylistGeneratorBaseConfigurationPanel(ctx, model)));

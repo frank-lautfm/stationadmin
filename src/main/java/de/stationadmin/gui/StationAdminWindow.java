@@ -80,6 +80,7 @@ import de.stationadmin.gui.playlist.ResetModifiedPlaylistsAction;
 import de.stationadmin.gui.playlist.SaveModifiedPlaylistsAction;
 import de.stationadmin.gui.playlist.forecast.ForecastDisplayAction;
 import de.stationadmin.gui.playlist.profile.PlaylistProfileEditAction;
+import de.stationadmin.gui.playlist.scheduleditems.ScheduledItemEditAction;
 import de.stationadmin.gui.playlist.tools.AutoFillPlaylistsAction;
 import de.stationadmin.gui.playlist.tools.CurrentPlaylistDisplayAction;
 import de.stationadmin.gui.playlist.tools.DupeFinderDisplayAction;
@@ -518,6 +519,7 @@ public class StationAdminWindow extends StationAdminFrame {
     {
       JMenu menuPlaylists = new JMenu(this.ctx.getTextProvider().getString("menu.playlist"));
       menuPlaylists.add(new PlaylistProfileEditAction(this.ctx));
+      menuPlaylists.add(new ScheduledItemEditAction(this.ctx));
       menuPlaylists.addSeparator();
       menuPlaylists.add(new PlaylistNewAction(this.ctx, null));
       menuPlaylists.add(new TempPlaylistDisplayAction(this.ctx));

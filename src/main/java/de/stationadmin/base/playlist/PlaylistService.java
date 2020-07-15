@@ -43,6 +43,7 @@ import de.stationadmin.base.playlist.profile.AdTriggerCfg;
 import de.stationadmin.base.playlist.profile.ArtistNormalizationCfg;
 import de.stationadmin.base.playlist.profile.PlaylistProfile;
 import de.stationadmin.base.playlist.profile.TrackRuleCfg;
+import de.stationadmin.base.playlist.scheduled.ScheduledItem;
 import de.stationadmin.base.playlist.shuffle.PlaylistProfileType;
 import de.stationadmin.base.playlist.shuffle.TrackRule;
 import de.stationadmin.base.playlist.shuffle.TrackRuleGroup;
@@ -87,6 +88,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
   private List<ShuffleScriptMeta> shuffleScripts = new ArrayList<>();
 
   private List<PlaylistProfile> profiles = new ArrayList<>();
+  private List<ScheduledItem> scheduledItems = new ArrayList<>();
   private Settings settings;
 
   /**
@@ -309,6 +311,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     this.loadPlaylists(PlaylistType.ONLINE);
     this.loadPlaylists(PlaylistType.ARCHIVED);
     this.loadProfilesFromFile();
+    this.loadScheduledItemsFromFile();
     this.checkIntegrity();
   }
 
@@ -956,7 +959,38 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       opts.remove("trackRuleGroups");
       opts.remove("trackRules");
     }
+  }
 
+  public void updateScheduledItemsOpts(String itemId) throws IOException {
+    for (Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
+      if (playlist.isShuffle() && playlist.getShuffleOpts() != null) {
+        if (updateScheduledItemsOpts(playlist.getShuffleOpts(), itemId)) {
+          this.ctx.getServer().updatePlaylistShuffleOpts(ctx.getStationId(), playlist.getId(), playlist.getShuffleOpts());
+        }
+      }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private boolean updateScheduledItemsOpts(Map<String, Object> opts, String itemId) throws IOException {
+    ScheduledItem item = getScheduledItem(itemId);
+    List<Map<String, Object>> cfg = (List<Map<String, Object>>) opts.get("scheduled");
+    boolean found = false;
+    if (cfg != null) {
+      List<Map<String, Object>> itemsToRemove = new ArrayList<>();
+      for (Map<String, Object> entry : cfg) {
+        if (entry.containsKey("id") && entry.get("id").equals(itemId)) {
+          if (item != null) {
+            item.updateIn(entry);
+          } else {
+            itemsToRemove.add(entry);
+          }
+          found = true;
+        }
+      }
+      cfg.removeAll(itemsToRemove);
+    }
+    return found;
   }
 
   public List<ShuffleScriptMeta> getShuffleScripts() {
@@ -1038,10 +1072,31 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     return null;
   }
 
+  public List<ScheduledItem> getScheduledItems() {
+    return this.scheduledItems;
+  }
+
+  public ScheduledItem getScheduledItem(String id) {
+    if (id != null) {
+      for (ScheduledItem p : scheduledItems) {
+        if (p.getId().equals(id)) {
+          return p;
+        }
+      }
+    }
+    return null;
+  }
+
   public void addProfile(PlaylistProfile profile) {
     List<PlaylistProfile> old = new ArrayList<>(this.profiles);
     this.profiles.add(profile);
     this.firePropertyChange("profiles", old, profiles);
+  }
+
+  public void addScheduledItem(ScheduledItem item) {
+    List<ScheduledItem> old = new ArrayList<>(this.scheduledItems);
+    this.scheduledItems.add(item);
+    this.firePropertyChange("scheduledItems", old, scheduledItems);
   }
 
   public void removeProfile(String id) {
@@ -1055,9 +1110,23 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     }
   }
 
-  public void saveProfiles() throws IOException {
+  public void removeScheduledItem(String id) {
+    List<ScheduledItem> old = new ArrayList<>(this.scheduledItems);
+    for (int i = 0; i < scheduledItems.size(); i++) {
+      if (scheduledItems.get(i).getId().equals(id)) {
+        scheduledItems.remove(i);
+        this.firePropertyChange("scheduledItems", old, scheduledItems);
+        return;
+      }
+    }
+  }
 
+  public void saveProfiles() throws IOException {
     saveProfilesToFile();
+  }
+
+  public void saveScheduledItems() throws IOException {
+    this.saveScheduledItemsToFile();
   }
 
   private List<PlaylistProfile> convertJsonToProfiles(String json) throws IOException {
@@ -1066,10 +1135,24 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     return new ArrayList<>(Arrays.asList(profiles));
   }
 
+  private List<ScheduledItem> convertJsonToScheduledItems(String json) throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+    ScheduledItem[] items = mapper.readValue(json, ScheduledItem[].class);
+    return new ArrayList<>(Arrays.asList(items));
+
+  }
+
   private String convertProfilesToJson() throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     PlaylistProfile[] profiles = this.profiles.toArray(new PlaylistProfile[this.profiles.size()]);
     return mapper.writeValueAsString(profiles);
+  }
+
+  private String convertScheduledItemsToJson() throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+    ScheduledItem[] items = this.scheduledItems.toArray(new ScheduledItem[this.scheduledItems.size()]);
+    return mapper.writeValueAsString(items);
+
   }
 
   private void loadProfilesFromFile() throws IOException {
@@ -1085,6 +1168,13 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     String file = ctx.getStationDirectory() + "playlistprofiles.json";
     if (new File(file).exists()) {
       this.profiles = convertJsonToProfiles(org.apache.commons.io.FileUtils.readFileToString(new File(file), Charset.forName("UTF-8")));
+    }
+  }
+
+  private void loadScheduledItemsFromFile() throws IOException {
+    String file = ctx.getStationDirectory() + "scheduleditems.json";
+    if (new File(file).exists()) {
+      this.scheduledItems = convertJsonToScheduledItems(org.apache.commons.io.FileUtils.readFileToString(new File(file), Charset.forName("UTF-8")));
     }
   }
 
@@ -1123,6 +1213,11 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
   private void saveProfilesToFile() throws IOException {
     String file = ctx.getStationDirectory() + "playlistprofiles.json";
     FileUtils.write(new File(file), convertProfilesToJson(), Charset.forName("UTF-8"));
+  }
+
+  private void saveScheduledItemsToFile() throws IOException {
+    String file = ctx.getStationDirectory() + "scheduleditems.json";
+    FileUtils.write(new File(file), convertScheduledItemsToJson(), Charset.forName("UTF-8"));
   }
 
   public String getPlaylistJson(int playlistId) throws IOException {
