@@ -95,7 +95,7 @@ public class ScheduledItemDlg extends StationAdminFrame {
             isNew = true;
           }
           ctx.getAdminClient().getPlaylistService().saveScheduledItems();
-          if(isNew) {
+          if(!isNew) {
             ctx.getAdminClient().getPlaylistService().updateScheduledItemsOpts(item.getId());
           }
           // ctx.getAdminClient().getClientConfigService().write();

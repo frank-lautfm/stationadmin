@@ -7,6 +7,7 @@ public class ScheduledItem {
   private String id = UUID.randomUUID().toString();
   private String name;
   private String tag;
+  private boolean excludeTracksFromShuffle = true;
   private TrackType trackType = TrackType.Song;
   private int introJingleId;
   private TrackSelectionMode selection = TrackSelectionMode.Random;
@@ -73,5 +74,19 @@ public class ScheduledItem {
     else {
       map.remove("introJingleId");
     }
+    if(this.excludeTracksFromShuffle) {
+      map.put("exclude", true);
+    }
+    else {
+      map.remove("exclude");
+    }
+  }
+
+  public boolean isExcludeTracksFromShuffle() {
+    return excludeTracksFromShuffle;
+  }
+
+  public void setExcludeTracksFromShuffle(boolean excludeTracksFromShuffle) {
+    this.excludeTracksFromShuffle = excludeTracksFromShuffle;
   }
 }

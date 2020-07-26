@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -46,7 +47,7 @@ public class ScheduledItemEditor extends JPanel {
 
   @SuppressWarnings("unchecked")
   private void initialize() {
-    this.setLayout(new FormLayout("5dlu,pref,5dlu,200dlu:grow,5dlu", "5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
+    this.setLayout(new FormLayout("5dlu,pref,5dlu,200dlu:grow,5dlu", "5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
 
     int row = 2;
@@ -81,6 +82,14 @@ public class ScheduledItemEditor extends JPanel {
       this.add(cmb, cc.xy(4, row));
       row += 2;
     }
+    
+    // exclude
+    {
+      JCheckBox cb = BasicComponentFactory.createCheckBox(model.getBufferedModel("excludeTracksFromShuffle"), textProvider.getString("scheduleditem.exclude"));
+      this.add(cb, cc.xy(4, row));
+      row += 2;
+    }
+
 
     // IntroJingle
     {

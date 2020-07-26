@@ -3,7 +3,7 @@ package de.stationadmin.base.playlist.scheduled;
 public enum TrackType {
   Song(1),
   Jingle(2),
-  Word(3);
+  Moderation(3);
 
   private int id;
   

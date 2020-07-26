@@ -28,6 +28,7 @@ public class ScheduledItemRule {
     HashMap<String, Object> map = new HashMap<>();
     if (scheduledItem != null) {
       map.put("id", scheduledItem.getId());
+      scheduledItem.updateIn(map);
     }
     if (this.hour > -1) {
       map.put("hour", hour);
@@ -35,6 +36,7 @@ public class ScheduledItemRule {
       map.put("interval", this.interval);
     }
     map.put("minute", this.minute);
+
     return map;
   }
 
