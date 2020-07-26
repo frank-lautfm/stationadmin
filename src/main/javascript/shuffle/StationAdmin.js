@@ -1,4 +1,4 @@
-// StationAdmin v2.0.1
+// StationAdmin v2.0.2
 ( function( tracks, opts, trackStats ){
 	
 	var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -528,11 +528,12 @@
 	}
 	
 	function insertJingles(playlistTracks) {
-		if(firstJingle == null && jingles.length == 0) {
+		var addFirstJingle = firstJingle != null && newsTrack == null; 
+		if(!addFirstJingle && jingles.length == 0) {
 			// nothing to do
 			return playlistTracks;
 		}
-		else if(firstJingle != null && (jingles.length == 0  || jinglesInsertedByPattern)) {
+		else if(addFirstJingle != null && (jingles.length == 0  || jinglesInsertedByPattern)) {
 			// just insert first jingle 
 			playlistTracks.splice(0, 0, firstJingle);
 			return playlistTracks;
@@ -562,7 +563,7 @@
 			jingleInterval = Math.floor((duration / numJingles) / 60);
 		}
 		
-		if(firstJingle != null) {
+		if(addFirstJingle) {
 			newTracks.push(firstJingle);
 			timeNextJingle = jingleInterval;
 			jingleOffset = jingleInterval;
@@ -811,7 +812,7 @@
 	    var adCnt = 0;
 	    var nextAdPosition = position1 * 60;
 
-	    var allowMove = true;
+	    var moveCnt = 0;
 	    for (var i = 0; i < playlistTracks.length; i++) {
 	      
 	      var addTrigger = currentPosition > nextAdPosition;
@@ -822,11 +823,11 @@
 	        var nextIsJingle = playlistTracks[i].type == 'jingle';
 	        if (lastIsJingle || nextIsJingle) {
 	        	if (adJingleCollisionStrategy == 'move_adtrigger') {
-	            	if (allowMove) {
+	            	if (moveCnt < 2) {
 	            		// prevent adding trigger for now and move next position 60 seconds ahead
 	            		addTrigger = false;
 	            		nextAdPosition += 60;
-	              		allowMove = false;
+	              		moveCnt++;
 	            	}
 	          	} else if (adJingleCollisionStrategy == 'remove_jingle') {
 	            	if (lastIsJingle) {
@@ -850,7 +851,7 @@
 	        adCnt++;
 	        var nextAdBase = adCnt % 2 == 0 ? position1 : position2;
 	        nextAdPosition = (nextAdBase * 60) + Math.floor(adCnt / 2) * 60 * 60;
-	        allowMove = true;
+	        moveCnt = 0;
 	      }
 	      if (addTrack) {
 	        newTracks.push(playlistTracks[i]);
