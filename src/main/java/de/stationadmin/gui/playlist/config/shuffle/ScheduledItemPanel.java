@@ -46,6 +46,7 @@ public class ScheduledItemPanel extends JPanel {
   private ValueModel scheduledItemHour = new ValueHolder(-1);
   private ValueModel scheduledItemMinute = new ValueHolder(0);
   private ValueModel scheduledItemInterval = new ValueHolder(0);
+  private ValueModel scheduledItemDay = new ValueHolder(-1);
 
   public ScheduledItemPanel(ClientContext ctx, PlaylistConfigurationModel model) {
     super();
@@ -104,14 +105,35 @@ public class ScheduledItemPanel extends JPanel {
   @SuppressWarnings("unchecked")
   private JPanel createScheduledItemPanel() {
 
-    JPanel panel = new JPanel(new FormLayout("pref,5dlu,max(pref;120dlu)", "pref,5dlu,pref,5dlu,pref,5dlu,pref"));
+    JPanel panel = new JPanel(new FormLayout("pref,5dlu,max(pref;120dlu)", "pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref"));
     CellConstraints cc = new CellConstraints();
+    int row = 1;
 
     {
       SelectionInList<ScheduledItem> itemSelectionInList = new SelectionInList<>(ctx.getAdminClient().getPlaylistService().getScheduledItems(), scheduledItem);
       JComboBox<ScheduledItem> itemSelection = BasicComponentFactory.createComboBox(itemSelectionInList);
       panel.add(new JLabel(ctx.getString("playlistcfg.property.scheduleditem.item")), cc.xy(1, 1));
-      panel.add(itemSelection, cc.xy(3, 1));
+      panel.add(itemSelection, cc.xy(3, row));
+      row += 2;
+    }
+    {
+      Integer[] dayOpts = { -1, -2, -3, 1, 2, 3, 4, 5, 6, 0 };
+      SelectionInList<Integer> daySelectionInList = new SelectionInList<>(dayOpts, scheduledItemDay);
+      JComboBox<Integer> daySelection = BasicComponentFactory.createComboBox(daySelectionInList, new DefaultListCellRenderer() {
+        private static final long serialVersionUID = -6540555659669518513L;
+
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+          Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+          setText(ctx.getTextProvider().getString("playlistcfg.property.scheduleditem.day." + value));
+          return comp;
+        }
+        
+      });
+      panel.add(new JLabel(ctx.getString("playlistcfg.property.scheduleditem.day")), cc.xy(1, row));
+      panel.add(daySelection, cc.xy(3, row));
+
+      row += 2;
     }
     {
       List<Integer> hours = new ArrayList<>();
@@ -132,8 +154,9 @@ public class ScheduledItemPanel extends JPanel {
         }
 
       });
-      panel.add(new JLabel(ctx.getString("playlistcfg.property.scheduleditem.hour")), cc.xy(1, 3));
-      panel.add(hourSelection, cc.xy(3, 3));
+      panel.add(new JLabel(ctx.getString("playlistcfg.property.scheduleditem.hour")), cc.xy(1, row));
+      panel.add(hourSelection, cc.xy(3, row));
+      row += 2;
     }
 
     {
@@ -143,8 +166,10 @@ public class ScheduledItemPanel extends JPanel {
       }
       SelectionInList<Integer> minuteSelectionInList = new SelectionInList<>(minutes, scheduledItemMinute);
       JComboBox<ScheduledItem> minuteSelection = BasicComponentFactory.createComboBox(minuteSelectionInList);
-      panel.add(new JLabel(ctx.getString("playlistcfg.property.scheduleditem.minute")), cc.xy(1, 5));
-      panel.add(minuteSelection, cc.xy(3, 5));
+      panel.add(new JLabel(ctx.getString("playlistcfg.property.scheduleditem.minute")), cc.xy(1, row));
+      panel.add(minuteSelection, cc.xy(3, row));
+      row += 2;
+
     }
 
     {
@@ -176,8 +201,9 @@ public class ScheduledItemPanel extends JPanel {
         }
 
       });
-      panel.add(new JLabel(ctx.getString("playlistcfg.property.scheduleditem.interval")), cc.xy(1, 7));
-      panel.add(intervalSelection, cc.xy(3, 7));
+      panel.add(new JLabel(ctx.getString("playlistcfg.property.scheduleditem.interval")), cc.xy(1, row));
+      panel.add(intervalSelection, cc.xy(3, row));
+      row += 2;
 
       scheduledItemHour.addValueChangeListener(new PropertyChangeListener() {
 
@@ -239,6 +265,7 @@ public class ScheduledItemPanel extends JPanel {
         ScheduledItemRule rule = (ScheduledItemRule) evt.getNewValue();
         if (rule != null) {
           scheduledItem.setValue(rule.getScheduledItem());
+          scheduledItemDay.setValue(rule.getDay());
           scheduledItemHour.setValue(rule.getHour());
           scheduledItemMinute.setValue(rule.getMinute());
           scheduledItemInterval.setValue(rule.getInterval());
@@ -256,6 +283,7 @@ public class ScheduledItemPanel extends JPanel {
     scheduledItemHour.setValue(-1);
     scheduledItemMinute.setValue(0);
     scheduledItemInterval.setValue(0);
+    scheduledItemDay.setValue(-1);
   }
 
   private class AcceptAction extends AbstractAction {
@@ -277,6 +305,7 @@ public class ScheduledItemPanel extends JPanel {
     public void actionPerformed(ActionEvent e) {
       boolean isNew = selection.getValue() == null;
       ScheduledItemRule rule = selection.getValue() != null ? (ScheduledItemRule) selection.getValue() : new ScheduledItemRule();
+      rule.setDay((Integer)scheduledItemDay.getValue());
       rule.setScheduledItem((ScheduledItem) scheduledItem.getValue());
       rule.setHour((Integer) scheduledItemHour.getValue());
       rule.setMinute((Integer) scheduledItemMinute.getValue());

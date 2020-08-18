@@ -8,7 +8,9 @@ import de.stationadmin.base.playlist.scheduled.ScheduledItem;
 
 public class ScheduledItemRule {
   private String id = UUID.randomUUID().toString();
+  private static String[] weekdays = { "So", "Mo", "Di", "Mi", "Do", "Fr", "Sa" };
   private ScheduledItem scheduledItem;
+  private int day = -1;
   private int hour = -1;
   private int minute = 0;
   private int interval = 60;
@@ -19,6 +21,7 @@ public class ScheduledItemRule {
 
   public ScheduledItemRule(ScheduledItem item, Map<String, Object> map) {
     this.scheduledItem = item;
+    this.day = map.containsKey("day") ? (Integer)map.get("day") : -1;
     this.hour = map.containsKey("hour") ? (Integer) map.get("hour") : -1;
     this.minute = map.containsKey("minute") ? (Integer) map.get("minute") : 15;
     this.interval = map.containsKey("interval") ? (Integer) map.get("interval") : 0;
@@ -34,6 +37,12 @@ public class ScheduledItemRule {
       map.put("hour", hour);
     } else {
       map.put("interval", this.interval);
+    }
+    if(this.day != -1) {
+      map.put("day", this.day);
+    }
+    else {
+      map.remove("day");
     }
     map.put("minute", this.minute);
 
@@ -74,11 +83,30 @@ public class ScheduledItemRule {
 
   public String toString() {
     String name = this.scheduledItem != null ? this.scheduledItem.getName() : "?";
-    return name + " (" + (this.hour > -1 ? Integer.toString(hour) : "") + ":" + (this.minute > 9 ? Integer.toString(minute) : "0" + minute) + ")";
+    String dayStr = "";
+    if(this.day >= 0) {
+      dayStr = weekdays[day] + " ";
+    }
+    else if(this.day == -2) {
+      dayStr = "Mo-Fr ";
+    }
+    else if(this.day == -3) {
+      dayStr = "Sa/So ";
+    }
+      
+    return name + " (" + dayStr + (this.hour > -1 ? Integer.toString(hour) : "") + ":" + (this.minute > 9 ? Integer.toString(minute) : "0" + minute) + ")";
   }
 
   public String getId() {
     return id;
+  }
+
+  public int getDay() {
+    return day;
+  }
+
+  public void setDay(int day) {
+    this.day = day;
   }
 
 }
