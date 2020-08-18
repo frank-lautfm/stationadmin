@@ -215,7 +215,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
         }
 
       } else {
-        properties.add(line);
+        properties.add(line.replace("\\n", "\n"));
       }
       i++;
     }
@@ -664,10 +664,11 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     Set<Integer> refreshed = new HashSet<Integer>(); // tracks that have been updated in track registry
     for (ExtendedPlaylistHead playlistInfo : playlistInfos) {
       if (ids.contains(playlistInfo.getId())) {
+        log.info("update playlist " + playlistInfo.getTitle());
 
         // prepare basic information
         Playlist playlist = this.playlistRegistry.getPlaylist(playlistInfo.getId());
-        if (playlist == null) {
+        if (playlist == null) { 
           playlist = new Playlist(this.trackRegistry, PlaylistType.ONLINE);
         } else {
           // remove all old titles - will be filled with new ones
@@ -691,7 +692,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       try {
         ctx.getServer().getPlaylist(ctx.getStationId(), id);
       } catch (ResourceNotFoundException e) {
-        System.out.println(e);
+        log.info("Deleting playlist " + id);
         // playlist does no longer exit
         this.deletePlaylist(getPlaylistRegistry().getPlaylist(id));
       } catch (Exception e) {

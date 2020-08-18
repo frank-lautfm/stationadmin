@@ -53,6 +53,7 @@ public class PlaylistBackupExporter extends PlaylistExporter {
     List<String> properties = playlist.getProperties();
     StringBuilder buf = new StringBuilder();
     for (String line : properties) {
+      line = line.replace("\n", "\\n");
       buf.append("# ");
       buf.append(line);
       buf.append('\n');
