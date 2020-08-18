@@ -684,8 +684,21 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
         updateMetaData(pl, playlist);
         this.savePlaylistAs(playlist, Integer.toString(playlist.getId()));
 
+        ids.remove(playlistInfo.getId());
       }
     }
+    for (Integer id : ids) {
+      try {
+        ctx.getServer().getPlaylist(ctx.getStationId(), id);
+      } catch (ResourceNotFoundException e) {
+        System.out.println(e);
+        // playlist does no longer exit
+        this.deletePlaylist(getPlaylistRegistry().getPlaylist(id));
+      } catch (Exception e) {
+        log.warn("Unable to access playlist " + id, e);
+      }
+    }
+
     this.playlistModificationDetector.markClean();
     this.trackRegistry.removeUnused();
 
