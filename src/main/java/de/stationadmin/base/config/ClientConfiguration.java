@@ -13,6 +13,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import de.stationadmin.base.Version;
 import de.stationadmin.base.playlist.PlaylistClientCfgData;
 import de.stationadmin.base.playlist.profile.PlaylistProfile;
+import de.stationadmin.base.playlist.scheduled.ScheduledItem;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement(name = "ClientCfg")
@@ -23,6 +24,7 @@ public class ClientConfiguration {
   private Map<String, String> tagGroups = new HashMap<>();
   private List<PlaylistClientCfgData> playlistData = new ArrayList<>();
   private List<PlaylistProfile> playlistProfiles = new ArrayList<>();
+  private List<ScheduledItem> scheduledPlaylistItems = new ArrayList<>();
   private Date timmestamp = new Date();
 
   public List<String> getDynamicTags() {
@@ -71,6 +73,14 @@ public class ClientConfiguration {
 
   public void setPlaylistProfiles(List<PlaylistProfile> playlistProfiles) {
     this.playlistProfiles = playlistProfiles;
+  }
+
+  public List<ScheduledItem> getScheduledPlaylistItems() {
+    return scheduledPlaylistItems;
+  }
+
+  public void setScheduledPlaylistItems(List<ScheduledItem> scheduledPlaylistItems) {
+    this.scheduledPlaylistItems = scheduledPlaylistItems;
   }
 
 }

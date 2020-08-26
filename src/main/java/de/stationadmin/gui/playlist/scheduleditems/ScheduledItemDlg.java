@@ -33,20 +33,22 @@ import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.scheduled.ScheduledItem;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.StationAdminFrame;
+import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.NonObservingPresentationModel;
+import de.stationadmin.gui.util.ThreadedAction;
 
 public class ScheduledItemDlg extends StationAdminFrame {
   private class DeleteAction extends AbstractAction implements PropertyChangeListener {
     private static final long serialVersionUID = -1424588336495262853L;
-    private ScheduledItem  item;
-    
-  
+    private ScheduledItem item;
+
     DeleteAction() {
       this.putValue(Action.SMALL_ICON, ctx.getIcon("delete.png"));
-      // this.putValue(Action.SHORT_DESCRIPTION, ctx.getString("titletagmanager.action.delete.tooltip"));
+      // this.putValue(Action.SHORT_DESCRIPTION,
+      // ctx.getString("titletagmanager.action.delete.tooltip"));
       this.setEnabled(false);
     }
-  
+
     /**
      * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
@@ -58,14 +60,14 @@ public class ScheduledItemDlg extends StationAdminFrame {
           ctx.getAdminClient().getPlaylistService().updateScheduledItemsOpts(item.getId());
           ctx.getAdminClient().getPlaylistService().removeScheduledItem(item.getId());
           ctx.getAdminClient().getPlaylistService().saveScheduledItems();
-          // ctx.getAdminClient().getClientConfigService().write();
+          ctx.getAdminClient().getClientConfigService().write();
         } catch (IOException e) {
           ErrorInfo errorInfo = ctx.createErrorInfo(e, "titletagmanager.action.delete.failed");
           JXErrorPane.showDialog(ScheduledItemDlg.this, errorInfo);
         }
       }
     }
-  
+
     /**
      * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
      */
@@ -78,35 +80,36 @@ public class ScheduledItemDlg extends StationAdminFrame {
 
   private class SaveAction extends AbstractAction implements PropertyChangeListener {
     private static final long serialVersionUID = -7540437073407576092L;
-  
+
     SaveAction() {
       this.putValue(Action.SMALL_ICON, ctx.getIcon("save.png"));
       this.setEnabled(false);
     }
-  
+
     public void actionPerformed(ActionEvent evt) {
       try {
         ScheduledItem item = (ScheduledItem) selection.getValue();
         model.triggerCommit();
-        if(item != null) {
+        if (item != null) {
           boolean isNew = false;
-          if(ctx.getAdminClient().getPlaylistService().getScheduledItem(item.getId()) == null) {
+          if (ctx.getAdminClient().getPlaylistService().getScheduledItem(item.getId()) == null) {
             ctx.getAdminClient().getPlaylistService().addScheduledItem(item);
             isNew = true;
           }
           ctx.getAdminClient().getPlaylistService().saveScheduledItems();
-          if(!isNew) {
-            ctx.getAdminClient().getPlaylistService().updateScheduledItemsOpts(item.getId());
+          ctx.getAdminClient().getClientConfigService().write();
+          if (!isNew) {
+            UpdateScheduledItemsAction updateAction = new UpdateScheduledItemsAction(ctx, item.getId());
+            updateAction.actionPerformed(new ActionEvent(this, 0, "update"));
           }
-          // ctx.getAdminClient().getClientConfigService().write();
         }
       } catch (IOException e) {
         ErrorInfo errorInfo = ctx.createErrorInfo(e, "action.error.generic");
         JXErrorPane.showDialog(ScheduledItemDlg.this, errorInfo);
       }
-  
+
     }
-  
+
     /**
      * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
      */
@@ -114,7 +117,35 @@ public class ScheduledItemDlg extends StationAdminFrame {
     public void propertyChange(PropertyChangeEvent evt) {
       this.setEnabled(evt.getNewValue() != null);
     }
-  
+
+  }
+
+  private class UpdateScheduledItemsAction extends ThreadedAction {
+    private static final long serialVersionUID = -6933201007843938751L;
+    private String itemId;
+
+    public UpdateScheduledItemsAction(ClientContext ctx, String itemId) {
+      super(ctx);
+      this.itemId = itemId;
+    }
+
+    @Override
+    protected String getStatus() {
+      return ctx.getString("shuffleopts.update.status");
+    }
+
+    @Override
+    protected void performAction() throws Exception {
+      ctx.getAdminClient().getPlaylistService().updateScheduledItemsOpts(itemId);
+
+    }
+
+    @Override
+    protected void showError(Exception e) {
+      JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo(e, "shuffleopts.update.error"));
+
+    }
+
   }
 
   private static final long serialVersionUID = 2613859345797901157L;
@@ -126,7 +157,7 @@ public class ScheduledItemDlg extends StationAdminFrame {
     model = new NonObservingPresentationModel<ScheduledItem>(selection);
     initialize();
   }
-  
+
   @SuppressWarnings("unchecked")
   private void initialize() {
     this.getContentPane().setLayout(new FormLayout("5dlu,120dlu,5dlu,pref:grow,5dlu", "5dlu,pref:grow,5dlu"));
@@ -171,14 +202,13 @@ public class ScheduledItemDlg extends StationAdminFrame {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-          if(evt.getNewValue() != null) {
-            if(container.getComponentCount() == 0) {
+          if (evt.getNewValue() != null) {
+            if (container.getComponentCount() == 0) {
               System.out.println("add edtior");
               container.add(editor, BorderLayout.CENTER);
-              
+
             }
-          }
-          else {
+          } else {
             container.removeAll();
           }
           container.validate();
@@ -210,7 +240,7 @@ public class ScheduledItemDlg extends StationAdminFrame {
       DeleteAction delete = new DeleteAction();
       selection.addValueChangeListener(delete);
       toolbar.add(delete);
-      
+
       mainPanel.add(toolbar, BorderLayout.NORTH);
       mainPanel.add(container, BorderLayout.CENTER);
 
@@ -224,6 +254,5 @@ public class ScheduledItemDlg extends StationAdminFrame {
   protected Dimension getDefaultSize() {
     return new Dimension(600, 500);
   }
-
 
 }

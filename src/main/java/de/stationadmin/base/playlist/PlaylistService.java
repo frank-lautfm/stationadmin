@@ -668,7 +668,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
 
         // prepare basic information
         Playlist playlist = this.playlistRegistry.getPlaylist(playlistInfo.getId());
-        if (playlist == null) { 
+        if (playlist == null) {
           playlist = new Playlist(this.trackRegistry, PlaylistType.ONLINE);
         } else {
           // remove all old titles - will be filled with new ones
@@ -1047,11 +1047,22 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
         }
       }
     }
+
+    if (cfg.getVersion().compareTo("5.2") >= 0 && cfg.getScheduledPlaylistItems() != null) {
+      try {
+        this.scheduledItems = cfg.getScheduledPlaylistItems();
+        this.saveScheduledItemsToFile();
+      } catch (Exception e) {
+        log.info("unable to update scheduled items from client configuration", e);
+      }
+    }
+
   }
 
   @Override
   public void collectClientConfiguration(ClientConfiguration cfg) {
     cfg.setPlaylistProfiles(this.profiles);
+    cfg.setScheduledPlaylistItems(this.scheduledItems);
     List<PlaylistClientCfgData> list = new ArrayList<>();
     for (Playlist pl : playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
       if ((pl.getAutoFillRule() != null && pl.getAutoFillRule().isConfigured()) || org.apache.commons.lang3.StringUtils.isNotEmpty(pl.getProfileId())

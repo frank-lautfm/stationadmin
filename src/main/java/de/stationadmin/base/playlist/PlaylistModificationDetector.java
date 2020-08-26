@@ -44,13 +44,16 @@ public class PlaylistModificationDetector extends AbstractBean {
         Playlist playlist = this.playlistRegistry.getPlaylist(head.getId());
         if (playlist == null || playlist.getUpdatedAt() == null || head.getUpdatedAt().getTime() > playlist.getUpdatedAt().getTime()) {
           modifiedIds.add(head.getId());
+          log.info("Playlist " + head.getTitle() + " detected as modified - updatedAt changed (" + playlist.getUpdatedAt() + " / " + head.getUpdatedAt() + ")");
         } else if (playlist.isShuffle() && !playlist.isShuffleTypeSet()) {
           modifiedIds.add(head.getId());
+          log.info("Playlist " + head.getTitle() + " detected as modified - shuffle type unknown");
         }
         ids.remove(head.getId());
       }
       if (ids.size() > 0) {
         // playlists have been deleted
+        log.info("Playlists " + ids + " have been deleted");
         modifiedIds.addAll(ids);
       }
 
