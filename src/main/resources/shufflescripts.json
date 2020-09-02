@@ -41,6 +41,15 @@
       "optsKey":null,
       "defaultOpts":null,
       "supportsGlobalOpts":false
+   },
+   {  
+      "key":"StationAdminBeta",
+      "automationAlgorithm": "stationadmin_beta",
+      "optsKey":"StationAdmin",
+      "file":"StationAdmin_v1_2.js",
+      "defaultOpts":null,
+      "supportsGlobalOpts":true
    }
+   
    
 ]
