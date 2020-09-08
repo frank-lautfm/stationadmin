@@ -45,6 +45,7 @@ import de.stationadmin.base.playlist.Playlist.PlaylistType;
 import de.stationadmin.base.playlist.PlaylistRegistry;
 import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.exporter.PlaylistBackupExporter;
+import de.stationadmin.base.playlist.scheduled.ScheduledItem;
 import de.stationadmin.base.playlist.trackimport.TrackImportHandler;
 import de.stationadmin.base.playlist.validation.PlaylistValidationException;
 import de.stationadmin.base.schedule.Schedule;
@@ -145,6 +146,11 @@ public class BackupService implements Service {
     }
   }
 
+  public boolean checkScheduledItemsAvailability(File file) throws IOException {
+    try(ZipFile zip = new ZipFile(file)) {
+      return zip.getEntry("scheduleditems.json") != null;
+    }
+  }
   /**
    * @see de.stationadmin.base.Service#close()
    */
@@ -204,6 +210,13 @@ public class BackupService implements Service {
           ZipEntry entry = new ZipEntry("playlistprofiles.json");
           zip.putNextEntry(entry);
           byte[] data = FileUtils.readFileToByteArray(profilesFile);
+          zip.write(data);
+        }
+        File scheduledItemsFile = new File(sessionCtx.getStationDirectory() + "scheduleditems.json");
+        if (scheduledItemsFile.exists()) {
+          ZipEntry entry = new ZipEntry("scheduleditems.json");
+          zip.putNextEntry(entry);
+          byte[] data = FileUtils.readFileToByteArray(scheduledItemsFile);
           zip.write(data);
         }
       }
@@ -370,6 +383,23 @@ public class BackupService implements Service {
     }
   }
 
+  public void restoreScheduledItems(File file) throws IOException {
+    try (ZipFile zip = new ZipFile(file)) {
+      ZipEntry entry = zip.getEntry("scheduleditems.json");
+      if(entry != null) {
+        try(InputStream in = zip.getInputStream(entry)) {
+          File itemsFile = new File(sessionCtx.getStationDirectory() + "scheduleditems.json");
+          try(FileOutputStream out = new FileOutputStream(itemsFile)) {
+            IOUtils.copy(in, out);
+          }
+        }
+        this.playlistService.reloadScheduledItems();
+        for(ScheduledItem item : this.playlistService.getScheduledItems()) {
+        	this.playlistService.updateScheduledItemsOpts(item.getId());
+        }
+      }
+    }
+  }
 
   @SuppressWarnings("unchecked")
   private boolean restorePlaylistLocalData(Playlist playlist, String playlistStr) {

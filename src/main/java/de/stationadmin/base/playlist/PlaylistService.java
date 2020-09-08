@@ -1195,6 +1195,14 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
       this.profiles = convertJsonToProfiles(org.apache.commons.io.FileUtils.readFileToString(new File(file), Charset.forName("UTF-8")));
     }
   }
+  
+  public void reloadScheduledItems() throws IOException {
+    String file = ctx.getStationDirectory() + "scheduleditems.json";
+    if (new File(file).exists()) {
+      this.scheduledItems = convertJsonToScheduledItems(org.apache.commons.io.FileUtils.readFileToString(new File(file), Charset.forName("UTF-8")));
+    }
+  }
+
 
   private void loadScheduledItemsFromFile() throws IOException {
     String file = ctx.getStationDirectory() + "scheduleditems.json";

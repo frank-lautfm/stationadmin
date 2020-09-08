@@ -57,6 +57,7 @@ public class PlaylistRestorePanel extends JPanel {
   private StationAdminClient adminClient;
   private Map<Integer, JCheckBox> playlistCbs = new HashMap<Integer, JCheckBox>();
   private ValueHolder profileImport = new ValueHolder(Boolean.FALSE);
+  private ValueHolder scheduledItemImport = new ValueHolder(Boolean.FALSE);
 
   /**
    * @param file
@@ -76,7 +77,7 @@ public class PlaylistRestorePanel extends JPanel {
 
   private void init() {
 
-    this.setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,50dlu:grow,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
+    this.setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,50dlu:grow,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
 
     {
@@ -145,13 +146,23 @@ public class PlaylistRestorePanel extends JPanel {
     }
 
     {
+      JCheckBox cbProfile = BasicComponentFactory.createCheckBox(scheduledItemImport, textProvider.getString("backup.restore.playlist.scheduleditems"));
+      this.add(cbProfile, cc.xy(2, 10));
+      try {
+        cbProfile.setEnabled(adminClient.getBackupService().checkScheduledItemsAvailability(file));
+      } catch (Exception e) {
+        cbProfile.setEnabled(false);
+      }
+    }
+
+    {
       JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
       JButton importBtn = new JButton(new ImportAction());
       bottom.add(importBtn);
 
       bottom.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-      this.add(bottom, cc.xy(2, 10));
+      this.add(bottom, cc.xy(2, 12));
 
     }
 
@@ -229,6 +240,9 @@ public class PlaylistRestorePanel extends JPanel {
       }
       if(profileImport.getValue().equals(Boolean.TRUE)) {
         tool.restorePlaylistProfile(file);
+      }
+      if(scheduledItemImport.getValue().equals(Boolean.TRUE)) {
+      	tool.restoreScheduledItems(file);
       }
 
     }
