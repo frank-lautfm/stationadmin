@@ -1,6 +1,8 @@
 package de.stationadmin.gui.playlist.scheduleditems;
 
 import java.awt.Component;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +49,7 @@ public class ScheduledItemEditor extends JPanel {
 
   @SuppressWarnings("unchecked")
   private void initialize() {
-    this.setLayout(new FormLayout("5dlu,pref,5dlu,200dlu:grow,5dlu", "5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
+    this.setLayout(new FormLayout("5dlu,pref,5dlu,200dlu:grow,5dlu", "5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
 
     int row = 2;
@@ -119,6 +121,25 @@ public class ScheduledItemEditor extends JPanel {
       this.add(new JLabel(textProvider.getString("scheduleditem.selection")), cc.xy(2, row));
       this.add(cmb, cc.xy(4, row));
       row += 2;
+    }
+    
+    // TrackIndex
+    {
+    	final JTextField tf = BasicComponentFactory.createIntegerField(model.getBufferedModel("trackIndex"), 0);
+    	tf.setColumns(2);
+    	tf.setEditable(model.getBufferedModel("selection").getValue() == TrackSelectionMode.Index);
+      this.add(new JLabel(textProvider.getString("scheduleditem.trackindex")), cc.xy(2, row));
+      this.add(tf, cc.xy(4, row, CellConstraints.LEFT, CellConstraints.CENTER));
+      row += 2;
+      
+      model.getBufferedModel("selection").addValueChangeListener(new PropertyChangeListener() {
+				
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					tf.setEditable(evt.getNewValue() == TrackSelectionMode.Index);
+				}
+			});
+      
     }
 
   }
