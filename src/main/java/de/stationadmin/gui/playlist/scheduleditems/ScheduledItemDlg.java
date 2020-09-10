@@ -57,11 +57,11 @@ public class ScheduledItemDlg extends StationAdminFrame {
       if (JOptionPane.showConfirmDialog(ScheduledItemDlg.this, ctx.getString("scheduleditems.action.delete.confirm", item.getName()), "",
           JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
         try {
-          ctx.getAdminClient().getPlaylistService().updateScheduledItemsOpts(item.getId());
+          ctx.getAdminClient().getPlaylistService().updateScheduledItemsOpts(item.getId(), true);
           ctx.getAdminClient().getPlaylistService().removeScheduledItem(item.getId());
           ctx.getAdminClient().getPlaylistService().saveScheduledItems();
           ctx.getAdminClient().getClientConfigService().write();
-        } catch (IOException e) {
+        } catch (Exception e) {
           ErrorInfo errorInfo = ctx.createErrorInfo(e, "titletagmanager.action.delete.failed");
           JXErrorPane.showDialog(ScheduledItemDlg.this, errorInfo);
         }
@@ -136,7 +136,7 @@ public class ScheduledItemDlg extends StationAdminFrame {
 
     @Override
     protected void performAction() throws Exception {
-      ctx.getAdminClient().getPlaylistService().updateScheduledItemsOpts(itemId);
+      ctx.getAdminClient().getPlaylistService().updateScheduledItemsOpts(itemId, false);
 
     }
 

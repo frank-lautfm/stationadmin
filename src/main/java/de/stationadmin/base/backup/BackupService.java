@@ -395,7 +395,7 @@ public class BackupService implements Service {
         }
         this.playlistService.reloadScheduledItems();
         for(ScheduledItem item : this.playlistService.getScheduledItems()) {
-        	this.playlistService.updateScheduledItemsOpts(item.getId());
+        	this.playlistService.updateScheduledItemsOpts(item.getId(), false);
         }
       }
     }

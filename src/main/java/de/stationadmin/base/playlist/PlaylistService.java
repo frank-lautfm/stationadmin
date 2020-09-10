@@ -975,10 +975,10 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     }
   }
 
-  public void updateScheduledItemsOpts(String itemId) throws IOException {
+  public void updateScheduledItemsOpts(String itemId, boolean delete) throws IOException {
     for (Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
       if (playlist.isShuffle() && playlist.getShuffleOpts() != null) {
-        if (updateScheduledItemsOpts(playlist.getShuffleOpts(), itemId)) {
+        if (updateScheduledItemsOpts(playlist.getShuffleOpts(), itemId, delete)) {
           this.ctx.getServer().updatePlaylistShuffleOpts(ctx.getStationId(), playlist.getId(), playlist.getShuffleOpts());
         }
       }
@@ -986,8 +986,8 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
   }
 
   @SuppressWarnings("unchecked")
-  private boolean updateScheduledItemsOpts(Map<String, Object> opts, String itemId) throws IOException {
-    ScheduledItem item = getScheduledItem(itemId);
+  private boolean updateScheduledItemsOpts(Map<String, Object> opts, String itemId, boolean delete) throws IOException {
+    ScheduledItem item = delete ? null : getScheduledItem(itemId);
     List<Map<String, Object>> cfg = (List<Map<String, Object>>) opts.get("scheduled");
     boolean found = false;
     if (cfg != null) {

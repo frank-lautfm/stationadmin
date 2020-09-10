@@ -1,0 +1,76 @@
+<html>
+	<head>
+		<title>Station Admin: Programmelemente f&uuml;r Playlists</title>
+		<link rel=stylesheet type="text/css" href="../stationadmin.css">
+
+	</head>
+	<body>
+
+<h1>Programmelemente f&uuml;r Playlists</h1>
+
+<img src="../images/programmelemente.jpg">
+
+<p class="subheading">
+Was ist das?
+</p>
+<p>
+  Programmelemente k&ouml;nnen zu festgelegten Uhrzeiten in Playlists eingef&uuml;gt werden die auf dem Server mit dem Station Admin-Verfahren geshuffelt werden.
+  Das k&ouml;nnen z. B. Wortbeitr&auml;ge sein die t&auml;glich zu festen Zeiten laufen sollen oder auch Songs die etwa immer zur vollen Stunden laufen sollen. 
+</p>
+<p class="subheading">
+Programmelemente erstellen
+</p>
+<p>
+  Unter <span class="menuref">Playlists / Programmelemente<span> definierst Du verf&uuml;gbare Programmelemente - d. h. Du beschreibst was das f&uuml;r Tracks sein sollen und wie ein Track ausgew&auml;hlt werden soll. Diese kannst Du dann in den Playlist-Einstellungen den jeweiligen Playlists zuordnen - dort legtst Du fest wann die Programmelemente gespielt werden sollen.
+</p>
+<p>
+  Ein Programmelement wird &uuml;ber folgende Eigenschaften konfiguriert:
+  <ul>
+  <li><span class="menuref">Name</span>: Eindeutiger Name mit dem Du das Programmelement innerhalb der Playlistkonfiguration auffinden kannst.</li>
+  <li><span class="menuref">Spiele einen</span>: Hier legst Du fest ob ein Song, ein Jingle oder ein Moderationsbeitrag gespielt werden soll.</li>
+  <li><span class="menuref">mit dem Tag</span>: Hier legst Du das Tag fest anhand dessen die verf&uuml;gbaren Tracks ausgew&auml;hlt werden.</li>
+  <li><span class="menuref">diese Tracks vom Shuffeln ausschlie&amp;szlig;en</span>: Wenn diese Option ausgew&auml;hlt ist werden die verf&uuml;gbaren Tracks nicht im Rahmen des normelen Shuffelns anderswo innerhalb der Playlist platziert.</li>
+  <li><span class="menuref">und davor</span>: Hier legst Du optional ein Jingle fest das vor dem ausgew&auml;hlten Track gespielt werden soll</li>
+  <li><span class="menuref">Trackauswahl</span>: Hier legst Du fest wie der Track der dann letztlich gespielt wird ausgew&auml;hlt werden soll. Dazu im n&auml;chsten Abschnitt mehr.</li>
+  <li><span class="menuref">Track-Nr.</span>: Nur bei der Option &quot;festgelegter Track&quot; f&uuml;r die Trackauswahl kannst Du hier festlegen welcher Track gespielt werden soll.</li>
+  </ul>  
+</p>
+<p>
+F&uuml;r die Trackauswahl stehen Dir folgende M&ouml;glichkeiten zur Verf&uuml;gung:
+  <ul>
+  <li>zuf&auml;lliger Track: Wie der Name schon sagt - es wird ein zuf&auml;lliger Track ausgew&auml;hlt.</li>
+  <li>rotiere &uuml;ber Liste: Es wird derjenige Track ausgew&auml;hlt der dem zuletzt gespielten in der Playlist folgt. <i>Wichtig:</i> Das funktioniert nur wenn t&auml;glich ein Track gespielt wird. Ansonsten wird wieder der erste Track verwendet.</li>
+  <li>w&auml;hle t&auml;glich einen anderen Track: Es wird t&auml;glich ein anderer Track verwendet. Das funktioniert auch dann wenn nicht t&auml;glich ein Track gespielt wird. Es werden jedoch nicht zwangsl&auml;ufig alle Tracks aus der Liste nacheinander gespielt. Wurden etwa Montag bis Freitag die Tracks 1 bis 5 gespielt und am Wochenende keiner geht es am folgenden Montag mit Track 8 weiter. Auch kann es zu Spr&uuml;ngen kommen wenn die Zahl der Tracks in der Playlist ver&auml;ndert wird.</li>
+  <li>Track enth&auml;lt Datum: W&auml;hlt den ersten Track aus der das aktuelle Datum im Format TT.MM. enth&auml;lt. Gibt es keinen passenden Track wird nichts gespielt.</li>
+  <li>festgelegter Track: Lege über Track-Nr. selber fest welcher Track gespielt wird.</li>
+  </ul>  
+</p>
+
+<p class="subheading">
+Programmelemente verwenden
+</p>
+
+<img src="../images/programmelemente-playlist.jpg">
+<p>
+  Innerhalb von Playlists die auf dem Server mit dem Station Admin-Verfahren geshuffelt werden kannst Du die Programmelemente nun verwenden. Im Bereich <span class="menuref">Programmelemente</span> kannst Du Programmelemente zur Verwendung konfigurieren oder Eintr&auml;ge l&ouml;schen oder bearbeiten.
+</p>
+<p>
+  Um ein Programmelement zu platzieren musst Du folgendes angeben:
+  <ul>
+  <li><span class="menuref">Programmelement</span>: Hier wählst Du das Programmelement aus das platziert werden soll.</li>
+  <li><span class="menuref">Tag</span>: Hier legst Du fest an welchen Wochentagen das Programmelement gespielt werden soll.</li>
+  <li><span class="menuref">Stunde</span>: Hier wählst Du entweder die Stunde aus in der das Programmelement gespielt werden soll oder <span class="menuref">regelm&auml;&szlig;ig</span> um das Programmelement mehrfach zu wiederholen.</li>
+  <li><span class="menuref">Minute</span>: Hier legst Du die Minute innerhalb der Stunde fest.</li>
+  <li><span class="menuref">Wiederholung</span>: Wenn das Programmelement regelm&auml;&szlig;ig gespielt werden soll legst Du hier fest in welchem Abstand eine Wiederholung erfolgt.</li>
+  </ul>  
+</p>
+<p>
+Grunds&auml;tzlich gibt es also zwei Ans&auml;tze: Entweder ein Programmelement wird zu einer festgelegten Uhrzeit gespielt. Dann solltest Du nat&uuml;rlich darauf achten dass die Playlist auch zu der betreffenden Zeit im Sendeplan steht. Oder das Programmelement wird st&uuml;ndlich oder alle x Stunden immer zu einer festen Zeit innerhalb der Stunde wiederholt. 
+</p>
+<p>
+Beachte bitte das alle die Platzierung nur ungef&auml;hr zur festgelegten Zeit erfolgt. Eine garantierte Platzierung auf die Minute genau ist technisch nicht m&ouml;glich.
+<p>
+
+
+</body>
+</html>

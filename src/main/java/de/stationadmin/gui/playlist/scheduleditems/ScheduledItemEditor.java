@@ -97,7 +97,7 @@ public class ScheduledItemEditor extends JPanel {
     {
       ArrayList<BasicTrack> jingles = new ArrayList<>();
       for (BasicTrack track : trackRegistry.getAllTracks()) {
-        if (track.getType() == BasicTrack.TYPE_JINGLE) {
+        if (track.getType() == BasicTrack.TYPE_JINGLE && !(track.getArtist().contains("START_AD_BREAK") || track.getTitle().contains("START_AD_BREAK"))) {
           jingles.add(track);
         }
       }
