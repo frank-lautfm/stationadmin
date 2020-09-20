@@ -174,6 +174,11 @@ public class ScheduledItemPanel extends JPanel {
 
     {
       List<Integer> intervals = new ArrayList<>();
+      intervals.add(-5);
+      intervals.add(-10);
+      intervals.add(-15);
+      intervals.add(-20);
+      intervals.add(-30);
       for (int i = 0; i < 13; i++) {
         intervals.add(i);
       }
@@ -190,6 +195,8 @@ public class ScheduledItemPanel extends JPanel {
               setText(ctx.getString("playlistcfg.property.scheduleditem.interval.once"));
             } else if (iVal == 1) {
               setText(ctx.getString("playlistcfg.property.scheduleditem.interval.hour1"));
+            } else if (iVal < 0 ) {
+              setText(ctx.getString("playlistcfg.property.scheduleditem.interval.minutex", Integer.toString(-iVal)));
             } else {
               setText(ctx.getString("playlistcfg.property.scheduleditem.interval.hourx", Integer.toString(iVal)));
 
