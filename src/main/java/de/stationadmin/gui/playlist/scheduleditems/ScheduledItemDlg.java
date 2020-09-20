@@ -21,6 +21,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
@@ -89,6 +90,16 @@ public class ScheduledItemDlg extends StationAdminFrame {
     public void actionPerformed(ActionEvent evt) {
       try {
         ScheduledItem item = (ScheduledItem) selection.getValue();
+        if(StringUtils.isEmpty((String)model.getBufferedValue("name"))) {
+          ErrorInfo errorInfo = ctx.createErrorInfo(null, "scheduleditems.title.error.missing.name");
+          JXErrorPane.showDialog(ScheduledItemDlg.this, errorInfo);
+        	return;
+        }
+        if(model.getBufferedValue("tag") == null) {
+          ErrorInfo errorInfo = ctx.createErrorInfo(null, "scheduleditems.title.error.missing.tag");
+          JXErrorPane.showDialog(ScheduledItemDlg.this, errorInfo);
+        	return;
+        }
         model.triggerCommit();
         if (item != null) {
           boolean isNew = false;
