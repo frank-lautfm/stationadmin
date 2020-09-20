@@ -32,83 +32,82 @@ import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.DisposeAction;
 
 public class AutoFillPlaylistsDlg extends StationAdminDialog {
-  private static final long serialVersionUID = 5509519002944425083L;
-  private JList<Playlist> list;
-  private PlaylistFiller filler;
+	private static final long serialVersionUID = 5509519002944425083L;
+	private JList<Playlist> list;
+	private PlaylistFiller filler;
 
-  public AutoFillPlaylistsDlg(ClientContext ctx) {
-    super(ctx, "AutoFill");
-    this.filler = new PlaylistFiller(ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getTrackService(), ctx.getAdminClient().getTagManager());
-    this.init();
-  }
+	public AutoFillPlaylistsDlg(ClientContext ctx) {
+		super(ctx, "AutoFill");
+		this.filler = new PlaylistFiller(ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getTrackService(),
+				ctx.getAdminClient().getTagManager());
+		this.init();
+	}
 
-  private ArrayList<Playlist> getPlaylists() {
-    ArrayList<Playlist> playlists = new ArrayList<>();
-    for (Playlist p : ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylists(PlaylistType.ONLINE)) {
-      if (p.getAutoFillRule().isEnabled()) {
-        playlists.add(p);
-      }
-    }
-    Collections.sort(playlists, new PlaylistNameCompator());
-    return playlists;
-  }
+	private ArrayList<Playlist> getPlaylists() {
+		ArrayList<Playlist> playlists = new ArrayList<>();
+		for (Playlist p : ctx.getAdminClient().getPlaylistService().getPlaylistRegistry()
+				.getPlaylists(PlaylistType.ONLINE)) {
+			if (p.getAutoFillRule().isEnabled()) {
+				playlists.add(p);
+			}
+		}
+		Collections.sort(playlists, new PlaylistNameCompator());
+		return playlists;
+	}
 
-  @SuppressWarnings("unchecked")
-  private void init() {
-    this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,pref:grow,5dlu,pref,5dlu"));
-    CellConstraints cc = new CellConstraints();
+	@SuppressWarnings("unchecked")
+	private void init() {
+		this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,pref:grow,5dlu,pref,5dlu"));
+		CellConstraints cc = new CellConstraints();
 
-    this.getContentPane().add(new JLabel(ctx.getString("autofill.dlg.label")), cc.xy(2, 2));
+		this.getContentPane().add(new JLabel(ctx.getString("autofill.dlg.label")), cc.xy(2, 2));
 
-    IndirectListModel<Playlist> model = new IndirectListModel<>(getPlaylists());
-    list = new JList<Playlist>(model);
-    list.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-    list.getSelectionModel().setSelectionInterval(0, model.getSize());
-    this.getContentPane().add(new JScrollPane(list), cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
+		IndirectListModel<Playlist> model = new IndirectListModel<>(getPlaylists());
+		list = new JList<Playlist>(model);
+		list.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		list.getSelectionModel().setSelectionInterval(0, model.getSize() - 1);
+		this.getContentPane().add(new JScrollPane(list), cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
 
-    {
-      JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
-      buttonPanel.add(new JButton(new FillAction()));
-      buttonPanel.add(new JButton(new DisposeAction(this, ctx.getString("cancel"))));
-      this.getContentPane().add(buttonPanel, cc.xy(2, 6, CellConstraints.CENTER, CellConstraints.CENTER));
-    }
+		{
+			JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+			buttonPanel.add(new JButton(new FillAction()));
+			buttonPanel.add(new JButton(new DisposeAction(this, ctx.getString("cancel"))));
+			this.getContentPane().add(buttonPanel, cc.xy(2, 6, CellConstraints.CENTER, CellConstraints.CENTER));
+		}
 
-    this.setTitle(ctx.getString("autofill.dlg.title"));
-  }
-  
-  @Override
-  protected Dimension getDefaultSize() {
-    return new Dimension(400, 400);
-  }
+		this.setTitle(ctx.getString("autofill.dlg.title"));
+	}
 
+	@Override
+	protected Dimension getDefaultSize() {
+		return new Dimension(400, 400);
+	}
 
-  private class FillAction extends AbstractAction {
-    private static final long serialVersionUID = 4730621907525954549L;
+	private class FillAction extends AbstractAction {
+		private static final long serialVersionUID = 4730621907525954549L;
 
-    FillAction() {
-      this.putValue(Action.NAME, ctx.getString("ok"));
-    }
+		FillAction() {
+			this.putValue(Action.NAME, ctx.getString("ok"));
+		}
 
-    @Override
-    public void actionPerformed(ActionEvent evt) {
+		@Override
+		public void actionPerformed(ActionEvent evt) {
+			for (Playlist playlist : list.getSelectedValuesList()) {
+				try {
+					filler.fillPlaylist(playlist);
+					ctx.getAdminClient().getPlaylistService().savePlaylist(playlist);
+				} catch (MissingSourceTracksException e) {
+					JXErrorPane.showDialog(AppUtils.getRootFrame(),
+							ctx.createErrorInfo(e, "action.playlist.fill.error.missingsource", e.getMessage()));
 
-      for (Playlist playlist : list.getSelectedValuesList()) {
-        try {
-          filler.fillPlaylist(playlist);
-          ctx.getAdminClient().getPlaylistService().savePlaylist(playlist);
-          dispose();
-        } catch(MissingSourceTracksException e) {
-          JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo(e, "action.playlist.fill.error.missingsource", e.getMessage()));
-          
-        } catch (Exception e) {
-          JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo(e, "action.playlist.fill.error"));
-        }
+				} catch (Exception e) {
+					JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo(e, "action.playlist.fill.error"));
+				}
+			}
+			dispose();
 
-      }
+		}
 
-
-    }
-
-  }
+	}
 
 }
