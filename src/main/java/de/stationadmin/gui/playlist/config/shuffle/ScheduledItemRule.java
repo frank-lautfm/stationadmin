@@ -33,7 +33,7 @@ public class ScheduledItemRule {
       map.put("id", scheduledItem.getId());
       scheduledItem.updateIn(map);
     }
-    if (this.hour > -1) {
+    if (this.hour != -1) {
       map.put("hour", hour);
     } else {
       map.put("interval", this.interval);

@@ -137,7 +137,7 @@ public class ScheduledItemPanel extends JPanel {
     }
     {
       List<Integer> hours = new ArrayList<>();
-      for (int i = -1; i < 23; i++) {
+      for (int i = -2; i < 23; i++) {
         hours.add(i);
       }
       SelectionInList<Integer> hourSelectionInList = new SelectionInList<>(hours, scheduledItemHour);
@@ -150,6 +150,9 @@ public class ScheduledItemPanel extends JPanel {
           if (value instanceof Integer && ((Integer) value).intValue() == -1) {
             setText(ctx.getString("playlistcfg.property.scheduleditem.hour.repeat"));
           }
+          else if (value instanceof Integer && ((Integer) value).intValue() == -2) {
+            setText(ctx.getString("playlistcfg.property.scheduleditem.hour.random"));
+          }
           return comp;
         }
 
@@ -159,13 +162,14 @@ public class ScheduledItemPanel extends JPanel {
       row += 2;
     }
 
+    final JComboBox<ScheduledItem> minuteSelection;
     {
       List<Integer> minutes = new ArrayList<>();
       for (int i = 0; i < 60; i++) {
         minutes.add(i);
       }
       SelectionInList<Integer> minuteSelectionInList = new SelectionInList<>(minutes, scheduledItemMinute);
-      JComboBox<ScheduledItem> minuteSelection = BasicComponentFactory.createComboBox(minuteSelectionInList);
+      minuteSelection = BasicComponentFactory.createComboBox(minuteSelectionInList);
       panel.add(new JLabel(ctx.getString("playlistcfg.property.scheduleditem.minute")), cc.xy(1, row));
       panel.add(minuteSelection, cc.xy(3, row));
       row += 2;
@@ -176,6 +180,7 @@ public class ScheduledItemPanel extends JPanel {
       List<Integer> intervals = new ArrayList<>();
       intervals.add(-5);
       intervals.add(-10);
+      intervals.add(-12);
       intervals.add(-15);
       intervals.add(-20);
       intervals.add(-30);
@@ -219,10 +224,9 @@ public class ScheduledItemPanel extends JPanel {
           int hour = (Integer) evt.getNewValue();
           if (hour > -1) {
             scheduledItemInterval.setValue(0);
-            intervalSelection.setEnabled(false);
-          } else {
-            intervalSelection.setEnabled(true);
           }
+          intervalSelection.setEnabled(hour == -1);
+          minuteSelection.setEnabled(hour != -2);
         }
       });
 
