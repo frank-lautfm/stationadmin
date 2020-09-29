@@ -6,9 +6,8 @@ public class FileUtils {
     StringBuilder buf = new StringBuilder();
     for (int i = 0; i < name.length(); i++) {
       char c = name.charAt(i);
-      if (c == '*' || c == ':' || c == '\\' || c == '/' || c == '?') {
+      if (c == '*' || c == ':' || c == '\\' || c == '/' || c == '?' || c == '<' || c == '>') {
         buf.append("x" + Integer.toHexString(c));
-
       } else {
         buf.append(c);
       }
