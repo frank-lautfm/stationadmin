@@ -137,7 +137,7 @@ public class ScheduledItemPanel extends JPanel {
     }
     {
       List<Integer> hours = new ArrayList<>();
-      for (int i = -2; i < 23; i++) {
+      for (int i = -4; i < 23; i++) {
         hours.add(i);
       }
       SelectionInList<Integer> hourSelectionInList = new SelectionInList<>(hours, scheduledItemHour);
@@ -152,6 +152,12 @@ public class ScheduledItemPanel extends JPanel {
           }
           else if (value instanceof Integer && ((Integer) value).intValue() == -2) {
             setText(ctx.getString("playlistcfg.property.scheduleditem.hour.random"));
+          }
+          else if (value instanceof Integer && ((Integer) value).intValue() == -3) {
+            setText(ctx.getString("playlistcfg.property.scheduleditem.hour.news.before"));
+          }
+          else if (value instanceof Integer && ((Integer) value).intValue() == -4) {
+            setText(ctx.getString("playlistcfg.property.scheduleditem.hour.news.after"));
           }
           return comp;
         }
@@ -226,7 +232,7 @@ public class ScheduledItemPanel extends JPanel {
             scheduledItemInterval.setValue(0);
           }
           intervalSelection.setEnabled(hour == -1);
-          minuteSelection.setEnabled(hour != -2);
+          minuteSelection.setEnabled(hour > -2);
         }
       });
 
