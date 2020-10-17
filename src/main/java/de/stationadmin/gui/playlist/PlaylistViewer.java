@@ -74,6 +74,7 @@ import de.stationadmin.base.playlist.validation.PlaylistValidationException;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
+import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.util.PlaylistGeneratorFactory;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.ClientContext;
@@ -596,7 +597,11 @@ public class PlaylistViewer extends JPanel {
     });
 
     table.addHighlighter(new AbstractHighlighter() {
-
+    
+    	private Color tagged = new Color(210, 210, 210);
+    	private Color specialTracks = new Color(210, 255, 210);
+    	private Color highighted = new Color(240, 240, 0);
+    	
       @Override
       protected Component doHighlight(Component comp, ComponentAdapter adapter) {
         int row = table.convertRowIndexToModel(adapter.row);
@@ -604,20 +609,26 @@ public class PlaylistViewer extends JPanel {
           comp.setFont(ComponentFactory.boldLabelFont);
           comp.setForeground(Color.RED);
         } else {
-          BasicTrack title = tableModel.getTitleAt(row);
+          BasicTrack track = tableModel.getTitleAt(row);
+          boolean highligted = false;
           if (taggedTitlesHolder.getValue() != null) {
             BitSet bs = (BitSet) taggedTitlesHolder.getValue();
-            if (title != null && bs.get(title.getId())) {
+            if (track != null && bs.get(track.getId())) {
               if (!adapter.isSelected()) {
-                comp.setBackground(new Color(210, 210, 210));
+                comp.setBackground(tagged);
+                highligted = true;
               }
             }
           }
           if (highlightedTrackHolder.getValue() != null) {
             Set<?> values = (Set<?>) highlightedTrackHolder.getValue();
-            if (values.contains(title.getId())) {
-              comp.setBackground(new Color(240, 240, 0));
+            if (values.contains(track.getId())) {
+              comp.setBackground(highighted);
+              highligted = true;
             }
+          }
+          if(!highligted && track != null && TrackRegistry.isSpecialTrack(track.getId())) {
+            comp.setBackground(specialTracks);
           }
         }
         return comp;

@@ -26,6 +26,8 @@ import de.stationadmin.base.util.AbstractBean;
 public class TrackRegistry extends AbstractBean {
   public static final int STANDARD_AD_TRIGGER_ID = 0;
   public static final int LAUTFM_NEWS_ID = 1;
+  public static final int STATIONADMIN_SEPARATOR = 8664493;
+
   
   private Map<Integer, RegisteredTrack> tracks = Collections.synchronizedMap(new HashMap<Integer, RegisteredTrack>());
   private Map<Integer, LiveTrack> liveTracks = Collections.synchronizedMap(new HashMap<Integer, LiveTrack>());
@@ -40,6 +42,10 @@ public class TrackRegistry extends AbstractBean {
   private boolean fullLegacyIdMappingLoaded = false;
   private Map<Integer, Integer> reverseLegacyIdMapping = new HashMap<Integer, Integer>();
 
+  public static boolean isSpecialTrack(int trackId) {
+  	return trackId == STANDARD_AD_TRIGGER_ID  || trackId == LAUTFM_NEWS_ID || trackId == STATIONADMIN_SEPARATOR;
+  }
+  
   /**
    * Removes all entries
    */

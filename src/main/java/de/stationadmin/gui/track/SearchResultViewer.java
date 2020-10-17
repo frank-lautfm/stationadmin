@@ -45,6 +45,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackQuery;
+import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.track.SearchResultTableModel.Column;
 import de.stationadmin.gui.util.ComponentFactory;
@@ -97,6 +98,13 @@ public class SearchResultViewer extends JPanel {
           }
           comp.setFont(ComponentFactory.italicLabelFont);
 
+        }
+        else {
+        	DetailedTrack track = tableModel.getTitle(row);
+        	if(track != null && TrackRegistry.isSpecialTrack(track.getId())) {
+            comp.setBackground(new Color(220, 255, 220));
+        	}
+        	
         }
         return comp;
       }

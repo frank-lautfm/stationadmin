@@ -138,7 +138,7 @@ public class SearchResultTableModel extends AbstractTableModel {
       case LENGTH:
         return TimeFormat.format(title.getLength(), false);
       case UPLOADDATE:
-        return new SimpleDateFormat("yyyy-MM-dd").format(title.getUploadDate());
+        return title.getUploadDate() != null ? new SimpleDateFormat("yyyy-MM-dd").format(title.getUploadDate()) : null;
       case YEAR:
         return title.getYear() != 0 ? title.getYear() : "";
       }
