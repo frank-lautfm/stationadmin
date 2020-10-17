@@ -179,7 +179,7 @@ public class UploadPanel extends JPanel {
       fileChooser.setFileFilter(new FileNameExtensionFilter("mp3", "mp3", "m3u"));
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       fileChooser.setMultiSelectionEnabled(true);
-      if (fileChooser.showOpenDialog(ctx.getRootWindow()) == JFileChooser.APPROVE_OPTION) {
+      if (fileChooser.showOpenDialog(UploadPanel.this) == JFileChooser.APPROVE_OPTION) {
         if (fileChooser.getSelectedFiles().length > 0) {
           addFiles(fileChooser.getSelectedFiles(), false);
         }

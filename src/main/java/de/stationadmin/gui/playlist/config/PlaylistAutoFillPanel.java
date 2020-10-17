@@ -47,7 +47,7 @@ public class PlaylistAutoFillPanel extends JPanel {
     final ArrayList<JComponent> dependentComponents = new ArrayList<>();
 
     this.setLayout(
-        new FormLayout("5dlu,pref,5dlu,250dlu,5dlu", "5dlu,pref,5dlu,pref,1dlu,pref,8dlu,pref,5dlu,min(pref;50dlu),5dlu,min(pref;50dlu),5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
+        new FormLayout("5dlu,pref,5dlu,250dlu,5dlu", "5dlu,pref,5dlu,pref,1dlu,pref,8dlu,pref,5dlu,min(pref;50dlu),5dlu,min(pref;50dlu),5dlu,pref,5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
     int row = 2;
 
@@ -137,7 +137,7 @@ public class PlaylistAutoFillPanel extends JPanel {
 
       this.add(new JLabel(ctx.getString("playlistcfg.property.autofill.playlists")), cc.xy(2, row, CellConstraints.LEFT, CellConstraints.TOP));
       final List<Playlist> playlists = ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getAllPlaylists();
-      // Collections.sort(playlists);
+      playlists.sort((p1, p2) -> p1.getName().compareToIgnoreCase(p2.getName()));
       final JList<Playlist> list = new JList<Playlist>(playlists.toArray(new Playlist[playlists.size()]));
       list.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
       dependentComponents.add(list);
@@ -177,6 +177,10 @@ public class PlaylistAutoFillPanel extends JPanel {
       });
 
       this.add(new JScrollPane(list), cc.xy(4, row, CellConstraints.FILL, CellConstraints.FILL));
+      row += 2;
+      
+      JCheckBox duplicateCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("duplicatesFromPlaylists"), ctx.getString("playlistcfg.property.autofill.duplicatesFromPlaylists"));
+      this.add(duplicateCb, cc.xy(4, row));
       row += 2;
     }
 

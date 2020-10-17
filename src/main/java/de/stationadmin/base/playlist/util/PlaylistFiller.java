@@ -91,10 +91,14 @@ public class PlaylistFiller {
           Playlist sourcePlaylist = this.playlistService.getPlaylistRegistry().getPlaylist(playlistId);
           if (sourcePlaylist != null) {
             for (Entry entry : sourcePlaylist.getEntries()) {
-              if (!tracks.containsKey(entry.getTrackId())) {
-                tracks.put(entry.getTrackId(), entry.getTrack());
-                trackList.add(entry.getTrack());
+              if (tracks.containsKey(entry.getTrackId())) {
+              	if(!playlist.getAutoFillRule().isDuplicatesFromPlaylists()) {
+	              	// remove previous entry
+	              	trackList.remove(entry.getTrack());
+              	}
               }
+              tracks.put(entry.getTrackId(), entry.getTrack());
+              trackList.add(entry.getTrack());
             }
           }
         }

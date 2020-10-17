@@ -13,6 +13,7 @@ public class AutoFillRule {
 
   private boolean enabled = false;
   private int[] sourcePlaylists;
+  private boolean duplicatesFromPlaylists = false;
   private String[] sourceTags;
   private boolean includeAdTrigger = false;
   private boolean includeTrackRules = false;
@@ -69,5 +70,13 @@ public class AutoFillRule {
   public void setIncludeNews(boolean includeNews) {
     this.includeNews = includeNews;
   }
+
+	public boolean isDuplicatesFromPlaylists() {
+		return duplicatesFromPlaylists;
+	}
+
+	public void setDuplicatesFromPlaylists(boolean duplicatesFromPlaylists) {
+		this.duplicatesFromPlaylists = duplicatesFromPlaylists;
+	}
 
 }

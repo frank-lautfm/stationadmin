@@ -9,6 +9,7 @@ Station Admin für laut.fm - Änderungen
 Version 5.2.0
 -------------
 [+] Programmelemente für auf dem Server geshuffelte Playlists
+[+] Möglichkeit beim automatischen Befüllen von Playlists Titel aus Quellplaylists mehrfach hinzuzufügen
 [*] Synchronisierung geänderter Playlsts berücksichtigte keine gelöschten Playlists
 [*] Fehlerhaftes Einlesen von Playlistmetadaten bei Zeilenumbrüchen in der Playlistbeschreibung
 [*] Automatisches Befüllen über Dialog funktionierte mit Vorauswahl aller in Frage kommenden Playlists nicht.
