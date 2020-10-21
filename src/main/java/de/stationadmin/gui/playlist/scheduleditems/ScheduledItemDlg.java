@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -176,7 +178,10 @@ public class ScheduledItemDlg extends StationAdminFrame {
 
     final PlaylistService service = this.ctx.getAdminClient().getPlaylistService();
     {
-      final IndirectListModel<ScheduledItem> model = new IndirectListModel<ScheduledItem>(service.getScheduledItems());
+    	List<ScheduledItem> items = new ArrayList<>(service.getScheduledItems());
+    	items.sort((a, b) -> StringUtils.trimToEmpty(a.getName()).compareToIgnoreCase(StringUtils.trimToEmpty(b.getName())));
+    	
+      final IndirectListModel<ScheduledItem> model = new IndirectListModel<ScheduledItem>(items);
 
       final JList<ScheduledItem> list = new JList<ScheduledItem>(model);
       list.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
