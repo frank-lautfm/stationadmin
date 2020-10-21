@@ -20,85 +20,93 @@ import de.stationadmin.gui.util.SwingTools;
  *
  */
 public class StationAdminDialog extends JDialog {
-  private static final long serialVersionUID = -6620750221420097655L;
-  protected ClientContext ctx;
-  private String name = null;
-  private WindowSizePositionPersister persisterTask;
-  private boolean windowSizePositionChanged = false;
+	private static final long serialVersionUID = -6620750221420097655L;
+	protected ClientContext ctx;
+	private String name = null;
+	private WindowSizePositionPersister persisterTask;
+	private boolean windowSizePositionChanged = false;
 
-  /**
-   * @param ctx
-   * @throws HeadlessException
-   */
-  public StationAdminDialog(ClientContext ctx) throws HeadlessException {
-    this(ctx, null);
-  }
+	/**
+	 * @param ctx
+	 * @throws HeadlessException
+	 */
+	public StationAdminDialog(ClientContext ctx) throws HeadlessException {
+		this(ctx, null);
+	}
 
-  public StationAdminDialog(ClientContext ctx, String name) throws HeadlessException {
-    super();
-    this.ctx = ctx;
-    this.name = name;
-    this.initFrame();
-  }
+	public StationAdminDialog(ClientContext ctx, String name) throws HeadlessException {
+		super();
+		this.ctx = ctx;
+		this.name = name;
+		this.initFrame();
+	}
 
-  protected Dimension getDefaultSize() {
-    return new Dimension(900, 712);
-  }
+	protected Dimension getDefaultSize() {
+		return new Dimension(900, 712);
+	}
 
-  private void initFrame() {
-    String prefix = this.name != null ? this.name + ".window." : "window.";
-    Dimension defaultDim = getDefaultSize();
-    this.setSize(Preferences.userRoot().getInt(prefix + "w", defaultDim.width), Preferences.userRoot().getInt(prefix + "h", defaultDim.height));
-    if (Preferences.userRoot().getInt(prefix + "x", -1) > 0) {
-      this.setLocation(Preferences.userRoot().getInt(prefix + "x", 10), Preferences.userRoot().getInt(prefix + "y", 10));
-    } else {
-      SwingTools.centerOnScreen(this);
-    }
+	private void initFrame() {
+		String prefix = this.name != null ? this.name + ".window." : "window.";
+		Dimension defaultDim = getDefaultSize();
+		this.setSize(Preferences.userRoot().getInt(prefix + "w", defaultDim.width),
+				Preferences.userRoot().getInt(prefix + "h", defaultDim.height));
+		if (Preferences.userRoot().getInt(prefix + "x", -1) > 0) {
+			this.setLocation(Preferences.userRoot().getInt(prefix + "x", 10),
+					Preferences.userRoot().getInt(prefix + "y", 10));
+		} else {
+			SwingTools.centerOnScreen(this);
+		}
 
-    this.addComponentListener(new ComponentAdapter() {
+		this.addComponentListener(new ComponentAdapter() {
 
-      @Override
-      public void componentResized(ComponentEvent e) {
-        windowSizePositionChanged = true;
-      }
+			@Override
+			public void componentResized(ComponentEvent e) {
+				windowSizePositionChanged = true;
+			}
 
-      @Override
-      public void componentMoved(ComponentEvent e) {
-        windowSizePositionChanged = true;
-      }
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				windowSizePositionChanged = true;
+			}
 
-    });
-    persisterTask = new WindowSizePositionPersister();
-    this.ctx.getAdminClient().getSessionCtx().getTimer().schedule(persisterTask, 5000, 5000);
+		});
+		persisterTask = new WindowSizePositionPersister();
+		try {
+			this.ctx.getAdminClient().getSessionCtx().getTimer().schedule(persisterTask, 5000, 5000);
+		} catch (IllegalStateException e) {
+			this.ctx.getAdminClient().getSessionCtx().recreateTimer();
+		} catch (Exception e) {
+		}
 
-    this.setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getClassLoader().getResource("icons/trayicon.png")));
+		this.setIconImage(
+				Toolkit.getDefaultToolkit().getImage(this.getClass().getClassLoader().getResource("icons/trayicon.png")));
 
-  }
+	}
 
-  private class WindowSizePositionPersister extends TimerTask {
+	private class WindowSizePositionPersister extends TimerTask {
 
-    @Override
-    public void run() {
-      if (windowSizePositionChanged) {
-        String prefix = name != null ? name + ".window." : "window.";
-        Preferences.userRoot().putInt(prefix + "x", getX());
-        Preferences.userRoot().putInt(prefix + "y", getY());
-        Preferences.userRoot().putInt(prefix + "w", getWidth());
-        Preferences.userRoot().putInt(prefix + "h", getHeight());
-        windowSizePositionChanged = false;
-      }
+		@Override
+		public void run() {
+			if (windowSizePositionChanged) {
+				String prefix = name != null ? name + ".window." : "window.";
+				Preferences.userRoot().putInt(prefix + "x", getX());
+				Preferences.userRoot().putInt(prefix + "y", getY());
+				Preferences.userRoot().putInt(prefix + "w", getWidth());
+				Preferences.userRoot().putInt(prefix + "h", getHeight());
+				windowSizePositionChanged = false;
+			}
 
-    }
+		}
 
-  }
+	}
 
-  public void dispose() {
-    super.dispose();
-    try {
-      this.persisterTask.cancel();
-    } catch (Exception e) {
+	public void dispose() {
+		super.dispose();
+		try {
+			this.persisterTask.cancel();
+		} catch (Exception e) {
 
-    }
-  }
+		}
+	}
 
 }

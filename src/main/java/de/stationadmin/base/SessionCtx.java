@@ -177,5 +177,8 @@ public class SessionCtx {
     this.errorHandler = errorHandler;
   }
 
+  public void recreateTimer() {
+  	this.timer = new Timer(true);
+  }
 
 }

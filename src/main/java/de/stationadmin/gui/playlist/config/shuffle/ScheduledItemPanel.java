@@ -137,7 +137,7 @@ public class ScheduledItemPanel extends JPanel {
     }
     {
       List<Integer> hours = new ArrayList<>();
-      for (int i = -4; i < 23; i++) {
+      for (int i = -4; i < 24; i++) {
         hours.add(i);
       }
       SelectionInList<Integer> hourSelectionInList = new SelectionInList<>(hours, scheduledItemHour);
