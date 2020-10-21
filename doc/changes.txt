@@ -15,6 +15,7 @@ Version 5.2.0
 [*] Fehlerhaftes Einlesen von Playlistmetadaten bei Zeilenumbrüchen in der Playlistbeschreibung
 [*] Automatisches Befüllen über Dialog funktionierte mit Vorauswahl aller in Frage kommenden Playlists nicht.
 [*] Ungültiger Dateiname für Tags in denen < oder > vorkommt
+[+] Sicherheitsabfrage beim Schließen des Track-Dialogs bei ungesicherten Änderungen
 
 Version 5.1.2
 -------------

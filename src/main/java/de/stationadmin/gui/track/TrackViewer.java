@@ -27,6 +27,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -72,6 +73,8 @@ public class TrackViewer extends JDialog {
   private ClientContext ctx;
   private BasicTrack title;
   private Set<Integer> playlistIds;
+  private PresentationModel<DetailedTrack> model;
+
 
   public TrackViewer(ClientContext ctx, BasicTrack title) {
     this(ctx, title, null);
@@ -112,6 +115,11 @@ public class TrackViewer extends JDialog {
 
       @Override
       public void actionPerformed(ActionEvent e) {
+      	
+      	if(model != null && model.isBuffering()) {
+          int response = JOptionPane.showConfirmDialog(TrackViewer.this, ctx.getString("trackviewer.confirm.modifications.message"), ctx.getString("trackviewer.confirm.modifications.title"), JOptionPane.YES_NO_OPTION);
+          if(response == JOptionPane.NO_OPTION) return;
+      	}
         dispose();
       }
 
@@ -204,7 +212,7 @@ public class TrackViewer extends JDialog {
     rowSpec.append("pref,");
     rowSpec.append("3dlu,");
 
-    final PresentationModel<DetailedTrack> model = new PresentationModel<DetailedTrack>((DetailedTrack) this.title) {
+    model = new PresentationModel<DetailedTrack>((DetailedTrack) this.title) {
       private static final long serialVersionUID = -8671601899095864425L;
 
       @Override
@@ -213,7 +221,7 @@ public class TrackViewer extends JDialog {
       }
 
     };
-
+    
     final List<JTextField> textFields = new ArrayList<JTextField>();
 
     JPanel panel = new JPanel(new FormLayout("3dlu,pref,5dlu,pref,3dlu", rowSpec.toString()));
