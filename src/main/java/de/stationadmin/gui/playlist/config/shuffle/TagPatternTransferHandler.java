@@ -33,10 +33,9 @@ public class TagPatternTransferHandler extends TransferHandler {
   }
 
   public boolean canImport(TransferSupport support) {
-    if (support.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+    if (!readOnly && support.isDataFlavorSupported(DataFlavor.stringFlavor)) {
       return true;
     }
-
     return false;
   }
 

@@ -41,7 +41,8 @@ F&uuml;r die Trackauswahl stehen Dir folgende M&ouml;glichkeiten zur Verf&uuml;g
   <li>zuf&auml;lliger Track: Wie der Name schon sagt - es wird ein zuf&auml;lliger Track ausgew&auml;hlt.</li>
   <li>rotiere &uuml;ber Liste: Es wird derjenige Track ausgew&auml;hlt der dem zuletzt gespielten in der Playlist folgt. <i>Wichtig:</i> Das funktioniert nur wenn t&auml;glich ein Track gespielt wird. Ansonsten wird wieder der erste Track verwendet.</li>
   <li>w&auml;hle t&auml;glich einen anderen Track: Es wird t&auml;glich ein anderer Track verwendet. Das funktioniert auch dann wenn nicht t&auml;glich ein Track gespielt wird. Es werden jedoch nicht zwangsl&auml;ufig alle Tracks aus der Liste nacheinander gespielt. Wurden etwa Montag bis Freitag die Tracks 1 bis 5 gespielt und am Wochenende keiner geht es am folgenden Montag mit Track 8 weiter. Auch kann es zu Spr&uuml;ngen kommen wenn die Zahl der Tracks in der Playlist ver&auml;ndert wird.</li>
-  <li>Track enth&auml;lt Datum: W&auml;hlt den ersten Track aus der das aktuelle Datum im Format TT.MM. enth&auml;lt. Gibt es keinen passenden Track wird nichts gespielt.</li>
+  <li>Track enth&auml;lt Datum: W&auml;hlt den ersten Track aus der das aktuelle Datum im Format TT.MM. im Titel oder Album enth&auml;lt. Gibt es keinen passenden Track wird nichts gespielt.</li>
+  <li>Track enth&auml;lt Uhrzeit (Stunde): W&auml;hlt den ersten Track aus der die Stunde zu der das Programmelemente platziert wird im Titel oder Album enth&auml;lt - also z. B. "2 Uhr". Gibt es keinen passenden Track wird nichts gespielt.</li>
   <li>festgelegter Track: Lege über Track-Nr. selber fest welcher Track gespielt wird.</li>
   </ul>  
 </p>
@@ -59,7 +60,14 @@ Programmelemente verwenden
   <ul>
   <li><span class="menuref">Programmelement</span>: Hier wählst Du das Programmelement aus das platziert werden soll.</li>
   <li><span class="menuref">Tag</span>: Hier legst Du fest an welchen Wochentagen das Programmelement gespielt werden soll.</li>
-  <li><span class="menuref">Stunde</span>: Hier wählst Du entweder die Stunde aus in der das Programmelement gespielt werden soll oder <span class="menuref">regelm&auml;&szlig;ig</span> um das Programmelement mehrfach zu wiederholen.</li>
+  <li><span class="menuref">Stunde</span>: Hier wählst Du entweder die Stunde aus in der das Programmelement gespielt werden soll oder 
+    <ul>
+	 <li><span class="menuref">regelm&auml;&szlig;ig</span> um das Programmelement mehrfach zu wiederholen</li>
+	 <li><span class="menuref">zuf&auml;llig</span> um das Programmelement einmalig zu einer zuf&auml;lligen Zeit zu platzieren</li>
+	 <li><span class="menuref">vor den Nachrichten</span> um das Programmelement vor den laut.fm-Nachrichten zu platzieren insofern diese in der Playlist enthalten sind</li>
+	 <li><span class="menuref">nach den Nachrichten</span> um das Programmelement nach den laut.fm-Nachrichten zu platzieren  insofern diese in der Playlist enthalten sind</li>
+	</ul>
+   </li>
   <li><span class="menuref">Minute</span>: Hier legst Du die Minute innerhalb der Stunde fest.</li>
   <li><span class="menuref">Wiederholung</span>: Wenn das Programmelement regelm&auml;&szlig;ig gespielt werden soll legst Du hier fest in welchem Abstand eine Wiederholung erfolgt.</li>
   </ul>  
