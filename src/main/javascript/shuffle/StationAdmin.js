@@ -1,5 +1,5 @@
-// StationAdmin v3.0
-// 01.11.2020
+// StationAdmin v3.0.3
+// 11.11.2020
 ( function( tracks, opts, trackStats ){
   
   var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -53,6 +53,7 @@
   var startTime;
   var lastJinglePlay = -1;
   var lastNewsStarted = 0;
+  var startsWithNews = false;
 
   var debug = 'debug' in opts ? opts.debug : false;
 
@@ -578,7 +579,7 @@
   }
   
   function insertJingles(playlistTracks) {
-    var addFirstJingle = firstJingle != null && newsTrack == null;
+    var addFirstJingle = firstJingle != null && !startsWithNews;
     if(!addFirstJingle && jingles.length == 0) {
       // nothing to do
       return playlistTracks;
@@ -954,13 +955,16 @@
 
   function scheduleNews() {
     var newsTracks = [];
+    var jingleCollision = 'keep_both';
     if(preNewsJingle != null) {
       newsTracks.push(preNewsJingle);
+      jingleCollision = 'remove_jingle';
     }
     newsTracks.push(newsTrack);
     newsTrack.duration = 165;
     if(firstJingle != null && firstJingleAfterNews) {
       newsTracks.push(firstJingle);
+      jingleCollision = 'remove_jingle';
     }
 
     var ts = new Date();
@@ -972,12 +976,13 @@
       ts.setTime(time);
       ts.setSeconds(0);
       if(isInNewsTimeframe(ts.getMinutes()) && ts.getTime() - lastNewsStarted > 1000 * 30 * 45) {
+        if(time == startTime) startsWithNews = true;
         var scheduledNews = {};
         scheduledNews.tracks = newsTracks;
         scheduledNews.minTime = ts.getTime();
         var diff = ts.getMinutes() < newsMax ? newsMax - ts.getMinutes() : newsMax + 60 - ts.getMinutes();
         scheduledNews.maxTime = ts.getTime() + 1000 * 60 * diff; 
-        scheduledNews.jingleCollision = 'keep_both';
+        scheduledNews.jingleCollision = jingleCollision;
         scheduledNews.type = 'news';
         scheduledTracks.push(scheduledNews);
         log("schedule news: " + ts.toLocaleString() + ", max = " + new Date(scheduledNews.maxTime).toLocaleString());
@@ -996,7 +1001,7 @@
     var scheduledTrigger = {};
     scheduledTrigger.tracks = tracks;
     scheduledTrigger.minTime = time;
-    scheduledTrigger.maxTime = time + 1000 * 25;
+    scheduledTrigger.maxTime = time + 1000 * 60 * 25;
     if(adJingleCollisionStrategy == 'move_adtrigger') {
       scheduledTrigger.jingleCollision = 'move';
     }
