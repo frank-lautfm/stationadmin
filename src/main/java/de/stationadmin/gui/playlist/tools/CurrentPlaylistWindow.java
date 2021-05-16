@@ -7,6 +7,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -40,10 +42,20 @@ public class CurrentPlaylistWindow extends StationAdminFrame {
 
   public CurrentPlaylistWindow(ClientContext ctx, Playlist playlist) throws HeadlessException {
     super(ctx, "CurrentPlaylist");
-    PlaylistViewer viewer = new CurrentPlaylistViewer(ctx, playlist);
+    final PlaylistViewer viewer = new CurrentPlaylistViewer(ctx, playlist);
     this.getContentPane().setLayout(new BorderLayout());
     this.getContentPane().add(viewer, BorderLayout.CENTER);
     this.setTitle("Aktuelle Playlist: " + playlist.getName());
+    
+    addWindowListener(new WindowAdapter() {
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				viewer.dispose();
+			}
+    	
+		});
+
   }
   
   public Dimension getDefaultSize() {

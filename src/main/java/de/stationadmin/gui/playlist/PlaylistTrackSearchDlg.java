@@ -6,6 +6,8 @@ package de.stationadmin.gui.playlist;
 import java.awt.FlowLayout;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -16,7 +18,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.value.ValueHolder;
 import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -69,7 +70,15 @@ public class PlaylistTrackSearchDlg extends JFrame {
     this.getContentPane().add(this.createSearchPanel(), cc.xy(2, 2));
     this.getContentPane().add(new PlaylistEntryListViewer(this.entryModel, this.playlistHolder, this.entryHolder), cc.xy(2, 4));
 
-    PlaylistViewer viewer = new PlaylistViewer(ctx, playlistHolder, this.entryHolder);
+    final PlaylistViewer viewer = new PlaylistViewer(ctx, playlistHolder, this.entryHolder);
+    addWindowListener(new WindowAdapter() {
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				viewer.dispose();
+			}
+    	
+		});
     this.getContentPane().add(viewer, cc.xy(2, 6, CellConstraints.FILL, CellConstraints.FILL));
     
     this.setTitle(ctx.getString("playlistsearch.title"));

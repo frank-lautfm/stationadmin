@@ -16,9 +16,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -36,6 +38,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
+import javax.swing.Timer;
 import javax.swing.TransferHandler;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -49,6 +52,7 @@ import org.jdesktop.swingx.JXStatusBar;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.AbstractHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.table.TableColumnExt;
 
 import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
@@ -114,1133 +118,1216 @@ import de.stationadmin.gui.util.ThreadedAction;
  * @author Frank Korf
  */
 public class PlaylistViewer extends JPanel {
-  private static final long serialVersionUID = -2324586164367971173L;
-  ClientContext ctx;
-  TextProvider textProvider;
-  ValueModel playlistHolder;
-  private ValueModel entryHolder;
-  PresentationModel<Playlist> presentationModel;
-  private JXTable table;
-  private SearchPanel searchPanel;
-  private SubscriptionResultViewer subscriptionPanel;
-  private ValueModel taggedTitlesHolder = new ValueHolder();
-  private ValueModel hasValidationErrors = new ValueHolder(Boolean.FALSE);
-  private ValueModel highlightedTrackHolder = new ValueHolder(new HashSet<Integer>(), true);
-  private ValueModel warningMessage;
-  private boolean readOnly;
-
-  private JLabel statisticsLabel = new JLabel("");
-
-  boolean isSelectionUpdating = false;
-
-  public PlaylistViewer(ClientContext ctx, ValueModel playlistHolder) {
-    this(ctx, playlistHolder, new ValueHolder());
-  }
-
-  public PlaylistViewer(ClientContext ctx, ValueModel playlistHolder, boolean readOnly) {
-    this(ctx, playlistHolder, new ValueHolder(), readOnly);
-  }
-
-  public PlaylistViewer(ClientContext ctx, ValueModel playlistHolder, ValueModel entryHolder) {
-    this(ctx, playlistHolder, entryHolder, false);
-  }
-
-  public PlaylistViewer(ClientContext ctx, ValueModel playlistHolder, ValueModel entryHolder, boolean readOnly) {
-    super();
-    this.readOnly = readOnly;
-    this.ctx = ctx;
-    this.textProvider = ctx.getTextProvider();
-    this.playlistHolder = playlistHolder;
-    this.presentationModel = new PresentationModel<Playlist>(playlistHolder);
-    this.entryHolder = entryHolder;
-    this.searchPanel = new SearchPanel(ctx);
-    this.searchPanel.setVisible(false);
-    this.searchPanel.getSelectionHolder().addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getNewValue() instanceof List<?>) {
-          HashSet<Integer> ids = new HashSet<Integer>();
-          for (Object item : (List<?>) evt.getNewValue()) {
-            ids.add(((DetailedTrack) item).getId());
-          }
-          highlightedTrackHolder.setValue(ids);
-          invalidate();
-          repaint();
-        } else {
-          highlightedTrackHolder.setValue(null);
-        }
-
-      }
-    });
-    this.searchPanel.setSelectionEnterAction(new AbstractAction() {
-      private static final long serialVersionUID = -4485102580616529596L;
-
-      @SuppressWarnings("unchecked")
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        List<BasicTrack> list = (List<BasicTrack>) searchPanel.getSelectionHolder().getValue();
-        if (list != null && list.size() > 0 && PlaylistViewer.this.playlistHolder.getValue() != null) {
-          Playlist playlist = (Playlist) PlaylistViewer.this.playlistHolder.getValue();
-          for (BasicTrack track : list) {
-            playlist.addTrack(track);
-          }
-          table.scrollRowToVisible(playlist.getEntries().size() - 1);
-        }
-      }
-    });
-
-    this.subscriptionPanel = new SubscriptionResultViewer(ctx, new ValueHolder(), true);
-    this.subscriptionPanel.setVisible(false);
-
-    this.init();
-  }
-
-  private JComponent createStatusBar() {
-    JXStatusBar statusBar = new JXStatusBar();
-    statusBar.setOpaque(false);
-    
-    statisticsLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
-
-    final JLabel lengthLabel = new JLabel("00:00:00");
-    lengthLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
-    this.presentationModel.getModel("length").addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getNewValue() != null) {
-          int length = (Integer) evt.getNewValue();
-          lengthLabel.setText(TimeFormat.format(length, true));
-        } else {
-          lengthLabel.setText("");
-        }
-      }
-    });
-
-    final JLabel shuffleLabel = new ActionLabel(new ActionListener() {
-      
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        Playlist playlist = (Playlist)playlistHolder.getValue();
-        if(playlist != null) {
-          PlaylistConfigExplainDlg dlg = new PlaylistConfigExplainDlg(ctx, playlist);
-          dlg.setVisible(true);
-        }
-        
-      }
-    });
-    this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        Playlist playlist = (Playlist)evt.getNewValue();
-        if(playlist != null) {
-          if (playlist.isShuffle()) {
-            shuffleLabel.setText(ctx.getString("playlistcfg.explain.short.shuffle.server"));
-          } else if (playlist.isGenerate()) {
-            shuffleLabel.setText(ctx.getString("playlistcfg.explain.short.generate"));
-          } else if (playlist.isLocalShuffleAllowed()) {
-            shuffleLabel.setText(ctx.getString("playlistcfg.explain.short.shuffle.local"));
-          }
-          else {
-            shuffleLabel.setText(ctx.getString("playlistcfg.explain.short.unshuffled"));
-          }
-
-        }
-        else {
-          shuffleLabel.setText("");
-        }
-        /*
-        if (evt.getNewValue() instanceof Boolean && ((Boolean) evt.getNewValue()).booleanValue()) {
-          shuffleLabel.setText("shuffle");
-        } else {
-          shuffleLabel.setText("");
-        }
-        */
-      }
-    });
-
-    final JLabel warningLabel = BasicComponentFactory.createLabel(warningMessage);
-    warningLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
-    warningLabel.setForeground(Color.RED);
-
-    this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getNewValue() instanceof Playlist) {
-          Playlist playlist = (Playlist) evt.getNewValue();
-          updateStatsLabel(playlist);
-        }
-      }
-    });
-    this.taggedTitlesHolder.addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        Playlist playlist = (Playlist) playlistHolder.getValue();
-        updateStatsLabel(playlist);
-
-      }
-    });
-
-    final JLabel type = new JLabel("");
-    type.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
-    this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getNewValue() instanceof Playlist) {
-          Playlist playlist = (Playlist) evt.getNewValue();
-          type.setText(textProvider.getString("playlisttype." + playlist.getType().name().toLowerCase()));
-        } else {
-          type.setText("");
-        }
-      }
-
-    });
-
-    JXStatusBar.Constraint typeConst = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
-    statusBar.add(type, typeConst);
-
-    JXStatusBar.Constraint lengthConst = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
-    statusBar.add(lengthLabel, lengthConst);
-
-    JXStatusBar.Constraint statisticsConst = new JXStatusBar.Constraint();
-    statusBar.add(statisticsLabel, statisticsConst);
-
-    JXStatusBar.Constraint shuffleConst = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
-    statusBar.add(shuffleLabel, shuffleConst);
-
-    JXStatusBar.Constraint warningConst = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
-    statusBar.add(warningLabel, warningConst);
-
-    return statusBar;
-  }
-
-  private void updateStatsLabel(Playlist playlist) {
-    if (playlist != null) {
-      int numSelectedForTag = taggedTitlesHolder.getValue() != null ? ((BitSet) taggedTitlesHolder.getValue()).cardinality() : 0;
-      int numTagged = 0;
-      if (numSelectedForTag > 0) {
-        BitSet bs = (BitSet) taggedTitlesHolder.getValue();
-        for (Entry entry : playlist.getEntries()) {
-          if (bs.get(entry.getTrackId())) {
-            numTagged++;
-          }
-        }
-      }
-      if (numTagged > 0) {
-        statisticsLabel.setText(textProvider.getString("playlistviewer.statistics.highlighted", Integer.toString(playlist.getEntries().size()),
-            Integer.toString(playlist.getNumDifferentArtists()), Integer.toString(numTagged)));
-      } else {
-        statisticsLabel
-            .setText(textProvider.getString("playlistviewer.statistics", Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists())));
-      }
-    } else {
-      statisticsLabel.setText("");
-    }
-
-  }
-
-  private JComponent createTabelPanel() {
-
-    final PlaylistTableModel tableModel = new PlaylistTableModel(this.textProvider, this.playlistHolder, this.entryHolder, ctx.getAdminClient().getTagManager());
-    tableModel.setHasValidationErrors(this.hasValidationErrors);
-    warningMessage = tableModel.getWarningMessage();
-    tableModel.addTableModelListener(new TableModelListener() {
-
-      @Override
-      public void tableChanged(TableModelEvent e) {
-        if (playlistHolder.getValue() instanceof Playlist) {
-          updateStatsLabel((Playlist) playlistHolder.getValue());
-        }
-      }
-    });
-
-    final TrackTypeRenderer typeRenderer = new TrackTypeRenderer();
-    final DateTableCellRenderer timeRenderer = new DateTableCellRenderer(new SimpleDateFormat(this.ctx.getTextProvider().getString("timeFormat")));
-    this.table = new JXTable(tableModel) {
-      private static final long serialVersionUID = 7268892380668597541L;
-
-      @Override
-      public String getToolTipText(MouseEvent evt) {
-        int col = columnAtPoint(evt.getPoint());
-        if (col > -1) {
-          int row = rowAtPoint(evt.getPoint());
-          col = convertColumnIndexToModel(col);
-          if (row > -1 && col == Column.TAGS.ordinal()) {
-            Object value = getModel().getValueAt(row, col);
-            if (value instanceof String) {
-              return (String) value;
-            }
-          }
-        }
-
-        return super.getToolTipText(evt);
-
-      }
-
-    };
-
-    int width4Digits = ComponentFactory.getTableFontWidth(6);
-    int timeWidth = ComponentFactory.getTableColumnWidthTime();
-    int dateTimeWidth = ComponentFactory.getTableColumnWidthDateTine();
-    table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setPreferredWidth(width4Digits);
-    table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setMaxWidth(width4Digits);
-    table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setPreferredWidth(timeWidth);
-    table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setMaxWidth(timeWidth);
-    table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(timeWidth);
-    table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(timeWidth);
-    table.getColumnModel().getColumn(Column.TYPE.ordinal()).setPreferredWidth(30);
-    table.getColumnModel().getColumn(Column.TYPE.ordinal()).setMaxWidth(30);
-    table.getColumnModel().getColumn(Column.YEAR.ordinal()).setPreferredWidth(width4Digits);
-    table.getColumnModel().getColumn(Column.YEAR.ordinal()).setMaxWidth(width4Digits);
-    table.getColumnModel().getColumn(Column.ADDED.ordinal()).setPreferredWidth(dateTimeWidth); // 110
-    table.getColumnModel().getColumn(Column.ADDED.ordinal()).setMaxWidth(dateTimeWidth);
-    table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setMaxWidth(width4Digits); // 40
-    table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setPreferredWidth(width4Digits);
-    table.getColumn(Column.TYPE.ordinal()).setCellRenderer(typeRenderer);
-    table.getColumn(Column.ADDED.ordinal()).setCellRenderer(timeRenderer);
-    table.getColumn(Column.YEAR.ordinal()).setCellRenderer(new IntTableCellRenderer(0));
-
-    table.setDropMode(DropMode.INSERT_ROWS);
-    table.setDragEnabled(!readOnly);
-    table.setTransferHandler(new PlaylistTableTransferHandler(ctx, table, readOnly));
-
-    table.setColumnControlVisible(true);
-    table.getColumnExt(table.convertColumnIndexToView(Column.ALBUM.ordinal())).setVisible(false);
-    table.getColumnExt(table.convertColumnIndexToView(Column.YEAR.ordinal())).setVisible(false);
-    table.getColumnExt(table.convertColumnIndexToView(Column.GENRE.ordinal())).setVisible(false);
-    table.getColumnExt(table.convertColumnIndexToView(Column.ADDED.ordinal())).setVisible(false);
-    table.getColumnExt(table.convertColumnIndexToView(Column.NUMPLAYLISTS.ordinal())).setVisible(false);
-    table.getColumnExt(table.convertColumnIndexToView(Column.TAGS.ordinal())).setVisible(false);
-
-    if (entryHolder != null) {
-      entryHolder.addValueChangeListener(new PropertyChangeListener() {
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-          if (!isSelectionUpdating) {
-            if (evt.getNewValue() instanceof Entry) {
-              int row = tableModel.getPlaylist().getEntries().indexOf(evt.getNewValue());
-              if (row > -1) {
-                table.getSelectionModel().clearSelection();
-                row = table.convertRowIndexToView(row);
-                table.getSelectionModel().setSelectionInterval(row, row);
-                table.scrollRowToVisible(row);
-              }
-            }
-            if (evt.getNewValue() instanceof List) {
-              table.getSelectionModel().clearSelection();
-              List<?> list = (List<?>) evt.getNewValue();
-              for (int i = 0; i < list.size(); i++) {
-                Entry entry = (Entry) list.get(i);
-                int row = tableModel.getPlaylist().getEntries().indexOf(entry);
-                if (row > -1) {
-                  row = table.convertRowIndexToView(row);
-                  table.getSelectionModel().addSelectionInterval(row, row);
-                }
-              }
-
-            }
-          }
-        }
-
-      });
-    }
-
-    table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-
-      @Override
-      public void valueChanged(ListSelectionEvent e) {
-        if (!e.getValueIsAdjusting()) {
-          int[] rows = table.getSelectedRows();
-          List<Entry> entries = new ArrayList<Entry>();
-          for (int i = 0; i < rows.length; i++) {
-            int row = table.convertRowIndexToModel(rows[i]);
-            entries.add(tableModel.getPlaylist().getEntries().get(row));
-          }
-          isSelectionUpdating = true;
-          try {
-            entryHolder.setValue(entries);
-          } finally {
-            isSelectionUpdating = false;
-          }
-        }
-      }
-
-    });
-
-    if (!readOnly) {
-      table.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
-      table.getActionMap().put("delete", new TitleDeleteAction());
-    }
-
-    final JPopupMenu popup = new JPopupMenu();
-    if (!readOnly)
-      popup.add(new ClipboardAction(ctx, table, this.entryHolder, TransferHandler.getCutAction()));
-    popup.add(new ClipboardAction(ctx, table, this.entryHolder, TransferHandler.getCopyAction()));
-    if (!readOnly)
-      popup.add(new ClipboardAction(ctx, table, this.entryHolder, TransferHandler.getPasteAction()));
-    popup.addSeparator();
-    final TagMenu tagMenu = new TagMenu(this.ctx.getTextProvider(), ctx.getAdminClient().getTagManager(), true);
-    final TagMenu untagMenu = new TagMenu(this.ctx.getTextProvider(), ctx.getAdminClient().getTagManager(), false);
-    final TagHighlightMenu tagHighlightMenu = new TagHighlightMenu(this.ctx.getTextProvider(), ctx.getAdminClient().getTagManager(), taggedTitlesHolder);
-    final CopyTracksAction copyAction = new CopyTracksAction(this.ctx);
-    final DistributeTracksAction distributeAction = new DistributeTracksAction(this.ctx);
-    final TrackViewAction viewAction = new TrackViewAction(ctx);
-    final ValueModel titleHolder = new ValueHolder(new ArrayList<BasicTrack>());
-    final FollowArtistsAction followAction = new FollowArtistsAction(this.ctx);
-    final TracksReloadAction reloadAction = new TracksReloadAction(ctx);
-    this.entryHolder.addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        if (playlistHolder.getValue() != null) {
-          if (evt.getNewValue() instanceof Entry) {
-            tagMenu.setTitleIds(new int[] { ((Entry) evt.getNewValue()).getTrackId() });
-            BasicTrack title = ((Entry) evt.getNewValue()).getTrack();
-            distributeAction.setTitles(Arrays.asList(title));
-            titleHolder.setValue(Arrays.asList(title));
-          } else if (evt.getNewValue() instanceof List) {
-            ArrayList<BasicTrack> titles = new ArrayList<BasicTrack>();
-            int[] titleIds = new int[((List<?>) evt.getNewValue()).size()];
-            int i = 0;
-            for (Object item : (List<?>) evt.getNewValue()) {
-              titleIds[i++] = ((Entry) item).getTrackId();
-              titles.add(((Entry) item).getTrack());
-            }
-            tagMenu.setTitleIds(titleIds);
-            untagMenu.setTitleIds(titleIds);
-            copyAction.setTitles(titles);
-            distributeAction.setTitles(titles);
-            titleHolder.setValue(titles);
-            viewAction.setTitles(titles);
-            followAction.setTracks(titles);
-            reloadAction.setTracks(titles);
-          } else {
-            distributeAction.setTitles(new ArrayList<BasicTrack>());
-          }
-        } else {
-          distributeAction.setTitles(new ArrayList<BasicTrack>());
-        }
-      }
-
-    });
-    if (!readOnly) {
-      popup.add(tagMenu);
-      popup.add(untagMenu);
-    }
-    popup.add(tagHighlightMenu);
-    popup.addSeparator();
-    popup.add(copyAction);
-    popup.add(distributeAction);
-    popup.add(followAction);
-    popup.addSeparator();
-    if (!readOnly) {
-      popup.add(new TitleDeleteAction());
-      popup.addSeparator();
-    }
-    popup.add(viewAction);
-    popup.add(reloadAction);
-    popup.add(new PlaySnippetAction(ctx, titleHolder));
-
-    table.addMouseListener(new MouseAdapter() {
-
-      private void checkPopup(MouseEvent e) {
-        if (e.isPopupTrigger()) {
-          popup.show(table, e.getX(), e.getY());
-        }
-      }
-
-      @Override
-      public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() > 1) {
-          int row = table.rowAtPoint(e.getPoint());
-          row = table.convertRowIndexToModel(row);
-          if (row > -1) {
-            BasicTrack title = tableModel.getTitleAt(row);
-            if (title != null) {
-              Set<Integer> playlistIds = (title instanceof RegisteredTrack) ? ((RegisteredTrack) title).getPlaylistIds() : new HashSet<Integer>();
-              if (!(title instanceof RegisteredTrack) || !((RegisteredTrack) title).isOwnTrack()) {
-                // load full data from server
-                try {
-                  title = ctx.getAdminClient().getTrackService().getTrack(title.getId());
-                } catch (Exception ex) {
-                }
-              }
-              TrackViewer viewer = new TrackViewer(ctx, title, playlistIds);
-              viewer.setVisible(true);
-            }
-          }
-        }
-        this.checkPopup(e);
-      }
-
-      /**
-       * @see java.awt.event.MouseAdapter#mousePressed(java.awt.event.MouseEvent)
-       */
-      @Override
-      public void mousePressed(MouseEvent e) {
-        this.checkPopup(e);
-      }
-
-      /**
-       * @see java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
-       */
-      @Override
-      public void mouseReleased(MouseEvent e) {
-        this.checkPopup(e);
-      }
-
-    });
-
-    table.addHighlighter(new AbstractHighlighter() {
-    
-    	private Color tagged = new Color(210, 210, 210);
-    	private Color specialTracks = new Color(210, 255, 210);
-    	private Color highighted = new Color(240, 240, 0);
-    	
-      @Override
-      protected Component doHighlight(Component comp, ComponentAdapter adapter) {
-        int row = table.convertRowIndexToModel(adapter.row);
-        if (tableModel.isGVLValidationError(row)) {
-          comp.setFont(ComponentFactory.boldLabelFont);
-          comp.setForeground(Color.RED);
-        } else {
-          BasicTrack track = tableModel.getTitleAt(row);
-          boolean highligted = false;
-          if (taggedTitlesHolder.getValue() != null) {
-            BitSet bs = (BitSet) taggedTitlesHolder.getValue();
-            if (track != null && bs.get(track.getId())) {
-              if (!adapter.isSelected()) {
-                comp.setBackground(tagged);
-                highligted = true;
-              }
-            }
-          }
-          if (highlightedTrackHolder.getValue() != null) {
-            Set<?> values = (Set<?>) highlightedTrackHolder.getValue();
-            if (values.contains(track.getId())) {
-              comp.setBackground(highighted);
-              highligted = true;
-            }
-          }
-          if(!highligted && track != null && TrackRegistry.isSpecialTrack(track.getId())) {
-            comp.setBackground(specialTracks);
-          }
-        }
-        return comp;
-      }
-
-    });
-
-    this.taggedTitlesHolder.addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        table.validate();
-        table.repaint();
-      }
-    });
-
-    return new JScrollPane(table);
-  }
-
-  private JToolBar createToolBar() {
-    JToolBar toolbar = new JToolBar();
-    if (!readOnly) {
-      toolbar.add(new NewPlaylistAction());
-      toolbar.addSeparator();
-      toolbar.add(new SaveAction(ctx));
-      toolbar.add(new ResetAction());
-      toolbar.add(new PlaylistDeleteAction(this.playlistHolder, this.ctx.getAdminClient().getPlaylistService(), this.textProvider, true));
-      ValidationErrorFilterAction vAction = new ValidationErrorFilterAction();
-      JToggleButton validationErrorFilterBtn = new JToggleButton(vAction);
-      vAction.setButton(validationErrorFilterBtn); // ouch
-      toolbar.add(validationErrorFilterBtn);
-      toolbar.addSeparator();
-      toolbar.add(new PlaylistEditPropertiesAction(ctx, playlistHolder, true));
-      toolbar.addSeparator();
-      final JToggleButton searchBtn = new JToggleButton(AppUtils.getIcon("searching.png"));
-      searchBtn.setToolTipText(ctx.getString("action.search.tooltip"));
-      searchBtn.addActionListener(new ActionListener() {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-          searchPanel.setVisible(searchBtn.isSelected());
-          if (!searchBtn.isSelected()) {
-            highlightedTrackHolder.setValue(null);
-          }
-        }
-      });
-
-      toolbar.add(searchBtn);
-
-      final JToggleButton subscriptionBtn = new JToggleButton(AppUtils.getIcon("subscriptions.png"));
-      subscriptionBtn.setToolTipText(ctx.getString("action.subscription.tooltip"));
-      subscriptionBtn.addActionListener(new ActionListener() {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-          subscriptionPanel.setVisible(subscriptionBtn.isSelected());
-        }
-      });
-      toolbar.add(subscriptionBtn);
-
-      toolbar.add(new ImportAction());
-      toolbar.add(new SortAction());
-      toolbar.add(new ShuffleAction());
-      toolbar.add(new GenerateAction());
-      toolbar.add(new AutoFillAction(ctx, playlistHolder));
-      toolbar.add(new AdTriggerInsertAction());
-      toolbar.addSeparator();
-    }
-    toolbar.add(new ArchiveDialogOpenAction(this.ctx, this.playlistHolder));
-
-    final JPopupMenu exportMenu = new JPopupMenu();
-    exportMenu.add(new PlaylistExportAction(ctx, playlistHolder, "lfm", new PlaylistBackupExporter()));
-    exportMenu.add(new PlaylistExportAction(ctx, playlistHolder, "csv", new PlaylistCSVExporter()));
-    exportMenu.add(new PlaylistExportAction(ctx, playlistHolder, "xls", new PlaylistExcelExporter()));
-    exportMenu.add(new PlaylistExportAction(ctx, playlistHolder, "txt", new PlaylistTxtExporter()));
-
-    final JButton exportBtn = new JButton(ctx.getIcon("playlist_export.png"));
-    toolbar.add(exportBtn);
-    exportBtn.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        exportMenu.show(exportBtn, 0, exportBtn.getPreferredSize().height);
-      }
-    });
-    exportBtn.setEnabled(false);
-    this.playlistHolder.addValueChangeListener(new PropertyChangeListener() {
-
-      @Override
-      public void propertyChange(PropertyChangeEvent evt) {
-        exportBtn.setEnabled(playlistHolder.getValue() != null);
-
-      }
-    });
-
-    toolbar.add(exportBtn);
-
-    return toolbar;
-  }
-
-  /**
-   * @return the entryHolder
-   */
-  public ValueModel getEntryHolder() {
-    return entryHolder;
-  }
-
-  public PresentationModel<Playlist> getPresentationModel() {
-    return presentationModel;
-  }
-
-  private void init() {
-    this.setLayout(new FormLayout("pref:grow", "pref,min(pref;150dlu),min(pref;150dlu),80dlu:grow,pref"));
-    CellConstraints cc = new CellConstraints();
-    this.add(this.createToolBar(), cc.xy(1, 1));
-    this.add(this.searchPanel, cc.xy(1, 2));
-    this.add(this.subscriptionPanel, cc.xy(1, 3));
-    this.add(this.createTabelPanel(), cc.xy(1, 4, CellConstraints.FILL, CellConstraints.FILL));
-    this.add(this.createStatusBar(), cc.xy(1, 5));
-  }
-
-  public void setValidationEnabled(boolean validate) {
-    ((PlaylistTableModel) this.table.getModel()).setValidationEnabled(validate);
-  }
-
-  public boolean isValidationEnabled() {
-    return ((PlaylistTableModel) this.table.getModel()).isValidationEnabled();
-  }
-
-  void scrollToRow(JXTable table, int row) {
-    // scroll
-    Rectangle rect = table.getCellRect(row, -1, true);
-
-    JViewport viewport = (JViewport) table.getParent();
-
-    Rectangle viewRect = viewport.getViewRect();
-
-    // Translate the cell location so that it is relative
-    // to the view, assuming the northwest corner of the
-    // view is (0,0).
-    rect.setLocation(rect.x - viewRect.x, rect.y - viewRect.y);
-
-    // Calculate location of rect if it were at the center of view
-    int centerX = (viewRect.width - rect.width) / 2;
-    int centerY = (viewRect.height - rect.height) / 2;
-
-    // Fake the location of the cell so that scrollRectToVisible
-    // will move the cell to the center
-    if (rect.x < centerX) {
-      centerX = -centerX;
-    }
-    if (rect.y < centerY) {
-      centerY = -centerY;
-    }
-    rect.translate(centerX, centerY);
-
-    // Scroll the area into view.
-    viewport.scrollRectToVisible(rect);
-
-  }
-
-  protected class ImportAction extends AbstractFileDialogAction implements PropertyChangeListener {
-    private static final long serialVersionUID = -1127269220503072051L;
-
-    public ImportAction() {
-      this.putValue(Action.SMALL_ICON, AppUtils.getIcon("import.png"));
-      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.import.tooltip"));
-      this.setTitle(textProvider.getString("playlistviewer.import.title"));
-      this.setFileFilter(new FileNameExtensionFilter("MP3 / Playlists", "mp3", "m3u", "m3u8", "lfm"));
-      this.setUserPrefencesKey("filedir.playlistimport");
-      setEnabled(false);
-      presentationModel.getBeanChannel().addValueChangeListener(this);
-    }
-
-    /**
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    @Override
-    public void performAction(JFileChooser fileChooser, File file) {
-
-      int row = table.getSelectedRow();
-      if (row == -1) {
-        row = table.getModel().getRowCount();
-      }
-
-      TrackImportHandler handler = new TrackImportHandler(ctx.getAdminClient().getTrackService(), ctx.getAdminClient().getTagManager(), (Playlist) playlistHolder.getValue(), row);
-      try {
-        handler.add(file);
-        handler.resolveTags();
-        handler.resolveTracksLocal();
-        if (handler.isEverythingResolved()) {
-          // if everything can be resolved without server requests handle this
-          // silently
-          handler.addTracksToPlaylist();
-        } else {
-          TrackImportDlg dlg = new TrackImportDlg(ctx, handler);
-          dlg.setVisible(true);
-          dlg.startTitleResolve();
-        }
-      } catch (Throwable e) {
-        JXErrorPane.showDialog(null, textProvider.createErrorInfo(e, "playlist.transfer.error.import"));
-      }
-    }
-
-    /**
-     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(!readOnly && evt.getNewValue() != null);
-    }
-
-  }
-
-  protected class ResetAction extends AbstractAction implements PropertyChangeListener {
-    private static final long serialVersionUID = 4692227689345527634L;
-
-    public ResetAction() {
-      this.putValue(Action.SMALL_ICON, AppUtils.getIcon("undo.png"));
-      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("action.playlist.reset.tooltip"));
-      setEnabled(false);
-      presentationModel.getModel("modified").addValueChangeListener(this);
-    }
-
-    /**
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      Playlist playlist = (Playlist) playlistHolder.getValue();
-      if (playlist != null) {
-        playlist.reset();
-      }
-
-    }
-
-    /**
-     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      if (evt.getNewValue() instanceof Boolean) {
-        setEnabled(((Boolean) evt.getNewValue()).booleanValue());
-      }
-    }
-
-  }
-
-  protected class SaveAction extends ThreadedAction implements PropertyChangeListener {
-    private static final long serialVersionUID = -1127269220503072051L;
-
-    public SaveAction(ClientContext ctx) {
-      super(ctx);
-      this.putValue(Action.SMALL_ICON, AppUtils.getIcon("save.png"));
-      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("action.playlist.save.tooltip"));
-      setEnabled(false);
-      presentationModel.getModel("modified").addValueChangeListener(this);
-    }
-
-    /**
-     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      Playlist playlist = (Playlist) playlistHolder.getValue();
-      if (evt.getNewValue() instanceof Boolean) {
-        setEnabled(((Boolean) evt.getNewValue()).booleanValue() && playlist != null && playlist.getType().isSaveToDiskSupported());
-      }
-    }
-
-    /**
-     * @see de.stationadmin.gui.util.ThreadedAction#getStatus()
-     */
-    @Override
-    protected String getStatus() {
-      Playlist playlist = (Playlist) playlistHolder.getValue();
-      return textProvider.getString("action.playlist.msg", playlist != null ? playlist.getDisplayName() : "Playlist");
-    }
-
-    /**
-     * @see de.stationadmin.gui.util.ThreadedAction#performAction()
-     */
-    @Override
-    protected void performAction() throws Exception {
-      Playlist playlist = (Playlist) playlistHolder.getValue();
-      if (playlist != null) {
-        ctx.getAdminClient().getPlaylistService().savePlaylist(playlist);
-      }
-    }
-
-    /**
-     * @see de.stationadmin.gui.util.ThreadedAction#showError(java.lang.Exception)
-     */
-    @Override
-    protected void showError(Exception e) {
-      Playlist playlist = (Playlist) playlistHolder.getValue();
-      if (playlist != null) {
-        if (e instanceof PlaylistValidationException) {
-          JXErrorPane.showDialog(null,
-              textProvider.createErrorInfo(e, "playlist.validationerror." + ((PlaylistValidationException) e).getError().name().toLowerCase(), playlist.getDisplayName()));
-        } else {
-          JXErrorPane.showDialog(null, textProvider.createErrorInfo(e, "action.playlist.save.error", playlist.getDisplayName()));
-        }
-      }
-    }
-
-    @Override
-    protected boolean beforeExecution() {
-      Playlist playlist = (Playlist) playlistHolder.getValue();
-      if (playlist != null) {
-        if (ctx.getAdminClient().getSchedule().isScheduled(playlist)) {
-          List<Entry> violations = new ArrayList<Entry>();
-          new GVLValidator().validate(playlist, violations);
-          if (violations.size() > 0) {
-            return JOptionPane.showConfirmDialog(ctx.getRootWindow(), textProvider.getString("action.playlist.save.msg.validationerror", playlist.getName()), null,
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION;
-          }
-        }
-      }
-      return true;
-    }
-
-  }
-
-  protected class ShuffleAction extends AbstractAction implements PropertyChangeListener {
-    private static final long serialVersionUID = -1127269220503072051L;
-
-    public ShuffleAction() {
-      this.putValue(Action.SMALL_ICON, AppUtils.getIcon("shuffle.png"));
-      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.shuffle.tooltip"));
-      setEnabled(false);
-      presentationModel.getBeanChannel().addValueChangeListener(this);
-    }
-
-    /**
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      Playlist playlist = (Playlist) playlistHolder.getValue();
-      if (playlist != null) {
-        if (playlist.isShuffle()) {
-          if (JOptionPane.showOptionDialog(ctx.getRootWindow(), ctx.getTextProvider().getString("playlistviewer.shuffle.msg.confirm"), null, JOptionPane.YES_NO_OPTION,
-              JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.NO_OPTION) {
-            return;
-          }
-        }
-        PlaylistShuffler shuffler = PlaylistGeneratorFactory.createShuffler(ctx.getAdminClient());
-        shuffler.shuffle(playlist);
-      }
-    }
-
-    /**
-     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(!readOnly && evt.getNewValue() != null && ((Playlist) evt.getNewValue()).isLocalShuffleAllowed());
-    }
-
-  }
-
-  protected class GenerateAction extends AbstractAction implements PropertyChangeListener {
-    private static final long serialVersionUID = 4424705922134106876L;
-
-    public GenerateAction() {
-      this.putValue(Action.SMALL_ICON, AppUtils.getIcon("generate.png"));
-      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.generate.tooltip"));
-      setEnabled(false);
-      presentationModel.getBeanChannel().addValueChangeListener(this);
-    }
-
-    /**
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    public void actionPerformed(ActionEvent evt) {
-      Playlist playlist = (Playlist) playlistHolder.getValue();
-      if (playlist != null) {
-        if (playlist.isShuffle()) {
-          if (JOptionPane.showOptionDialog(ctx.getRootWindow(), ctx.getTextProvider().getString("playlistviewer.generate.msg.confirm"), null, JOptionPane.YES_NO_OPTION,
-              JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.NO_OPTION) {
-            return;
-          }
-        }
-        PlaylistGenerator generator = PlaylistGeneratorFactory.createGenerator(ctx.getAdminClient());
-        try {
-          generator.generate(playlist);
-        } catch (Exception e) {
-          JXErrorPane.showDialog(null, textProvider.createErrorInfo(e, "action.playlist.generate.error", playlist.getDisplayName()));
-        }
-      }
-    }
-
-    /**
-     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(!readOnly && evt.getNewValue() != null && StringUtils.isNotEmpty(((Playlist) evt.getNewValue()).getGenerateTags())
-          && ((Playlist) evt.getNewValue()).getGenerateLength() > 0 && ((Playlist) evt.getNewValue()).getType() == PlaylistType.ONLINE);
-    }
-
-  }
-
-  protected class AdTriggerInsertAction extends AbstractAction implements PropertyChangeListener {
-    private static final long serialVersionUID = -8236527305347914482L;
-
-    public AdTriggerInsertAction() {
-      this.putValue(Action.SMALL_ICON, AppUtils.getIcon("coins.png"));
-      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.adtrigger.tooltip"));
-      setEnabled(false);
-      presentationModel.getBeanChannel().addValueChangeListener(this);
-    }
-
-    /**
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    @Override
-    public void actionPerformed(ActionEvent evt) {
-      Playlist playlist = (Playlist) playlistHolder.getValue();
-      if (playlist != null) {
-        AdTriggerEngine engine = new AdTriggerEngine(ctx.getAdminClient().getTrackService().getTrackRegistry());
-        
-        List<PlaylistProfile> profiles = ctx.getAdminClient().getPlaylistService().getProfiles();
-        List<PlaylistProfile> profilesWithTrigger = new ArrayList<>();
-        for(PlaylistProfile p : profiles) {
-          if(p.getAdTrigger() != null && p.getAdTrigger().getPos1() > -1) {
-            profilesWithTrigger.add(p);
-          }
-        }
-        profilesWithTrigger.sort((p1, p2) -> Integer.compare(p1.getType().ordinal(), p2.getType().ordinal()));
-        if(profilesWithTrigger.size() > 0) {
-          engine.initialize(profilesWithTrigger.get(0));
-        }
-        else {
-          engine.setPosition1(15);
-          engine.setPosition1(45);
-        }
-        engine.setClearExistingTriggers(true);
-        ArrayList<BasicTrack> tracks = new ArrayList<BasicTrack>();
-        for (Entry entry : playlist.getEntries()) {
-          if (entry.getTrack() != null) {
-            tracks.add(entry.getTrack());
-          }
-        }
-        playlist.setTracks(engine.process(playlist, tracks, false));
-      }
-    }
-
-    /**
-     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(!readOnly && evt.getNewValue() != null && !((Playlist) evt.getNewValue()).isShuffle() && ((Playlist) evt.getNewValue()).getType() == PlaylistType.ONLINE);
-    }
-
-  }
-
-  protected class NewPlaylistAction extends PlaylistNewAction {
-    private static final long serialVersionUID = -1127269220503072051L;
-
-    public NewPlaylistAction() {
-      super(ctx, playlistHolder);
-      this.putValue(Action.NAME, null);
-      this.putValue(Action.SMALL_ICON, AppUtils.getIcon("filenew.png"));
-      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.new.tooltip"));
-      setEnabled(!readOnly);
-    }
-
-    /**
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      Playlist playlist = new Playlist(ctx.getAdminClient().getTrackService().getTrackRegistry(), PlaylistType.ONLINE);
-      playlistHolder.setValue(playlist);
-      PlaylistConfigurationModel model = new PlaylistConfigurationModel(playlist, ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getTagManager(), ctx.getAdminClient().getPlaylistService().getShuffleScripts(), ctx.getAdminClient().getPlaylistService().getProfiles(), ctx.getTextProvider());
-      PlaylistConfigurationDialog dlg = new PlaylistConfigurationDialog(ctx, model);
-      dlg.setVisible(true);
-    }
-
-  }
-
-  protected class SortAction extends AbstractAction implements PropertyChangeListener {
-    private static final long serialVersionUID = -1127269220503072051L;
-
-    public SortAction() {
-      this.putValue(Action.SMALL_ICON, AppUtils.getIcon("sort.png"));
-      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.sort.tooltip"));
-      setEnabled(false);
-      presentationModel.getBeanChannel().addValueChangeListener(this);
-    }
-
-    /**
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      Playlist playlist = (Playlist) playlistHolder.getValue();
-      if (playlist != null) {
-        playlist.sortByArtist();
-      }
-    }
-
-    /**
-     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-     */
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-      setEnabled(!readOnly && evt.getNewValue() != null);
-    }
-
-  }
-
-  protected class TitleDeleteAction extends AbstractAction {
-    private static final long serialVersionUID = 3279957643214213264L;
-
-    public TitleDeleteAction() {
-      this.putValue(Action.NAME, textProvider.getString("action.playlist.titledelete"));
-      this.setEnabled(!readOnly);
-    }
-
-    /**
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public void actionPerformed(ActionEvent e) {
-      Playlist playlist = (Playlist) playlistHolder.getValue();
-      if (playlist != null) {
-        if (entryHolder.getValue() instanceof Entry) {
-          playlist.removeEntry((Entry) entryHolder.getValue());
-
-        }
-        if (entryHolder.getValue() instanceof List) {
-          playlist.removeEntries((List<Entry>) entryHolder.getValue());
-        }
-      }
-
-    }
-
-  }
-
-  private class ValidationErrorFilterAction extends AbstractAction {
-    private static final long serialVersionUID = 614169305315740902L;
-    private JToggleButton button;
-
-    ValidationErrorFilterAction() {
-      this.putValue(Action.SMALL_ICON, AppUtils.getIcon("messagebox_warning.png"));
-      this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("action.playlist.validationerrorfilter.tooltip"));
-      this.setEnabled(false);
-      hasValidationErrors.addValueChangeListener(new PropertyChangeListener() {
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-          if (evt.getNewValue().equals(Boolean.TRUE)) {
-            setEnabled(true);
-          } else {
-            setEnabled(false);
-            button.setSelected(false);
-            setFilterEnabled(false);
-          }
-        }
-      });
-    }
-
-    private void setFilterEnabled(boolean enabled) {
-      // FIXME
-      // if (enabled) {
-      // ValidationErrorFilter filter = new
-      // ValidationErrorFilter((PlaylistTableModel) table.getModel());
-      // table.setFilters(new FilterPipeline(filter));
-      // } else {
-      // table.setFilters(null);
-      // }
-
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      if (button != null) {
-        setFilterEnabled(button.isSelected());
-      }
-
-    }
-
-    /**
-     * @param button the button to set
-     */
-    void setButton(JToggleButton button) {
-      this.button = button;
-    }
-
-  }
-
-  /**
-   * Gets a value model that holds the ids of titles that are currently requested
-   * for highlighting because they are selected in the search panel.
-   * 
-   * @return the highlightedTitleHolder
-   */
-  public ValueModel getHighlightedTrackHolder() {
-    return highlightedTrackHolder;
-  }
-
-  protected JXTable getTable() {
-    return table;
-  }
-
-  protected ValueModel getPlaylistHolder() {
-    return playlistHolder;
-  }
+	private static final long serialVersionUID = -2324586164367971173L;
+	private static final String REGKEY_COLUMNS = "stationadmin.playlist.columns";
+	ClientContext ctx;
+	TextProvider textProvider;
+	ValueModel playlistHolder;
+	private ValueModel entryHolder;
+	PresentationModel<Playlist> presentationModel;
+	private JXTable table;
+	private SearchPanel searchPanel;
+	private SubscriptionResultViewer subscriptionPanel;
+	private ValueModel taggedTitlesHolder = new ValueHolder();
+	private ValueModel hasValidationErrors = new ValueHolder(Boolean.FALSE);
+	private ValueModel highlightedTrackHolder = new ValueHolder(new HashSet<Integer>(), true);
+	private ValueModel warningMessage;
+	private boolean readOnly;
+
+	private JLabel statisticsLabel = new JLabel("");
+
+	private int visibleColumns = 1 << Column.ARTIST.ordinal() | 1 << Column.ENTRYNO.ordinal()
+			| 1 << Column.LENGTH.ordinal() | 1 << Column.STARTTIME.ordinal() | 1 << Column.TITLE.ordinal()
+			| 1 << Column.TYPE.ordinal();
+
+	boolean isSelectionUpdating = false;
+
+	private Timer columnMonitoringTimer;
+
+	public PlaylistViewer(ClientContext ctx, ValueModel playlistHolder) {
+		this(ctx, playlistHolder, new ValueHolder());
+	}
+
+	public PlaylistViewer(ClientContext ctx, ValueModel playlistHolder, boolean readOnly) {
+		this(ctx, playlistHolder, new ValueHolder(), readOnly);
+	}
+
+	public PlaylistViewer(ClientContext ctx, ValueModel playlistHolder, ValueModel entryHolder) {
+		this(ctx, playlistHolder, entryHolder, false);
+	}
+
+	public PlaylistViewer(ClientContext ctx, ValueModel playlistHolder, ValueModel entryHolder, boolean readOnly) {
+		super();
+
+		this.readOnly = readOnly;
+		this.ctx = ctx;
+		this.textProvider = ctx.getTextProvider();
+		this.playlistHolder = playlistHolder;
+		this.presentationModel = new PresentationModel<Playlist>(playlistHolder);
+		this.entryHolder = entryHolder;
+		this.searchPanel = new SearchPanel(ctx);
+		this.searchPanel.setVisible(false);
+		this.searchPanel.getSelectionHolder().addValueChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (evt.getNewValue() instanceof List<?>) {
+					HashSet<Integer> ids = new HashSet<Integer>();
+					for (Object item : (List<?>) evt.getNewValue()) {
+						ids.add(((DetailedTrack) item).getId());
+					}
+					highlightedTrackHolder.setValue(ids);
+					invalidate();
+					repaint();
+				} else {
+					highlightedTrackHolder.setValue(null);
+				}
+
+			}
+		});
+		this.searchPanel.setSelectionEnterAction(new AbstractAction() {
+			private static final long serialVersionUID = -4485102580616529596L;
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				List<BasicTrack> list = (List<BasicTrack>) searchPanel.getSelectionHolder().getValue();
+				if (list != null && list.size() > 0 && PlaylistViewer.this.playlistHolder.getValue() != null) {
+					Playlist playlist = (Playlist) PlaylistViewer.this.playlistHolder.getValue();
+					for (BasicTrack track : list) {
+						playlist.addTrack(track);
+					}
+					table.scrollRowToVisible(playlist.getEntries().size() - 1);
+				}
+			}
+		});
+
+		this.subscriptionPanel = new SubscriptionResultViewer(ctx, new ValueHolder(), true);
+		this.subscriptionPanel.setVisible(false);
+
+		this.init();
+	}
+
+	private JComponent createStatusBar() {
+		JXStatusBar statusBar = new JXStatusBar();
+		statusBar.setOpaque(false);
+
+		statisticsLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+
+		final JLabel lengthLabel = new JLabel("00:00:00");
+		lengthLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+		this.presentationModel.getModel("length").addValueChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (evt.getNewValue() != null) {
+					int length = (Integer) evt.getNewValue();
+					lengthLabel.setText(TimeFormat.format(length, true));
+				} else {
+					lengthLabel.setText("");
+				}
+			}
+		});
+
+		final JLabel shuffleLabel = new ActionLabel(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Playlist playlist = (Playlist) playlistHolder.getValue();
+				if (playlist != null) {
+					PlaylistConfigExplainDlg dlg = new PlaylistConfigExplainDlg(ctx, playlist);
+					dlg.setVisible(true);
+				}
+
+			}
+		});
+		this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				Playlist playlist = (Playlist) evt.getNewValue();
+				if (playlist != null) {
+					if (playlist.isShuffle()) {
+						shuffleLabel.setText(ctx.getString("playlistcfg.explain.short.shuffle.server"));
+					} else if (playlist.isGenerate()) {
+						shuffleLabel.setText(ctx.getString("playlistcfg.explain.short.generate"));
+					} else if (playlist.isLocalShuffleAllowed()) {
+						shuffleLabel.setText(ctx.getString("playlistcfg.explain.short.shuffle.local"));
+					} else {
+						shuffleLabel.setText(ctx.getString("playlistcfg.explain.short.unshuffled"));
+					}
+
+				} else {
+					shuffleLabel.setText("");
+				}
+				/*
+				 * if (evt.getNewValue() instanceof Boolean && ((Boolean)
+				 * evt.getNewValue()).booleanValue()) { shuffleLabel.setText("shuffle"); } else
+				 * { shuffleLabel.setText(""); }
+				 */
+			}
+		});
+
+		final JLabel warningLabel = BasicComponentFactory.createLabel(warningMessage);
+		warningLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+		warningLabel.setForeground(Color.RED);
+
+		this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (evt.getNewValue() instanceof Playlist) {
+					Playlist playlist = (Playlist) evt.getNewValue();
+					updateStatsLabel(playlist);
+				}
+			}
+		});
+		this.taggedTitlesHolder.addValueChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				Playlist playlist = (Playlist) playlistHolder.getValue();
+				updateStatsLabel(playlist);
+
+			}
+		});
+
+		final JLabel type = new JLabel("");
+		type.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+		this.presentationModel.getBeanChannel().addValueChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (evt.getNewValue() instanceof Playlist) {
+					Playlist playlist = (Playlist) evt.getNewValue();
+					type.setText(textProvider.getString("playlisttype." + playlist.getType().name().toLowerCase()));
+				} else {
+					type.setText("");
+				}
+			}
+
+		});
+
+		JXStatusBar.Constraint typeConst = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
+		statusBar.add(type, typeConst);
+
+		JXStatusBar.Constraint lengthConst = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
+		statusBar.add(lengthLabel, lengthConst);
+
+		JXStatusBar.Constraint statisticsConst = new JXStatusBar.Constraint();
+		statusBar.add(statisticsLabel, statisticsConst);
+
+		JXStatusBar.Constraint shuffleConst = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
+		statusBar.add(shuffleLabel, shuffleConst);
+
+		JXStatusBar.Constraint warningConst = new JXStatusBar.Constraint(new Insets(0, 5, 0, 5));
+		statusBar.add(warningLabel, warningConst);
+
+		return statusBar;
+	}
+
+	private void updateStatsLabel(Playlist playlist) {
+		if (playlist != null) {
+			int numSelectedForTag = taggedTitlesHolder.getValue() != null
+					? ((BitSet) taggedTitlesHolder.getValue()).cardinality()
+					: 0;
+			int numTagged = 0;
+			if (numSelectedForTag > 0) {
+				BitSet bs = (BitSet) taggedTitlesHolder.getValue();
+				for (Entry entry : playlist.getEntries()) {
+					if (bs.get(entry.getTrackId())) {
+						numTagged++;
+					}
+				}
+			}
+			if (numTagged > 0) {
+				statisticsLabel.setText(textProvider.getString("playlistviewer.statistics.highlighted",
+						Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists()),
+						Integer.toString(numTagged)));
+			} else {
+				statisticsLabel.setText(textProvider.getString("playlistviewer.statistics",
+						Integer.toString(playlist.getEntries().size()), Integer.toString(playlist.getNumDifferentArtists())));
+			}
+		} else {
+			statisticsLabel.setText("");
+		}
+
+	}
+
+	private JComponent createTabelPanel() {
+
+		final PlaylistTableModel tableModel = new PlaylistTableModel(this.textProvider, this.playlistHolder,
+				this.entryHolder, ctx.getAdminClient().getTagManager());
+		tableModel.setHasValidationErrors(this.hasValidationErrors);
+		warningMessage = tableModel.getWarningMessage();
+		tableModel.addTableModelListener(new TableModelListener() {
+
+			@Override
+			public void tableChanged(TableModelEvent e) {
+				if (playlistHolder.getValue() instanceof Playlist) {
+					updateStatsLabel((Playlist) playlistHolder.getValue());
+				}
+			}
+		});
+
+		final TrackTypeRenderer typeRenderer = new TrackTypeRenderer();
+		final DateTableCellRenderer timeRenderer = new DateTableCellRenderer(
+				new SimpleDateFormat(this.ctx.getTextProvider().getString("timeFormat")));
+		this.table = new JXTable(tableModel) {
+			private static final long serialVersionUID = 7268892380668597541L;
+
+			@Override
+			public String getToolTipText(MouseEvent evt) {
+				int col = columnAtPoint(evt.getPoint());
+				if (col > -1) {
+					int row = rowAtPoint(evt.getPoint());
+					col = convertColumnIndexToModel(col);
+					if (row > -1) {
+						if (col == Column.TAGS.ordinal()) {
+							Object value = getModel().getValueAt(row, col);
+							if (value instanceof String) {
+								return (String) value;
+							}
+						} else if (col == Column.NUMPLAYLISTS.ordinal()) {
+							PlaylistTableModel model = (PlaylistTableModel) getModel();
+							BasicTrack track = model.getEntryAt(row).getTrack();
+							if (track instanceof RegisteredTrack) {
+								RegisteredTrack regTrack = (RegisteredTrack) track;
+								List<String> names = new ArrayList<String>();
+								for (int id : regTrack.getPlaylistIds()) {
+									Playlist pl = ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getPlaylist(id);
+									if(pl != null) {
+										names.add(pl.getName());
+									}
+								}
+								Collections.sort(names);
+								return "<html>" + String.join("<br>", names) + "</html>";
+							}
+						}
+					}
+				}
+
+				return super.getToolTipText(evt);
+
+			}
+
+		};
+
+		int width4Digits = ComponentFactory.getTableFontWidth(6);
+		int timeWidth = ComponentFactory.getTableColumnWidthTime();
+		int dateTimeWidth = ComponentFactory.getTableColumnWidthDateTine();
+		table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setPreferredWidth(width4Digits);
+		table.getColumnModel().getColumn(Column.ENTRYNO.ordinal()).setMaxWidth(width4Digits);
+		table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setPreferredWidth(timeWidth);
+		table.getColumnModel().getColumn(Column.STARTTIME.ordinal()).setMaxWidth(timeWidth);
+		table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(timeWidth);
+		table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(timeWidth);
+		table.getColumnModel().getColumn(Column.TYPE.ordinal()).setPreferredWidth(30);
+		table.getColumnModel().getColumn(Column.TYPE.ordinal()).setMaxWidth(30);
+		table.getColumnModel().getColumn(Column.YEAR.ordinal()).setPreferredWidth(width4Digits);
+		table.getColumnModel().getColumn(Column.YEAR.ordinal()).setMaxWidth(width4Digits);
+		table.getColumnModel().getColumn(Column.ADDED.ordinal()).setPreferredWidth(dateTimeWidth); // 110
+		table.getColumnModel().getColumn(Column.ADDED.ordinal()).setMaxWidth(dateTimeWidth);
+		table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setMaxWidth(width4Digits); // 40
+		table.getColumnModel().getColumn(Column.NUMPLAYLISTS.ordinal()).setPreferredWidth(width4Digits);
+		table.getColumn(Column.TYPE.ordinal()).setCellRenderer(typeRenderer);
+		table.getColumn(Column.ADDED.ordinal()).setCellRenderer(timeRenderer);
+		table.getColumn(Column.YEAR.ordinal()).setCellRenderer(new IntTableCellRenderer(0));
+
+		table.setDropMode(DropMode.INSERT_ROWS);
+		table.setDragEnabled(!readOnly);
+		table.setTransferHandler(new PlaylistTableTransferHandler(ctx, table, readOnly));
+
+		for (int i = 0; i <= Column.TAGS.ordinal(); i++) {
+			boolean visible = (this.visibleColumns & (1 << i)) > 0;
+			((TableColumnExt) table.getColumnModel().getColumn(table.convertColumnIndexToView(i))).setVisible(visible);
+		}
+		table.setColumnControlVisible(true);
+
+		if (entryHolder != null) {
+			entryHolder.addValueChangeListener(new PropertyChangeListener() {
+
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					if (!isSelectionUpdating) {
+						if (evt.getNewValue() instanceof Entry) {
+							int row = tableModel.getPlaylist().getEntries().indexOf(evt.getNewValue());
+							if (row > -1) {
+								table.getSelectionModel().clearSelection();
+								row = table.convertRowIndexToView(row);
+								table.getSelectionModel().setSelectionInterval(row, row);
+								table.scrollRowToVisible(row);
+							}
+						}
+						if (evt.getNewValue() instanceof List) {
+							table.getSelectionModel().clearSelection();
+							List<?> list = (List<?>) evt.getNewValue();
+							for (int i = 0; i < list.size(); i++) {
+								Entry entry = (Entry) list.get(i);
+								int row = tableModel.getPlaylist().getEntries().indexOf(entry);
+								if (row > -1) {
+									row = table.convertRowIndexToView(row);
+									table.getSelectionModel().addSelectionInterval(row, row);
+								}
+							}
+
+						}
+					}
+				}
+
+			});
+		}
+
+		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (!e.getValueIsAdjusting()) {
+					int[] rows = table.getSelectedRows();
+					List<Entry> entries = new ArrayList<Entry>();
+					for (int i = 0; i < rows.length; i++) {
+						int row = table.convertRowIndexToModel(rows[i]);
+						entries.add(tableModel.getPlaylist().getEntries().get(row));
+					}
+					isSelectionUpdating = true;
+					try {
+						entryHolder.setValue(entries);
+					} finally {
+						isSelectionUpdating = false;
+					}
+				}
+			}
+
+		});
+
+		if (!readOnly) {
+			table.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
+			table.getActionMap().put("delete", new TitleDeleteAction());
+		}
+
+		final JPopupMenu popup = new JPopupMenu();
+		if (!readOnly)
+			popup.add(new ClipboardAction(ctx, table, this.entryHolder, TransferHandler.getCutAction()));
+		popup.add(new ClipboardAction(ctx, table, this.entryHolder, TransferHandler.getCopyAction()));
+		if (!readOnly)
+			popup.add(new ClipboardAction(ctx, table, this.entryHolder, TransferHandler.getPasteAction()));
+		popup.addSeparator();
+		final TagMenu tagMenu = new TagMenu(this.ctx.getTextProvider(), ctx.getAdminClient().getTagManager(), true);
+		final TagMenu untagMenu = new TagMenu(this.ctx.getTextProvider(), ctx.getAdminClient().getTagManager(), false);
+		final TagHighlightMenu tagHighlightMenu = new TagHighlightMenu(this.ctx.getTextProvider(),
+				ctx.getAdminClient().getTagManager(), taggedTitlesHolder);
+		final CopyTracksAction copyAction = new CopyTracksAction(this.ctx);
+		final DistributeTracksAction distributeAction = new DistributeTracksAction(this.ctx);
+		final TrackViewAction viewAction = new TrackViewAction(ctx);
+		final ValueModel titleHolder = new ValueHolder(new ArrayList<BasicTrack>());
+		final FollowArtistsAction followAction = new FollowArtistsAction(this.ctx);
+		final TracksReloadAction reloadAction = new TracksReloadAction(ctx);
+		this.entryHolder.addValueChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (playlistHolder.getValue() != null) {
+					if (evt.getNewValue() instanceof Entry) {
+						tagMenu.setTitleIds(new int[] { ((Entry) evt.getNewValue()).getTrackId() });
+						BasicTrack title = ((Entry) evt.getNewValue()).getTrack();
+						distributeAction.setTitles(Arrays.asList(title));
+						titleHolder.setValue(Arrays.asList(title));
+					} else if (evt.getNewValue() instanceof List) {
+						ArrayList<BasicTrack> titles = new ArrayList<BasicTrack>();
+						int[] titleIds = new int[((List<?>) evt.getNewValue()).size()];
+						int i = 0;
+						for (Object item : (List<?>) evt.getNewValue()) {
+							titleIds[i++] = ((Entry) item).getTrackId();
+							titles.add(((Entry) item).getTrack());
+						}
+						tagMenu.setTitleIds(titleIds);
+						untagMenu.setTitleIds(titleIds);
+						copyAction.setTitles(titles);
+						distributeAction.setTitles(titles);
+						titleHolder.setValue(titles);
+						viewAction.setTitles(titles);
+						followAction.setTracks(titles);
+						reloadAction.setTracks(titles);
+					} else {
+						distributeAction.setTitles(new ArrayList<BasicTrack>());
+					}
+				} else {
+					distributeAction.setTitles(new ArrayList<BasicTrack>());
+				}
+			}
+
+		});
+		if (!readOnly) {
+			popup.add(tagMenu);
+			popup.add(untagMenu);
+		}
+		popup.add(tagHighlightMenu);
+		popup.addSeparator();
+		popup.add(copyAction);
+		popup.add(distributeAction);
+		popup.add(followAction);
+		popup.addSeparator();
+		if (!readOnly) {
+			popup.add(new TitleDeleteAction());
+			popup.addSeparator();
+		}
+		popup.add(viewAction);
+		popup.add(reloadAction);
+		popup.add(new PlaySnippetAction(ctx, titleHolder));
+
+		table.addMouseListener(new MouseAdapter() {
+
+			private void checkPopup(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					popup.show(table, e.getX(), e.getY());
+				}
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() > 1) {
+					int row = table.rowAtPoint(e.getPoint());
+					row = table.convertRowIndexToModel(row);
+					if (row > -1) {
+						BasicTrack title = tableModel.getTitleAt(row);
+						if (title != null) {
+							Set<Integer> playlistIds = (title instanceof RegisteredTrack) ? ((RegisteredTrack) title).getPlaylistIds()
+									: new HashSet<Integer>();
+							if (!(title instanceof RegisteredTrack) || !((RegisteredTrack) title).isOwnTrack()) {
+								// load full data from server
+								try {
+									title = ctx.getAdminClient().getTrackService().getTrack(title.getId());
+								} catch (Exception ex) {
+								}
+							}
+							TrackViewer viewer = new TrackViewer(ctx, title, playlistIds);
+							viewer.setVisible(true);
+						}
+					}
+				}
+				this.checkPopup(e);
+			}
+
+			/**
+			 * @see java.awt.event.MouseAdapter#mousePressed(java.awt.event.MouseEvent)
+			 */
+			@Override
+			public void mousePressed(MouseEvent e) {
+				this.checkPopup(e);
+			}
+
+			/**
+			 * @see java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
+			 */
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				this.checkPopup(e);
+			}
+
+		});
+
+		table.addHighlighter(new AbstractHighlighter() {
+
+			private Color tagged = new Color(210, 210, 210);
+			private Color specialTracks = new Color(210, 255, 210);
+			private Color highighted = new Color(240, 240, 0);
+
+			@Override
+			protected Component doHighlight(Component comp, ComponentAdapter adapter) {
+				int row = table.convertRowIndexToModel(adapter.row);
+				if (tableModel.isGVLValidationError(row)) {
+					comp.setFont(ComponentFactory.boldLabelFont);
+					comp.setForeground(Color.RED);
+				} else {
+					BasicTrack track = tableModel.getTitleAt(row);
+					boolean highligted = false;
+					if (taggedTitlesHolder.getValue() != null) {
+						BitSet bs = (BitSet) taggedTitlesHolder.getValue();
+						if (track != null && bs.get(track.getId())) {
+							if (!adapter.isSelected()) {
+								comp.setBackground(tagged);
+								highligted = true;
+							}
+						}
+					}
+					if (highlightedTrackHolder.getValue() != null) {
+						Set<?> values = (Set<?>) highlightedTrackHolder.getValue();
+						if (values.contains(track.getId())) {
+							comp.setBackground(highighted);
+							highligted = true;
+						}
+					}
+					if (!highligted && track != null && TrackRegistry.isSpecialTrack(track.getId())) {
+						comp.setBackground(specialTracks);
+					}
+				}
+				return comp;
+			}
+
+		});
+
+		this.taggedTitlesHolder.addValueChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				table.validate();
+				table.repaint();
+			}
+		});
+
+		return new JScrollPane(table);
+	}
+
+	private JToolBar createToolBar() {
+		JToolBar toolbar = new JToolBar();
+		if (!readOnly) {
+			toolbar.add(new NewPlaylistAction());
+			toolbar.addSeparator();
+			toolbar.add(new SaveAction(ctx));
+			toolbar.add(new ResetAction());
+			toolbar.add(new PlaylistDeleteAction(this.playlistHolder, this.ctx.getAdminClient().getPlaylistService(),
+					this.textProvider, true));
+			ValidationErrorFilterAction vAction = new ValidationErrorFilterAction();
+			JToggleButton validationErrorFilterBtn = new JToggleButton(vAction);
+			vAction.setButton(validationErrorFilterBtn); // ouch
+			toolbar.add(validationErrorFilterBtn);
+			toolbar.addSeparator();
+			toolbar.add(new PlaylistEditPropertiesAction(ctx, playlistHolder, true));
+			toolbar.addSeparator();
+			final JToggleButton searchBtn = new JToggleButton(AppUtils.getIcon("searching.png"));
+			searchBtn.setToolTipText(ctx.getString("action.search.tooltip"));
+			searchBtn.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					searchPanel.setVisible(searchBtn.isSelected());
+					if (!searchBtn.isSelected()) {
+						highlightedTrackHolder.setValue(null);
+					}
+				}
+			});
+
+			toolbar.add(searchBtn);
+
+			final JToggleButton subscriptionBtn = new JToggleButton(AppUtils.getIcon("subscriptions.png"));
+			subscriptionBtn.setToolTipText(ctx.getString("action.subscription.tooltip"));
+			subscriptionBtn.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					subscriptionPanel.setVisible(subscriptionBtn.isSelected());
+				}
+			});
+			toolbar.add(subscriptionBtn);
+
+			toolbar.add(new ImportAction());
+			toolbar.add(new SortAction());
+			toolbar.add(new ShuffleAction());
+			toolbar.add(new GenerateAction());
+			toolbar.add(new AutoFillAction(ctx, playlistHolder));
+			toolbar.add(new AdTriggerInsertAction());
+			toolbar.addSeparator();
+		}
+		toolbar.add(new ArchiveDialogOpenAction(this.ctx, this.playlistHolder));
+
+		final JPopupMenu exportMenu = new JPopupMenu();
+		exportMenu.add(new PlaylistExportAction(ctx, playlistHolder, "lfm", new PlaylistBackupExporter()));
+		exportMenu.add(new PlaylistExportAction(ctx, playlistHolder, "csv", new PlaylistCSVExporter()));
+		exportMenu.add(new PlaylistExportAction(ctx, playlistHolder, "xls", new PlaylistExcelExporter()));
+		exportMenu.add(new PlaylistExportAction(ctx, playlistHolder, "txt", new PlaylistTxtExporter()));
+
+		final JButton exportBtn = new JButton(ctx.getIcon("playlist_export.png"));
+		toolbar.add(exportBtn);
+		exportBtn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				exportMenu.show(exportBtn, 0, exportBtn.getPreferredSize().height);
+			}
+		});
+		exportBtn.setEnabled(false);
+		this.playlistHolder.addValueChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				exportBtn.setEnabled(playlistHolder.getValue() != null);
+
+			}
+		});
+
+		toolbar.add(exportBtn);
+
+		return toolbar;
+	}
+
+	/**
+	 * @return the entryHolder
+	 */
+	public ValueModel getEntryHolder() {
+		return entryHolder;
+	}
+
+	public PresentationModel<Playlist> getPresentationModel() {
+		return presentationModel;
+	}
+
+	private void init() {
+		int colsPref = Preferences.userRoot().getInt(REGKEY_COLUMNS, -1);
+		if (colsPref > 0) {
+			this.visibleColumns = colsPref;
+		}
+
+		this.setLayout(new FormLayout("pref:grow", "pref,min(pref;150dlu),min(pref;150dlu),80dlu:grow,pref"));
+		CellConstraints cc = new CellConstraints();
+		this.add(this.createToolBar(), cc.xy(1, 1));
+		this.add(this.searchPanel, cc.xy(1, 2));
+		this.add(this.subscriptionPanel, cc.xy(1, 3));
+		this.add(this.createTabelPanel(), cc.xy(1, 4, CellConstraints.FILL, CellConstraints.FILL));
+		this.add(this.createStatusBar(), cc.xy(1, 5));
+
+		columnMonitoringTimer = new Timer(1000 * 5, new ColumnMonitor());
+		columnMonitoringTimer.setInitialDelay(1000 * 10);
+		columnMonitoringTimer.start();
+
+	}
+
+	public void setValidationEnabled(boolean validate) {
+		((PlaylistTableModel) this.table.getModel()).setValidationEnabled(validate);
+	}
+
+	public boolean isValidationEnabled() {
+		return ((PlaylistTableModel) this.table.getModel()).isValidationEnabled();
+	}
+
+	void scrollToRow(JXTable table, int row) {
+		// scroll
+		Rectangle rect = table.getCellRect(row, -1, true);
+
+		JViewport viewport = (JViewport) table.getParent();
+
+		Rectangle viewRect = viewport.getViewRect();
+
+		// Translate the cell location so that it is relative
+		// to the view, assuming the northwest corner of the
+		// view is (0,0).
+		rect.setLocation(rect.x - viewRect.x, rect.y - viewRect.y);
+
+		// Calculate location of rect if it were at the center of view
+		int centerX = (viewRect.width - rect.width) / 2;
+		int centerY = (viewRect.height - rect.height) / 2;
+
+		// Fake the location of the cell so that scrollRectToVisible
+		// will move the cell to the center
+		if (rect.x < centerX) {
+			centerX = -centerX;
+		}
+		if (rect.y < centerY) {
+			centerY = -centerY;
+		}
+		rect.translate(centerX, centerY);
+
+		// Scroll the area into view.
+		viewport.scrollRectToVisible(rect);
+
+	}
+
+	protected class ImportAction extends AbstractFileDialogAction implements PropertyChangeListener {
+		private static final long serialVersionUID = -1127269220503072051L;
+
+		public ImportAction() {
+			this.putValue(Action.SMALL_ICON, AppUtils.getIcon("import.png"));
+			this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.import.tooltip"));
+			this.setTitle(textProvider.getString("playlistviewer.import.title"));
+			this.setFileFilter(new FileNameExtensionFilter("MP3 / Playlists", "mp3", "m3u", "m3u8", "lfm"));
+			this.setUserPrefencesKey("filedir.playlistimport");
+			setEnabled(false);
+			presentationModel.getBeanChannel().addValueChangeListener(this);
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void performAction(JFileChooser fileChooser, File file) {
+
+			int row = table.getSelectedRow();
+			if (row == -1) {
+				row = table.getModel().getRowCount();
+			}
+
+			TrackImportHandler handler = new TrackImportHandler(ctx.getAdminClient().getTrackService(),
+					ctx.getAdminClient().getTagManager(), (Playlist) playlistHolder.getValue(), row);
+			try {
+				handler.add(file);
+				handler.resolveTags();
+				handler.resolveTracksLocal();
+				if (handler.isEverythingResolved()) {
+					// if everything can be resolved without server requests handle this
+					// silently
+					handler.addTracksToPlaylist();
+				} else {
+					TrackImportDlg dlg = new TrackImportDlg(ctx, handler);
+					dlg.setVisible(true);
+					dlg.startTitleResolve();
+				}
+			} catch (Throwable e) {
+				JXErrorPane.showDialog(null, textProvider.createErrorInfo(e, "playlist.transfer.error.import"));
+			}
+		}
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			setEnabled(!readOnly && evt.getNewValue() != null);
+		}
+
+	}
+
+	protected class ResetAction extends AbstractAction implements PropertyChangeListener {
+		private static final long serialVersionUID = 4692227689345527634L;
+
+		public ResetAction() {
+			this.putValue(Action.SMALL_ICON, AppUtils.getIcon("undo.png"));
+			this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("action.playlist.reset.tooltip"));
+			setEnabled(false);
+			presentationModel.getModel("modified").addValueChangeListener(this);
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			Playlist playlist = (Playlist) playlistHolder.getValue();
+			if (playlist != null) {
+				playlist.reset();
+			}
+
+		}
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			if (evt.getNewValue() instanceof Boolean) {
+				setEnabled(((Boolean) evt.getNewValue()).booleanValue());
+			}
+		}
+
+	}
+
+	protected class SaveAction extends ThreadedAction implements PropertyChangeListener {
+		private static final long serialVersionUID = -1127269220503072051L;
+
+		public SaveAction(ClientContext ctx) {
+			super(ctx);
+			this.putValue(Action.SMALL_ICON, AppUtils.getIcon("save.png"));
+			this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("action.playlist.save.tooltip"));
+			setEnabled(false);
+			presentationModel.getModel("modified").addValueChangeListener(this);
+		}
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			Playlist playlist = (Playlist) playlistHolder.getValue();
+			if (evt.getNewValue() instanceof Boolean) {
+				setEnabled(((Boolean) evt.getNewValue()).booleanValue() && playlist != null
+						&& playlist.getType().isSaveToDiskSupported());
+			}
+		}
+
+		/**
+		 * @see de.stationadmin.gui.util.ThreadedAction#getStatus()
+		 */
+		@Override
+		protected String getStatus() {
+			Playlist playlist = (Playlist) playlistHolder.getValue();
+			return textProvider.getString("action.playlist.msg", playlist != null ? playlist.getDisplayName() : "Playlist");
+		}
+
+		/**
+		 * @see de.stationadmin.gui.util.ThreadedAction#performAction()
+		 */
+		@Override
+		protected void performAction() throws Exception {
+			Playlist playlist = (Playlist) playlistHolder.getValue();
+			if (playlist != null) {
+				ctx.getAdminClient().getPlaylistService().savePlaylist(playlist);
+			}
+		}
+
+		/**
+		 * @see de.stationadmin.gui.util.ThreadedAction#showError(java.lang.Exception)
+		 */
+		@Override
+		protected void showError(Exception e) {
+			Playlist playlist = (Playlist) playlistHolder.getValue();
+			if (playlist != null) {
+				if (e instanceof PlaylistValidationException) {
+					JXErrorPane.showDialog(null,
+							textProvider.createErrorInfo(e,
+									"playlist.validationerror." + ((PlaylistValidationException) e).getError().name().toLowerCase(),
+									playlist.getDisplayName()));
+				} else {
+					JXErrorPane.showDialog(null,
+							textProvider.createErrorInfo(e, "action.playlist.save.error", playlist.getDisplayName()));
+				}
+			}
+		}
+
+		@Override
+		protected boolean beforeExecution() {
+			Playlist playlist = (Playlist) playlistHolder.getValue();
+			if (playlist != null) {
+				if (ctx.getAdminClient().getSchedule().isScheduled(playlist)) {
+					List<Entry> violations = new ArrayList<Entry>();
+					new GVLValidator().validate(playlist, violations);
+					if (violations.size() > 0) {
+						return JOptionPane.showConfirmDialog(ctx.getRootWindow(),
+								textProvider.getString("action.playlist.save.msg.validationerror", playlist.getName()), null,
+								JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION;
+					}
+				}
+			}
+			return true;
+		}
+
+	}
+
+	protected class ShuffleAction extends AbstractAction implements PropertyChangeListener {
+		private static final long serialVersionUID = -1127269220503072051L;
+
+		public ShuffleAction() {
+			this.putValue(Action.SMALL_ICON, AppUtils.getIcon("shuffle.png"));
+			this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.shuffle.tooltip"));
+			setEnabled(false);
+			presentationModel.getBeanChannel().addValueChangeListener(this);
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			Playlist playlist = (Playlist) playlistHolder.getValue();
+			if (playlist != null) {
+				if (playlist.isShuffle()) {
+					if (JOptionPane.showOptionDialog(ctx.getRootWindow(),
+							ctx.getTextProvider().getString("playlistviewer.shuffle.msg.confirm"), null, JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.NO_OPTION) {
+						return;
+					}
+				}
+				PlaylistShuffler shuffler = PlaylistGeneratorFactory.createShuffler(ctx.getAdminClient());
+				shuffler.shuffle(playlist);
+			}
+		}
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			setEnabled(!readOnly && evt.getNewValue() != null && ((Playlist) evt.getNewValue()).isLocalShuffleAllowed());
+		}
+
+	}
+
+	protected class GenerateAction extends AbstractAction implements PropertyChangeListener {
+		private static final long serialVersionUID = 4424705922134106876L;
+
+		public GenerateAction() {
+			this.putValue(Action.SMALL_ICON, AppUtils.getIcon("generate.png"));
+			this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.generate.tooltip"));
+			setEnabled(false);
+			presentationModel.getBeanChannel().addValueChangeListener(this);
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		public void actionPerformed(ActionEvent evt) {
+			Playlist playlist = (Playlist) playlistHolder.getValue();
+			if (playlist != null) {
+				if (playlist.isShuffle()) {
+					if (JOptionPane.showOptionDialog(ctx.getRootWindow(),
+							ctx.getTextProvider().getString("playlistviewer.generate.msg.confirm"), null, JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.NO_OPTION) {
+						return;
+					}
+				}
+				PlaylistGenerator generator = PlaylistGeneratorFactory.createGenerator(ctx.getAdminClient());
+				try {
+					generator.generate(playlist);
+				} catch (Exception e) {
+					JXErrorPane.showDialog(null,
+							textProvider.createErrorInfo(e, "action.playlist.generate.error", playlist.getDisplayName()));
+				}
+			}
+		}
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			setEnabled(!readOnly && evt.getNewValue() != null
+					&& StringUtils.isNotEmpty(((Playlist) evt.getNewValue()).getGenerateTags())
+					&& ((Playlist) evt.getNewValue()).getGenerateLength() > 0
+					&& ((Playlist) evt.getNewValue()).getType() == PlaylistType.ONLINE);
+		}
+
+	}
+
+	protected class AdTriggerInsertAction extends AbstractAction implements PropertyChangeListener {
+		private static final long serialVersionUID = -8236527305347914482L;
+
+		public AdTriggerInsertAction() {
+			this.putValue(Action.SMALL_ICON, AppUtils.getIcon("coins.png"));
+			this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.adtrigger.tooltip"));
+			setEnabled(false);
+			presentationModel.getBeanChannel().addValueChangeListener(this);
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent evt) {
+			Playlist playlist = (Playlist) playlistHolder.getValue();
+			if (playlist != null) {
+				AdTriggerEngine engine = new AdTriggerEngine(ctx.getAdminClient().getTrackService().getTrackRegistry());
+
+				List<PlaylistProfile> profiles = ctx.getAdminClient().getPlaylistService().getProfiles();
+				List<PlaylistProfile> profilesWithTrigger = new ArrayList<>();
+				for (PlaylistProfile p : profiles) {
+					if (p.getAdTrigger() != null && p.getAdTrigger().getPos1() > -1) {
+						profilesWithTrigger.add(p);
+					}
+				}
+				profilesWithTrigger.sort((p1, p2) -> Integer.compare(p1.getType().ordinal(), p2.getType().ordinal()));
+				if (profilesWithTrigger.size() > 0) {
+					engine.initialize(profilesWithTrigger.get(0));
+				} else {
+					engine.setPosition1(15);
+					engine.setPosition1(45);
+				}
+				engine.setClearExistingTriggers(true);
+				ArrayList<BasicTrack> tracks = new ArrayList<BasicTrack>();
+				for (Entry entry : playlist.getEntries()) {
+					if (entry.getTrack() != null) {
+						tracks.add(entry.getTrack());
+					}
+				}
+				playlist.setTracks(engine.process(playlist, tracks, false));
+			}
+		}
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			setEnabled(!readOnly && evt.getNewValue() != null && !((Playlist) evt.getNewValue()).isShuffle()
+					&& ((Playlist) evt.getNewValue()).getType() == PlaylistType.ONLINE);
+		}
+
+	}
+
+	protected class NewPlaylistAction extends PlaylistNewAction {
+		private static final long serialVersionUID = -1127269220503072051L;
+
+		public NewPlaylistAction() {
+			super(ctx, playlistHolder);
+			this.putValue(Action.NAME, null);
+			this.putValue(Action.SMALL_ICON, AppUtils.getIcon("filenew.png"));
+			this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.new.tooltip"));
+			setEnabled(!readOnly);
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			Playlist playlist = new Playlist(ctx.getAdminClient().getTrackService().getTrackRegistry(), PlaylistType.ONLINE);
+			playlistHolder.setValue(playlist);
+			PlaylistConfigurationModel model = new PlaylistConfigurationModel(playlist,
+					ctx.getAdminClient().getPlaylistService(), ctx.getAdminClient().getTagManager(),
+					ctx.getAdminClient().getPlaylistService().getShuffleScripts(),
+					ctx.getAdminClient().getPlaylistService().getProfiles(), ctx.getTextProvider());
+			PlaylistConfigurationDialog dlg = new PlaylistConfigurationDialog(ctx, model);
+			dlg.setVisible(true);
+		}
+
+	}
+
+	protected class SortAction extends AbstractAction implements PropertyChangeListener {
+		private static final long serialVersionUID = -1127269220503072051L;
+
+		public SortAction() {
+			this.putValue(Action.SMALL_ICON, AppUtils.getIcon("sort.png"));
+			this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("playlistviewer.sort.tooltip"));
+			setEnabled(false);
+			presentationModel.getBeanChannel().addValueChangeListener(this);
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			Playlist playlist = (Playlist) playlistHolder.getValue();
+			if (playlist != null) {
+				playlist.sortByArtist();
+			}
+		}
+
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			setEnabled(!readOnly && evt.getNewValue() != null);
+		}
+
+	}
+
+	protected class TitleDeleteAction extends AbstractAction {
+		private static final long serialVersionUID = 3279957643214213264L;
+
+		public TitleDeleteAction() {
+			this.putValue(Action.NAME, textProvider.getString("action.playlist.titledelete"));
+			this.setEnabled(!readOnly);
+		}
+
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		@SuppressWarnings("unchecked")
+		public void actionPerformed(ActionEvent e) {
+			Playlist playlist = (Playlist) playlistHolder.getValue();
+			if (playlist != null) {
+				if (entryHolder.getValue() instanceof Entry) {
+					playlist.removeEntry((Entry) entryHolder.getValue());
+
+				}
+				if (entryHolder.getValue() instanceof List) {
+					playlist.removeEntries((List<Entry>) entryHolder.getValue());
+				}
+			}
+
+		}
+
+	}
+
+	private class ValidationErrorFilterAction extends AbstractAction {
+		private static final long serialVersionUID = 614169305315740902L;
+		private JToggleButton button;
+
+		ValidationErrorFilterAction() {
+			this.putValue(Action.SMALL_ICON, AppUtils.getIcon("messagebox_warning.png"));
+			this.putValue(Action.SHORT_DESCRIPTION, textProvider.getString("action.playlist.validationerrorfilter.tooltip"));
+			this.setEnabled(false);
+			hasValidationErrors.addValueChangeListener(new PropertyChangeListener() {
+
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					if (evt.getNewValue().equals(Boolean.TRUE)) {
+						setEnabled(true);
+					} else {
+						setEnabled(false);
+						button.setSelected(false);
+						setFilterEnabled(false);
+					}
+				}
+			});
+		}
+
+		private void setFilterEnabled(boolean enabled) {
+			// FIXME
+			// if (enabled) {
+			// ValidationErrorFilter filter = new
+			// ValidationErrorFilter((PlaylistTableModel) table.getModel());
+			// table.setFilters(new FilterPipeline(filter));
+			// } else {
+			// table.setFilters(null);
+			// }
+
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (button != null) {
+				setFilterEnabled(button.isSelected());
+			}
+
+		}
+
+		/**
+		 * @param button the button to set
+		 */
+		void setButton(JToggleButton button) {
+			this.button = button;
+		}
+
+	}
+
+	/**
+	 * Gets a value model that holds the ids of titles that are currently requested
+	 * for highlighting because they are selected in the search panel.
+	 * 
+	 * @return the highlightedTitleHolder
+	 */
+	public ValueModel getHighlightedTrackHolder() {
+		return highlightedTrackHolder;
+	}
+
+	protected JXTable getTable() {
+		return table;
+	}
+
+	protected ValueModel getPlaylistHolder() {
+		return playlistHolder;
+	}
+
+	public void dispose() {
+		try {
+			if (columnMonitoringTimer != null && columnMonitoringTimer.isRunning()) {
+				columnMonitoringTimer.stop();
+			}
+		} catch (Exception e) {
+
+		}
+	}
+
+	private class ColumnMonitor implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			int visibleCols = 0;
+			for (int i = 0; i <= Column.TAGS.ordinal(); i++) {
+				int index = table.convertColumnIndexToView(i);
+				if (index > -1) {
+					boolean visible = ((TableColumnExt) table.getColumnModel().getColumn(index)).isVisible();
+					if (visible) {
+						visibleCols |= (1 << i);
+					}
+				}
+			}
+			if (visibleColumns != visibleCols) {
+				Preferences.userRoot().putInt(REGKEY_COLUMNS, visibleCols);
+				visibleColumns = visibleCols;
+			}
+		}
+
+	}
 
 }
