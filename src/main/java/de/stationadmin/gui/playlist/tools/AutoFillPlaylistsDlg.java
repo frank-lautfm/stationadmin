@@ -2,11 +2,9 @@ package de.stationadmin.gui.playlist.tools;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -30,6 +28,7 @@ import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.StationAdminDialog;
 import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.DisposeAction;
+import de.stationadmin.gui.util.ThreadedAction;
 
 public class AutoFillPlaylistsDlg extends StationAdminDialog {
 	private static final long serialVersionUID = 5509519002944425083L;
@@ -70,7 +69,7 @@ public class AutoFillPlaylistsDlg extends StationAdminDialog {
 
 		{
 			JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 5, 5));
-			buttonPanel.add(new JButton(new FillAction()));
+			buttonPanel.add(new JButton(new FillAction(this.ctx)));
 			buttonPanel.add(new JButton(new DisposeAction(this, ctx.getString("cancel"))));
 			this.getContentPane().add(buttonPanel, cc.xy(2, 6, CellConstraints.CENTER, CellConstraints.CENTER));
 		}
@@ -83,29 +82,49 @@ public class AutoFillPlaylistsDlg extends StationAdminDialog {
 		return new Dimension(400, 400);
 	}
 
-	private class FillAction extends AbstractAction {
+	private class FillAction extends ThreadedAction {
+
 		private static final long serialVersionUID = 4730621907525954549L;
 
-		FillAction() {
+
+		private Playlist currentPlaylist;
+
+		
+		public FillAction(ClientContext ctx) {
+			super(ctx);
 			this.putValue(Action.NAME, ctx.getString("ok"));
 		}
 
+
 		@Override
-		public void actionPerformed(ActionEvent evt) {
+		protected String getStatus() {
+			return ctx.getString("action.playlist.fill.status", currentPlaylist != null ? currentPlaylist.getName() : "");
+		}
+
+		@Override
+		protected void performAction() throws Exception {
 			for (Playlist playlist : list.getSelectedValuesList()) {
-				try {
-					filler.fillPlaylist(playlist);
-					ctx.getAdminClient().getPlaylistService().savePlaylist(playlist);
-				} catch (MissingSourceTracksException e) {
-					JXErrorPane.showDialog(AppUtils.getRootFrame(),
-							ctx.createErrorInfo(e, "action.playlist.fill.error.missingsource", e.getMessage()));
-
-				} catch (Exception e) {
-					JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo(e, "action.playlist.fill.error"));
-				}
+				currentPlaylist = playlist;
+				filler.fillPlaylist(playlist);
+				ctx.getAdminClient().getPlaylistService().savePlaylist(playlist);
 			}
-			dispose();
+		}
 
+		@Override
+		protected void showError(Exception e) {
+			if (e instanceof MissingSourceTracksException) {
+				JXErrorPane.showDialog(AppUtils.getRootFrame(),
+						ctx.createErrorInfo(e, "action.playlist.fill.error.missingsource", e.getMessage()));
+			} else {
+				JXErrorPane.showDialog(AppUtils.getRootFrame(), ctx.createErrorInfo(e, "action.playlist.fill.error"));
+			}
+
+
+		}
+
+		@Override
+		protected void onSuccess() {
+			dispose();
 		}
 
 	}

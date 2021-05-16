@@ -12,6 +12,7 @@ Version 5.2.1
 [+] Station Admin merkt sich angezeigte Spalten im Playlistviewer
 [+] Tooltip für "Playlists"-Spalte im Playlistviewer zeigt Namen der Playlists in denen der Track enthalten ist
 [#] Deutlichere Nachfrage beim Löschen von Playlists auf dem Server
+[#] Automatisches Befüllen mehrerer Playlists: Anzeige der aktuell bearbeiteten Playlist während des Vorgangs
 [+] Verbessertes Fehlerhandling
 
 Version 5.2.0
