@@ -67,8 +67,8 @@ public class PlaylistModificationDetector extends AbstractBean {
 				return modifiedPlaylistIds;
 			}
 
-		} catch (IOException e) {
-			log.error("unable to check for modified playlists");
+		} catch (Exception e) {
+			log.error("unable to check for modified playlists", e);
 		}
 
 		return null;

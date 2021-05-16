@@ -6,6 +6,10 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 5.2.1
+-------------
+[+] Verbessertes Fehlerhandling
+
 Version 5.2.0
 -------------
 [+] Programmelemente für auf dem Server geshuffelte Playlists

@@ -1,5 +1,5 @@
-// StationAdmin v3.0.3
-// 11.11.2020
+// StationAdmin v3.0.4
+// 27.01.2021
 ( function( tracks, opts, trackStats ){
   
   var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -567,7 +567,7 @@
     if(hasPreservedTracks) {
       var newTracks = [];
       for(var i = 0; i < playlistTracks.length; i++) {
-        if(typeof preservedTracks[newTracks.length] != 'undefined') {
+        while(typeof preservedTracks[newTracks.length] != 'undefined') {
           newTracks.push(preservedTracks[newTracks.length]);
         }
         newTracks.push(playlistTracks[i]);

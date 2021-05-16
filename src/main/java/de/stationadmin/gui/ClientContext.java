@@ -84,7 +84,7 @@ public class ClientContext {
     });
   }
 
-  protected void displayError(final String text, final Exception e) {
+  protected void displayError(final String text, final Throwable e) {
     SwingUtilities.invokeLater(new Runnable() {
 
       @Override
