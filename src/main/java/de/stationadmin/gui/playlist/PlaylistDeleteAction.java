@@ -50,7 +50,7 @@ class PlaylistDeleteAction extends AbstractAction implements PropertyChangeListe
     Playlist playlist = (Playlist) this.playlistHolder.getValue();
     if (playlist != null) {
       String key = playlist.getType() == PlaylistType.ARCHIVED ? "action.playlist.delete.msg.confirm.archived" : "action.playlist.delete.msg.confirm";
-      if (JOptionPane.showConfirmDialog(AppUtils.getRootFrame(), this.textProvider.getString(key, playlist.getName()), null, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+      if (JOptionPane.showConfirmDialog(AppUtils.getRootFrame(), this.textProvider.getString(key, playlist.getName()), this.textProvider.getString("action.playlist.delete.msg.confirm.title"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
         try {
           this.service.deletePlaylist(playlist);
         } catch (IOException e) {
