@@ -65,7 +65,7 @@ public class ScheduledItemDlg extends StationAdminFrame {
           ctx.getAdminClient().getPlaylistService().saveScheduledItems();
           ctx.getAdminClient().getClientConfigService().write();
         } catch (Exception e) {
-          ErrorInfo errorInfo = ctx.createErrorInfo(e, "titletagmanager.action.delete.failed");
+          ErrorInfo errorInfo = ctx.createErrorInfo(e, "scheduleditems.action.delete.failed");
           JXErrorPane.showDialog(ScheduledItemDlg.this, errorInfo);
         }
       }
@@ -200,6 +200,7 @@ public class ScheduledItemDlg extends StationAdminFrame {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
+        	model.setList(ctx.getAdminClient().getPlaylistService().getScheduledItems());
           model.fireContentsChanged(0, ctx.getAdminClient().getPlaylistService().getScheduledItems().size());
           list.getSelectionModel().clearSelection();
         }

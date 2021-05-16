@@ -8,6 +8,7 @@ Station Admin für laut.fm - Änderungen
 
 Version 5.2.1
 -------------
+[*] Programmelemente-Dialog: Liste der Programmelemente wurde nach dem Hinzufügen oder Löschen eines Elements nicht aktualisiert
 [+] Verbessertes Fehlerhandling
 
 Version 5.2.0
