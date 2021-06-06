@@ -575,20 +575,20 @@ public class LogAnalyzerService implements Service {
     // Statistics stats = ctx.getServer().getStatistics(ctx.getStationId());
     Date today = new Date();
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.DAY_OF_MONTH, -10);
+    cal.add(Calendar.DAY_OF_MONTH, -31);
     ListenerStatsEntry[] listenerStats = ctx.getServer().getListenerStatistics(ctx.getStationId(), cal.getTime(), today, ListenerStatsPeriod.Daily);
 
     cal.setTimeInMillis(System.currentTimeMillis());
 
     SimpleDateFormat dateFmt = new SimpleDateFormat(DATE_FORMAT);
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 31; i++) {
       cal.add(Calendar.DAY_OF_MONTH, -1);
       String date = dateFmt.format(cal.getTime());
       String filename = this.logCacheDir + "station_dailysummary" + "-" + date + ".log";
       File file = new File(filename);
       if (i > 3 && file.exists()) {
         // we have already data and it shouldn't change anymore
-        break;
+        continue;
       }
 
       for (int j = 0; j < listenerStats.length; j++) {
