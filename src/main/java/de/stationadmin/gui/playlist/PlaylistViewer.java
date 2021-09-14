@@ -383,6 +383,7 @@ public class PlaylistViewer extends JPanel {
 					int row = rowAtPoint(evt.getPoint());
 					col = convertColumnIndexToModel(col);
 					if (row > -1) {
+						row = convertRowIndexToModel(row);
 						if (col == Column.TAGS.ordinal()) {
 							Object value = getModel().getValueAt(row, col);
 							if (value instanceof String) {
