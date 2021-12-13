@@ -22,7 +22,8 @@ import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
@@ -49,7 +50,7 @@ import de.stationadmin.lfm.backend.Track;
  * @author Frank Korf
  */
 public class TagManager extends AbstractBean implements Service, TagChecker, ClientConfigurationSource {
-  private static final Logger log = Logger.getLogger(TagManager.class);
+  private static final Logger log = LogManager.getLogger(TagManager.class);
   /** pseudo tag: used titles */
   public static final String USED_TITLES = "#USED#";
   /** pseudo tag: unused titles */
@@ -648,7 +649,7 @@ public class TagManager extends AbstractBean implements Service, TagChecker, Cli
 
         }
       } catch (ResourceNotFoundException e) {
-        Logger.getLogger(TagManager.class).warn("unable to retrieve tracks for " + tag);
+        LogManager.getLogger(TagManager.class).warn("unable to retrieve tracks for " + tag);
       }
     }
 

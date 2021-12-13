@@ -8,9 +8,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,16 +28,14 @@ import de.stationadmin.lfm.backend.TrackList;
  * 
  */
 public class TestAdminService {
-  private static final Logger log = Logger.getLogger(TestAdminService.class);
+  private static final Logger log = LogManager.getLogger(TestAdminService.class);
   private String token;
   private String origin = "StationAdmin";
 
   private LautfmAdminService service;
 
   @Before
-  public void setUp() throws Exception {
-    BasicConfigurator.configure();
-    Logger.getRootLogger().setLevel(Level.INFO);
+  public void setUp() throws Exception {	
     Properties props = new Properties();
     props.load(this.getClass().getClassLoader().getResourceAsStream("account.properties"));
     this.token = props.getProperty("token");

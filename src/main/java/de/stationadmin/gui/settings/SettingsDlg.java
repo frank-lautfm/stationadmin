@@ -33,8 +33,9 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXLabel;
 
@@ -155,15 +156,15 @@ public class SettingsDlg extends StationAdminDialog {
     panel.setBorder(BorderFactory.createTitledBorder("Logging"));
 
     final JCheckBox cb = new JCheckBox("Netzwerkverkehr für diese Sitzung loggen");
-    cb.setSelected(Logger.getLogger(LautfmAdminService.class).getLevel().equals(Level.INFO));
+    cb.setSelected(LogManager.getLogger(LautfmAdminService.class).getLevel().equals(Level.DEBUG));
     cb.addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
         if (cb.isSelected()) {
-          Logger.getLogger(LautfmAdminService.class).setLevel(Level.INFO);
+        	Configurator.setLevel(LautfmAdminService.class.getName(), Level.DEBUG);
         } else {
-          Logger.getLogger(LautfmAdminService.class).setLevel(Level.ERROR);
+        	Configurator.setLevel(LautfmAdminService.class.getName(), Level.ERROR);
         }
       }
     });

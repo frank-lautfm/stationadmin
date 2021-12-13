@@ -27,7 +27,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
 
@@ -68,9 +69,9 @@ import de.stationadmin.lfm.backend.TrackRef;
  * 
  */
 public class PlaylistService extends AbstractBean implements Service, ClientConfigurationSource, PlaylistProfileRegistry {
-  public static final int MAX_TRACKS = 10000;
+  public static final int MAX_TRACKS = 10000;	
 
-  private static final Logger log = Logger.getLogger(PlaylistService.class);
+  private static final Logger log = LogManager.getLogger(PlaylistService.class);
   private static final Pattern shuffleKeyPattern = Pattern.compile("key.\\s*([\\w|_]+)", Pattern.MULTILINE | Pattern.DOTALL);
 
   public static final String SHUFFLE_CLASSIC = "basic";

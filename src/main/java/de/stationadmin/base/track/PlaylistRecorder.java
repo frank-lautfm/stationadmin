@@ -6,7 +6,8 @@ package de.stationadmin.base.track;
 import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.StationStatus;
 import de.stationadmin.lfmapi.LautfmService;
@@ -18,7 +19,7 @@ import de.stationadmin.lfmapi.Song;
  * @author Frank Korf
  */
 public class PlaylistRecorder extends Thread {
-  private static final Logger log = Logger.getLogger(PlaylistRecorder.class);
+  private static final Logger log = LogManager.getLogger(PlaylistRecorder.class);
 
   private TrackRegistry titleRegistry;
   private LautfmService lfmService;

@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.util.TimeFormat;
 import javazoom.jl.decoder.Bitstream;
@@ -26,7 +27,7 @@ import javazoom.jl.decoder.Header;
  * @author korf
  */
 public class MP3Writer {
-  private static final Logger log = Logger.getLogger(MP3Writer.class);
+  private static final Logger log = LogManager.getLogger(MP3Writer.class);
   private InputStream source;
   private OutputStream target;
   private int maxBuffer = 15;

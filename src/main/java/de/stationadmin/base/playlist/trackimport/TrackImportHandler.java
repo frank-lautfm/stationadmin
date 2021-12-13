@@ -16,16 +16,17 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.trackimport.TrackImportTask.Status;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.tag.TagSet;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.RegisteredTrack;
-import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.base.track.format.ArtistTracknameFormat;
 import de.stationadmin.base.track.format.CSVFormat;
@@ -38,7 +39,7 @@ import de.stationadmin.base.track.format.TrackExportFormat;
  * @author Frank Korf
  */
 public class TrackImportHandler {
-  private static final Logger log = Logger.getLogger(TrackImportHandler.class);
+  private static final Logger log = LogManager.getLogger(TrackImportHandler.class);
 
   private TrackExportFormat[] formats = { new ExtendedTrackFormat(), new ArtistTracknameFormat(), new CSVFormat() };
 

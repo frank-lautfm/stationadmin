@@ -12,22 +12,23 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import javazoom.jl.decoder.Bitstream;
-import javazoom.jl.decoder.BitstreamException;
-import javazoom.jl.decoder.Header;
-
 import org.apache.commons.io.FilenameUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.blinkenlights.jid3.ID3Exception;
 import org.blinkenlights.jid3.MP3File;
 import org.blinkenlights.jid3.v2.ID3V2_3_0Tag;
+
+import javazoom.jl.decoder.Bitstream;
+import javazoom.jl.decoder.BitstreamException;
+import javazoom.jl.decoder.Header;
 
 /**
  * @author fkorf
  * 
  */
 public class MP3Splitter {
-  private static Logger log = Logger.getLogger(MP3Splitter.class);
+  private static Logger log = LogManager.getLogger(MP3Splitter.class);
   private static int BEYOND_EOF = Integer.MAX_VALUE;
 
   public List<File> split(File inputFile, List<SplitPoint> splitPoints,

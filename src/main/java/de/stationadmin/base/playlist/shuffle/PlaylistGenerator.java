@@ -17,7 +17,8 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import de.stationadmin.base.playlist.Playlist;
@@ -36,7 +37,7 @@ import de.stationadmin.base.util.TimeFormat;
  * @author Frank Korf
  */
 public class PlaylistGenerator {
-  private static final Logger log = Logger.getLogger(PlaylistGenerator.class);
+  private static final Logger log = LogManager.getLogger(PlaylistGenerator.class);
 
   private PlaylistProfileRegistry profileRegistry;
   private TagChecker tagManager;

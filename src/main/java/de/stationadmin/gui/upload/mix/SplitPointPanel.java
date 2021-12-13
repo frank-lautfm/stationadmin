@@ -31,7 +31,7 @@ import javax.swing.table.TableCellRenderer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXTable;
 
@@ -189,7 +189,7 @@ public class SplitPointPanel extends JPanel {
               table.getModel().setValueAt(string, row >= 0 ? row : 0, col >= 0 ? col : 0);
             }
           } catch (Exception e) {
-            Logger.getLogger(SplitPointPanel.class).error("error while parsing dj mix list", e);
+            LogManager.getLogger(SplitPointPanel.class).error("error while parsing dj mix list", e);
           }
 
         }

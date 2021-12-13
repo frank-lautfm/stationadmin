@@ -17,7 +17,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.AccessDeniedException;
 import de.stationadmin.base.Service;
@@ -37,7 +38,7 @@ import de.stationadmin.lfm.backend.TrackStatsEntry;
  */
 public class LogAnalyzerService implements Service {
   public static final int DAY_IN_MS = 1000 * 60 * 60 * 24;
-  private static final Logger log = Logger.getLogger(LogAnalyzerService.class);
+  private static final Logger log = LogManager.getLogger(LogAnalyzerService.class);
   private static final String DATE_FORMAT = "yyyy-MM-dd";
   private static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
   private SessionCtx ctx;

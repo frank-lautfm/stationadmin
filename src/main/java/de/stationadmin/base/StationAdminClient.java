@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
 
@@ -46,7 +47,7 @@ import de.stationadmin.streamlive.MP3Streamer;
  * @author Frank Korf
  */
 public class StationAdminClient {
-  private static final Logger log = Logger.getLogger(StationAdminClient.class);
+  private static final Logger log = LogManager.getLogger(StationAdminClient.class);
 
   public static long TIMESTAMP_RADIOADMIN_SWITCH = 1481806854618l;
 

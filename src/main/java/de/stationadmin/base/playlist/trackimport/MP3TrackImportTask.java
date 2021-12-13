@@ -6,7 +6,8 @@ package de.stationadmin.base.playlist.trackimport;
 import java.io.File;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.blinkenlights.jid3.ID3Exception;
 import org.blinkenlights.jid3.ID3Tag;
 import org.blinkenlights.jid3.MP3File;
@@ -22,7 +23,7 @@ import de.stationadmin.base.util.MP3Util;
  * 
  */
 public class MP3TrackImportTask extends TrackImportTask {
-  private static final Logger log = Logger.getLogger(MP3TrackImportTask.class);
+  private static final Logger log = LogManager.getLogger(MP3TrackImportTask.class);
   private boolean resolved = false;
   private File file;
   private ID3Tag tag;

@@ -13,7 +13,7 @@ import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.jgoodies.binding.value.ValueModel;
 
@@ -70,7 +70,7 @@ public class PlaysTableModel extends AbstractTableModel {
           if (playlist != null) {
             this.scheduleTable[weekday.ordinal()][h] = playlist.getName();
           } else {
-            Logger.getLogger(PlaysTableModel.class).warn("no playlist found with id " + entry.getPlaylistId());
+            LogManager.getLogger(PlaysTableModel.class).warn("no playlist found with id " + entry.getPlaylistId());
           }
         }
       }

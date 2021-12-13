@@ -3,7 +3,8 @@
  */
 package de.stationadmin.base.schedule;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.StationAdminClient;
 import de.stationadmin.base.tasks.AbstractTask;
@@ -15,7 +16,7 @@ import de.stationadmin.base.tasks.TaskExecutionResult;
  *
  */
 public class ScheduleShuffleTask extends AbstractTask {
-  private static final Logger log = Logger.getLogger(ScheduleShuffleTask.class);
+  private static final Logger log = LogManager.getLogger(ScheduleShuffleTask.class);
   private String playlistTag = ScheduleShuffler.TAG_USED;
   private boolean slotLenghForPlaylistsRequired;
 

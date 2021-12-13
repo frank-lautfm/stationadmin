@@ -19,7 +19,8 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * 
@@ -27,7 +28,7 @@ import org.apache.log4j.Logger;
  * 
  */
 public class TagFile {
-  private static final Logger log = Logger.getLogger(TagFile.class);
+  private static final Logger log = LogManager.getLogger(TagFile.class);
   private static byte[] FILE_ID = { 0, 0, 3, 5 };
   private static final int DATA_OFFSET = 1024;
   private String filename;

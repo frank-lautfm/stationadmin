@@ -12,7 +12,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimerTask;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
@@ -28,7 +29,7 @@ import de.stationadmin.lfm.backend.Statistics;
  *
  */
 public class StatisticsService implements Service {
-  private static final Logger log = Logger.getLogger(StatisticsService.class);
+  private static final Logger log = LogManager.getLogger(StatisticsService.class);
   private SessionCtx sessionCtx;
   private ListenerStatsHistory listenerStatsHistory = new ListenerStatsHistory();
   private TimerTask statsRefresherTask = null;
@@ -40,7 +41,7 @@ public class StatisticsService implements Service {
    * @param ctx
    */
   public StatisticsService(SessionCtx ctx, Settings settings, LogAnalyzerService logAnalyzerService) {
-    this.sessionCtx = ctx;
+    this.sessionCtx = ctx;		
     this.settings = settings;
     this.logAnalyzerService = logAnalyzerService;
 

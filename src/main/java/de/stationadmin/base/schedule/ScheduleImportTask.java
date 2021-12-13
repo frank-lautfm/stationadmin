@@ -5,14 +5,12 @@ package de.stationadmin.base.schedule;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.StationAdminClient;
-import de.stationadmin.base.schedule.Schedule.Entry;
 import de.stationadmin.base.tasks.AbstractTask;
-import de.stationadmin.base.tasks.Task;
 import de.stationadmin.base.tasks.TaskExecutionMessage;
 import de.stationadmin.base.tasks.TaskExecutionResult;
 
@@ -21,7 +19,7 @@ import de.stationadmin.base.tasks.TaskExecutionResult;
  * 
  */
 public class ScheduleImportTask extends AbstractTask {
-  private static final Logger log = Logger.getLogger(ScheduleImportTask.class);
+  private static final Logger log = LogManager.getLogger(ScheduleImportTask.class);
   private String filename;
 
   @Override

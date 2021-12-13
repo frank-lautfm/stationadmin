@@ -18,7 +18,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import com.jgoodies.binding.PresentationModel;
@@ -49,7 +50,7 @@ import de.stationadmin.gui.util.NonObservingPresentationModel;
 public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
 
   private static final long serialVersionUID = 4865584693941336972L;
-  private static final Logger log = Logger.getLogger(PlaylistConfigurationModel.class);
+  private static final Logger log = LogManager.getLogger(PlaylistConfigurationModel.class);
   private AbstractValueModel tags;
   private AbstractValueModel generateTags;
   private TableModel weightTableModel = new GenerateWeightTableModel();

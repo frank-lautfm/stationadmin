@@ -21,7 +21,8 @@ import java.util.Set;
 import java.util.TimerTask;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -46,7 +47,7 @@ import de.stationadmin.lfm.backend.ScheduledEvent;
  * @author Frank Korf
  */
 public class Schedule extends AbstractBean implements Service {
-  private static final Logger log = Logger.getLogger(Schedule.class);
+  private static final Logger log = LogManager.getLogger(Schedule.class);
   private SessionCtx ctx;
   private PlaylistRegistry playlistRegistry;
   private int basePlaylistId;

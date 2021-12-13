@@ -6,6 +6,10 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 5.3.1
+-------------
+[#] Aktualisierung von log4j auf Version 2.15.0
+
 Version 5.3.0
 -------------
 [*] Programmelemente-Dialog: Liste der Programmelemente wurde nach dem Hinzufügen oder Löschen eines Elements nicht aktualisiert

@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
@@ -29,7 +29,7 @@ import de.stationadmin.base.util.AbstractBean;
  * 
  */
 public class TaskExecutionService extends AbstractBean implements Service {
-  private static final Logger log = Logger.getLogger(TaskExecutionService.class);
+  private static final Logger log = LogManager.getLogger(TaskExecutionService.class);
   private XStream xstream;
   private List<ScheduledTask> scheduledTasks = new ArrayList<ScheduledTask>();
   private StationAdminClient client;

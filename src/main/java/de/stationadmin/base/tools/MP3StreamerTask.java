@@ -6,7 +6,7 @@ package de.stationadmin.base.tools;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import de.stationadmin.base.LiveAccount;
 import de.stationadmin.base.StationAdminClient;
@@ -143,7 +143,7 @@ public class MP3StreamerTask extends AbstractTask {
       try {
         streamer.run(waitForTrackChange);
       } catch (Exception e) {
-        Logger.getLogger(MP3StreamerTask.class).error("unable to start broadcast", e);
+        LogManager.getLogger(MP3StreamerTask.class).error("unable to start broadcast", e);
       }
 
     }

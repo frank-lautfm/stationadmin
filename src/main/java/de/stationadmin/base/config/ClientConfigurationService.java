@@ -10,7 +10,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
@@ -19,7 +20,7 @@ import de.stationadmin.lfm.backend.ResourceNotFoundException;
 
 public class ClientConfigurationService implements Service {
   private static final String tsfile = "clientconfigts";
-  private static final Logger log = Logger.getLogger(ClientConfigurationService.class);
+  private static final Logger log = LogManager.getLogger(ClientConfigurationService.class);
   private static final String dateFormat = "yyyy-MM-dd HH:mm:ss";
   private SessionCtx sessionCtx;
   private List<ClientConfigurationSource> sources = new ArrayList<>();

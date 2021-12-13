@@ -12,7 +12,6 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +32,7 @@ import javax.swing.event.ListSelectionListener;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
@@ -221,7 +220,7 @@ public class SnippetPlayer extends StationAdminFrame {
       this.timeRefresher.start();
 
     } catch (Exception e) {
-      Logger.getLogger(SnippetPlayer.class).error("Play of " + snippet + " failed", e);
+      LogManager.getLogger(SnippetPlayer.class).error("Play of " + snippet + " failed", e);
       displayErrorInEDT(e);
     }
   }
@@ -275,7 +274,7 @@ public class SnippetPlayer extends StationAdminFrame {
         this.player.play();
       } catch (Exception e) {
         displayErrorInEDT(e);
-        Logger.getLogger(SnippetPlayer.class).error("Play of " + snippet + " failed", e);
+        LogManager.getLogger(SnippetPlayer.class).error("Play of " + snippet + " failed", e);
       } finally {
         try {
           response.close();

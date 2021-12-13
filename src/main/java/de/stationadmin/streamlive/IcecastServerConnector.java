@@ -11,7 +11,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Establishes a connection to an Icecast server.
@@ -22,7 +23,7 @@ import org.apache.log4j.Logger;
  * @author btoddb, Frank Korf
  */
 public class IcecastServerConnector {
-  private Logger logger = Logger.getLogger(IcecastServerConnector.class);
+  private Logger logger = LogManager.getLogger(IcecastServerConnector.class);
 
   private Socket socket;
   private String hostName = "live.laut.fm";

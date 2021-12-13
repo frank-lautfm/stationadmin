@@ -18,7 +18,8 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.track.DetailedTrack;
@@ -31,7 +32,7 @@ import de.stationadmin.base.util.AbstractBean;
  * 
  */
 public class UploadManager extends AbstractBean {
-  private static final Logger log = Logger.getLogger(UploadManager.class);
+  private static final Logger log = LogManager.getLogger(UploadManager.class);
   private UploadProgressListener progressListener = new UploadProgressListener();
   private List<QueuedTrack> queue = Collections.synchronizedList(new ArrayList<QueuedTrack>());
   private List<QueuedTrack> processedTracks = Collections.synchronizedList(new ArrayList<QueuedTrack>());

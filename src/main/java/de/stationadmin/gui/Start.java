@@ -4,7 +4,6 @@
 package de.stationadmin.gui;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -12,11 +11,16 @@ import java.util.prefs.Preferences;
 
 import javax.swing.SwingUtilities;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.RollingFileAppender;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
+import org.apache.logging.log4j.core.config.builder.api.LayoutComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.api.LoggerComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
@@ -40,18 +44,40 @@ public class Start {
 
 			String dataDirectory = System.getProperty("user.home") + File.separatorChar + "laut.fm" + File.separatorChar
 					+ "StationAdmin" + File.separatorChar;
-			RollingFileAppender appender = new RollingFileAppender(new PatternLayout("%d [%t] %p %c %x - %m%n"),
-					dataDirectory + "stationadmin.log");
-			appender.setMaximumFileSize(1024 * 1024 * 3);
-			appender.setMaxBackupIndex(10);
-			BasicConfigurator.configure(appender);
 
-			Logger.getRootLogger().setLevel(Level.INFO);
-			Logger.getLogger(LautfmAdminService.class).setLevel(Level.ERROR);
+			ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
+			builder.setStatusLevel(Level.ERROR);
+
+			LayoutComponentBuilder standard = builder.newLayout("PatternLayout");
+			standard.addAttribute("pattern", "%d [%t] %p %c %x - %m%n");
+
+			AppenderComponentBuilder rollingFile = builder.newAppender("rolling", "RollingFile");
+
+			rollingFile.addAttribute("fileName", dataDirectory + "stationadmin.log");
+			rollingFile.addAttribute("filePattern", dataDirectory + "stationadmin.log");
+			rollingFile
+					.addComponent(builder.newComponent("Policies").addComponent(
+							builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", (1024 * 1024 * 3) + "B")))
+					.addComponent(builder.newComponent("DefaultRolloverStrategy").addAttribute("max", 10));
+			rollingFile.add(standard);
+			builder.add(rollingFile);
+
+			RootLoggerComponentBuilder rootLogger = builder.newRootLogger(Level.DEBUG);
+			rootLogger.add(builder.newAppenderRef("rolling"));
+
+			builder.add(rootLogger);
+
+			LoggerComponentBuilder logger = builder.newLogger(LautfmAdminService.class.getName(), Level.ERROR);
+			logger.add(builder.newAppenderRef("rolling"));
+			logger.addAttribute("additivity", false);
+
+			builder.add(logger);
+
+			Configurator.initialize(builder.build());
 
 			System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -77,7 +103,7 @@ public class Start {
 				admin.showMain();
 			}
 		} catch (Throwable t) {
-			Logger.getLogger(Start.class).error("failed start main application", t);
+			LogManager.getLogger(Start.class).error("failed start main application", t);
 		}
 	}
 
@@ -154,7 +180,7 @@ public class Start {
 
 			@Override
 			public void uncaughtException(final Thread t, final Throwable e) {
-				Logger.getLogger(Start.class).error("Uncaught exception in thread " + t.getName(), e);
+				LogManager.getLogger(Start.class).error("Uncaught exception in thread " + t.getName(), e);
 				if (SwingUtilities.isEventDispatchThread()) {
 					ErrorInfo errorInfo = getCtx().createErrorInfo(e, "unexpectederror", e.getMessage());
 					JXErrorPane.showDialog(AppUtils.getRootFrame(), errorInfo);
@@ -169,7 +195,7 @@ public class Start {
 					mainWindow.setVisible(true);
 					mainWindow.initAdminClient();
 				} catch (Throwable t) {
-					Logger.getLogger(Start.class).error("failed start main application", t);
+					LogManager.getLogger(Start.class).error("failed start main application", t);
 					JXErrorPane.showDialog(t);
 				}
 			}

@@ -13,16 +13,15 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
-import de.stationadmin.base.util.TimeFormat;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author korf
  * 
  */
 public class MetaDataWriter {
-  private static final Logger log = Logger.getLogger(MetaDataWriter.class);
+  private static final Logger log = LogManager.getLogger(MetaDataWriter.class);
   private ExecutorService executor = Executors.newSingleThreadExecutor();
   private List<Long> times = new ArrayList<Long>();
   private List<String> songs = new ArrayList<String>();

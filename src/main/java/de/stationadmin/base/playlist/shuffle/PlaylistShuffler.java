@@ -13,7 +13,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
@@ -29,7 +30,7 @@ import de.stationadmin.base.track.TrackRegistry;
  * @author Frank Korf
  */
 public class PlaylistShuffler {
-  private static final Logger log = Logger.getLogger(PlaylistShuffler.class);
+  private static final Logger log = LogManager.getLogger(PlaylistShuffler.class);
   private Random random = new Random();
   private ArtistNormalizer artistNormalizer = new DefaultArtistNormalizer();
 

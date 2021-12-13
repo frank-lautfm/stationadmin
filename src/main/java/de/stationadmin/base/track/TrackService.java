@@ -25,7 +25,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 
 import de.stationadmin.base.Service;
@@ -45,7 +46,7 @@ import de.stationadmin.lfmapi.Song;
  * 
  */
 public class TrackService implements Service {
-  private static final Logger log = Logger.getLogger(TrackService.class);
+  private static final Logger log = LogManager.getLogger(TrackService.class);
   private static final String PROP_SYNCTILL = "synchronizedOwnTill";
   public static final String FILENAME_TRACKS = "tracks.tsv";
   public static final String FILENAME_LIVETRACKS = "livetracks.tsv";

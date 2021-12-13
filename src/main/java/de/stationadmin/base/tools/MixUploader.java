@@ -7,7 +7,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.StationAdminClient;
 import de.stationadmin.base.mp3splitter.MP3Splitter;
@@ -41,7 +42,7 @@ public class MixUploader {
     }
   }
 
-  protected static final Logger log = Logger.getLogger(MixUploader.class);
+  protected static final Logger log = LogManager.getLogger(MixUploader.class);
   private StationAdminClient client;
   private String sourceFile;
   private String targetPlaylist;

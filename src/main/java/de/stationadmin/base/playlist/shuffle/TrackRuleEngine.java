@@ -8,7 +8,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.profile.PlaylistProfile;
@@ -137,7 +138,7 @@ public class TrackRuleEngine implements PlaylistEnhancer {
     }
   }
 
-  private static Logger log = Logger.getLogger(TrackRuleEngine.class);
+  private static Logger log = LogManager.getLogger(TrackRuleEngine.class);
 
   private TrackRegistry trackRegistry;
   private TagManager tagManager;

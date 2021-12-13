@@ -33,7 +33,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 
 import de.stationadmin.base.Service;
@@ -61,7 +62,7 @@ import de.stationadmin.base.track.TrackService;
  * 
  */
 public class BackupService implements Service {
-  private static final Logger log = Logger.getLogger(BackupService.class);
+  private static final Logger log = LogManager.getLogger(BackupService.class);
 
   private static final String PATH_PLAYLIST_ARCHIVE = "playlists/archive/";
   private static final String PATH_PLAYLIST_ONLINE = "playlists/";

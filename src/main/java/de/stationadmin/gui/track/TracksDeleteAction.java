@@ -10,13 +10,13 @@ import java.util.Set;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
 import de.stationadmin.base.playlist.Playlist;
-import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.BasicTrack;
+import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.util.ThreadedAction;
 
@@ -90,7 +90,7 @@ public class TracksDeleteAction extends ThreadedAction {
         this.status = ctx.getTextProvider().getString("action.title.delete.status.tags");
         this.ctx.getAdminClient().getTagManager().onTracksDelete(trackIds);
       } catch (Exception e) {
-        Logger.getLogger(TracksDeleteAction.class).warn("unable to update tag files", e);
+        LogManager.getLogger(TracksDeleteAction.class).warn("unable to update tag files", e);
         // accept inconsistency - problem will disappear after next
         // synchronization
       }

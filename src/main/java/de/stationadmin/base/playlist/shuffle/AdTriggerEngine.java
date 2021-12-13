@@ -3,7 +3,8 @@ package de.stationadmin.base.playlist.shuffle;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.profile.AdTriggerCfg;
@@ -13,7 +14,7 @@ import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.util.TimeFormat;
 
 public class AdTriggerEngine implements PlaylistEnhancer {
-  private Logger log = Logger.getLogger(AdTriggerEngine.class);
+  private Logger log = LogManager.getLogger(AdTriggerEngine.class);
 
   public enum AdJingleCollisionStrategy {
     KEEP_BOTH, REMOVE_JINGLE, MOVE_ADTRIGGER
