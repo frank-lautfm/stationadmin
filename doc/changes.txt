@@ -8,6 +8,8 @@ Station Admin für laut.fm - Änderungen
 
 Version 5.3.1
 -------------
+[*] Tooltips für Tags funktionierten bei umsortierter Playlist nicht
+[+] Sendeplan-Editor: Anzeige wie oft Playlist im Sendeplan schon verwendet wurde
 [#] Aktualisierung von log4j auf Version 2.15.0
 
 Version 5.3.0

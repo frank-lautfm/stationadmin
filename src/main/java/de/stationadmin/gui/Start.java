@@ -54,10 +54,10 @@ public class Start {
 			AppenderComponentBuilder rollingFile = builder.newAppender("rolling", "RollingFile");
 
 			rollingFile.addAttribute("fileName", dataDirectory + "stationadmin.log");
-			rollingFile.addAttribute("filePattern", dataDirectory + "stationadmin.log");
+			rollingFile.addAttribute("filePattern", dataDirectory + "stationadmin.log.%i");
 			rollingFile
 					.addComponent(builder.newComponent("Policies").addComponent(
-							builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", (1024 * 1024 * 3) + "B")))
+							builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", (1024 * 1024 * 5) + "B")))
 					.addComponent(builder.newComponent("DefaultRolloverStrategy").addAttribute("max", 10));
 			rollingFile.add(standard);
 			builder.add(rollingFile);
