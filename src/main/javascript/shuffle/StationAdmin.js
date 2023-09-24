@@ -1,5 +1,5 @@
-// StationAdmin v3.0.4
-// 27.01.2021
+// StationAdmin v3.0.5
+// 24.09.2023
 ( function( tracks, opts, trackStats ){
   
   var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -343,7 +343,7 @@
   function applyTagPattern(tracks, duration) {
     var playlist = [];
     // console.log("applyTagPattern " + tracks.length + " / " +  duration);
-
+    shuffle(jingles);
     tracks = tracks.concat(jingles);
     
     var patternIndex = {};
