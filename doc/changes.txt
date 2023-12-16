@@ -9,6 +9,7 @@ Station Admin für laut.fm - Änderungen
 Version 5.3.2
 -------------
 [#] Aktualisierung von XStream auf 1.4.20 - behebt Probleme beim Starten von Station Admin auf neueren Java-Versionen
+[#] Aktualisierung von log4j auf Version 2.22.0
 
 
 Version 5.3.1
