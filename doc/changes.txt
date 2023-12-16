@@ -6,6 +6,11 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 5.3.2
+-------------
+[#] Aktualisierung von XStream auf 1.4.20 - behebt Probleme beim Starten von Station Admin auf neueren Java-Versionen
+
+
 Version 5.3.1
 -------------
 [*] Tooltips für Tags funktionierten bei umsortierter Playlist nicht
