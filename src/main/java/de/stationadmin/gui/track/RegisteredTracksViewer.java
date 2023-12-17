@@ -76,6 +76,8 @@ import de.stationadmin.base.track.exporter.TrackListCSVExporter;
 import de.stationadmin.base.track.exporter.TrackListExcelExporter;
 import de.stationadmin.base.track.exporter.TrackListExporter;
 import de.stationadmin.base.track.exporter.TrackListTxtExporter;
+import de.stationadmin.base.track.format.ExtendedTrackFormat;
+import de.stationadmin.base.track.format.ExtendedTrackFormat.TrackDetailLevel;
 import de.stationadmin.base.util.TimeFormat;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
@@ -497,6 +499,7 @@ public class RegisteredTracksViewer extends JPanel {
 
     table.setTransferHandler(new TransferHandler() {
       private static final long serialVersionUID = 8486946874778173755L;
+      private ExtendedTrackFormat exportFormat = new ExtendedTrackFormat(TrackDetailLevel.ENHANCED);
 
       /**
        * @see javax.swing.TransferHandler#exportToClipboard(javax.swing.JComponent,
@@ -517,9 +520,9 @@ public class RegisteredTracksViewer extends JPanel {
           StringBuffer buf = new StringBuffer();
           for (int i = 0; i < rows.length; i++) {
             int row = table.convertRowIndexToModel(rows[i]);
-            BasicTrack title = tableModel.getTrackAt(row);
-            if (title != null) {
-              buf.append(title.toTabSeparatedValues());
+            BasicTrack track = tableModel.getTrackAt(row);
+            if (track != null) {
+              buf.append(exportFormat.toString(track));
               buf.append('\n');
             }
           }
