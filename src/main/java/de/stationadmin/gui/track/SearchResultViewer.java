@@ -46,6 +46,8 @@ import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackQuery;
 import de.stationadmin.base.track.TrackRegistry;
+import de.stationadmin.base.track.format.ExtendedTrackFormat;
+import de.stationadmin.base.track.format.ExtendedTrackFormat.TrackDetailLevel;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.track.SearchResultTableModel.Column;
 import de.stationadmin.gui.util.ComponentFactory;
@@ -249,6 +251,8 @@ public class SearchResultViewer extends JPanel {
     table.setTransferHandler(new TransferHandler() {
       private static final long serialVersionUID = 380546188495324607L;
 
+      private ExtendedTrackFormat trackFormat = new ExtendedTrackFormat(TrackDetailLevel.FULL);
+      
       /**
        * @see javax.swing.TransferHandler#createTransferable(javax.swing.JComponent)
        */
@@ -260,8 +264,7 @@ public class SearchResultViewer extends JPanel {
             row = table.convertRowIndexToModel(row);
             DetailedTrack title = tableModel.getTitle(row);
             if (title != null) {
-              String str = title.toTabSeparatedValues();
-              buf.append(str);
+            	buf.append(trackFormat.toString(title));
               buf.append("\n");
             }
           }

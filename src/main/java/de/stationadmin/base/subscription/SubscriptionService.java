@@ -32,6 +32,7 @@ import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
+import de.stationadmin.base.track.format.ExtendedTrackFormat.TrackDetailLevel;
 import de.stationadmin.base.util.AbstractBean;
 import de.stationadmin.lfm.backend.Track;
 import de.stationadmin.lfm.backend.TrackList;
@@ -42,7 +43,7 @@ import de.stationadmin.lfm.backend.TrackList;
  */
 public class SubscriptionService extends AbstractBean implements Service {
   private static final Logger log = LogManager.getLogger(SubscriptionService.class);
-  private static final ExtendedTrackFormat fmt = new ExtendedTrackFormat(true);
+  private static final ExtendedTrackFormat fmt = new ExtendedTrackFormat(TrackDetailLevel.FULL);
   private static final String DIR = "/subscriptions/";
   private SessionCtx sessionCtx;
   private TrackRegistry trackRegistry;

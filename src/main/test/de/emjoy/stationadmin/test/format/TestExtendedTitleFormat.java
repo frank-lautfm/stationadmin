@@ -11,6 +11,7 @@ import org.junit.Test;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
+import de.stationadmin.base.track.format.ExtendedTrackFormat.TrackDetailLevel;
 
 /**
  * @author Frank
@@ -56,7 +57,7 @@ public class TestExtendedTitleFormat {
     t.setYear(2011);
     t.setUploadDate(new Date(System.currentTimeMillis()));
 
-    ExtendedTrackFormat fmt = new ExtendedTrackFormat(true);
+    ExtendedTrackFormat fmt = new ExtendedTrackFormat(TrackDetailLevel.FULL);
 
     {
       String str = fmt.toString(t);

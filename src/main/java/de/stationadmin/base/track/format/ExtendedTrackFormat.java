@@ -18,18 +18,18 @@ import de.stationadmin.base.track.BasicTrack;
  */
 public class ExtendedTrackFormat implements TrackExportFormat {
 
-  private boolean writeDetailedData = false;
+  private TrackDetailLevel detailLevel = TrackDetailLevel.BASIC;
 
   public ExtendedTrackFormat() {
-    this(false);
+    this(TrackDetailLevel.BASIC);
   }
 
   /**
    * @param writeDetailedData
    */
-  public ExtendedTrackFormat(boolean writeDetailedData) {
+  public ExtendedTrackFormat(TrackDetailLevel level) {
     super();
-    this.writeDetailedData = writeDetailedData;
+    this.detailLevel = level;
   }
 
   /**
@@ -55,9 +55,11 @@ public class ExtendedTrackFormat implements TrackExportFormat {
             reg.setYear(Integer.parseInt(parts[7]));
             long uploadDate = Long.parseLong(parts[8]);
             reg.setUploadDate(uploadDate > 0 ? new Date(uploadDate) : null);
-            reg.setPrivateTrack(parts[9].equalsIgnoreCase("true"));
-            if (parts.length >= 11) {
-              reg.setOwnTrack(parts[10].equalsIgnoreCase("true"));
+            if(parts.length >= 10) {
+	            reg.setPrivateTrack(parts[9].equalsIgnoreCase("true"));
+	            if (parts.length >= 11) {
+	              reg.setOwnTrack(parts[10].equalsIgnoreCase("true"));
+	            }
             }
           }
         }
@@ -83,7 +85,7 @@ public class ExtendedTrackFormat implements TrackExportFormat {
   @Override
   public String toString(BasicTrack title) {
     String str = title.toTabSeparatedValues();
-    if (this.writeDetailedData && title instanceof DetailedTrack) {
+    if (this.detailLevel != TrackDetailLevel.BASIC && title instanceof DetailedTrack) {
       DetailedTrack reg = (DetailedTrack) title;
       StringBuffer buf = new StringBuffer(str);
 
@@ -95,14 +97,22 @@ public class ExtendedTrackFormat implements TrackExportFormat {
       buf.append('\t');
       buf.append(reg.getUploadDate() != null ? Long.toString(reg.getUploadDate().getTime()) : "0");
       buf.append('\t');
-      buf.append(Boolean.toString(reg.isPrivateTrack()));
-      buf.append('\t');
-      buf.append(Boolean.toString(reg.isOwnTrack()));
-      buf.append('\t');
+      if(this.detailLevel == TrackDetailLevel.FULL) {
+	      buf.append(Boolean.toString(reg.isPrivateTrack()));
+	      buf.append('\t');
+	      buf.append(Boolean.toString(reg.isOwnTrack()));
+	      buf.append('\t');
+      }
 
       str = buf.toString();
     }
     return str;
+  }
+  
+  public enum TrackDetailLevel {
+  	BASIC,
+  	ENHANCED,
+  	FULL
   }
 
 }

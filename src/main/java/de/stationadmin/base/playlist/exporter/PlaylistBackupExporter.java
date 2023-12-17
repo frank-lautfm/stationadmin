@@ -14,6 +14,7 @@ import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
+import de.stationadmin.base.track.format.ExtendedTrackFormat.TrackDetailLevel;
 
 /**
  * Exports the playlist in a format that is easy to reimport.
@@ -26,7 +27,7 @@ import de.stationadmin.base.track.format.ExtendedTrackFormat;
  */
 public class PlaylistBackupExporter extends PlaylistExporter {
   public static final String EXTENSION = "lfm";
-  private ExtendedTrackFormat format = new ExtendedTrackFormat(true);
+  private ExtendedTrackFormat format = new ExtendedTrackFormat(TrackDetailLevel.FULL);
 
   /**
    * @see de.stationadmin.base.playlist.exporter.PlaylistExporter#getHeadLine()

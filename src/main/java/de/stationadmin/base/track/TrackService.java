@@ -33,6 +33,7 @@ import de.stationadmin.base.Service;
 import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.Settings;
 import de.stationadmin.base.track.format.ExtendedTrackFormat;
+import de.stationadmin.base.track.format.ExtendedTrackFormat.TrackDetailLevel;
 import de.stationadmin.lfm.backend.ProgressListener;
 import de.stationadmin.lfm.backend.ResourceNotFoundException;
 import de.stationadmin.lfm.backend.Track;
@@ -51,7 +52,7 @@ public class TrackService implements Service {
   public static final String FILENAME_TRACKS = "tracks.tsv";
   public static final String FILENAME_LIVETRACKS = "livetracks.tsv";
   public static final String FILENAME_ALIASES = "aliases.tsv";
-  private ExtendedTrackFormat fmt = new ExtendedTrackFormat(true);
+  private ExtendedTrackFormat fmt = new ExtendedTrackFormat(TrackDetailLevel.FULL);
   private SessionCtx ctx;
   private TrackRegistry trackRegistry;
   private PlaylistRecorder playlistRecorder;

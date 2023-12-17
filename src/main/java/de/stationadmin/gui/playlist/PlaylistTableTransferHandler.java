@@ -24,6 +24,8 @@ import org.jdesktop.swingx.JXTable;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.trackimport.TrackImportHandler;
 import de.stationadmin.base.track.BasicTrack;
+import de.stationadmin.base.track.format.ExtendedTrackFormat;
+import de.stationadmin.base.track.format.ExtendedTrackFormat.TrackDetailLevel;
 import de.stationadmin.gui.ClientContext;
 
 /**
@@ -39,6 +41,7 @@ import de.stationadmin.gui.ClientContext;
  */
 class PlaylistTableTransferHandler extends TransferHandler {
   private static final long serialVersionUID = -4695810613414149078L;
+  private ExtendedTrackFormat exportFormat = new ExtendedTrackFormat(TrackDetailLevel.ENHANCED);
   private ClientContext ctx;
   private JXTable table;
   private PlaylistTableModel model;
@@ -192,9 +195,9 @@ class PlaylistTableTransferHandler extends TransferHandler {
       StringBuffer buf = new StringBuffer();
       for (int i = 0; i < rows.length; i++) {
         int row = table.convertRowIndexToModel(rows[i]);
-        BasicTrack title = model.getTitleAt(row);
-        if (title != null) {
-          buf.append(title.toTabSeparatedValues());
+        BasicTrack track = model.getTitleAt(row);
+        if (track != null) {
+          buf.append(exportFormat.toString(track));
           buf.append('\n');
 
           if (action == TransferHandler.MOVE) {
