@@ -6,6 +6,11 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 5.3.3
+-------------
+[*] Ausgeführte Aufgaben konnten in der 5.3.2 z. T. nicht geladen werden
+
+
 Version 5.3.2
 -------------
 [+] Verbesserungen im Copy & Paste und Drag & Drop von Tracks - zusätzliche Informationen wie Album werden mit kopiert

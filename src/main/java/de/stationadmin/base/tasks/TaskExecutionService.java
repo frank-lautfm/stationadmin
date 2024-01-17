@@ -22,6 +22,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.security.NoTypePermission;
 import com.thoughtworks.xstream.security.NullPermission;
 import com.thoughtworks.xstream.security.PrimitiveTypePermission;
+import com.thoughtworks.xstream.security.TypePermission;
 
 import de.stationadmin.base.Service;
 import de.stationadmin.base.StationAdminClient;
@@ -52,7 +53,7 @@ public class TaskExecutionService extends AbstractBean implements Service {
 			xstream.addPermission(NoTypePermission.NONE); // forbid everything
 			xstream.addPermission(NullPermission.NULL); // allow "null"
 			xstream.addPermission(PrimitiveTypePermission.PRIMITIVES); // allow primitive types
-			xstream.allowTypesByWildcard(new String[] { "de.stationadmin.base.**" });
+			xstream.allowTypesByWildcard(new String[] { "de.stationadmin.base.**", "java.lang.**" });
 		}
 		return xstream;
 	}
