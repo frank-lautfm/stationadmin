@@ -58,6 +58,7 @@ import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.track.DistributeTracksDlg;
 import de.stationadmin.gui.upload.UploadedTrackTableModel.Column;
 import de.stationadmin.gui.util.Option;
+import de.stationadmin.gui.util.SwingTools;
 
 /**
  * 
@@ -193,6 +194,7 @@ public class UploadedTracksPanel extends JPanel {
       }
 
     });
+    SwingTools.bindPopup(table, popup);
 
     this.add(new JScrollPane(table), cc.xywh(1, 1, 5, 1));
 

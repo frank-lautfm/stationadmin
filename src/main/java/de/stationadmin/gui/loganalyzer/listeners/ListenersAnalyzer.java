@@ -58,6 +58,7 @@ import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.DateTableCellRenderer;
 import de.stationadmin.gui.util.IntTableCellRenderer;
+import de.stationadmin.gui.util.SwingTools;
 import de.stationadmin.gui.util.TableExportUtils;
 
 /**
@@ -368,6 +369,7 @@ public class ListenersAnalyzer extends StationAdminFrame {
     popup.add(TableExportUtils.getExportToExcelAction(table, ctx.getTextProvider(), ctx.getTextProvider().getString("listeners.tab.history"), 1 << Column.TIME.ordinal()));
 
     table.addMouseListener(new PopupListener(table, popup));    
+    SwingTools.bindPopup(table, popup);
 
     return panel;
   }

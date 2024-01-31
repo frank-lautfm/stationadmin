@@ -105,6 +105,7 @@ import de.stationadmin.gui.util.ClipboardAction;
 import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.DateTableCellRenderer;
 import de.stationadmin.gui.util.IntTableCellRenderer;
+import de.stationadmin.gui.util.SwingTools;
 import de.stationadmin.gui.util.ThreadedAction;
 
 /**
@@ -626,6 +627,8 @@ public class PlaylistViewer extends JPanel {
 			}
 
 		});
+		
+		SwingTools.bindPopup(table, popup);
 
 		table.addHighlighter(new AbstractHighlighter() {
 

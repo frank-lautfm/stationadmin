@@ -90,6 +90,7 @@ import de.stationadmin.gui.util.ClipboardAction;
 import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.DateTableCellRenderer;
 import de.stationadmin.gui.util.IntTableCellRenderer;
+import de.stationadmin.gui.util.SwingTools;
 
 /**
  * @author korf
@@ -607,6 +608,7 @@ public class RegisteredTracksViewer extends JPanel {
       }
 
     });
+		SwingTools.bindPopup(table, popup);
 
     table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 

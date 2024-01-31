@@ -6,6 +6,10 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 5.3.4
+-------------
+[+] Öffnen des Kontextmenüs über Keyboard (Shift+F10, Kontextmenütaste)
+
 Version 5.3.3
 -------------
 [*] Ausgeführte Aufgaben konnten in der 5.3.2 z. T. nicht geladen werden

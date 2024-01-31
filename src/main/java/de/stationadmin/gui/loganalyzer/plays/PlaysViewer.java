@@ -41,6 +41,7 @@ import de.stationadmin.gui.track.TrackViewAction;
 import de.stationadmin.gui.util.ComponentFactory;
 import de.stationadmin.gui.util.DateTableCellRenderer;
 import de.stationadmin.gui.util.LengthTableCellRenderer;
+import de.stationadmin.gui.util.SwingTools;
 import de.stationadmin.gui.util.TableExportUtils;
 
 /**
@@ -153,6 +154,8 @@ public class PlaysViewer extends JPanel {
       popup.addSeparator();
       popup.add(viewAction);
       popup.add(new PlaySnippetAction(ctx, titleHolder));
+
+      SwingTools.bindPopup(table, popup);
 
       table.addMouseListener(new PopupListener(table, popup));
     }

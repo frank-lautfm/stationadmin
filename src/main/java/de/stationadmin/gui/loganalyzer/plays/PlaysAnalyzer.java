@@ -34,6 +34,7 @@ import de.stationadmin.gui.StationAdminFrame;
 import de.stationadmin.gui.TextProvider;
 import de.stationadmin.gui.playlist.PopupListener;
 import de.stationadmin.gui.util.AppUtils;
+import de.stationadmin.gui.util.SwingTools;
 import de.stationadmin.gui.util.TableExportUtils;
 
 /**
@@ -115,6 +116,9 @@ public class PlaysAnalyzer extends StationAdminFrame {
     popup.add(TableExportUtils.getExportToExcelAction(table, ctx.getTextProvider(), ctx.getTextProvider().getString("playsanalyzer.tab.plays")));
     table.addMouseListener(new PopupListener(table, popup));    
     
+    
+    SwingTools.bindPopup(table, popup);
+
     panel.add(new JScrollPane(table), BorderLayout.CENTER);
     return panel;
   }
@@ -129,6 +133,7 @@ public class PlaysAnalyzer extends StationAdminFrame {
     popup.add(TableExportUtils.getCopyToClipboardAction(table, ctx.getTextProvider()));
     popup.add(TableExportUtils.getExportToExcelAction(table, ctx.getTextProvider(), ctx.getTextProvider().getString("playsanalyzer.tab.plays")));
     table.addMouseListener(new PopupListener(table, popup));    
+    SwingTools.bindPopup(table, popup);
     
     panel.add(new JScrollPane(table), BorderLayout.CENTER);
     return panel;

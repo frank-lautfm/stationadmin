@@ -56,6 +56,7 @@ import de.stationadmin.gui.track.TagMenu;
 import de.stationadmin.gui.track.TrackViewAction;
 import de.stationadmin.gui.util.AppUtils;
 import de.stationadmin.gui.util.ComponentFactory;
+import de.stationadmin.gui.util.SwingTools;
 import de.stationadmin.gui.util.TableExportUtils;
 
 /**
@@ -181,6 +182,7 @@ public class UnplayedTracksViewer extends StationAdminFrame {
       popup.add(new PlaySnippetAction(ctx, titleHolder));
 
       table.addMouseListener(new PopupListener(table, popup));
+      SwingTools.bindPopup(table, popup);
     }
 
     JXStatusBar statusBar = new JXStatusBar();

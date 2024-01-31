@@ -56,6 +56,7 @@ import de.stationadmin.base.playlist.PlaylistRegistry;
 import de.stationadmin.base.schedule.Schedule.Entry;
 import de.stationadmin.base.track.RegisteredTrack;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.util.SwingTools;
 
 /**
  * Panel that allows to select a playlist
@@ -143,6 +144,7 @@ public class PlaylistSelector extends JPanel {
 
       }
     });
+        
     toolbar.add(settingsBtn);
     panel.add(toolbar, cc.xy(3, 2));
 
@@ -494,6 +496,8 @@ public class PlaylistSelector extends JPanel {
       }
 
     });
+    
+    SwingTools.bindPopup(list, popup);
 
   }
 
