@@ -62,15 +62,27 @@ public class MP3StreamerTask extends AbstractTask {
       }
       client.setMp3Streamer(streamer);
 
-      int rc = streamer.testConnect();
-      if (rc == 401) {
+      StreamerThread t = new StreamerThread(streamer, waitForTrackChange);
+      t.start();
+      
+      long ts = System.currentTimeMillis();
+      int rc = -1;
+      do {
+      	try {
+      	Thread.sleep(500);
+      	} catch(Exception e) {
+      	}
+      	rc = streamer.getReturnCode();
+      } while(rc < 0 && (System.currentTimeMillis() - ts) < 60000);
+      
+      if (rc == 401 || rc == 403) {
         result.addMessage(true, "mp3streamer.task.msg.authentication_error");
       } else if (rc != 200) {
         result.addMessage(true, "mp3streamer.task.msg.connection_error", Integer.toString(rc));
       }
-      StreamerThread t = new StreamerThread(streamer, waitForTrackChange);
-      t.start();
-      result.addMessage(false, "mp3streamer.task.msg.started", Integer.toString(rc));
+      else {
+      	result.addMessage(false, "mp3streamer.task.msg.started", Integer.toString(rc));
+      }
 
     } catch (IOException e) {
       result.addMessage(true, "mp3streamer.task.msg.error", e.getMessage() != null ? e.getMessage() : e.toString());

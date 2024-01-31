@@ -24,6 +24,7 @@ public class MP3Streamer {
   private Status status = Status.OFFLINE;
   private File meta;
   private int maxDuration = 0;
+  private volatile int connectReturnCode = -1;
 
   public MP3Streamer(File sourcefile) throws IOException {
     this(sourcefile, null);
@@ -135,8 +136,8 @@ public class MP3Streamer {
         }
       }
 
-      int rc = this.ice.connect();
-      if (rc == 200) {
+      this.connectReturnCode = this.ice.connect();
+      if (this.connectReturnCode == 200) {
         this.mp3Writer = new MP3Writer(source.getInputStream(), this.ice.getOutStream(), this.metaWriter);
         this.mp3Writer.setMaxDuration(this.maxDuration);
         /*
@@ -156,13 +157,18 @@ public class MP3Streamer {
           }
         }
       } else {
-        throw new IOException("Icecast connection failed with status " + rc);
+        throw new IOException("Icecast connection failed with status " + this.connectReturnCode);
       }
     } finally {
       this.status = Status.OFFLINE;
 
     }
   }
+  
+  public int getReturnCode() {
+  	return this.connectReturnCode;
+  }
+  
 
   public enum Status {
     OFFLINE, WAITING, ONLINE
