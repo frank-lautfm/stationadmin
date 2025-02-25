@@ -1,5 +1,5 @@
-// StationAdmin v3.0.5
-// 24.09.2023
+// StationAdmin v3.0.6 beta
+// 22.02.2025
 ( function( tracks, opts, trackStats ){
   
   var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -45,6 +45,8 @@
 
   var selectorTags = {};
   var scheduledTracks = [];
+
+  var dateTagCache = {};
   
   var newsTrack;
   var preNewsJingle;
@@ -108,15 +110,57 @@
     return stripped.length > 3 ? stripped : name;
   }
 
+  function checkDateTag(tag, previousState) {
+    if(previousState == 1 || !tag.startsWith("@")) return previousState;
+    if(dateTagCache[tag] !== undefined) {
+      return dateTagCache[tag];
+    }
+    var parts = /^@(\d{1,2}).(\d{1,2}).-(\d{1,2}).(\d{1,2}.)/.exec(tag);
+    if(!parts) {
+      parts = /^@(\d{1,2}).(\d{1,2})./.exec(tag);
+      if(!parts) {
+        dateTagCache[tag] = 0;
+        return previousState;
+      }
+    }
+    var fromDay = parseInt(parts[1]);
+    var fromMonth = parseInt(parts[2]);
+    var toDay = parts.length == 5 ? parseInt(parts[3]) : fromDay;
+    var toMonth = parts.length == 5 ? parseInt(parts[4]) : fromMonth;
+
+    if(fromDay > 31 || fromMonth > 12 || toDay > 31 || toMonth > 12) {
+      dateTagCache[tag] = 0;
+      return previousState;      
+    }
+
+    var ts = new Date();
+    ts.setTime(startTime);
+    var day = ts.getDate();
+    var month = ts.getMonth() + 1;
+
+    var yearChange = toMonth < fromMonth;
+    var matchFrom = month > fromMonth || (month == fromMonth && day >= fromDay) || (yearChange && month < fromMonth); 
+    var matchTo = month < toMonth || (month == toMonth && day <= toDay);
+
+    var result = matchFrom && matchTo ? 1 : -1;
+    dateTagCache[tag] = result;
+
+    // console.log("result: " + tag + " " + result);
+
+    return result;
+  }
+
     
   function assignTrackScore(track) {
     // assign random score
     track.score = 100 + Math.floor((Math.random() * 500));
+    var dateTagState = 0;
     if(tagWeights != null && track.tags.length > 0) {
       // increase / decrease score based on tag weights
       var minWeight = 0;
       var maxWeight = 0;
       for(var i = 0; i < track.tags.length; i++) {
+        dateTagState = checkDateTag(track.tags[i], dateTagState);
         if(track.tags[i] in tagWeights) {
           var w = tagWeights[track.tags[i]];
           if(w > 0 && w > maxWeight) {
@@ -127,7 +171,7 @@
           }
         }
       }
-      if(minWeight < -3) {
+      if(minWeight < -3 || dateTagState == -1) {
         // not at all
         track.score = 999999;
         return;
@@ -143,6 +187,16 @@
         weight = Math.abs(weight);
         var p = 1 + (weight/ 4);
         track.score = track.score * p;
+      }
+    }
+    else {
+      for(var i = 0; i < track.tags.length; i++) {
+        dateTagState = checkDateTag(track.tags[i], dateTagState);
+      }
+      if(dateTagState == -1) {
+        // not at all
+        track.score = 999999;
+        return;
       }
     }
     if (track.id in lastPlays && lastPlays[track.id] < 60 * avoidRepeat) {
