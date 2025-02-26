@@ -1,5 +1,5 @@
-// StationAdmin v3.0.6 beta
-// 22.02.2025
+// StationAdmin v3.0.6
+// 26.02.2025
 ( function( tracks, opts, trackStats ){
   
   var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -115,7 +115,7 @@
     if(dateTagCache[tag] !== undefined) {
       return dateTagCache[tag];
     }
-    var parts = /^@(\d{1,2}).(\d{1,2}).-(\d{1,2}).(\d{1,2}.)/.exec(tag);
+    var parts = /^@(\d{1,2}).(\d{1,2}).\s*-\s*(\d{1,2}).(\d{1,2}.)/.exec(tag);
     if(!parts) {
       parts = /^@(\d{1,2}).(\d{1,2})./.exec(tag);
       if(!parts) {
@@ -312,9 +312,12 @@
       
       tracksDuration += tracks[i].duration;
       tracks[i].use = false;
+      tracks[i].groupTags = [];
       
       if(trackNameLimit > 0) {
         tracks[i].normTitle = normalizeTitle(tracks[i].title);
+        tracks[i].groupTags = tracks[i].tags.filter(t => t.startsWith("=")); 
+        tracks[i].groupTags.push(tracks[i].normTitle); 
       }
       
       assignTrackScore(tracks[i]);
@@ -444,7 +447,7 @@
                   penalty++;
                 }
               }
-              if(recentTrackNames.includes(track.normTitle)) {
+              if(track.groupTags.some(t => recentTrackNames.some(r => r.includes(t)))) {
                 penalty += 3;
               }
             }
@@ -466,7 +469,6 @@
         playlist.push(track);
         playlistLen += track.duration;
         tracks.push(track); 
-    // console.log(tagPattern[tagPatternPtr] + ": " + track.title + " " + track.score);
         tracks[candidates[bestIdx]] = null;
         candidates.splice(bestIdx, 1);
         failed = 0;
@@ -474,7 +476,7 @@
           artistBlocked[track.artistNormalized] = playlistLen + 60 * 60;
           matchingRules = checkTagSequenceRules(track);
           if(trackNameLimit > 0) {
-            recentTrackNames.push(track.normTitle);
+            recentTrackNames.push(track.groupTags);
             if(recentTrackNames.length > trackNameLimit) {
               recentTrackNames.shift();
             } 
@@ -589,7 +591,7 @@
           for(var t2 = t; t2 < playlistTracks.length && t2 < t + 5; t2++) {
             var check = playlistTracks[t2];
             var accept = true;
-            if(trackNameLimit > 0 && recentTrackNames.includes(check.normTitle)) {
+            if(trackNameLimit > 0 && check.groupTags.some(t => recentTrackNames.some(r => r.includes(t)))) {
               accept = false;
             }
             for(var r = 0; r < matchingRules.length && accept; r++) {
@@ -608,7 +610,7 @@
             }
           }
           if(trackNameLimit > 0) {
-            recentTrackNames.push(playlistTracks[t].normTitle);
+            recentTrackNames.push(playlistTracks[t].groupTags);
             if(recentTrackNames.length > trackNameLimit) {
               recentTrackNames.shift();
             } 
