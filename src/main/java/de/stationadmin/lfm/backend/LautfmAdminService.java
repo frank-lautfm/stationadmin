@@ -57,6 +57,7 @@ import de.stationadmin.base.Version;
  */
 public class LautfmAdminService {
   private static final String BASE_URL = "https://api.radioadmin.laut.fm";
+  private static final String SEARCH_API_URL = "https://search.api.radioadmin.laut.fm";
   private static final Logger log = LogManager.getLogger(LautfmAdminService.class);
 
   private String token;
@@ -178,7 +179,11 @@ public class LautfmAdminService {
   }
 
   private CloseableHttpResponse doGet(String path) throws IOException {
-    HttpGet request = new HttpGet(BASE_URL + path);
+    return this.doGet(BASE_URL, path);
+  }
+  
+  private CloseableHttpResponse doGet(String baseUrl, String path) throws IOException {
+    HttpGet request = new HttpGet(baseUrl + path);
     if (log.isInfoEnabled()) {
       log.info("GET " + BASE_URL + path);
     }
@@ -187,6 +192,7 @@ public class LautfmAdminService {
     this.checkResponse(response);
     return response;
   }
+
 
   private CloseableHttpResponse doDelete(String path) throws IOException {
     HttpDelete request = new HttpDelete(BASE_URL + path);
@@ -462,7 +468,7 @@ public class LautfmAdminService {
 
     }
 
-    return this.getTracks(this.doGet("/stations/" + stationId + "/tracks" + (queryString.length() > 0 ? "?" + queryString.toString() : "")));
+    return this.getTracks(this.doGet(SEARCH_API_URL, "/stations/" + stationId + "/tracks" + (queryString.length() > 0 ? "?" + queryString.toString() : "")));
   }
 
   public TrackList getTracksQueued(int stationId) throws IOException {
