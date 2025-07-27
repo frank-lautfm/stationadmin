@@ -18,6 +18,7 @@ import de.stationadmin.base.tasks.TaskExecutionResult;
 public class ScheduleShuffleTask extends AbstractTask {
   private static final Logger log = LogManager.getLogger(ScheduleShuffleTask.class);
   private String playlistTag = ScheduleShuffler.TAG_USED;
+  private String entryTag = null;
   private boolean slotLenghForPlaylistsRequired;
 
   public ScheduleShuffleTask() {
@@ -31,6 +32,7 @@ public class ScheduleShuffleTask extends AbstractTask {
     try {
       ScheduleShuffler shuffler = new ScheduleShuffler(client.getPlaylistService().getPlaylistRegistry(), client.getSchedule().getBasePlaylist().getId());
       shuffler.setPlaylistTag(this.playlistTag);
+      shuffler.setEntryTag(this.entryTag);
       shuffler.setSlotLenghForPlaylistsRequired(this.slotLenghForPlaylistsRequired);
       client.getSchedule().setEntries(shuffler.shuffle(client.getSchedule().getEntries()));
       client.getSchedule().submitToServer();
@@ -75,5 +77,13 @@ public class ScheduleShuffleTask extends AbstractTask {
   public void setSlotLenghForPlaylistsRequired(boolean slotLenghForPlaylistsRequired) {
     this.slotLenghForPlaylistsRequired = slotLenghForPlaylistsRequired;
   }
+
+	public String getEntryTag() {
+		return entryTag;
+	}
+
+	public void setEntryTag(String entryTag) {
+		this.entryTag = entryTag;
+	}
 
 }

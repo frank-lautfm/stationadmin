@@ -26,6 +26,7 @@ public class ScheduleShuffler {
 
   private boolean slotLenghForPlaylistsRequired = false;
   private String playlistTag = TAG_USED;
+  private String entryTag;
   private int basePlaylistId;
 
   /**
@@ -80,16 +81,20 @@ public class ScheduleShuffler {
     for (int i = 0; i < entries.size(); i++) {
       Schedule.Entry entry = entries.get(i);
       if (entry.getPlaylistId() != basePlaylistId) {
-        int slot = (entry.getWeekday().getRawDay() - 1) * 24 + entry.getHour();
-        Schedule.Entry next = null;
-        for (int j = i + 1; j < entries.size() && next == null; j++) {
-          if (entries.get(j).getPlaylistId() != entry.getPlaylistId()) {
-            next = entries.get(j);
-          }
-        }
-        int nextSlot = next != null ? (next.getWeekday().getRawDay() - 1) * 24 + next.getHour() : 24 * 7;
-        int length = nextSlot - slot;
-        list.add(new EntryRef(entry, length * 60 * 60));
+    		Playlist p = this.playlistRegistry.getPlaylist(entry.getPlaylistId());
+    		boolean acceptEntry = this.entryTag == null || p == null || p.getTags().contains(this.entryTag);
+    		if(acceptEntry) {
+	        int slot = (entry.getWeekday().getRawDay() - 1) * 24 + entry.getHour();
+	        Schedule.Entry next = null;
+	        for (int j = i + 1; j < entries.size() && next == null; j++) {
+	          if (entries.get(j).getPlaylistId() != entry.getPlaylistId()) {
+	            next = entries.get(j);
+	          }
+	        }
+	        int nextSlot = next != null ? (next.getWeekday().getRawDay() - 1) * 24 + next.getHour() : 24 * 7;
+	        int length = nextSlot - slot;
+	        list.add(new EntryRef(entry, length * 60 * 60));
+    		}
       }
     }
 
@@ -200,4 +205,17 @@ public class ScheduleShuffler {
       return length;
     }
   }
+
+	public String getEntryTag() {
+		return entryTag;
+	}
+
+	/**
+	 * Sets a tag that schedule entries that are going to be replaced must have. If not set
+	 * all schedule entries are replaced.
+	 * @param entryTag
+	 */
+	public void setEntryTag(String entryTag) {
+		this.entryTag = entryTag;
+	}
 }

@@ -6,6 +6,12 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 5.4.0
+-------------
+[+] Filtern nach zu ersetzenden Playlists beim Shuffeln des Sendeplans
+[#] Verwendung von search.api.laut.fm für Tracksuche
+
+
 Version 5.3.4
 -------------
 [*] MP3 Live senden per Aufgabe funktionierte mit lautcast nicht

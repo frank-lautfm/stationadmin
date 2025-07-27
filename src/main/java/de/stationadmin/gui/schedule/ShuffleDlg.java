@@ -42,6 +42,7 @@ public class ShuffleDlg extends JDialog {
   private ScheduleTableModel tableModel;
 
   private ValueHolder playlistFilter = new ValueHolder(ScheduleShuffler.TAG_USED);
+  private ValueHolder entryFilter = new ValueHolder(null);
   private ValueHolder slotLengthRequired = new ValueHolder(Boolean.FALSE);
 
   /**
@@ -55,7 +56,8 @@ public class ShuffleDlg extends JDialog {
   }
 
   private void init() {
-    this.getContentPane().setLayout(new FormLayout("5dlu,pref,5dlu,pref,5dlu", "5dlu,pref,5dlu,pref,8dlu,pref,5dlu"));
+  	this.setTitle(ctx.getTextProvider().getString("schedule.action.shuffle.name"));
+    this.getContentPane().setLayout(new FormLayout("5dlu,pref,5dlu,pref,5dlu", "5dlu,pref,5dlu,pref,5dlu,pref,8dlu,pref,5dlu"));
     CellConstraints cc = new CellConstraints();
 
     this.getContentPane().add(new JLabel(ctx.getString("schedule.action.shuffle.property.playlists")), cc.xy(2, 2));
@@ -79,11 +81,31 @@ public class ShuffleDlg extends JDialog {
 
     });
     this.getContentPane().add(combo, cc.xy(4, 2));
+    
+    this.getContentPane().add(new JLabel(ctx.getString("schedule.action.shuffle.property.entries")), cc.xy(2, 4));
+    SelectionInList<String> entryModel = new SelectionInList<String>(buildEntryTagModel(), entryFilter);
+    JComboBox entryCombo = BasicComponentFactory.createComboBox(entryModel, new DefaultListCellRenderer() {
+      private static final long serialVersionUID = -7901905125762119676L;
+
+      /**
+       * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
+       */
+      @Override
+      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        if (value == null) {
+          setText(ctx.getTextProvider().getString("playlistselector.all"));
+        } 
+        return comp;
+      }
+    });
+    this.getContentPane().add(entryCombo, cc.xy(4, 4));
+
 
     JCheckBox cb = BasicComponentFactory.createCheckBox(slotLengthRequired, ctx.getString("schedule.action.shuffle.property.slotLengthRequired"));
-    this.getContentPane().add(cb, cc.xywh(2, 4, 3, 1));
+    this.getContentPane().add(cb, cc.xywh(2, 6, 3, 1));
 
-    this.getContentPane().add(new JButton(new ShuffleAction()), cc.xywh(2, 6, 3, 1, CellConstraints.CENTER, CellConstraints.CENTER));
+    this.getContentPane().add(new JButton(new ShuffleAction()), cc.xywh(2, 8, 3, 1, CellConstraints.CENTER, CellConstraints.CENTER));
     
     Dimension dim = this.getPreferredSize();
     this.setSize((int)dim.getWidth() + 30, (int)dim.getHeight() + 50);
@@ -98,6 +120,14 @@ public class ShuffleDlg extends JDialog {
     entries.add(ScheduleShuffler.TAG_USED);
     return new IndirectListModel<String>(entries);
   }
+  
+  IndirectListModel<String> buildEntryTagModel() {
+    ArrayList<String> entries = new ArrayList<String>(ctx.getAdminClient().getPlaylistService().getPlaylistRegistry().getUsedTags());
+    Collections.sort(entries);
+    entries.add(0, null);
+    return new IndirectListModel<String>(entries);
+  }
+
 
   private class ShuffleAction extends AbstractAction {
     private static final long serialVersionUID = -1708985373451632910L;
@@ -111,6 +141,7 @@ public class ShuffleDlg extends JDialog {
 
       ScheduleShuffler shuffler = new ScheduleShuffler(ctx.getAdminClient().getPlaylistService().getPlaylistRegistry(), ctx.getAdminClient().getSchedule().getBasePlaylist().getId());
       shuffler.setPlaylistTag(playlistFilter.getString());
+      shuffler.setEntryTag(entryFilter.getString());
       shuffler.setSlotLenghForPlaylistsRequired((Boolean) slotLengthRequired.getValue());
       tableModel.setEntries(shuffler.shuffle(tableModel.getEntries()));
 

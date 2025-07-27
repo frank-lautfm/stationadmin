@@ -41,6 +41,7 @@ public class ScheduleShuffleTaskPanel extends JPanel implements ScheduledTaskEdi
 
   private JTextField taskNameTf;
   private JComboBox<String> playlistTagCmb;
+  private JComboBox<String> entryTagCmb;
   private JCheckBox slotLengthRequiredCb;
 
   public ScheduleShuffleTaskPanel(PlaylistRegistry playlistRegistry, TextProvider textProvider) {
@@ -52,7 +53,7 @@ public class ScheduleShuffleTaskPanel extends JPanel implements ScheduledTaskEdi
 
   @SuppressWarnings("rawtypes")
   private void init() {
-    this.setLayout(new FormLayout("pref,5dlu,pref:grow", "pref,5dlu,pref,5dlu,pref"));
+    this.setLayout(new FormLayout("pref,5dlu,pref:grow", "pref,5dlu,pref,5dlu,pref,5dlu,pref"));
     CellConstraints cc = new CellConstraints();
 
     this.taskNameTf = new JTextField(15);
@@ -87,8 +88,33 @@ public class ScheduleShuffleTaskPanel extends JPanel implements ScheduledTaskEdi
     });
     this.add(this.playlistTagCmb, cc.xy(3, 3));
 
+    this.add(new JLabel(this.textProvider.getString("schedule.action.shuffle.property.entries")), cc.xy(1, 5));
+
+    ArrayList<String> entries2 = new ArrayList<String>(playlistRegistry.getUsedTags());
+    Collections.sort(entries2);
+    entries2.add(0, null);
+
+    this.entryTagCmb = new JComboBox<String>(entries2.toArray(new String[entries2.size()]));
+    entryTagCmb.setRenderer(new DefaultListCellRenderer() {
+      private static final long serialVersionUID = -7901905125762119676L;
+
+      /**
+       * @see javax.swing.DefaultListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
+       */
+      @Override
+      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        if (value == null) {
+          setText(textProvider.getString("playlistselector.all"));
+        }
+        return comp;
+      }
+    });
+    this.add(this.entryTagCmb, cc.xy(3, 5));
+
+
     this.slotLengthRequiredCb = new JCheckBox(textProvider.getString("schedule.action.shuffle.property.slotLengthRequired"));
-    this.add(this.slotLengthRequiredCb, cc.xywh(1, 5, 3, 1));
+    this.add(this.slotLengthRequiredCb, cc.xywh(1, 7, 3, 1));
 
   }
 
@@ -108,6 +134,7 @@ public class ScheduleShuffleTaskPanel extends JPanel implements ScheduledTaskEdi
     if (task.getTask() instanceof ScheduleShuffleTask) {
       ScheduleShuffleTask shuffleTask = (ScheduleShuffleTask) task.getTask();
       shuffleTask.setPlaylistTag((String) playlistTagCmb.getSelectedItem());
+      shuffleTask.setEntryTag((String) entryTagCmb.getSelectedItem());
       shuffleTask.setSlotLenghForPlaylistsRequired(slotLengthRequiredCb.isSelected());
       shuffleTask.setName(StringUtils.trimToEmpty(taskNameTf.getText()));
     }
