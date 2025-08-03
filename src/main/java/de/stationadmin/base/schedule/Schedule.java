@@ -508,6 +508,7 @@ public class Schedule extends AbstractBean implements Service {
   public void submitToServer() throws IOException, JSONException {
     checkAccess();
     int[][] table = new int[7][24];
+    Collections.sort(this.entries);
     for (Schedule.Entry entry : this.entries) {
       int d = entry.getWeekday().ordinal();
       Arrays.fill(table[d], entry.getHour(), 24, entry.getPlaylistId());

@@ -10,6 +10,7 @@ Version 5.4.0
 -------------
 [+] Filtern nach zu ersetzenden Playlists beim Shuffeln des Sendeplans
 [#] Verwendung von search.api.laut.fm für Tracksuche
+[*] Sendung per Aufgabe in Sendeplan eintragen konnte evt folgende Sendungen überschreiben
 
 
 Version 5.3.4
