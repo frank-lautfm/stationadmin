@@ -1,5 +1,5 @@
-// StationAdmin v3.0.6
-// 26.02.2025
+// StationAdmin v3.0.7
+// 11.10.2025
 ( function( tracks, opts, trackStats ){
   
   var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -110,46 +110,44 @@
     return stripped.length > 3 ? stripped : name;
   }
 
+
   function checkDateTag(tag, previousState) {
-    if(previousState == 1 || !tag.startsWith("@")) return previousState;
-    if(dateTagCache[tag] !== undefined) {
+    if (previousState == 1 || !tag.startsWith("@")) return previousState;
+
+    if (dateTagCache[tag] !== undefined) {
       return dateTagCache[tag];
     }
-    var parts = /^@(\d{1,2}).(\d{1,2}).\s*-\s*(\d{1,2}).(\d{1,2}.)/.exec(tag);
-    if(!parts) {
-      parts = /^@(\d{1,2}).(\d{1,2})./.exec(tag);
-      if(!parts) {
-        dateTagCache[tag] = 0;
-        return previousState;
-      }
-    }
-    var fromDay = parseInt(parts[1]);
-    var fromMonth = parseInt(parts[2]);
-    var toDay = parts.length == 5 ? parseInt(parts[3]) : fromDay;
-    var toMonth = parts.length == 5 ? parseInt(parts[4]) : fromMonth;
 
-    if(fromDay > 31 || fromMonth > 12 || toDay > 31 || toMonth > 12) {
+    let parts = /^@(\d{1,2})\.(\d{1,2})\.\s*-\s*(\d{1,2})\.(\d{1,2})\./.exec(tag);
+    if (!parts) parts = /^@(\d{1,2})\.(\d{1,2})\./.exec(tag);
+    if (!parts) {
       dateTagCache[tag] = 0;
-      return previousState;      
+      return previousState;
     }
 
-    var ts = new Date();
-    ts.setTime(startTime);
-    var day = ts.getDate();
-    var month = ts.getMonth() + 1;
+    const fromDay = +parts[1], fromMonth = +parts[2];
+    const toDay = parts[3] ? +parts[3] : fromDay;
+    const toMonth = parts[4] ? +parts[4] : fromMonth;
 
-    var yearChange = toMonth < fromMonth;
-    var matchFrom = month > fromMonth || (month == fromMonth && day >= fromDay) || (yearChange && month < fromMonth); 
-    var matchTo = month < toMonth || (month == toMonth && day <= toDay);
+    const now = new Date(startTime);
+    const year = now.getFullYear();
 
-    var result = matchFrom && matchTo ? 1 : -1;
+    let fromDate = new Date(year, fromMonth - 1, fromDay);
+    let toDate = new Date(year, toMonth - 1, toDay);
+
+    // handle wrap into next year
+    if (toDate < fromDate) {
+      toDate.setFullYear(year + 1);
+    }
+
+    const inRange = now >= fromDate && now <= toDate;
+    const result = inRange ? 1 : -1;
     dateTagCache[tag] = result;
 
     // console.log("result: " + tag + " " + result);
-
+    
     return result;
   }
-
     
   function assignTrackScore(track) {
     // assign random score
@@ -376,8 +374,11 @@
     while((tagPattern.length > 0 || cDuration < remainingDuration) && cIdx < candidates.length) {
       cDuration += candidates[cIdx].duration;
       candidates[cIdx].use = true;
+      candidates[cIdx].plays = 0;
       cIdx++;
     }
+
+    console.log(tracks.length + " tracks, " + candidates.length + " candidates, " + cIdx + " preselected, " + (cDuration / (60 * 60) + " hours"));
   }
   
   /* tag pattern - start */
@@ -483,6 +484,10 @@
           }
         }
         jinglesInsertedByPattern = jinglesInsertedByPattern || track.type == 'jingle';
+        track.plays++;
+        if(track.plays > 1) {
+          console.log("repeat " + track.artist + " - " + track.title + ": " + track.plays);
+        }
       }
       tagPatternPtr = (tagPatternPtr + 1) % tagPattern.length;
     }
