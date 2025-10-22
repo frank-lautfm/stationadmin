@@ -1,5 +1,5 @@
-// StationAdmin v3.0.7
-// 11.10.2025
+// StationAdmin v3.0.8
+// 22.10.2025
 ( function( tracks, opts, trackStats ){
   
   var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -148,6 +148,16 @@
     
     return result;
   }
+
+  function isExcludedByDateTag(track) {
+    var dateTagState = 0;
+    if(track.tags.length > 0) {
+      for(var i = 0; i < track.tags.length; i++) {
+        dateTagState = checkDateTag(track.tags[i], dateTagState);
+      }
+    }
+    return dateTagState == -1;
+  }
     
   function assignTrackScore(track) {
     // assign random score
@@ -242,7 +252,9 @@
       }
       if((trackRulesEnabled || schedulingRulesEnabled) && tracks[i].id in boundTracks) {
         // only inserted by track rule
-        boundTracks[tracks[i].id] = tracks[i];
+        if(!isExcludedByDateTag(tracks[i])) {
+          boundTracks[tracks[i].id] = tracks[i];
+        }
         continue;
       }
       if(schedulingRulesEnabled) {
@@ -256,8 +268,10 @@
                 rule.trackIdxs = [];
               }
               if('exclude' in rule) skip = true;
-              rule.tracks.push(tracks[i]);
-              rule.trackIdxs.push(i);
+              if(!isExcludedByDateTag(tracks[i])) {
+                rule.tracks.push(tracks[i]);
+                rule.trackIdxs.push(i);
+              }
             }
           }
         }
@@ -378,7 +392,7 @@
       cIdx++;
     }
 
-    console.log(tracks.length + " tracks, " + candidates.length + " candidates, " + cIdx + " preselected, " + (cDuration / (60 * 60) + " hours"));
+    // console.console.log(tracks.length + " tracks, " + candidates.length + " candidates, " + cIdx + " preselected, " + (cDuration / (60 * 60) + " hours"));
   }
   
   /* tag pattern - start */
@@ -486,7 +500,7 @@
         jinglesInsertedByPattern = jinglesInsertedByPattern || track.type == 'jingle';
         track.plays++;
         if(track.plays > 1) {
-          console.log("repeat " + track.artist + " - " + track.title + ": " + track.plays);
+          // console.log("repeat " + track.artist + " - " + track.title + ": " + track.plays);
         }
       }
       tagPatternPtr = (tagPatternPtr + 1) % tagPattern.length;
@@ -794,6 +808,7 @@
     // check rules - do we have the bound track?
     for(var i = 0; i < opts.trackRules.length; i++) {
       opts.trackRules[i].active = 'type' in  boundTracks[opts.trackRules[i].trackId];
+      // console.log(opts.trackRules[i].active + " " + opts.trackRules[i].trackId);
     }
     
     
@@ -803,6 +818,7 @@
          for(var r = 0; r < opts.trackRules.length; r++) {
            if(opts.trackRules[r].active && isBoundTo(playlistTracks[i], opts.trackRules[r])) {
              playlistTracks[i].boundTo.push(r);
+             // console.log(playlistTracks[i].artist + " bound");
            }
          }
       }
