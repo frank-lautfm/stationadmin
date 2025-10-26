@@ -66,7 +66,7 @@ public class PlaylistFiller {
 
       Map<Integer, BasicTrack> tracks = new HashMap<>();
 
-      // Source: Tgas
+      // Source: Tags
       String[] tags = playlist.getAutoFillRule().getSourceTags();
       if (tags != null) {
         for (String tag : tags) {
@@ -152,7 +152,7 @@ public class PlaylistFiller {
       if (playlist.getAutoFillRule().isIncludeTrackRules() && profile != null && profile.getTrackRules() != null) {
         for (TrackRule rule : profile.getTrackRules().getRules()) {
           BasicTrack track = trackRegistry.getTrack(rule.getTrackId());
-          if (track != null) {
+          if (track != null && !tracks.containsKey(track.getId())) {
             playlist.addTrack(track);
           }
         }
