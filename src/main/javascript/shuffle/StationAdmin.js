@@ -1,5 +1,5 @@
-// StationAdmin v3.0.8
-// 22.10.2025
+// StationAdmin v3.0.10
+// 26.10.2025
 ( function( tracks, opts, trackStats ){
   
   var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -132,9 +132,8 @@
     const now = new Date(startTime);
     const year = now.getFullYear();
 
-    let fromDate = new Date(year, fromMonth - 1, fromDay);
-    let toDate = new Date(year, toMonth - 1, toDay);
-
+    let fromDate = new Date(year, fromMonth - 1, fromDay, 0, 0, 0, 0);
+    let toDate   = new Date(year, toMonth - 1, toDay, 23, 59, 59, 999);
     // handle wrap into next year
     if (toDate < fromDate) {
       toDate.setFullYear(year + 1);
@@ -282,7 +281,7 @@
           excludeFollowing = true;
           continue;
         }
-        if(iteration == 0) {
+        if(iteration == 0 && !isExcludedByDateTag(tracks[i])) {
           if(tracks[i].id == 0 || tracks[i].id == opts.adTrigger) {
             adTrigger = tracks[i];
           }
