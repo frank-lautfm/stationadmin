@@ -87,4 +87,12 @@ public class StaticTag implements Tag {
   public void setGroup(String group) {
     this.group = group;
   }
+  
+  public boolean isDateFilterTag() {
+  	return this.name != null && this.name.startsWith("@") && this.name.matches("\\@\\d{1,2}\\.\\d{1,2}\\.\\s*-\\s*\\d{1,2}\\.\\d{1,2}\\..*");
+  }
+  
+  public boolean isGroupingTag() {
+  	return this.name != null && this.name.startsWith("=");
+  }
 }

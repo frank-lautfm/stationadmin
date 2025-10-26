@@ -9,6 +9,7 @@ Station Admin für laut.fm - Änderungen
 Version 5.4.0
 -------------
 [+] Filtern nach zu ersetzenden Playlists beim Shuffeln des Sendeplans
+[+] Datumsfilter- und Gruppierungstags werden im Tagging-Kontextmenü automatisch in eigene Untermenüs sortiert
 [#] Verwendung von search.api.laut.fm für Tracksuche
 [*] Sendung per Aufgabe in Sendeplan eintragen konnte evt folgende Sendungen überschreiben
 [*] Gebundene Jingles wurden unter Umständen beim Befüllen doppelt hinzugefügt

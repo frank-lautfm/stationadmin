@@ -57,14 +57,32 @@ public class TagMenu extends JMenu {
       this.add(menu);
       groupsMenus.put(group, menu);
     }
+    
+    JMenu dateFilterMenu = null;
+    JMenu groupingMenu = null;
 
     for (String tagName : tagManager.getTags()) {
       Tag tag = this.tagManager.getTag(tagName);
       if (tag instanceof StaticTag) {
+      	StaticTag stag = (StaticTag)tag;
         TrackTagAction action = new TrackTagAction(this.tagManager, textProvider, tagName, this.tag);
         actions.add(action);
         String group = tag.getGroup();
         JMenu menu = group != null ? groupsMenus.get(group) : null;
+        if(menu == null) {
+        	if(stag.isDateFilterTag()) {
+        		if(dateFilterMenu == null) {
+        			dateFilterMenu = new JMenu(this.textProvider.getString("titletagmanager.tagtype.date"));
+        		}
+        		menu = dateFilterMenu;
+        	}
+        	else if(stag.isGroupingTag()) {
+        		if(groupingMenu == null) {
+        			groupingMenu = new JMenu(this.textProvider.getString("titletagmanager.tagtype.grouping"));
+        		}
+        		menu = groupingMenu;
+        	}
+        }
         if (menu == null) {
           this.add(action);
         } else {
@@ -72,6 +90,13 @@ public class TagMenu extends JMenu {
         }
       }
     }
+    if(groupingMenu != null || dateFilterMenu != null) {
+    	if(this.getItemCount() > 0) this.insertSeparator(0);
+      if(groupingMenu != null) this.insert(groupingMenu, 0);
+      if(dateFilterMenu != null) this.insert(dateFilterMenu, 0);
+    	
+    }
+    
     if (tag) {
       this.addSeparator();
       {
