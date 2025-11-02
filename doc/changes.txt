@@ -14,6 +14,8 @@ Version 5.4.0
 [#] Verwendung von search.api.laut.fm für Tracksuche
 [*] Sendung per Aufgabe in Sendeplan eintragen konnte evt folgende Sendungen überschreiben
 [*] Gebundene Jingles wurden unter Umständen beim Befüllen doppelt hinzugefügt
+[#] Aktualisierung von log4j auf Version 2.25.2
+
 
 
 Version 5.3.4
