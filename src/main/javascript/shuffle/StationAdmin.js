@@ -1,5 +1,5 @@
-// StationAdmin v3.0.10
-// 26.10.2025
+// StationAdmin v3.0.11
+// 04.11.2025
 ( function( tracks, opts, trackStats ){
   
   var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -11,6 +11,7 @@
   var wordDistribution = 'wordDistribution' in opts ? opts.wordDistribution : 'random';
   var preserveAllJingles = 'preserveAllJingles' in opts ? opts.preserveAllJingles : 0;
   var avoidRepeat = 'avoidRepeat' in opts ? opts.avoidRepeat : 2;
+  var excludePreviousTracks = 'excludePreviousTracks' in opts ? opts.excludePreviousTracks : 0;
   var trackNameLimit = 'trackNameLimit' in opts ? opts.trackNameLimit : 0;
   var adPositions = 'adPositions' in opts && opts.adPositions.length > 1 ? opts.adPositions : [15, 45];
   var adJingleCollisionStrategy = 'adJingleCollisionStrategy' in opts ? opts.adJingleCollisionStrategy : 'keep_both';
@@ -207,9 +208,14 @@
       }
     }
     if (track.id in lastPlays && lastPlays[track.id] < 60 * avoidRepeat) {
-      var penalty = 500 - 250 * lastPlays[track.id] / (60 * avoidRepeat);
-      track.score += penalty;
-      track.penalty = Math.floor(penalty / 50);
+      if(excludePreviousTracks) {
+        track.score = 999999;
+      }
+      else {
+        var penalty = 500 - 250 * lastPlays[track.id] / (60 * avoidRepeat);
+        track.score += penalty;
+        track.penalty = Math.floor(penalty / 50);
+      }
     }
     else {
       track.penalty = 0;

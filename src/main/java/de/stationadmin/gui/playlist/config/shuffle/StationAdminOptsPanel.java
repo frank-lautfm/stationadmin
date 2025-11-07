@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -115,6 +116,7 @@ public class StationAdminOptsPanel extends JPanel {
 
     // Max tracks per artist
     final ValueHolder avoidRepeat = new ValueHolder(getOptions().containsKey("avoidRepeat") ? getOptions().get("avoidRepeat") : 2);
+    final ValueHolder excludePreviousTracks = new ValueHolder(getOptions().containsKey("excludePreviousTracks") && getOptions().get("excludePreviousTracks").equals(1) ? true : false);
     {
       panel.add(new JLabel(this.ctx.getTextProvider().getString("playlistcfg.property.shuffleAvoidRepeat1")), cc.xywh(2, row, 3, 1));
       row += 2;
@@ -123,9 +125,13 @@ public class StationAdminOptsPanel extends JPanel {
       avoidRepeatTf.setColumns(3);
       panel.add(new JLabel(this.ctx.getTextProvider().getString("playlistcfg.property.shuffleAvoidRepeat2")), cc.xy(2, row));
 
-      JPanel tfPanel = new JPanel(new FormLayout("pref,3dlu,pref", "pref"));
+      JPanel tfPanel = new JPanel(new FormLayout("pref,3dlu,pref,5dlu,pref", "pref"));
       tfPanel.add(avoidRepeatTf, cc.xy(1, 1));
       tfPanel.add(new JLabel(this.ctx.getTextProvider().getString("playlistcfg.property.hours")), cc.xy(3, 1));
+      
+      JCheckBox excludeCb = BasicComponentFactory.createCheckBox(excludePreviousTracks, this.ctx.getTextProvider().getString("playlistcfg.property.shuffleAvoidRepeat3"));
+      tfPanel.add(excludeCb, cc.xy(5, 1));
+      
       panel.add(tfPanel, cc.xy(4, row, CellConstraints.LEFT, CellConstraints.CENTER));
 
       avoidRepeat.addValueChangeListener(new PropertyChangeListener() {
@@ -139,6 +145,22 @@ public class StationAdminOptsPanel extends JPanel {
           }
         }
       });
+      
+      excludePreviousTracks.addValueChangeListener(new PropertyChangeListener() {
+				
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					Boolean value = (Boolean)evt.getNewValue();
+					if(value.booleanValue()) {
+            getOptions().put("excludePreviousTracks", 1);
+					}
+					else {
+            getOptions().remove("excludePreviousTracks");
+					}
+					
+				}
+			});
+      
       row += 2;
     }
 
