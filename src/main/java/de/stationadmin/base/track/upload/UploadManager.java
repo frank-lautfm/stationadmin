@@ -25,6 +25,7 @@ import de.stationadmin.base.SessionCtx;
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.base.util.AbstractBean;
+import de.stationadmin.lfm.backend.InsufficientStorageException;
 
 /**
  * 
@@ -44,8 +45,13 @@ public class UploadManager extends AbstractBean {
   private TrackService trackService;
   private SessionCtx sessionCtx;
   private TrackProcessingMonitor processingMonitor;
+  private boolean waitingDueToInsufficientSpace;
 
-  public UploadManager(TrackService trackService, SessionCtx ctx) {
+  public boolean isWaitingDueToInsufficientSpace() {
+		return waitingDueToInsufficientSpace;
+	}
+
+	public UploadManager(TrackService trackService, SessionCtx ctx) {
     super();
     this.trackService = trackService;
     this.sessionCtx = ctx;
@@ -169,27 +175,37 @@ public class UploadManager extends AbstractBean {
     }
     try {
       while (this.currentIndex < this.queue.size() && !stop) {
-        try {
-          this.progressListener.setAbortCurrent(false);
-          QueuedTrack entry = this.queue.get(this.currentIndex);
-          entry.setStatus(UploadStatus.UPLOADING);
-          fireTrackStatusUpdate();
-          entry.setResponse(this.trackService.upload(entry.getFile(), progressListener));
-          if (progressListener.isAbortCurrent()) {
-            entry.setStatus(UploadStatus.ABORTED);
-          } else {
-            entry.setStatus(UploadStatus.PROCESSING);
-          }
-          this.numberOfTracksProcessing++;
-          fireTrackStatusUpdate();
-        } catch (InterruptedIOException e) {
-          log.info("upload interrupted");
-        }
-        this.progressListener.currentUploadCompleted();
-        int oldRemaining = this.getNumberOfRemainingFiles();
-        this.currentIndex++;
-        this.firePropertyChange("numberOfRemainingFiles", oldRemaining, this.getNumberOfRemainingFiles());
-        this.saveQueue();
+        this.progressListener.setAbortCurrent(false);
+        QueuedTrack entry = this.queue.get(this.currentIndex);
+        entry.setStatus(UploadStatus.UPLOADING);
+        fireTrackStatusUpdate();
+      	try {
+	        try {
+	          this.waitingDueToInsufficientSpace = false;
+	          entry.setResponse(this.trackService.upload(entry.getFile(), progressListener));
+	          if (progressListener.isAbortCurrent()) {
+	            entry.setStatus(UploadStatus.ABORTED);
+	          } else {
+	            entry.setStatus(UploadStatus.PROCESSING);
+	          }
+	          this.numberOfTracksProcessing++;
+	          fireTrackStatusUpdate();
+	        } catch (InterruptedIOException e) {
+	          log.info("upload interrupted");
+	        }
+	        this.progressListener.currentUploadCompleted();
+	        int oldRemaining = this.getNumberOfRemainingFiles();
+	        this.currentIndex++;
+	        this.firePropertyChange("numberOfRemainingFiles", oldRemaining, this.getNumberOfRemainingFiles());
+	        this.saveQueue();
+      	} catch(InsufficientStorageException e) {
+      		try {
+	          entry.setStatus(UploadStatus.WAITING);
+	          this.waitingDueToInsufficientSpace = true;
+      			Thread.sleep(1000 * 30);
+      		} catch(InterruptedException ex) {
+      		}
+      	}
       }
       this.processingMonitor.abort();
       this.progressListener.reset();

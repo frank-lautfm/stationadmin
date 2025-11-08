@@ -3,6 +3,7 @@
  */
 package de.stationadmin.gui.upload;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -76,7 +77,7 @@ public class UploadProgressPanel extends JPanel {
       protected Component doHighlight(Component component, ComponentAdapter adapter) {
         if (adapter.row > -1) {
           QueuedTrack track = remainingFilesModel.getElementAt(adapter.row);
-          if (track.getStatus() == UploadStatus.UPLOADING) {
+          if (track.getStatus() == UploadStatus.UPLOADING || track.getStatus() == UploadStatus.WAITING) {
             component.setFont(bigFont);
           }
           else if (track.getStatus() == UploadStatus.PROCESSING) {
@@ -142,7 +143,10 @@ public class UploadProgressPanel extends JPanel {
         }
 
         {
-          if(uploadManager.getNumberOfRemainingFiles() > 0) {
+          if(uploadManager.isWaitingDueToInsufficientSpace()) {
+            statusLabel.setText(ctx.getTextProvider().getString("upload.progress.status.waiting"));
+          }
+          else if(uploadManager.getNumberOfRemainingFiles() > 0) {
             statusLabel.setText(ctx.getTextProvider().getString("upload.progress.status.transfer"));
           }
           else if(uploadManager.getNumberOfTracksProcessing() > 0) {

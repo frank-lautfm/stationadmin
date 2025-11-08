@@ -9,6 +9,6 @@ package de.stationadmin.base.track.upload;
  */
 public enum UploadStatus {
 
-  QUEUED, UPLOADING, PROCESSING, ABORTED, COMPLETED
+  QUEUED, UPLOADING, WAITING, PROCESSING, ABORTED, COMPLETED
   
 }

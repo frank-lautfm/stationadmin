@@ -12,6 +12,7 @@ Version 5.4.0
 [+] Datumsfilter- und Gruppierungstags werden im Tagging-Kontextmenü automatisch in eigene Untermenüs sortiert
 [+] Angepasster Dialog für verschiedene Tag-Typen wenn Tag über Kontextmenü erstellt wird
 [+] Neue Option für Station Admin-Shuffle: Vorherige Tracks für neue Playlist komplette ausschließen
+[+] Automatischer Neustart von Upload bei Abbruch wegen fehlender Kapazität auf dem Server
 [#] Verwendung von search.api.laut.fm für Tracksuche
 [*] Sendung per Aufgabe in Sendeplan eintragen konnte evt folgende Sendungen überschreiben
 [*] Gebundene Jingles wurden unter Umständen beim Befüllen doppelt hinzugefügt

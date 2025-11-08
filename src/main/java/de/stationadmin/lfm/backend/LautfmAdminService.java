@@ -785,7 +785,7 @@ public class LautfmAdminService {
     } while (result.size() > 0);
     return map;
   }
-
+  
   public UploadResponse uploadTrack(int stationId, TrackUpload track, final ProgressListener progressListener) throws IOException {
     final HttpPost filePost = new HttpPost(BASE_URL + "/stations/" + stationId + "/tracks");
     if (progressListener != null) {
@@ -816,6 +816,7 @@ public class LautfmAdminService {
     try {
       CloseableHttpResponse response = uploadClient.execute(filePost);
       this.checkResponse(response);
+            
       if (response.getStatusLine().getStatusCode() == 201) {
         UploadResponse uploadResponse = deserializeJson(response, UploadResponse.class);
         if (track.isPrivateTrack()) {
@@ -831,6 +832,8 @@ public class LautfmAdminService {
         }
 
         return uploadResponse;
+      } else if (response.getStatusLine().getStatusCode() == 507) {
+        throw new InsufficientStorageException(this.getErrorMessage(response));
       } else {
         throw new AdminServiceException(this.getErrorMessage(response));
       }
