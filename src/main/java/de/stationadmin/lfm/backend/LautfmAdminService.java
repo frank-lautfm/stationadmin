@@ -162,7 +162,6 @@ public class LautfmAdminService {
     case 504:
     case 505:
     case 506:
-    case 507:
     case 508:
     case 510:
     case 511:
@@ -175,6 +174,9 @@ public class LautfmAdminService {
       log.info(response.getStatusLine().getStatusCode());
       this.client = createClient();
       throw new ResourceNotFoundException();
+    case 507:
+      log.info(response.getStatusLine().getStatusCode());
+      throw new InsufficientStorageException(getErrorMessage(response));
     }
   }
 
@@ -832,8 +834,8 @@ public class LautfmAdminService {
         }
 
         return uploadResponse;
-      } else if (response.getStatusLine().getStatusCode() == 507) {
-        throw new InsufficientStorageException(this.getErrorMessage(response));
+      } else if(response.getStatusLine().getStatusCode() == 507) {
+      	throw new InsufficientStorageException(this.getErrorMessage(response));
       } else {
         throw new AdminServiceException(this.getErrorMessage(response));
       }
