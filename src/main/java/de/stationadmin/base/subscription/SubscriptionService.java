@@ -157,7 +157,7 @@ public class SubscriptionService extends AbstractBean implements Service {
         list = this.sessionCtx.getServer().getTracks(this.sessionCtx.getStationId(), page, filter, "created_at", false);
 
         for (Track track : list.getTracks()) {
-          if(track.getUpdatedAt().getTime() < minSearchDate.getTime()) {
+          if(track.getCreatedAt().getTime() < minSearchDate.getTime()) {
             abort = true;
           }
           if (!abort && !known.contains(track.getId()) && checkTrack(subscription, track) && !track.isPrivateTrack() && this.trackRegistry.getTrack(track.getId()) == null) {

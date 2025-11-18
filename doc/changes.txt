@@ -6,6 +6,12 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 5.4.1
+-------------
+[*] "Neue Uploads durchsuchen" funktionierte nicht
+[*] Neustart eines wegen fehlender Kapazität abgebrochenen Uploads funktioniert jetzt
+[#] Automatische Drosselung des Uploads mehrerer Tracks wenn Server überlastet ist
+
 Version 5.4.0
 -------------
 [+] Filtern nach zu ersetzenden Playlists beim Shuffeln des Sendeplans
