@@ -185,15 +185,20 @@ public class LautfmAdminService {
   }
   
   private CloseableHttpResponse doGet(String baseUrl, String path) throws IOException {
+    return doGet(this.client, baseUrl, path);
+  }
+  
+  private CloseableHttpResponse doGet(CloseableHttpClient client,  String baseUrl, String path) throws IOException {
     HttpGet request = new HttpGet(baseUrl + path);
     if (log.isInfoEnabled()) {
       log.info("GET " + BASE_URL + path);
     }
     this.addAuthHeaders(request);
-    CloseableHttpResponse response = this.client.execute(request);
+    CloseableHttpResponse response = client.execute(request);
     this.checkResponse(response);
     return response;
   }
+
 
 
   private CloseableHttpResponse doDelete(String path) throws IOException {
@@ -849,6 +854,16 @@ public class LautfmAdminService {
       monitor.requestStop();
     }
 
+  }
+  
+  public boolean isUploadQueueFull(int stationId) throws IOException {
+    CloseableHttpClient statusClient = createClient();
+    try {
+    	doGet(statusClient, BASE_URL, "/stations/" + stationId + "/queue_status");
+    	return false;
+    } catch(InsufficientStorageException e) {
+    	return true;
+    }
   }
 
   public Schedule getSchedule(int stationId) throws IOException {

@@ -10,7 +10,7 @@ Version 5.4.1
 -------------
 [*] "Neue Uploads durchsuchen" funktionierte nicht
 [*] Neustart eines wegen fehlender Kapazität abgebrochenen Uploads funktioniert jetzt
-[#] Automatische Drosselung des Uploads mehrerer Tracks wenn Server überlastet ist
+[#] Automatische Drosselung von gleichzeitigen Uploads wenn Server eine volle Queue signalisiert
 
 Version 5.4.0
 -------------

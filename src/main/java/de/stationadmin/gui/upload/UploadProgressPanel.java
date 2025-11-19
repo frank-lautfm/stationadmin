@@ -143,7 +143,10 @@ public class UploadProgressPanel extends JPanel {
         }
 
         {
-          if(uploadManager.isWaitingDueToInsufficientSpace()) {
+          if(uploadManager.isThrottling()) {
+            statusLabel.setText(ctx.getTextProvider().getString("upload.progress.status.throttling"));
+          }
+          else if(uploadManager.isWaitingDueToInsufficientSpace()) {
             statusLabel.setText(ctx.getTextProvider().getString("upload.progress.status.waiting"));
           }
           else if(uploadManager.getNumberOfRemainingFiles() > 0) {

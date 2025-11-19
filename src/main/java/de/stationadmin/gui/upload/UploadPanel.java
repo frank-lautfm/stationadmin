@@ -3,7 +3,9 @@
  */
 package de.stationadmin.gui.upload;
 
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -12,6 +14,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
@@ -62,13 +65,25 @@ public class UploadPanel extends JPanel {
   private void init() {
     this.setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,pref:grow,5dlu,pref:grow,5dlu"));
     CellConstraints cc = new CellConstraints();
+    
+    final JCheckBox slowerUploadCb = new JCheckBox(ctx.getString("upload.progress.throttle"));
+    slowerUploadCb.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				uploadManager.setSlowerUploadEnabled(slowerUploadCb.isSelected());
+			}
+		});
 
+    JPanel panel = new JPanel(new FormLayout("pref:grow,5dlu,pref,3dlu","pref"));
     JToolBar toolbar = new JToolBar();
     toolbar.add(new RestartAction());
     toolbar.addSeparator();
     toolbar.add(new AddFilesAction());
     toolbar.add(new AddDJMixAction());
-    this.add(toolbar, cc.xy(2, 2));
+    panel.add(toolbar, cc.xy(1, 1));
+    panel.add(slowerUploadCb, cc.xy(3, 1));
+    this.add(panel, cc.xy(2, 2));
 
     this.progressPanel = new UploadProgressPanel(ctx, uploadManager);
     this.add(this.progressPanel, cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
