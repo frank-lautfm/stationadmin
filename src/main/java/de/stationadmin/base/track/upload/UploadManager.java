@@ -26,6 +26,7 @@ import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.track.TrackService;
 import de.stationadmin.base.util.AbstractBean;
 import de.stationadmin.lfm.backend.InsufficientStorageException;
+import de.stationadmin.lfm.backend.QueueStatus;
 
 /**
  * 
@@ -35,6 +36,7 @@ import de.stationadmin.lfm.backend.InsufficientStorageException;
 public class UploadManager extends AbstractBean {
 	private static final Logger log = LogManager.getLogger(UploadManager.class);
 	private static long QUEUETATUS_DELAY = 10 * 1000;
+	private static final int DEFAULT_QUEUE_LIMIT = 15;
 	private UploadProgressListener progressListener = new UploadProgressListener();
 	private List<QueuedTrack> queue = Collections.synchronizedList(new ArrayList<QueuedTrack>());
 	private List<QueuedTrack> processedTracks = Collections.synchronizedList(new ArrayList<QueuedTrack>());
@@ -46,10 +48,11 @@ public class UploadManager extends AbstractBean {
 	private TrackService trackService;
 	private SessionCtx sessionCtx;
 	private TrackProcessingMonitor processingMonitor;
-	private boolean queueExceeded;
 	private boolean throttling;
 	private boolean waitingDueToInsufficientSpace;
 	private long lastQueueStatusCheck = 0;
+	
+	private QueueStatus queueStatus;
 	
 	private boolean slowerUploadEnabled = false;
 
@@ -177,17 +180,21 @@ public class UploadManager extends AbstractBean {
 		return this.queue.size() - this.currentIndex;
 	}
 
-	public void UpdateQueueStatus() {
+	public QueueStatus getQueueStatus() {
 		try {
 			if(System.currentTimeMillis() - this.lastQueueStatusCheck  >= QUEUETATUS_DELAY) {			
 				this.lastQueueStatusCheck = System.currentTimeMillis();
-				this.queueExceeded = this.sessionCtx.getServer().isUploadQueueFull(this.sessionCtx.getStationId());
-				// System.out.println(this.queueExceeded);
+				this.queueStatus = this.sessionCtx.getServer().getQueueStatus(this.sessionCtx.getStationId());
 			}
 		} catch (IOException e) {
-			// ignore
+			if(this.queueStatus == null) {
+				// create default entry - shouldn't happen
+				this.queueStatus = new QueueStatus();
+				this.queueStatus.setUserLimit(DEFAULT_QUEUE_LIMIT);
+				this.queueStatus.setStationLimit(DEFAULT_QUEUE_LIMIT);
+			}
 		}
-
+		return this.queueStatus;
 	}
 
 	public void run() throws IOException {
@@ -198,7 +205,7 @@ public class UploadManager extends AbstractBean {
 			this.processingMonitor.start();
 		}
 		
-		int maxQueueLength = 15;
+		int maxQueueLength = DEFAULT_QUEUE_LIMIT;
 		
 		try {
 			while (this.currentIndex < this.queue.size() && !stop) {
@@ -212,13 +219,16 @@ public class UploadManager extends AbstractBean {
 					Sleep(QUEUETATUS_DELAY - timeSinceLastCheck);
 				}
 
-				this.UpdateQueueStatus();
-				if(this.queueExceeded && numQueued < maxQueueLength) {
-					maxQueueLength = Math.max(1, numQueued);
+				QueueStatus status = this.getQueueStatus();
+				if(status.getEffectiveLimit() < maxQueueLength) {
+					maxQueueLength = Math.max(1, status.getEffectiveLimit());
+				}
+				else if(status.getEffectiveLimit() > maxQueueLength && maxQueueLength < DEFAULT_QUEUE_LIMIT) {
+					maxQueueLength = Math.min(DEFAULT_QUEUE_LIMIT, status.getEffectiveLimit());
 					log.info("Set max queue length to " + maxQueueLength);
 				}
 				
-				if (numQueued >= maxQueueLength || (this.slowerUploadEnabled && numQueued >= 3)) {
+				if (queueStatus.IsOverloaded() || (this.slowerUploadEnabled && numQueued >= 3)) {
 					// do not add further tracks until more capacity is available
 					this.throttling = true;
 					Sleep(1000);

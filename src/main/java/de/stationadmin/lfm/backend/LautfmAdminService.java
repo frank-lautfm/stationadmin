@@ -865,6 +865,17 @@ public class LautfmAdminService {
     	return true;
     }
   }
+  
+  public QueueStatus getQueueStatus(int stationId) throws IOException {
+    CloseableHttpClient statusClient = createClient();
+    HttpGet request = new HttpGet(BASE_URL + "/stations/" + stationId + "/queue_status");
+    this.addAuthHeaders(request);
+    CloseableHttpResponse response = statusClient.execute(request);
+    if(response.getStatusLine().getStatusCode() != 200 && response.getStatusLine().getStatusCode() != 507) {
+    	this.checkResponse(response);
+    }
+    return deserializeJson(response, QueueStatus.class);
+  }
 
   public Schedule getSchedule(int stationId) throws IOException {
     CloseableHttpResponse response = doGet("/stations/" + stationId + "/schedule");
