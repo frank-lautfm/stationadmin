@@ -7,6 +7,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -38,6 +40,7 @@ import de.stationadmin.base.tag.Tag;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.StationAdminFrame;
+import de.stationadmin.gui.util.SwingTools;
 
 /**
  * 
@@ -64,10 +67,10 @@ public class TagManagerDlg extends StationAdminFrame {
     this.getContentPane().setLayout(new FormLayout("5dlu,120dlu,5dlu,pref:grow,5dlu", "5dlu,pref:grow,5dlu"));
     this.setTitle(ctx.getString("titletagmanager.title"));
 
+    final IndirectListModel<Tag> model = new IndirectListModel<Tag>(this.tagManager.getTagObjects());
+    final JList list = new JList(model);
     {
-      final IndirectListModel<Tag> model = new IndirectListModel<Tag>(this.tagManager.getTagObjects());
 
-      final JList list = new JList(model);
       list.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       list.addListSelectionListener(new ListSelectionListener() {
 
@@ -105,6 +108,7 @@ public class TagManagerDlg extends StationAdminFrame {
         public void propertyChange(PropertyChangeEvent evt) {
           JPanel newEditor = null;
           if (evt.getNewValue() instanceof DynamicTag) {
+            dynamicTagEditor.prepareDisplay();
             newEditor = dynamicTagEditor;
             dynamicTagEditor.getModel().triggerFlush();
             dynamicTagEditor.getModel().setBean((DynamicTag) evt.getNewValue());
@@ -157,6 +161,49 @@ public class TagManagerDlg extends StationAdminFrame {
 
       mainPanel.add(toolbar, BorderLayout.NORTH);
       mainPanel.add(tagEditorContainer, BorderLayout.CENTER);
+      
+      JPopupMenu popup = new JPopupMenu();
+      DeleteAction deletePopup = new DeleteAction();
+      deletePopup.asPopupItem();
+      selection.addValueChangeListener(deletePopup);
+      popup.add(deletePopup);
+      
+      RenameAction rename = new RenameAction();
+      selection.addValueChangeListener(rename);
+      popup.add(rename);
+      
+      
+      list.addMouseListener(new MouseAdapter() {
+
+        private void checkPopup(MouseEvent e) {
+          if (e.isPopupTrigger()) {
+            popup.show(list, e.getX(), e.getY());
+          }
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+          this.checkPopup(e);
+        }
+
+        /**
+         * @see java.awt.event.MouseAdapter#mousePressed(java.awt.event.MouseEvent)
+         */
+        @Override
+        public void mousePressed(MouseEvent e) {
+          this.checkPopup(e);
+        }
+
+        /**
+         * @see java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
+         */
+        @Override
+        public void mouseReleased(MouseEvent e) {
+          this.checkPopup(e);
+        }
+
+      });
+      
 
       this.add(mainPanel, new CellConstraints(4, 2, CellConstraints.FILL, CellConstraints.FILL));
 
@@ -254,21 +301,19 @@ public class TagManagerDlg extends StationAdminFrame {
       this.putValue(Action.SHORT_DESCRIPTION, ctx.getString("titletagmanager.action.delete.tooltip"));
       this.setEnabled(false);
     }
+    
+    public void asPopupItem() {
+      this.putValue(Action.SMALL_ICON, null);
+      this.putValue(Action.NAME, ctx.getTextProvider().getString("delete"));
+    }
+    
+
 
     /**
      * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     @Override
     public void actionPerformed(ActionEvent evt) {
-      if (JOptionPane.showConfirmDialog(TagManagerDlg.this, ctx.getString("titletagmanager.action.delete.confirm", tag.getName()), "",
-          JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-        try {
-          tagManager.deleteTag(tag.getName());
-        } catch (IOException e) {
-          ErrorInfo errorInfo = ctx.createErrorInfo(e, "titletagmanager.action.delete.failed");
-          JXErrorPane.showDialog(TagManagerDlg.this, errorInfo);
-        }
-      }
     }
 
     /**
@@ -280,5 +325,38 @@ public class TagManagerDlg extends StationAdminFrame {
       this.setEnabled(this.tag != null && tagManager.getTag(tag.getName()) != null);
     }
   }
+  
+  private class RenameAction extends AbstractAction implements PropertyChangeListener {
+		private static final long serialVersionUID = -4792388743411183829L;
+		private Tag tag;
+
+    RenameAction() {
+			this.putValue(Action.NAME, ctx.getTextProvider().getString("rename"));
+      this.setEnabled(false);
+    }
+    
+    
+
+
+    /**
+     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     */
+    @Override
+    public void actionPerformed(ActionEvent evt) {
+    	RenameTagDlg dlg = new RenameTagDlg(ctx, tag);
+    	SwingTools.centerWithin(TagManagerDlg.this, dlg);
+    	dlg.setVisible(true);
+    }
+
+    /**
+     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+     */
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+      this.tag = (Tag) evt.getNewValue();
+      this.setEnabled(this.tag != null && tagManager.getTag(tag.getName()) != null);
+    }
+  }
+
 
 }

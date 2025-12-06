@@ -59,6 +59,7 @@ public class DynamicTagEditor extends JPanel {
   private static final long serialVersionUID = 4513201211256622444L;
   private ClientContext ctx;
   private PresentationModel<DynamicTag> model = new NonObservingPresentationModel<DynamicTag>((DynamicTag) null);
+  private IndirectListModel<String> tagNamesModel;
 
   /**
    * @param ctx
@@ -67,6 +68,10 @@ public class DynamicTagEditor extends JPanel {
     super();
     this.ctx = ctx;
     this.init();
+  }
+  
+  public void prepareDisplay() {
+  	this.tagNamesModel.setList(getTagNames());
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -266,6 +271,15 @@ public class DynamicTagEditor extends JPanel {
     return panel;
   }
 
+  private List<String> getTagNames() {
+    List<String> tagNames = new ArrayList<String>();
+    for (StaticTag tag : this.ctx.getAdminClient().getTagManager().getStaticTags()) {
+      tagNames.add(tag.getName());
+    }
+    Collections.sort(tagNames);
+    return tagNames;
+  }
+  
   @SuppressWarnings({ "unchecked", "rawtypes" })
   private JPanel createTagsPanel() {
     JPanel panel = new JPanel(new FormLayout("3dlu,pref:grow,3dlu", "3dlu,pref,3dlu,pref:grow,3dlu"));
@@ -274,14 +288,8 @@ public class DynamicTagEditor extends JPanel {
     final BufferedValueModel tagModel = this.model.getBufferedModel("tags");
     final EventGate evtGate = new EventGate();
 
-    List<String> tagNames = new ArrayList<String>();
-    for (StaticTag tag : this.ctx.getAdminClient().getTagManager().getStaticTags()) {
-      tagNames.add(tag.getName());
-    }
-    Collections.sort(tagNames);
-
-    final IndirectListModel<String> model = new IndirectListModel<String>(tagNames);
-    final JList list = new JList(model);
+    this.tagNamesModel = new IndirectListModel<String>(getTagNames());
+    final JList list = new JList(this.tagNamesModel);
     list.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     list.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
@@ -294,7 +302,7 @@ public class DynamicTagEditor extends JPanel {
             if (indices.length > 0) {
               String[] tags = new String[indices.length];
               for (int i = 0; i < indices.length; i++) {
-                tags[i] = (String) model.getElementAt(indices[i]);
+                tags[i] = (String) tagNamesModel.getElementAt(indices[i]);
               }
               tagModel.setValue(tags);
             } else {
@@ -322,8 +330,8 @@ public class DynamicTagEditor extends JPanel {
               for (String tag : tags) {
                 idSet.add(tag);
               }
-              for (int i = 0; i < model.getSize(); i++) {
-                String tag = model.getElementAt(i);
+              for (int i = 0; i < tagNamesModel.getSize(); i++) {
+                String tag = tagNamesModel.getElementAt(i);
                 if (idSet.contains(tag)) {
                   list.getSelectionModel().addSelectionInterval(i, i);
                 }
