@@ -6,7 +6,7 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
-Version 5.5.0
+Version 5.4.2
 -------------
 [#] Optimierungen im gleichzeitigen Upload mehrer Tracks
 
