@@ -264,7 +264,7 @@ public class ScheduleEditor extends JPanel {
 					if (flavor.equals(DataFlavor.stringFlavor)) {
 						String string = (String) support.getTransferable().getTransferData(DataFlavor.stringFlavor);
 						for (Playlist playlist : ctx.getAdminClient().getPlaylistService().getPlaylistRegistry()
-								.getAllPlaylists()) {
+								.getPlaylists(PlaylistType.ONLINE)) {
 							if (playlist.getName().equals(string)) {
 								((ScheduleTableModel) table.getModel()).setPlaylistAt(playlist, col - 1, row);
 								try {
@@ -272,6 +272,7 @@ public class ScheduleEditor extends JPanel {
 								} catch (Exception e) {
 
 								}
+								break;
 							}
 						}
 						break;
