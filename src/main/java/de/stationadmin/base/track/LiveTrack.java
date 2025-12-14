@@ -13,12 +13,10 @@ public class LiveTrack extends BasicTrack {
 
   public LiveTrack(String str) {
     String[] parts = StringUtils.split(str, '\t');
-    try {
+    if(parts.length > 2) {
       setId(Integer.parseInt(parts[0]));
       setArtist(parts[1]);
       setTitle(parts[2]);
-    } catch (Exception e) {
-
     }
   }
   

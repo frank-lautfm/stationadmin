@@ -8,8 +8,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.stationadmin.base.track.BasicTrack;
-import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.util.AbstractBean;
 
 /**
@@ -18,6 +20,7 @@ import de.stationadmin.base.util.AbstractBean;
  * @author korf
  */
 public class PlayStatistics extends AbstractBean {
+	private static final Logger log = LogManager.getLogger(PlayStatistics.class);
 
   private int numPlays;
   private int numTracks;
@@ -88,23 +91,27 @@ public class PlayStatistics extends AbstractBean {
     HashMap<Integer,ItemFrequency<BasicTrack>> tracks = new HashMap<Integer, ItemFrequency<BasicTrack>>();
     HashMap<String,ItemFrequency<String>> artists = new HashMap<String, ItemFrequency<String>>();
     for(Play play : plays) {
-      ItemFrequency<BasicTrack> tf = tracks.get(play.getTrack().getId());
-      if(tf == null) {
-        tf = new ItemFrequency<BasicTrack>(play.getTrack(), 1);
-        tracks.put(play.getTrack().getId(), tf);
-      }
-      else {
-        tf.inc();
-      }
-      String normArtist = play.getTrack().getArtist().toLowerCase();
-      ItemFrequency<String> af = artists.get(normArtist);
-      if(af == null) {
-        af = new ItemFrequency<String>(play.getTrack().getArtist(), 1);
-        artists.put(normArtist, af);
-      }
-      else {
-        af.inc();
-      }
+    	try  {
+	      ItemFrequency<BasicTrack> tf = tracks.get(play.getTrack().getId());
+	      if(tf == null) {
+	        tf = new ItemFrequency<BasicTrack>(play.getTrack(), 1);
+	        tracks.put(play.getTrack().getId(), tf);
+	      }
+	      else {
+	        tf.inc();
+	      }
+	      String normArtist = play.getTrack().getArtist().toLowerCase();
+	      ItemFrequency<String> af = artists.get(normArtist);
+	      if(af == null) {
+	        af = new ItemFrequency<String>(play.getTrack().getArtist(), 1);
+	        artists.put(normArtist, af);
+	      }
+	      else {
+	        af.inc();
+	      }
+    	} catch(Exception e) {
+    		log.warn("Unabled to analyze play", e);
+    	}
     }
     
     this.setNumPlays(plays.size());

@@ -10,6 +10,7 @@ Version 5.4.2
 -------------
 [*] Eintragen von Playlists in Sendeplan funktionierte u. U. nicht wenn Playlists gleichen Namens im Archiv existiert
 [*] Synchronisieren von Tags schlug fehl wenn ein " im Tagnamen enthalten war
+[#] Robusteres Laden von Live-Tracks um Fehler bei der Trackstatistikanzeige zu vermeiden
 [#] Optimierungen im gleichzeitigen Upload mehrer Tracks
 
 Version 5.4.1
