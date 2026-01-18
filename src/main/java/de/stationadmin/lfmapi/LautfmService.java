@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package de.stationadmin.lfmapi;
 
@@ -9,47 +9,49 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpEntity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * Provides access to the public Laut.fm API
- * 
+ *
  * @author Frank
  */
 public class LautfmService {
   public static String BASE_URL = "http://api.laut.fm/";
 
-  private DefaultHttpClient client;
+  private CloseableHttpClient client;
 
   public LautfmService() {
     this.client = this.createClient();
   }
 
-  public LautfmService(DefaultHttpClient client) {
+  public LautfmService(CloseableHttpClient client) {
     this.client = client;
   }
 
-  private DefaultHttpClient createClient() {
-    DefaultHttpClient client = new DefaultHttpClient();
-    client.getParams().setParameter("http.useragent",
-        "Mozilla/4.0 (compatible; Laut.fm API 4 Java; " + System.getProperty("os.name") + ")");
-    return client;
+  private CloseableHttpClient createClient() {
+    return HttpClients.custom()
+        .setUserAgent("Mozilla/4.0 (compatible; Laut.fm API 4 Java; " + System.getProperty("os.name") + ")")
+        .build();
   }
   
   public String get(String path) throws IOException {
     String url = "https://api.laut.fm/" + path;
     HttpGet action = new HttpGet(url);
     synchronized (this.client) {
-      HttpResponse response = this.client.execute(action);
-      String raw = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-      return raw;
+      try (CloseableHttpResponse response = this.client.execute(action)) {
+        HttpEntity entity = response.getEntity();
+        String raw = IOUtils.toString(entity.getContent(), "UTF-8");
+        return raw;
+      }
     }
-    
   }
 
   /**
@@ -63,10 +65,12 @@ public class LautfmService {
     String url = BASE_URL + "station/" + station;
     HttpGet action = new HttpGet(url);
     synchronized (this.client) {
-      HttpResponse response = this.client.execute(action);
-      String raw = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-      JSONObject obj = new JSONObject(raw);
-      return new Station(obj);
+      try (CloseableHttpResponse response = this.client.execute(action)) {
+        HttpEntity entity = response.getEntity();
+        String raw = IOUtils.toString(entity.getContent(), "UTF-8");
+        JSONObject obj = new JSONObject(raw);
+        return new Station(obj);
+      }
     }
   }
 
@@ -81,10 +85,12 @@ public class LautfmService {
     String url = BASE_URL + "station/" + station + "/current_song";
     HttpGet action = new HttpGet(url);
     synchronized (this.client) {
-      HttpResponse response = this.client.execute(action);
-      String raw = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-      JSONObject obj = new JSONObject(raw);
-      return new Song(obj);
+      try (CloseableHttpResponse response = this.client.execute(action)) {
+        HttpEntity entity = response.getEntity();
+        String raw = IOUtils.toString(entity.getContent(), "UTF-8");
+        JSONObject obj = new JSONObject(raw);
+        return new Song(obj);
+      }
     }
   }
 
@@ -99,14 +105,16 @@ public class LautfmService {
     String url = BASE_URL + "station/" + station + "/last_songs";
     HttpGet action = new HttpGet(url);
     synchronized (this.client) {
-      HttpResponse response = this.client.execute(action);
-      String raw = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-      JSONArray array = new JSONArray(raw);
-      Song[] songs = new Song[array.length()];
-      for (int i = 0; i < array.length(); i++) {
-        songs[i] = new Song(array.getJSONObject(i));
+      try (CloseableHttpResponse response = this.client.execute(action)) {
+        HttpEntity entity = response.getEntity();
+        String raw = IOUtils.toString(entity.getContent(), "UTF-8");
+        JSONArray array = new JSONArray(raw);
+        Song[] songs = new Song[array.length()];
+        for (int i = 0; i < array.length(); i++) {
+          songs[i] = new Song(array.getJSONObject(i));
+        }
+        return songs;
       }
-      return songs;
     }
   }
 
@@ -114,30 +122,33 @@ public class LautfmService {
     String url = BASE_URL + "station/" + station + "/schedule";
     HttpGet action = new HttpGet(url);
     synchronized (this.client) {
-      HttpResponse response = this.client.execute(action);
-      String raw = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-      JSONArray array = new JSONArray(raw);
-      SchedulerEntry[] entries = new SchedulerEntry[array.length()];
-      for (int i = 0; i < array.length(); i++) {
-        entries[i] = new SchedulerEntry(array.getJSONObject(i));
+      try (CloseableHttpResponse response = this.client.execute(action)) {
+        HttpEntity entity = response.getEntity();
+        String raw = IOUtils.toString(entity.getContent(), "UTF-8");
+        JSONArray array = new JSONArray(raw);
+        SchedulerEntry[] entries = new SchedulerEntry[array.length()];
+        for (int i = 0; i < array.length(); i++) {
+          entries[i] = new SchedulerEntry(array.getJSONObject(i));
+        }
+        return entries;
       }
-      return entries;
     }
-
   }
 
   public PlaylistSchedules[] getPlaylists(String station) throws IOException, JSONException {
     String url = BASE_URL + "station/" + station + "/playlists";
     HttpGet action = new HttpGet(url);
     synchronized (this.client) {
-      HttpResponse response = this.client.execute(action);
-      String raw = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-      JSONArray array = new JSONArray(raw);
-      PlaylistSchedules[] entries = new PlaylistSchedules[array.length()];
-      for(int i = 0; i < array.length(); i++) {
-        entries[i] = new PlaylistSchedules(array.getJSONObject(i));
+      try (CloseableHttpResponse response = this.client.execute(action)) {
+        HttpEntity entity = response.getEntity();
+        String raw = IOUtils.toString(entity.getContent(), "UTF-8");
+        JSONArray array = new JSONArray(raw);
+        PlaylistSchedules[] entries = new PlaylistSchedules[array.length()];
+        for(int i = 0; i < array.length(); i++) {
+          entries[i] = new PlaylistSchedules(array.getJSONObject(i));
+        }
+        return entries;
       }
-      return entries;
     }
   }
 
@@ -145,38 +156,39 @@ public class LautfmService {
     String url = BASE_URL + "station/" + station + "/network";
     HttpGet action = new HttpGet(url);
     synchronized (this.client) {
-      HttpResponse response = this.client.execute(action);
-      String raw = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-      JSONArray array = new JSONArray(raw);
-      NetworkEntry[] entries = new NetworkEntry[array.length()];
-      for (int i = 0; i < array.length(); i++) {
-        entries[i] = new NetworkEntry(array.getJSONObject(i));
+      try (CloseableHttpResponse response = this.client.execute(action)) {
+        HttpEntity entity = response.getEntity();
+        String raw = IOUtils.toString(entity.getContent(), "UTF-8");
+        JSONArray array = new JSONArray(raw);
+        NetworkEntry[] entries = new NetworkEntry[array.length()];
+        for (int i = 0; i < array.length(); i++) {
+          entries[i] = new NetworkEntry(array.getJSONObject(i));
+        }
+        return entries;
       }
-      return entries;
-
     }
-
   }
   
   public Date getTime() throws IOException, ParseException {
     String url = BASE_URL + "time";
     HttpGet action = new HttpGet(url);
     synchronized (this.client) {
-      HttpResponse response = this.client.execute(action);
-      String raw = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-      if(raw.length() > 2) {
-        if(raw.charAt(0) == '"') {
-          raw = raw.substring(1);
+      try (CloseableHttpResponse response = this.client.execute(action)) {
+        HttpEntity entity = response.getEntity();
+        String raw = IOUtils.toString(entity.getContent(), "UTF-8");
+        if(raw.length() > 2) {
+          if(raw.charAt(0) == '"') {
+            raw = raw.substring(1);
+          }
+          if(raw.charAt(raw.length() - 1) == '"') {
+            raw = raw.substring(0, raw.length() - 1);
+          }
         }
-        if(raw.charAt(raw.length() - 1) == '"') {
-          raw = raw.substring(0, raw.length() - 1);
-        }
+        
+        SimpleDateFormat df = new SimpleDateFormat(JSONUtil.DEFAULT_DATE_FORMAT);
+        return df.parse(raw);
       }
-      
-      SimpleDateFormat df = new SimpleDateFormat(JSONUtil.DEFAULT_DATE_FORMAT);
-      return df.parse(raw);
     }
-    
   }
 
 }

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package de.stationadmin.lfm.backend;
 
@@ -20,30 +20,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.net.ssl.SSLContext;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.HttpEntityWrapper;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.message.AbstractHttpMessage;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPatch;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.io.entity.HttpEntityWrapper;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.apache.hc.core5.ssl.TrustStrategy;
+import org.apache.hc.core5.util.Timeout;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -74,24 +79,37 @@ public class LautfmAdminService {
 
   public CloseableHttpClient createClient() {
     try {
-      SSLContextBuilder builder = new SSLContextBuilder();
-      builder.loadTrustMaterial(null, new TrustStrategy() {
-        @Override
-        public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-          return true;
-        }
-      });
-      SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
+      // Build SSL context that trusts all certificates
+      SSLContext sslContext = SSLContextBuilder.create()
+          .loadTrustMaterial(null, new TrustStrategy() {
+            @Override
+            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+              return true;
+            }
+          })
+          .build();
+      
+      SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
+      
+      // Create connection manager with SSL socket factory
+      HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+          .setSSLSocketFactory(sslsf)
+          .build();
 
-      HttpClientBuilder hcBuilder = HttpClients.custom();
-      hcBuilder.setSSLSocketFactory(sslsf).build();
+      // Configure timeouts using Timeout class
+      RequestConfig config = RequestConfig.custom()
+          .setResponseTimeout(Timeout.ofMilliseconds(90 * 1000))
+          .setConnectTimeout(Timeout.ofMilliseconds(20 * 1000))
+          .build();
+
+      HttpClientBuilder hcBuilder = HttpClients.custom()
+          .setConnectionManager(connectionManager)
+          .setDefaultRequestConfig(config)
+          .setUserAgent("Mozilla/4.0 (compatible; Station Admin " + Version.VERSION + "; " + System.getProperty("os.name") + ")");
+      
       if (System.getProperty("stationadmin.proxy", "false").equals("true")) {
         hcBuilder.setRoutePlanner(new DefaultProxyRoutePlanner(new HttpHost("localhost", 8888)));
       }
-      hcBuilder.setUserAgent("Mozilla/4.0 (compatible; Station Admin " + Version.VERSION + "; " + System.getProperty("os.name") + ")");
-
-      RequestConfig config = RequestConfig.custom().setSocketTimeout(90 * 1000).setConnectTimeout(20 * 1000).build();
-      HttpClients.custom().setDefaultRequestConfig(config);
 
       return hcBuilder.build();
 
@@ -105,14 +123,14 @@ public class LautfmAdminService {
     InputStream stream = response.getEntity().getContent();
     if (log.isInfoEnabled()) {
       String content = IOUtils.toString(stream, "UTF-8");
-      log.info(response.getStatusLine().getStatusCode() + " - " + content);
+      log.info(response.getCode() + " - " + content);
       return mapper.readValue(content, type);
     } else {
       return mapper.readValue(stream, type);
     }
   }
 
-  private void addAuthHeaders(AbstractHttpMessage request) {
+  private void addAuthHeaders(ClassicHttpRequest request) {
     request.addHeader("Authorization", "Bearer " + this.token);
     request.addHeader("ORIGIN", this.origin);
   }
@@ -126,34 +144,35 @@ public class LautfmAdminService {
 
   @SuppressWarnings("unchecked")
   private String getErrorMessage(CloseableHttpResponse response) throws IOException {
-    String contentType = response.getEntity().getContentType().getValue();
-    if (contentType != null && contentType.toLowerCase().contains("html")) {
-      // HTML page - try to strip tags
-      String content = IOUtils.toString(response.getEntity().getContent());
-      content = content.replaceAll("\\<.*?\\>", "");
-      return content;
-
-    } else {
-
-      Map<String, Object> map = this.deserializeAsMap(response);
-      Map<String, Object> errors = (Map<String, Object>) map.get("_errors");
-
-      StringBuffer buf = new StringBuffer();
-      if (errors != null) {
-        for (Entry<String, Object> entry : errors.entrySet()) {
-          if (buf.length() > 0) {
-            buf.append("; ");
-          }
-          buf.append(entry.getKey() + ": " + entry.getValue());
-        }
+    HttpEntity entity = response.getEntity();
+    if (entity != null && entity.getContentType() != null) {
+      String contentType = entity.getContentType();
+      if (contentType != null && contentType.toLowerCase().contains("html")) {
+        // HTML page - try to strip tags
+        String content = IOUtils.toString(entity.getContent());
+        content = content.replaceAll("\\<.*?\\>", "");
+        return content;
       }
-
-      return buf.toString();
     }
+
+    Map<String, Object> map = this.deserializeAsMap(response);
+    Map<String, Object> errors = (Map<String, Object>) map.get("_errors");
+
+    StringBuffer buf = new StringBuffer();
+    if (errors != null) {
+      for (Entry<String, Object> entry : errors.entrySet()) {
+        if (buf.length() > 0) {
+          buf.append("; ");
+        }
+        buf.append(entry.getKey() + ": " + entry.getValue());
+      }
+    }
+
+    return buf.toString();
   }
 
   private void checkResponse(CloseableHttpResponse response) throws IOException {
-    switch (response.getStatusLine().getStatusCode()) {
+    switch (response.getCode()) {
     case 400:
     case 500:
     case 501:
@@ -165,17 +184,17 @@ public class LautfmAdminService {
     case 508:
     case 510:
     case 511:
-      log.info(response.getStatusLine().getStatusCode());
+      log.info(response.getCode());
       throw new AdminServiceException(getErrorMessage(response));
     case 401:
-      log.info(response.getStatusLine().getStatusCode());
+      log.info(response.getCode());
       throw new AuthenticationException();
     case 404:
-      log.info(response.getStatusLine().getStatusCode());
+      log.info(response.getCode());
       this.client = createClient();
       throw new ResourceNotFoundException();
     case 507:
-      log.info(response.getStatusLine().getStatusCode());
+      log.info(response.getCode());
       throw new InsufficientStorageException(getErrorMessage(response));
     }
   }
@@ -591,7 +610,7 @@ public class LautfmAdminService {
   public PlaylistHead createPlaylist(int stationId, PlaylistHead playlist) throws IOException {
     CloseableHttpResponse response = this.doPost("/stations/" + stationId + "/playlists", playlist);
     try {
-      if (response.getStatusLine().getStatusCode() == 201) {
+      if (response.getCode() == 201) {
         return deserializeJson(response, PlaylistHead.class);
       } else {
         throw new AdminServiceException(this.getErrorMessage(response));
@@ -604,7 +623,7 @@ public class LautfmAdminService {
   public void deletePlaylist(int stationId, int playlistId) throws IOException {
     CloseableHttpResponse response = this.doDelete("/stations/" + stationId + "/playlists/" + playlistId);
     try {
-      if (response.getStatusLine().getStatusCode() != 204) {
+      if (response.getCode() != 204) {
         throw new AdminServiceException(this.getErrorMessage(response));
       }
     } finally {
@@ -615,7 +634,7 @@ public class LautfmAdminService {
   public void deleteTrack(int stationId, int trackId) throws IOException {
     CloseableHttpResponse response = this.doDelete("/stations/" + stationId + "/tracks/" + trackId);
     try {
-      if (response.getStatusLine().getStatusCode() != 204) {
+      if (response.getCode() != 204) {
         throw new AdminServiceException(this.getErrorMessage(response));
       }
     } finally {
@@ -627,7 +646,7 @@ public class LautfmAdminService {
     // /stations/:station_id/tracks/tags/:tagname
     CloseableHttpResponse response = this.doDelete("/stations/" + stationId + "/tracks/tags/" + StringUtils.replace(URLEncoder.encode(tag, "UTF-8"), "+", "%20"));
     try {
-      if (response.getStatusLine().getStatusCode() != 204 && response.getStatusLine().getStatusCode() != 200) {
+      if (response.getCode() != 204 && response.getCode() != 200) {
         throw new AdminServiceException(this.getErrorMessage(response));
       }
     } finally {
@@ -683,7 +702,7 @@ public class LautfmAdminService {
 
       if (trackList.length() > 800) {
         CloseableHttpResponse response = this.doPost(prefix + trackList.toString() + suffix, tags);
-        if (response.getStatusLine().getStatusCode() != 200) {
+        if (response.getCode() != 200) {
           throw new AdminServiceException(this.getErrorMessage(response));
         }
         for (Track track : this.getTracks(response).getTracks()) {
@@ -695,7 +714,7 @@ public class LautfmAdminService {
     }
     if (trackList.length() > 0) {
       CloseableHttpResponse response = this.doPost(prefix + trackList.toString() + suffix, tags);
-      if (response.getStatusLine().getStatusCode() != 200) {
+      if (response.getCode() != 200) {
         throw new AdminServiceException(this.getErrorMessage(response));
       }
       for (Track track : this.getTracks(response).getTracks()) {
@@ -722,7 +741,7 @@ public class LautfmAdminService {
 
       if (trackList.length() > 800) {
         CloseableHttpResponse response = this.doDeleteWithBody(prefix + trackList.toString() + suffix, tagData);
-        if (response.getStatusLine().getStatusCode() != 200) {
+        if (response.getCode() != 200) {
           throw new AdminServiceException(this.getErrorMessage(response));
         }
         response.close();
@@ -732,7 +751,7 @@ public class LautfmAdminService {
     }
     if (trackList.length() > 0) {
       CloseableHttpResponse response = this.doDeleteWithBody(prefix + trackList.toString() + suffix, tagData);
-      if (response.getStatusLine().getStatusCode() != 200) {
+      if (response.getCode() != 200) {
         throw new AdminServiceException(this.getErrorMessage(response));
       }
       response.close();
@@ -800,7 +819,9 @@ public class LautfmAdminService {
     }
     this.addAuthHeaders(filePost);
 
-    HttpEntity entity = MultipartEntityBuilder.create().addBinaryBody("track", track.getFile(), ContentType.create("audio/mp3"), track.getFile().getName()).build();
+    HttpEntity entity = MultipartEntityBuilder.create()
+        .addBinaryBody("track", track.getFile(), ContentType.create("audio/mp3"), track.getFile().getName())
+        .build();
 
     HttpEntityWrapper entityWrapper = new HttpEntityWrapper(entity) {
       @Override
@@ -824,7 +845,7 @@ public class LautfmAdminService {
       CloseableHttpResponse response = uploadClient.execute(filePost);
       this.checkResponse(response);
             
-      if (response.getStatusLine().getStatusCode() == 201) {
+      if (response.getCode() == 201) {
         UploadResponse uploadResponse = deserializeJson(response, UploadResponse.class);
         if (track.isPrivateTrack()) {
           try {
@@ -839,7 +860,7 @@ public class LautfmAdminService {
         }
 
         return uploadResponse;
-      } else if(response.getStatusLine().getStatusCode() == 507) {
+      } else if(response.getCode() == 507) {
       	throw new InsufficientStorageException(this.getErrorMessage(response));
       } else {
         throw new AdminServiceException(this.getErrorMessage(response));
@@ -871,7 +892,7 @@ public class LautfmAdminService {
     HttpGet request = new HttpGet(BASE_URL + "/stations/" + stationId + "/queue_status");
     this.addAuthHeaders(request);
     CloseableHttpResponse response = statusClient.execute(request);
-    if(response.getStatusLine().getStatusCode() != 200 && response.getStatusLine().getStatusCode() != 507) {
+    if(response.getCode() != 200 && response.getCode() != 507) {
     	this.checkResponse(response);
     }
     return deserializeJson(response, QueueStatus.class);
@@ -1001,19 +1022,10 @@ public class LautfmAdminService {
 
   }
 
-  private static class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
+  private static class HttpDeleteWithBody extends HttpDelete {
 
     public HttpDeleteWithBody(String url) throws IOException {
-      try {
-        this.setURI(new URI(url));
-      } catch (Exception e) {
-        throw new IOException(e);
-      }
-    }
-
-    @Override
-    public String getMethod() {
-      return "DELETE";
+      super(url);
     }
   }
 
