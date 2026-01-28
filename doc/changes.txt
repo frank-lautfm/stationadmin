@@ -6,6 +6,11 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 5.5.0
+-------------
+[+] Anzeige von Tags für gespielte / ungespielte Titel in der Analyse
+[#] Aktualisierung von Apache HttpClient
+
 Version 5.4.2
 -------------
 [*] Eintragen von Playlists in Sendeplan funktionierte u. U. nicht wenn Playlists gleichen Namens im Archiv existiert

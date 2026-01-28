@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package de.stationadmin.gui.loganalyzer.plays;
 
@@ -8,6 +8,7 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -23,6 +24,8 @@ import de.stationadmin.base.loganalyzer.Play;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.schedule.Schedule.Entry;
 import de.stationadmin.base.schedule.Schedule.Weekday;
+import de.stationadmin.base.tag.StaticTag;
+import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.track.LiveTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.TextProvider;
@@ -39,12 +42,14 @@ public class PlaysTableModel extends AbstractTableModel {
   private TextProvider textProvider;
 
   private LogAnalyzerService logAnalyzerService;
+  private TagManager tagManager;
 
   private ValueModel playsHolder;
   private List<Play> plays = new ArrayList<Play>();
   private List<Integer> listeners = null;
   private String[][] scheduleTable;
   private Calendar cal = Calendar.getInstance();
+  private List<String> tagNames = new ArrayList<String>();
 
   @SuppressWarnings("unchecked")
   public PlaysTableModel(ClientContext ctx, ValueModel playsHolder) {
@@ -53,6 +58,7 @@ public class PlaysTableModel extends AbstractTableModel {
     this.plays = (List<Play>) playsHolder.getValue();
     this.playsHolder = playsHolder;
     this.logAnalyzerService = ctx.getAdminClient().getLogAnalyzerService();
+    this.tagManager = ctx.getAdminClient().getTagManager();
 
     playsHolder.addValueChangeListener(new PropertyChangeListener() {
 
@@ -76,6 +82,27 @@ public class PlaysTableModel extends AbstractTableModel {
       }
     }
 
+    refreshTagNames();
+    tagManager.addPropertyChangeListener("tags", new PropertyChangeListener() {
+
+      @Override
+      public void propertyChange(PropertyChangeEvent evt) {
+        refreshTagNames();
+      }
+    });
+
+  }
+
+  private void refreshTagNames() {
+    try {
+      tagNames.clear();
+      for (StaticTag tag : tagManager.getStaticTags()) {
+        tagNames.add(tag.getName());
+      }
+      Collections.sort(tagNames);
+    } catch (Exception e) {
+
+    }
   }
 
   @Override
@@ -86,6 +113,8 @@ public class PlaysTableModel extends AbstractTableModel {
       return Date.class;
     case LENGTH:
       return Integer.class;
+    case TAGS:
+      return String.class;
     default:
       return String.class;
     }
@@ -141,6 +170,26 @@ public class PlaysTableModel extends AbstractTableModel {
         this.resolveListeners();
       }
       return this.listeners.get(rowIndex);
+    case TAGS:
+      return getTags(play);
+    }
+    return null;
+  }
+
+  private String getTags(Play play) {
+    try {
+      int id = play.getTrack().getId();
+      StringBuilder buf = new StringBuilder();
+      for (String tag : tagNames) {
+        if (tagManager.isTagged(tag, id)) {
+          if (buf.length() > 0) {
+            buf.append(", ");
+          }
+          buf.append(tag);
+        }
+      }
+      return buf.length() > 0 ? buf.toString() : null;
+    } catch (Exception e) {
     }
     return null;
   }
@@ -192,7 +241,7 @@ public class PlaysTableModel extends AbstractTableModel {
   }
 
   public enum Column {
-    START_DATE, START_TIME, SHOW, ARTIST, TITLE, LENGTH, LISTENERS
+    START_DATE, START_TIME, SHOW, ARTIST, TITLE, LENGTH, LISTENERS, TAGS
   }
 
 }

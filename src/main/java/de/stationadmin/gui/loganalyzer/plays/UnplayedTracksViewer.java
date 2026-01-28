@@ -119,11 +119,13 @@ public class UnplayedTracksViewer extends StationAdminFrame {
     this.getContentPane().add(filterPanel, cc.xy(2, 2, CellConstraints.FILL, CellConstraints.FILL));
 
     {
-      this.tableModel = new TrackTableModel(ctx.getTextProvider());
+      this.tableModel = new TrackTableModel(ctx.getTextProvider(), ctx.getAdminClient().getTagManager());
       final JXTable table = new JXTable(this.tableModel);
       int timeWidth = ComponentFactory.getTableColumnWidthTime();
       table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setPreferredWidth(timeWidth);
       table.getColumnModel().getColumn(Column.LENGTH.ordinal()).setMaxWidth(timeWidth);
+      table.getColumnExt(table.convertColumnIndexToView(Column.TAGS.ordinal())).setVisible(false);
+      table.setColumnControlVisible(true);
       this.getContentPane().add(new JScrollPane(table), cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
 
       final ValueHolder titleHolder = new ValueHolder();

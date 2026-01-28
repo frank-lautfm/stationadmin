@@ -93,6 +93,7 @@ public class PlaysViewer extends JPanel {
       table.getColumnModel().getColumn(Column.LISTENERS.ordinal()).setMaxWidth(listenersWidth);
       table.getColumnExt(table.convertColumnIndexToView(Column.SHOW.ordinal())).setVisible(false);
       table.getColumnExt(table.convertColumnIndexToView(Column.LISTENERS.ordinal())).setVisible(false);
+      table.getColumnExt(table.convertColumnIndexToView(Column.TAGS.ordinal())).setVisible(false);
       
       table.setColumnControlVisible(true);
 
