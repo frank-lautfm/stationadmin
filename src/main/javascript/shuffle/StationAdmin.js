@@ -1,5 +1,5 @@
-// StationAdmin v3.0.11
-// 04.11.2025
+// StationAdmin v3.0.12
+// 31.01.2026
 ( function( tracks, opts, trackStats ){
   
   var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
@@ -137,7 +137,12 @@
     let toDate   = new Date(year, toMonth - 1, toDay, 23, 59, 59, 999);
     // handle wrap into next year
     if (toDate < fromDate) {
-      toDate.setFullYear(year + 1);
+      if (now < fromDate) {
+        fromDate.setFullYear(year - 1);
+      }
+      else {
+        toDate.setFullYear(year + 1);
+      }
     }
 
     const inRange = now >= fromDate && now <= toDate;
