@@ -10,6 +10,7 @@ Version 5.5.0
 -------------
 [+] Umbenennen von Tags
 [+] Anzeige von Tags für gespielte / ungespielte Titel in der Analyse
+[#] obsolete Option "vorherigen Titel zu Ende spielen lassen" für das Live-Senden von mp3-Tracks entfernt
 [#] Aktualisierung von Apache HttpClient
 
 Version 5.4.2

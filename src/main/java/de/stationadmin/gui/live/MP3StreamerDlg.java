@@ -54,7 +54,6 @@ public class MP3StreamerDlg extends StationAdminFrame {
   private ValueHolder sourcefile = new ValueHolder();
   private ValueHolder metafile = new ValueHolder();
   private ValueHolder maxDuration = new ValueHolder(0);
-  private ValueHolder waitForNextTrack = new ValueHolder(Boolean.FALSE);
   private ValueHolder configEnabled = new ValueHolder(Boolean.TRUE);
 
   private ValueHolder status = new ValueHolder("offline");
@@ -163,11 +162,8 @@ public class MP3StreamerDlg extends StationAdminFrame {
     panel.add(new JLabel(this.ctx.getString("mp3streamer.dlg.property.maxduration")), cc.xy(2, 6));
     panel.add(durationPanel, cc.xy(4, 6, CellConstraints.LEFT, CellConstraints.CENTER));
 
-    final JCheckBox delayCb = BasicComponentFactory.createCheckBox(this.waitForNextTrack, this.ctx.getString("mp3streamer.dlg.property.waiting"));
-    panel.add(delayCb, cc.xywh(2, 8, 4, 1));
-
     JPanel adTriggerPanel = new MP3StreamerAdTriggerPanel(ctx.getTextProvider(), insertAdTriggers, adPosition1, adPosition2);
-    panel.add(adTriggerPanel, cc.xywh(2, 10, 4, 1));
+    panel.add(adTriggerPanel, cc.xywh(2, 8, 4, 1));
 
     this.configEnabled.addValueChangeListener(new PropertyChangeListener() {
 
@@ -177,7 +173,6 @@ public class MP3StreamerDlg extends StationAdminFrame {
         sourceTf.setEditable(b.booleanValue());
         metaTf.setEditable(b.booleanValue());
         durationTf.setEditable(b.booleanValue());
-        delayCb.setEnabled(b.booleanValue());
       }
     });
 
@@ -254,7 +249,7 @@ public class MP3StreamerDlg extends StationAdminFrame {
           Thread t = new Thread() {
             public void run() {
               try {
-                streamer.run(waitForNextTrack.booleanValue());
+                streamer.run();
               } catch (Exception e) {
                 e.printStackTrace();
                 final Exception ex = e;

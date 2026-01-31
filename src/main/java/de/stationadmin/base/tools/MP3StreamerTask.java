@@ -6,6 +6,7 @@ package de.stationadmin.base.tools;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.hc.core5.annotation.Obsolete;
 import org.apache.logging.log4j.LogManager;
 
 import de.stationadmin.base.LiveAccount;
@@ -62,7 +63,7 @@ public class MP3StreamerTask extends AbstractTask {
       }
       client.setMp3Streamer(streamer);
 
-      StreamerThread t = new StreamerThread(streamer, waitForTrackChange);
+      StreamerThread t = new StreamerThread(streamer);
       t.start();
       
       long ts = System.currentTimeMillis();
@@ -123,6 +124,7 @@ public class MP3StreamerTask extends AbstractTask {
   /**
    * @return the waitForTrackChange
    */
+  @Obsolete
   public boolean isWaitForTrackChange() {
     return waitForTrackChange;
   }
@@ -131,29 +133,28 @@ public class MP3StreamerTask extends AbstractTask {
    * @param waitForTrackChange
    *          the waitForTrackChange to set
    */
+  @Obsolete
   public void setWaitForTrackChange(boolean waitForTrackChange) {
     this.waitForTrackChange = waitForTrackChange;
   }
 
   private static class StreamerThread extends Thread {
     private MP3Streamer streamer;
-    private boolean waitForTrackChange;
     
     /**
      * @param streamer
      * @param waitForTrackChange
      */
-    public StreamerThread(MP3Streamer streamer, boolean waitForTrackChange) {
+    public StreamerThread(MP3Streamer streamer) {
       super();
       this.setDaemon(true);
       this.setName("MP3 Streamer");
       this.streamer = streamer;
-      this.waitForTrackChange = waitForTrackChange;
     }
 
     public void run() {
       try {
-        streamer.run(waitForTrackChange);
+        streamer.run();
       } catch (Exception e) {
         LogManager.getLogger(MP3StreamerTask.class).error("unable to start broadcast", e);
       }

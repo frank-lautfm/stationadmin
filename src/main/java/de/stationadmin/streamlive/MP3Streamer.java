@@ -119,23 +119,8 @@ public class MP3Streamer {
     }
   }
 
-  public void run(boolean waitForTrackChange) throws IOException {
+  public void run() throws IOException {
     try {
-      if (waitForTrackChange) {
-        this.status = Status.WAITING;
-        LautfmService service = new LautfmService();
-        try {
-          Date now = service.getTime();
-          Date end = service.getCurrentSong(station).getEndsAt();
-          long diff = end.getTime() - now.getTime() - 3000;
-          if (diff > 0) {
-            Thread.sleep(diff);
-          }
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-
       this.connectReturnCode = this.ice.connect();
       if (this.connectReturnCode == 200) {
         this.mp3Writer = new MP3Writer(source.getInputStream(), this.ice.getOutStream(), this.metaWriter);

@@ -40,7 +40,6 @@ public class MP3StreamerTaskPanel extends JPanel implements ScheduledTaskEditorC
   private ValueHolder sourcefile = new ValueHolder();
   private ValueHolder metafile = new ValueHolder();
   private ValueHolder maxDuration = new ValueHolder(0);
-  private ValueHolder waitForNextTrack = new ValueHolder(Boolean.FALSE);
 
   private ValueHolder insertAds = new ValueHolder(Boolean.FALSE);
   private ValueHolder adPosition1 = new ValueHolder(20);
@@ -97,12 +96,9 @@ public class MP3StreamerTaskPanel extends JPanel implements ScheduledTaskEditorC
     durationPanel.add(new JLabel(" " + textProvider.getString("mp3streamer.dlg.property.maxduration.unit")));
     this.add(new JLabel(textProvider.getString("mp3streamer.dlg.property.maxduration")), cc.xy(1, 7));
     this.add(durationPanel, cc.xy(3, 7, CellConstraints.LEFT, CellConstraints.CENTER));
-    
-    final JCheckBox delayCb = BasicComponentFactory.createCheckBox(this.waitForNextTrack, textProvider.getString("mp3streamer.dlg.property.waiting"));
-    this.add(delayCb, cc.xywh(1, 9, 4, 1));
-    
+        
     JPanel adTriggerPanel = new MP3StreamerAdTriggerPanel(textProvider, insertAds, adPosition1, adPosition2);
-    this.add(adTriggerPanel , cc.xywh(1, 11, 4, 1));
+    this.add(adTriggerPanel , cc.xywh(1, 9, 4, 1));
 
   }
 
@@ -113,7 +109,6 @@ public class MP3StreamerTaskPanel extends JPanel implements ScheduledTaskEditorC
       this.taskName.setValue(mp3StreamerTask.getName());
       this.sourcefile.setValue(mp3StreamerTask.getSourceFile());
       this.metafile.setValue(mp3StreamerTask.getMetaDataFile());
-      this.waitForNextTrack.setValue(mp3StreamerTask.isWaitForTrackChange());
       this.maxDuration.setValue(mp3StreamerTask.getMaxDuration());
       if(mp3StreamerTask.getAdTriggerPosition1() > -1 && mp3StreamerTask.getAdTriggerPosition2() > 0) {
         insertAds.setValue(Boolean.TRUE);
@@ -135,7 +130,6 @@ public class MP3StreamerTaskPanel extends JPanel implements ScheduledTaskEditorC
       mp3StreamerTask.setName(this.taskName.getString());
       mp3StreamerTask.setSourceFile(this.sourcefile.getString());
       mp3StreamerTask.setMetaDataFile(this.metafile.getString());
-      mp3StreamerTask.setWaitForTrackChange(this.waitForNextTrack.booleanValue());
       mp3StreamerTask.setMaxDuration(this.maxDuration.intValue());
       if(insertAds.booleanValue()) {
         mp3StreamerTask.setAdTriggerPosition1(adPosition1.intValue());
