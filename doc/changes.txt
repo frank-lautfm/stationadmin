@@ -8,6 +8,7 @@ Station Admin für laut.fm - Änderungen
 
 Version 5.5.0
 -------------
+[+] Umbenennen von Tags
 [+] Anzeige von Tags für gespielte / ungespielte Titel in der Analyse
 [#] Aktualisierung von Apache HttpClient
 
