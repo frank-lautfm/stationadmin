@@ -98,6 +98,15 @@ public class PlaysAnalyzer extends StationAdminFrame {
     tabPane.addTab(textProvider.getString("playsanalyzer.tab.plays"), new PlaysViewer(ctx, playsHolder, statistics));
     tabPane.addTab(textProvider.getString("playsanalyzer.tab.artists"), this.createArtistPanel());
     tabPane.addTab(textProvider.getString("playsanalyzer.tab.titles"), this.createTitlePanel());
+    
+    // Only add Tags tab if there are tags defined
+    try {
+      if (!ctx.getAdminClient().getTagManager().getStaticTags().isEmpty()) {
+        tabPane.addTab(textProvider.getString("playsanalyzer.tab.tags"), this.createTagPanel());
+      }
+    } catch (Exception e) {
+      // If tags cannot be loaded, skip the tab
+    }
 
     this.getContentPane().add(tabPane, cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
 
@@ -137,6 +146,24 @@ public class PlaysAnalyzer extends StationAdminFrame {
     table.addMouseListener(new PopupListener(table, popup));    
     SwingTools.bindPopup(table, popup);
     
+    panel.add(new JScrollPane(table), BorderLayout.CENTER);
+    return panel;
+  }
+
+  private JPanel createTagPanel() {
+    JPanel panel = new JPanel(new BorderLayout());
+    JXTable table = new JXTable(new FrequentTagsTableModel(this.ctx, this.playsHolder));
+    table.getColumn(0).setPreferredWidth(40);
+    table.getColumn(0).setMaxWidth(40);
+    
+    final JPopupMenu popup = new JPopupMenu();
+    popup.add(TableExportUtils.getCopyToClipboardAction(table, ctx.getTextProvider()));
+    popup.add(TableExportUtils.getExportToExcelAction(table, ctx.getTextProvider(), ctx.getTextProvider().getString("playsanalyzer.tab.plays")));
+    table.addMouseListener(new PopupListener(table, popup));
+    
+    
+    SwingTools.bindPopup(table, popup);
+
     panel.add(new JScrollPane(table), BorderLayout.CENTER);
     return panel;
   }

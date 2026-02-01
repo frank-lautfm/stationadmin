@@ -18,7 +18,7 @@ public class ItemFrequency<T> implements Comparable<ItemFrequency<?>>{
     this.frequency = frequency;
   }
   
-  protected void inc() {
+  public void inc() {
     this.frequency++;
   }
 

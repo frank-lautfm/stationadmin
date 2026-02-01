@@ -8,7 +8,8 @@ Station Admin für laut.fm - Änderungen
 
 Version 5.5.1
 -------------
-[+] Anzeige von Tags auch in Tabelle für Häufigkeite gespielter Titel
+[+] Anzeige von Tags auch in Tabelle für Häufigkeit gespielter Titel
+[+] Anzeige von Tags nach Häufigkeit bei gespielten Titeln
 
 Version 5.5.0
 -------------
