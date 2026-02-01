@@ -6,6 +6,10 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 5.5.1
+-------------
+[+] Anzeige von Tags auch in Tabelle für Häufigkeite gespielter Titel
+
 Version 5.5.0
 -------------
 [+] Umbenennen von Tags

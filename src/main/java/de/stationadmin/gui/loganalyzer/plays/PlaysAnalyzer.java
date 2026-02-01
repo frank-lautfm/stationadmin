@@ -125,9 +125,11 @@ public class PlaysAnalyzer extends StationAdminFrame {
 
   private JPanel createTitlePanel() {
     JPanel panel = new JPanel(new BorderLayout());
-    JXTable table = new JXTable(new FrequentTracksTableModel(this.ctx.getTextProvider(), this.statistics));
+    JXTable table = new JXTable(new FrequentTracksTableModel(this.ctx, this.statistics));
     table.getColumn(0).setPreferredWidth(40);
     table.getColumn(0).setMaxWidth(40);
+    table.getColumnExt(3).setVisible(false);
+    table.setColumnControlVisible(true);
     
     final JPopupMenu popup = new JPopupMenu();
     popup.add(TableExportUtils.getCopyToClipboardAction(table, ctx.getTextProvider()));
