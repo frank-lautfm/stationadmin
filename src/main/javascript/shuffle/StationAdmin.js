@@ -1455,8 +1455,8 @@
 
   /* Initialization */
 
-  executionTime = new Date().getTime();
-  startTime = new Date().getTime() + 1000 * 120; // buest guess - will try to refine with track stats
+  executionTime = 'time' in opts ? Date.parse(opts.time) : new Date().getTime();
+  startTime = executionTime + 1000 * 120; // buest guess - will try to refine with track stats
   if(trackRulesEnabled) {
     for(var i = 0; i < opts.trackRules.length; i++) {
       var trackId = opts.trackRules[i].trackId;
