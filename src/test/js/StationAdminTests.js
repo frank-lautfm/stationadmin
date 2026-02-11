@@ -13,7 +13,60 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 
+const boundJingles = [3435730, 3435732, 3484100, 3435733, 3435734]
+
+const trackRules =  [ {
+            "filter" : "Christian Hüser",
+            "groupName" : "Artists",
+            "minDistance" : 120,
+            "trackId" : 3435730,
+            "position" : "before",
+            "filterType" : "artist"
+            }, {
+            "filter" : "Fug und Janina",
+            "groupName" : "Artists",
+            "minDistance" : 120,
+            "trackId" : 3435732,
+            "position" : "before",
+            "filterType" : "artist"
+            }, {
+            "filter" : "Grünschnabel",
+            "groupName" : "Artists",
+            "minDistance" : 120,
+            "trackId" : 3484100,
+            "position" : "before",
+            "filterType" : "artist"
+            }, {
+            "filter" : "Reinhard Horn",
+            "groupName" : "Artists",
+            "minDistance" : 120,
+            "trackId" : 3435733,
+            "position" : "before",
+            "filterType" : "artist"
+            }, {
+            "filter" : "Robert Metcalf",
+            "groupName" : "Artists",
+            "minDistance" : 120,
+            "trackId" : 3435734,
+            "position" : "before",
+            "filterType" : "artist"
+            } ];
+
+
+const trackRuleGroups = {
+      "Standard" : {
+        "minDistance" : 0,
+        "multiMatchSelection" : "all"
+      },
+      "Artists" : {
+        "minDistance" : 30,
+        "multiMatchSelection" : "all"
+      }
+    };
+
 const time = '2026-02-09T20:57:11+01:00';
+
+
 
 /**
  * Load and execute the StationAdmin.js shuffle function
@@ -266,6 +319,149 @@ function assertNews(tracks) {
 
 }
 
+/**
+ * Assert that tracks follow the expected tag pattern sequence
+ * Pattern "Jingle" means the track must be of type jingle
+ * Excludes news and ad triggers from the check
+ * @param {Array} tracks - Array of track objects
+ * @param {Array} pattern - Array of tag names or "Jingle" to match against
+ */
+function assertTagPattern(tracks, pattern) {
+    // Verify that tracks is an array and not empty
+    assert.ok(Array.isArray(tracks), 'Result should be an array');
+    assert.ok(tracks.length > 0, 'Result should contain tracks');
+    assert.ok(Array.isArray(pattern), 'Pattern should be an array');
+    assert.ok(pattern.length > 0, 'Pattern should not be empty');
+    
+    // Filter out news and ad triggers (id === 0)
+    const filteredTracks = tracks.filter(track => {
+        return track.type !== 'news' && track.id !== 0 && !boundJingles.includes(track.id);
+    });
+    
+    // Track pattern matching
+    let patternIndex = 0;
+    const matches = [];
+    
+    for (let i = 0; i < filteredTracks.length; i++) {
+        const track = filteredTracks[i];
+        const expectedPattern = pattern[patternIndex % pattern.length];
+        
+        let isMatch = false;
+        
+        // Check if pattern is "Jingle" - match against track type
+        if (expectedPattern === 'Jingle') {
+            isMatch = track.type === 'jingle';
+        } else {
+            // Match against track tags
+            isMatch = track.tags && Array.isArray(track.tags) && track.tags.includes(expectedPattern);
+        }
+        
+        matches.push({
+            index: i,
+            track: track,
+            expectedPattern: expectedPattern,
+            matched: isMatch
+        });
+        
+        // Assert that the track matches the expected pattern
+        assert.ok(
+            isMatch,
+            `Track at position ${i} (original index: ${tracks.indexOf(track)}) does not match pattern "${expectedPattern}". ` +
+            `Track type: ${track.type}, tags: ${track.tags ? track.tags.join(', ') : 'none'}`
+        );
+        
+        patternIndex++;
+    }
+    
+    console.log(`  - Pattern verified: ${pattern.join(' -> ')}`);
+    console.log(`  - Tracks checked: ${filteredTracks.length} (excluded ${tracks.length - filteredTracks.length} news/ad triggers)`);
+    console.log(`  - Pattern cycles: ${Math.floor(filteredTracks.length / pattern.length)}`);
+}
+
+/**
+ * Assert that ad triggers are placed correctly
+ * @param {Array} tracks - Array of track objects
+ */
+function assertAdTriggers(tracks, p1, p2) {
+    // Verify that tracks is an array and not empty
+    assert.ok(Array.isArray(tracks), 'Result should be an array');
+    assert.ok(tracks.length > 0, 'Result should contain tracks');
+        
+    // Find all news track positions
+    const positions = [];
+    let cumulativeDuration = 0;
+    
+    for (let i = 0; i < tracks.length; i++) {
+        if (tracks[i].id === 0) {
+            positions.push({
+                index: i,
+                time: cumulativeDuration
+            });        
+        }
+        if (tracks[i].type === 'news') {
+            cumulativeDuration += 165;
+        }
+        else {
+            cumulativeDuration += tracks[i].duration;
+        }
+    }
+    
+    let hours = Math.floor(cumulativeDuration / (60 * 60));
+    console.log(hours + " hours");
+    for(let i = 0; i < hours; i++) {
+        let t1 = i * 60 * 60 + p1 * 60;
+        let t2 = i * 60 * 60 + p2 * 60;
+
+        console.log(i + ": " + t1 + " <> " + positions[i * 2].time);
+        console.log(i + ": " + t2 + " <> " + positions[i * 2 + 1].time);
+
+        assert.ok(positions[i * 2].time >= t1 - 360 && positions[i * 2].time <= t1 + 360, "Ad position 1 for hour " + i);
+        assert.ok(positions[i * 2 + 1].time >= t2 - 360 && positions[i * 2 + 1].time <= t2 + 360, "Ad position 2 for hour " + i);
+    }
+}
+
+/**
+ * Assert that ad bound jingles are placed
+ * @param {Array} tracks - Array of track objects
+ */
+function assertBoundJingles(tracks) {
+    assert.ok(Array.isArray(tracks), 'Result should be an array');
+
+    let artists = 0;
+    let jingles = 0;
+    let cumulativeDuration = 0;
+    let last = -1;
+    for(let i = 1; i < tracks.length; i++) {
+        let rule = trackRules.find((r) => r.filter == tracks[i].artist);
+        if(rule) {
+            artists++;
+            if(tracks[i - 1].id === rule.trackId) {
+                jingles++;
+                if(last > -1) {
+                    let dist = (cumulativeDuration - last) / 60;
+                    assert.ok(dist >= 30, "Bound jingle distance violation" );
+                }
+                last = cumulativeDuration;
+            }
+        }
+        if (tracks[i].type === 'news') {
+            cumulativeDuration += 165;
+        }
+        else {
+            cumulativeDuration += tracks[i].duration;
+        }
+
+    }
+
+    if(artists > 0) {
+        assert.ok(jingles > 0, "Expected bound jingles: " + artists + " artists");
+    }
+        
+}
+
+
+
+
 // Test: noPatternSimple
 test('noPatternSimple - basic shuffle', (t) => {
     // Load tracks from the test resource file
@@ -293,6 +489,36 @@ test('noPatternSimple - basic shuffle', (t) => {
     assertJingleInterval(result, jingleInterval);
     assertArtistDistribution(result, 2);    
 });
+
+// Test: patternSimple
+test('patternSimple - basic shuffle', (t) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_plain.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    // Options with only duration set to 7200 seconds (2 hours)
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time,
+        tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ]
+    };
+    
+    // Execute the shuffle function
+    const result = executeShuffleFunction(tracks, opts, trackStats);
+
+    // Assert duration constraints
+    assertDuration(result, duration);
+    assertTagPattern(result, opts.tagPattern);
+    assertArtistDistribution(result, 2);    
+});
+
 
 // Test: noPatternTagWeights
 test('noPatternTagWeights - basic shuffle with tag weights', (t) => {
@@ -375,7 +601,7 @@ test('dateFilter - basic shuffle with date filter tags', (t) => {
 });
 
 
-// Test: noPatternTagWeights
+// Test: noPatternNews
 test('noPatternNews - basic shuffle with news', (t) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_news.json');
@@ -400,6 +626,143 @@ test('noPatternNews - basic shuffle with news', (t) => {
     // Execute the shuffle function
     const result = executeShuffleFunction(tracks, opts, trackStats);
     assertNews(result);
+});
+
+// Test: patternNews
+test('patternNews - basic shuffle with news', (t) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_news.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    // Options with only duration set to 7200 seconds (2 hours)
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time,
+        newsInterval : 60,
+        newsMin : 59,
+        newsMax : 15,
+        tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ]
+    };
+    
+    // Execute the shuffle function
+    const result = executeShuffleFunction(tracks, opts, trackStats);
+    assertNews(result);
+    assertTagPattern(result, opts.tagPattern);
+});
 
 
+// Test: noPatternAdTrigger
+test('noPatternAdTrigger - basic shuffle with ad triggers', (t) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_ad_trigger.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    // Options with only duration set to 7200 seconds (2 hours)
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time,
+        adTrigger : 0,
+        adPositions : [ 15, 45 ]
+    };
+    
+    // Execute the shuffle function
+    const result = executeShuffleFunction(tracks, opts, trackStats);
+    assertAdTriggers(result, 15, 45);
+});
+
+// Test: patternAdTrigger
+test('patternAdTrigger - basic shuffle with ad triggers', (t) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_ad_trigger.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    // Options with only duration set to 7200 seconds (2 hours)
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time,
+        adTrigger : 0,
+        adPositions : [ 15, 45 ],
+        tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ]
+    };
+    
+    // Execute the shuffle function
+    const result = executeShuffleFunction(tracks, opts, trackStats);
+    assertAdTriggers(result, 15, 45);
+    assertTagPattern(result, opts.tagPattern);
+});
+
+
+// Test: noPatternBoundJingles
+test('noPatternBoundJingles - basic shuffle with bound jingles', (t) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_bound_jingles.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time,
+        trackRules : JSON.parse(JSON.stringify(trackRules)),
+        trackRuleGroups : JSON.parse(JSON.stringify(trackRuleGroups)),
+        trackRuleJingleCollisionStrategy: 'keep_both'
+    };
+    
+    // Execute the shuffle function
+    const result = executeShuffleFunction(tracks, opts, trackStats);
+    assertBoundJingles(result);
+});
+
+// Test: patternBoundJingles
+test('patternBoundJingles - tag pattern shuffle with bound jingles', (t) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_bound_jingles.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time,
+        tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ],
+        trackRules : JSON.parse(JSON.stringify(trackRules)),
+        trackRuleGroups : JSON.parse(JSON.stringify(trackRuleGroups)),
+        trackRuleJingleCollisionStrategy: 'keep_both'
+    };
+    
+    // Execute the shuffle function
+    const result = executeShuffleFunction(tracks, opts, trackStats);
+    assertBoundJingles(result);
+    assertTagPattern(result, opts.tagPattern);
 });

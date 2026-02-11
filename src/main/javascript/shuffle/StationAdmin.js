@@ -1493,7 +1493,7 @@
   }
   
   if(trackStats != null) {
-    var baseTime = Date.now();
+    var baseTime = 'time' in opts ? Date.parse(opts.time) : Date.now;
     var lastTrackEnd = 0;
     for(var i = 0; i < trackStats.length; i++) {
       if(i > trackStats.length - 12 && trackStats[i].artist != null) {
