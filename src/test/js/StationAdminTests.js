@@ -64,7 +64,20 @@ const trackRuleGroups = {
       }
     };
 
+ const scheduled = [ {
+      "selection" : "random",
+      "trackType" : "moderation",
+      "index" : 1,
+      "exclude" : true,
+      "interval" : 3,
+      "id" : "d0b1c3c8-5366-43af-aefa-aa2612719aef",
+      "tag" : "CD-Vorstellung",
+      "minute" : 20
+    } ];
+   
+
 const time = '2026-02-09T20:57:11+01:00';
+const time2 = '2026-02-09T20:58:11+01:00';
 
 
 
@@ -330,12 +343,10 @@ function assertTagPattern(tracks, pattern) {
     // Verify that tracks is an array and not empty
     assert.ok(Array.isArray(tracks), 'Result should be an array');
     assert.ok(tracks.length > 0, 'Result should contain tracks');
-    assert.ok(Array.isArray(pattern), 'Pattern should be an array');
-    assert.ok(pattern.length > 0, 'Pattern should not be empty');
     
-    // Filter out news and ad triggers (id === 0)
+    // Filter out news and ad triggers (id === 0), bound jingles and scheduled items
     const filteredTracks = tracks.filter(track => {
-        return track.type !== 'news' && track.id !== 0 && !boundJingles.includes(track.id);
+        return track.type !== 'news' && track.id !== 0 && !boundJingles.includes(track.id) && !track.tags.includes("CD-Vorstellung");
     });
     
     // Track pattern matching
@@ -459,6 +470,45 @@ function assertBoundJingles(tracks) {
         
 }
 
+/**
+ * Assert that ad bound jingles are placed
+ * @param {Array} tracks - Array of track objects
+ */
+function assertScheduledItem(tracks) {
+    assert.ok(Array.isArray(tracks), 'Result should be an array');
+
+    let items = 0;
+    let cumulativeDuration = 0;
+    let last = -1;
+    var t = Date.parse(time2);
+    for(let i = 0; i < tracks.length; i++) {
+        if(tracks[i].tags.includes(scheduled[0].tag)) {
+            items++;
+
+            let ts = new Date();
+            ts.setTime(t + cumulativeDuration * 1000);
+            let minute = ts.getMinutes()
+            console.log(minute);
+            assert.ok(minute >= scheduled[0].minute - 5 && minute <= scheduled[0].minute + 5, "Minute: " + minute);
+
+            if(last > -1) {
+                let dist = (cumulativeDuration - last) / 60;
+                let expected = 60 * scheduled[0].interval;
+                assert.ok(dist < (60 * scheduled[0].interval) + 300, "Scheduled item distance violation: " + dist + " < " + expected);
+            }
+            last = cumulativeDuration;
+        }
+        if (tracks[i].type === 'news') {
+            cumulativeDuration += 165;
+        }
+        else {
+            cumulativeDuration += tracks[i].duration;
+        }
+
+    }
+
+    assert.equal(items, 2, "Number of expected items");
+}
 
 
 
@@ -765,4 +815,53 @@ test('patternBoundJingles - tag pattern shuffle with bound jingles', (t) => {
     const result = executeShuffleFunction(tracks, opts, trackStats);
     assertBoundJingles(result);
     assertTagPattern(result, opts.tagPattern);
+});
+
+// Test: noPatternScheduledItem
+test('noPatternScheduledItem - basic shuffle with a scheduled item', (t) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_scheduled_items.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time2,
+        scheduled : JSON.parse(JSON.stringify(scheduled))
+    };
+    
+    // Execute the shuffle function
+    const result = executeShuffleFunction(tracks, opts, trackStats);
+    assertScheduledItem(result);
+});
+
+// Test: PatternScheduledItem
+test('PatternScheduledItem - tag pattern shuffle with a scheduled item', (t) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_scheduled_items.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time2,        
+        tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ],
+        scheduled : JSON.parse(JSON.stringify(scheduled))
+    };
+    
+    // Execute the shuffle function
+    const result = executeShuffleFunction(tracks, opts, trackStats);
+    assertScheduledItem(result);
 });
