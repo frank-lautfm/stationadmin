@@ -2,6 +2,7 @@
 /build/
 /dist/
 /plans/
+/.vscode/
 .project
 .classpath
 .settings
