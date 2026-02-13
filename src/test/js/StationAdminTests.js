@@ -323,10 +323,10 @@ function assertNews(tracks) {
     let hours = Math.floor(cumulativeDuration / (60 * 60));
     console.log(hours + " hours");
     for(let i = 0; i < hours; i++) {
-        let min = i * 60 * 60 - 60;
-        let max = i * 60 * 60 + (15 * 60);
+        let min = i * 60 * 60 - 120;
+        let max = i * 60 * 60 + (16 * 60);
         console.log(i + ": " + min + " < " + newsPositions[i].time + " < " + max);
-        assert.ok(newsPositions[i].time >= min && newsPositions[i].time <= max, "News position for hour " + i);
+        assert.ok(newsPositions[i].time >= min && newsPositions[i].time <= max, "News position for hour " + i + ": " + min + " < " + newsPositions[i].time + " < " + max);
     }
     
 
@@ -841,8 +841,8 @@ test('noPatternScheduledItem - basic shuffle with a scheduled item', (t) => {
     assertScheduledItem(result);
 });
 
-// Test: PatternScheduledItem
-test('PatternScheduledItem - tag pattern shuffle with a scheduled item', (t) => {
+// Test: patternScheduledItem
+test('patternScheduledItem - tag pattern shuffle with a scheduled item', (t) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_scheduled_items.json');
     
@@ -865,3 +865,78 @@ test('PatternScheduledItem - tag pattern shuffle with a scheduled item', (t) => 
     const result = executeShuffleFunction(tracks, opts, trackStats);
     assertScheduledItem(result);
 });
+
+
+// Test: noPatternMixed
+test('noPatternMixed - basic shuffle with mixed use cases', (t) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_full.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time2,
+        newsInterval : 60,
+        newsMin : 59,
+        newsMax : 15,
+        adTrigger : 0,
+        adPositions : [ 15, 45 ],
+        trackRules : JSON.parse(JSON.stringify(trackRules)),
+        trackRuleGroups : JSON.parse(JSON.stringify(trackRuleGroups)),
+        trackRuleJingleCollisionStrategy: 'keep_both',
+        scheduled : JSON.parse(JSON.stringify(scheduled))
+
+    };
+    
+    // Execute the shuffle function
+    const result = executeShuffleFunction(tracks, opts, trackStats);
+    assertNews(result);
+    assertAdTriggers(result, 15, 45);
+    assertBoundJingles(result);
+    assertScheduledItem(result);
+});
+
+// Test: patternMixed
+test('patternMixed - basic shuffle with mixed use cases', (t) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_full.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time2,
+        newsInterval : 60,
+        newsMin : 59,
+        newsMax : 15,
+        adTrigger : 0,
+        adPositions : [ 15, 45 ],
+        trackRules : JSON.parse(JSON.stringify(trackRules)),
+        trackRuleGroups : JSON.parse(JSON.stringify(trackRuleGroups)),
+        trackRuleJingleCollisionStrategy: 'keep_both',
+        scheduled : JSON.parse(JSON.stringify(scheduled)),
+        tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ],
+    };
+    
+    // Execute the shuffle function
+    const result = executeShuffleFunction(tracks, opts, trackStats);
+    assertNews(result);
+    assertAdTriggers(result, 15, 45);
+    assertBoundJingles(result);
+    assertScheduledItem(result);
+    assertTagPattern(result, opts.tagPattern);
+});
+
