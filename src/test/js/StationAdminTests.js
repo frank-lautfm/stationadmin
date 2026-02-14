@@ -12,6 +12,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
+const Alea = require('alea');
 
 const boundJingles = [3435730, 3435732, 3484100, 3435733, 3435734]
 
@@ -86,12 +87,21 @@ const time2 = '2026-02-09T20:58:11+01:00';
  * @param {Array} tracks - Playlist tracks
  * @param {Object} opts - Shuffle options
  * @param {Array} trackStats - Track statistics from last 24 hours
+ * @param {string} seed - Optional seed for deterministic random generation (for testing)
  * @returns {Array} - Shuffled tracks
  */
-function executeShuffleFunction(tracks, opts, trackStats) {
+function executeShuffleFunction(tracks, opts, trackStats, seed) {
     // Load the StationAdmin.js file
     const shuffleFunctionPath = path.join(__dirname, '..', '..', 'main', 'javascript', 'shuffle', 'StationAdmin.js');
     const shuffleFunctionCode = fs.readFileSync(shuffleFunctionPath, 'utf8');
+    
+    // If a seed is provided, inject a seeded random generator
+    if (seed !== undefined) {
+        const prng = new Alea(seed);
+        opts.random = function() {
+            return prng();
+        };
+    }
     
     // The StationAdmin.js file contains an IIFE (Immediately Invoked Function Expression)
     // Format: ( function( tracks, opts, trackStats ){ ... })
@@ -510,10 +520,23 @@ function assertScheduledItem(tracks) {
     assert.equal(items, 2, "Number of expected items");
 }
 
-
+/**
+ * Helper function to run a test multiple times with different seeds
+ * @param {string} testName - Name of the test
+ * @param {Function} testFn - Test function that accepts a seed parameter
+ * @param {number} iterations - Number of times to run the test (default: 5)
+ */
+function testWithMultipleSeeds(testName, testFn, iterations = 5) {
+    for (let i = 0; i < iterations; i++) {
+        const seed = `${testName}-seed-${i}`;
+        test(`${testName} (seed ${i})`, (t) => {
+            testFn(seed);
+        });
+    }
+}
 
 // Test: noPatternSimple
-test('noPatternSimple - basic shuffle', (t) => {
+testWithMultipleSeeds('noPatternSimple - basic shuffle', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_plain.json');
     
@@ -531,17 +554,17 @@ test('noPatternSimple - basic shuffle', (t) => {
         time: time
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
 
     // Assert duration constraints
     assertDuration(result, duration);
     assertJingleInterval(result, jingleInterval);
-    assertArtistDistribution(result, 2);    
+    assertArtistDistribution(result, 2);
 });
 
 // Test: patternSimple
-test('patternSimple - basic shuffle', (t) => {
+testWithMultipleSeeds('patternSimple - basic shuffle', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_plain.json');
     
@@ -560,18 +583,18 @@ test('patternSimple - basic shuffle', (t) => {
         tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ]
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
 
     // Assert duration constraints
     assertDuration(result, duration);
     assertTagPattern(result, opts.tagPattern);
-    assertArtistDistribution(result, 2);    
+    assertArtistDistribution(result, 2);
 });
 
 
 // Test: noPatternTagWeights
-test('noPatternTagWeights - basic shuffle with tag weights', (t) => {
+testWithMultipleSeeds('noPatternTagWeights - basic shuffle with tag weights', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_plain.json');
     
@@ -594,8 +617,8 @@ test('noPatternTagWeights - basic shuffle with tag weights', (t) => {
         }
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
 
     var aTracks = countByTag(result, 'A');
     var bTracks = countByTag(result, 'B');
@@ -609,7 +632,7 @@ test('noPatternTagWeights - basic shuffle with tag weights', (t) => {
 });
 
 // Test: dateFilter
-test('dateFilter - basic shuffle with date filter tags', (t) => {
+testWithMultipleSeeds('dateFilter - basic shuffle with date filter tags', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_plain.json');
 
@@ -634,8 +657,8 @@ test('dateFilter - basic shuffle with date filter tags', (t) => {
         time: time,
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
 
     var t1 = countByTag(result, tags[0]);
     var t2 = countByTag(result, tags[1]);
@@ -652,7 +675,7 @@ test('dateFilter - basic shuffle with date filter tags', (t) => {
 
 
 // Test: noPatternNews
-test('noPatternNews - basic shuffle with news', (t) => {
+testWithMultipleSeeds('noPatternNews - basic shuffle with news', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_news.json');
     
@@ -673,13 +696,13 @@ test('noPatternNews - basic shuffle with news', (t) => {
         newsMax : 15,
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
     assertNews(result);
 });
 
 // Test: patternNews
-test('patternNews - basic shuffle with news', (t) => {
+testWithMultipleSeeds('patternNews - basic shuffle with news', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_news.json');
     
@@ -701,15 +724,15 @@ test('patternNews - basic shuffle with news', (t) => {
         tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ]
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
     assertNews(result);
     assertTagPattern(result, opts.tagPattern);
 });
 
 
 // Test: noPatternAdTrigger
-test('noPatternAdTrigger - basic shuffle with ad triggers', (t) => {
+testWithMultipleSeeds('noPatternAdTrigger - basic shuffle with ad triggers', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_ad_trigger.json');
     
@@ -729,13 +752,13 @@ test('noPatternAdTrigger - basic shuffle with ad triggers', (t) => {
         adPositions : [ 15, 45 ]
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
     assertAdTriggers(result, 15, 45);
 });
 
 // Test: patternAdTrigger
-test('patternAdTrigger - basic shuffle with ad triggers', (t) => {
+testWithMultipleSeeds('patternAdTrigger - basic shuffle with ad triggers', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_ad_trigger.json');
     
@@ -756,15 +779,15 @@ test('patternAdTrigger - basic shuffle with ad triggers', (t) => {
         tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ]
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
     assertAdTriggers(result, 15, 45);
     assertTagPattern(result, opts.tagPattern);
 });
 
 
 // Test: noPatternBoundJingles
-test('noPatternBoundJingles - basic shuffle with bound jingles', (t) => {
+testWithMultipleSeeds('noPatternBoundJingles - basic shuffle with bound jingles', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_bound_jingles.json');
     
@@ -784,13 +807,13 @@ test('noPatternBoundJingles - basic shuffle with bound jingles', (t) => {
         trackRuleJingleCollisionStrategy: 'keep_both'
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
     assertBoundJingles(result);
 });
 
 // Test: patternBoundJingles
-test('patternBoundJingles - tag pattern shuffle with bound jingles', (t) => {
+testWithMultipleSeeds('patternBoundJingles - tag pattern shuffle with bound jingles', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_bound_jingles.json');
     
@@ -811,14 +834,14 @@ test('patternBoundJingles - tag pattern shuffle with bound jingles', (t) => {
         trackRuleJingleCollisionStrategy: 'keep_both'
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
     assertBoundJingles(result);
     assertTagPattern(result, opts.tagPattern);
 });
 
 // Test: noPatternScheduledItem
-test('noPatternScheduledItem - basic shuffle with a scheduled item', (t) => {
+testWithMultipleSeeds('noPatternScheduledItem - basic shuffle with a scheduled item', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_scheduled_items.json');
     
@@ -836,13 +859,13 @@ test('noPatternScheduledItem - basic shuffle with a scheduled item', (t) => {
         scheduled : JSON.parse(JSON.stringify(scheduled))
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
     assertScheduledItem(result);
 });
 
 // Test: patternScheduledItem
-test('patternScheduledItem - tag pattern shuffle with a scheduled item', (t) => {
+testWithMultipleSeeds('patternScheduledItem - tag pattern shuffle with a scheduled item', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_scheduled_items.json');
     
@@ -861,14 +884,14 @@ test('patternScheduledItem - tag pattern shuffle with a scheduled item', (t) => 
         scheduled : JSON.parse(JSON.stringify(scheduled))
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
     assertScheduledItem(result);
 });
 
 
 // Test: noPatternMixed
-test('noPatternMixed - basic shuffle with mixed use cases', (t) => {
+testWithMultipleSeeds('noPatternMixed - basic shuffle with mixed use cases', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_full.json');
     
@@ -895,8 +918,8 @@ test('noPatternMixed - basic shuffle with mixed use cases', (t) => {
 
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
     assertNews(result);
     assertAdTriggers(result, 15, 45);
     assertBoundJingles(result);
@@ -904,7 +927,7 @@ test('noPatternMixed - basic shuffle with mixed use cases', (t) => {
 });
 
 // Test: patternMixed
-test('patternMixed - basic shuffle with mixed use cases', (t) => {
+testWithMultipleSeeds('patternMixed - basic shuffle with mixed use cases', (seed) => {
     // Load tracks from the test resource file
     const tracks = loadTracksFromFile('tracks_full.json');
     
@@ -931,8 +954,8 @@ test('patternMixed - basic shuffle with mixed use cases', (t) => {
         tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ],
     };
     
-    // Execute the shuffle function
-    const result = executeShuffleFunction(tracks, opts, trackStats);
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
     assertNews(result);
     assertAdTriggers(result, 15, 45);
     assertBoundJingles(result);

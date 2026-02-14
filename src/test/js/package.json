@@ -1,0 +1,12 @@
+{
+  "name": "stationadmin-tests",
+  "version": "1.0.0",
+  "description": "Tests for StationAdmin shuffle algorithm",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node StationAdminTests.js"
+  },
+  "dependencies": {
+    "alea": "^0.0.9"
+  }
+}

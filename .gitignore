@@ -3,6 +3,7 @@
 /dist/
 /plans/
 /.vscode/
+/src/test/js/node_modules/
 .project
 .classpath
 .settings

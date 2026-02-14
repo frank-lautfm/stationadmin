@@ -4,7 +4,7 @@
   
   var duration = 'duration' in opts && opts.duration < 64800 ? opts.duration : 64800;
   var blockLength = 'blockLength' in opts ? opts.blockLength : (duration / 3600) + 1;
-  var maxTracksPerArtist = 'maxTracksPerArtist' in opts && opts.maxTracksPerArtist < Math.floor(duration / (60 * 60)) ? opts.maxTracksPerArtist : Math.floor(duration / (60 * 60)); 
+  var maxTracksPerArtist = 'maxTracksPerArtist' in opts && opts.maxTracksPerArtist < Math.floor(duration / (60 * 60)) ? opts.maxTracksPerArtist : Math.floor(duration / (60 * 60));
   var tagWeights = 'tagWeights' in opts ? opts.tagWeights : null;
   var artistSeparators = 'artistSeparators' in opts ? opts.artistSeparators : [' feat'];
   var artistAliases = null;
@@ -27,6 +27,9 @@
   var jinglesInsertedByPattern = false;
   var patternTags = {};
   var tagTracks = {};
+
+  // Random number generator - can be injected for testing
+  var random = 'random' in opts ? opts.random : Math.random;
 
   var firstJingle;
   var adTrigger;
@@ -73,7 +76,7 @@
   function partialShuffle( a, len ) {
     var j, x, i;
     for ( i = len; i; i-- ) {
-      j        = Math.floor( Math.random() * i );
+      j        = Math.floor( random() * i );
       x        = a[i - 1];
       a[i - 1] = a[j];
       a[j]     = x;
@@ -166,7 +169,7 @@
     
   function assignTrackScore(track) {
     // assign random score
-    track.score = 100 + Math.floor((Math.random() * 500));
+    track.score = 100 + Math.floor((random() * 500));
     var dateTagState = 0;
     if(tagWeights != null && track.tags.length > 0) {
       // increase / decrease score based on tag weights
@@ -709,7 +712,7 @@
         jingleOffset = Math.max(0, jingleInterval - lastJinglePlay);
       }
       else {
-        jingleOffset = Math.floor((Math.random() * jingleInterval));
+        jingleOffset = Math.floor((random() * jingleInterval));
       }
       timeNextJingle = jingleOffset;
     }
@@ -780,7 +783,7 @@
       rulesByGroup[groupName].push(rule);
     }
     if(groupNames.length > 1 && opts.trackRuleGroupCollisionStrategy != 'all') {
-      var idx = opts.trackRuleGroupCollisionStrategy == 'first' ? 0 : Math.floor(Math.random() * groupNames.length);
+      var idx = opts.trackRuleGroupCollisionStrategy == 'first' ? 0 : Math.floor(random() * groupNames.length);
       var selectedGroupName = groupNames[idx];
       groupNames = [];
       groupNames.push(selectedGroupName);
@@ -795,7 +798,7 @@
         filtered.push(rulesByGroup[groupNames[g]][0]);
       } else {
         // select any
-        var idx = Math.floor(Math.random() *  rulesByGroup[groupNames[g]].length);
+        var idx = Math.floor(random() *  rulesByGroup[groupNames[g]].length);
         filtered.push(rulesByGroup[groupNames[g]][idx]);
       }
     }
@@ -1220,8 +1223,8 @@
     minutes.push(rule.minute);
     if('hour' in rule) {
       if(rule.hour == -2) {
-        rule.hour = (startHour + Math.floor(Math.random() * (duration / 3600))) % 24; // random
-        rule.minute = Math.floor(Math.random() * 60); 
+        rule.hour = (startHour + Math.floor(random() * (duration / 3600))) % 24; // random
+        rule.minute = Math.floor(random() * 60);
         minutes = [];
         minutes.push(rule.minute);
       }
