@@ -187,7 +187,7 @@ public class LoginDlg extends JDialog {
     JCheckBox rememberCb = BasicComponentFactory.createCheckBox(this.remember, ctx.getTextProvider().getString("login.remember"));
     optionsPanel.add(rememberCb, cc.xy(1, 1));
 
-    SelectionInList<Locale> localeSelection = new SelectionInList<Locale>(new Locale[] { Locale.GERMAN, Locale.ENGLISH }, this.locale);
+    SelectionInList<Locale> localeSelection = new SelectionInList<Locale>(new Locale[] { Locale.GERMAN, Locale.ENGLISH, Locale.ITALIAN }, this.locale);
     JComboBox localeCmb = BasicComponentFactory.createComboBox(localeSelection, new DefaultListCellRenderer() {
 
       @Override
@@ -246,6 +246,10 @@ public class LoginDlg extends JDialog {
     if (locale != null && locale.equalsIgnoreCase("en")) {
       this.locale.setValue(Locale.ENGLISH);
       ctx.getTextProvider().setLocale(Locale.ENGLISH);
+    }
+    if (locale != null && locale.equalsIgnoreCase("it")) {
+      this.locale.setValue(Locale.ITALIAN);
+      ctx.getTextProvider().setLocale(Locale.ITALIAN);
     }
   }
 
