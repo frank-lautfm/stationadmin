@@ -12,6 +12,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 const Alea = require('alea');
 
 const boundJingles = [3435730, 3435732, 3484100, 3435733, 3435734]
@@ -102,11 +103,17 @@ function executeShuffleFunction(tracks, opts, trackStats, seed) {
             return prng();
         };
     }
+
+    opts.debug = true;
     
-    // The StationAdmin.js file contains an IIFE (Immediately Invoked Function Expression)
-    // Format: ( function( tracks, opts, trackStats ){ ... })
-    // We evaluate it and call it with our parameters
-    const shuffleFunction = eval(shuffleFunctionCode);
+    // Use vm.runInThisContext with filename option to enable debugging
+    // This allows the debugger to map breakpoints to the actual source file
+    const shuffleFunction = vm.runInThisContext(shuffleFunctionCode, {
+        filename: shuffleFunctionPath,
+        lineOffset: 0,
+        columnOffset: 0
+    });
+    
     return shuffleFunction(tracks, opts, trackStats);
 }
 
@@ -120,6 +127,13 @@ function loadTracksFromFile(filename) {
     const fileContent = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(fileContent);
 }
+
+function loadTrackStats() {
+    const filePath = path.join(__dirname, 'resources', '24h.json');
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(fileContent);
+}
+
 
 /**
  * Calculate total duration of tracks
@@ -173,7 +187,7 @@ function assertJingleInterval(tracks, interval) {
         if (tracks[i].type === 'jingle') {
             jinglePositions.push({
                 index: i,
-                timeInMinutes: cumulativeDuration / 60
+                time: cumulativeDuration
             });
         }
         cumulativeDuration += tracks[i].duration;
@@ -190,7 +204,7 @@ function assertJingleInterval(tracks, interval) {
     const tolerance = 240; // 4 minutes tolerance in seconds (to account for track boundaries)
     
     for (let i = 1; i < jinglePositions.length; i++) {
-        const timeDiff = (jinglePositions[i].timeInMinutes - jinglePositions[i-1].timeInMinutes) * 60;
+        const timeDiff = (jinglePositions[i].time - jinglePositions[i-1].time);
         const minInterval = intervalSeconds - tolerance;
         const maxInterval = intervalSeconds + tolerance;
         
@@ -199,12 +213,6 @@ function assertJingleInterval(tracks, interval) {
             `Jingle interval between position ${jinglePositions[i-1].index} and ${jinglePositions[i].index} ` +
             `is ${Math.round(timeDiff/60)}m (expected ${interval}m ± 4m)`
         );
-    }
-    
-    console.log(`  - Jingles found: ${jinglePositions.length}`);
-    console.log(`  - First jingle at: ${Math.round(jinglePositions[0].timeInMinutes)}m`);
-    if (jinglePositions.length > 1) {
-        console.log(`  - Average interval: ${Math.round((jinglePositions[jinglePositions.length-1].timeInMinutes - jinglePositions[0].timeInMinutes) / (jinglePositions.length - 1))}m`);
     }
 }
 
@@ -338,8 +346,6 @@ function assertNews(tracks) {
         console.log(i + ": " + min + " < " + newsPositions[i].time + " < " + max);
         assert.ok(newsPositions[i].time >= min && newsPositions[i].time <= max, "News position for hour " + i + ": " + min + " < " + newsPositions[i].time + " < " + max);
     }
-    
-
 }
 
 /**
@@ -349,14 +355,19 @@ function assertNews(tracks) {
  * @param {Array} tracks - Array of track objects
  * @param {Array} pattern - Array of tag names or "Jingle" to match against
  */
-function assertTagPattern(tracks, pattern) {
+function assertTagPattern(tracks, pattern, excludeJingles, excludedTrackIds) {
     // Verify that tracks is an array and not empty
     assert.ok(Array.isArray(tracks), 'Result should be an array');
     assert.ok(tracks.length > 0, 'Result should contain tracks');
     
     // Filter out news and ad triggers (id === 0), bound jingles and scheduled items
     const filteredTracks = tracks.filter(track => {
-        return track.type !== 'news' && track.id !== 0 && !boundJingles.includes(track.id) && !track.tags.includes("CD-Vorstellung");
+        return track.type !== 'news' 
+            && track.id !== 0 
+            && !boundJingles.includes(track.id) 
+            && !track.tags.includes("CD-Vorstellung")
+            && (!excludeJingles || track.type !== 'jingle')
+            && (!excludedTrackIds || !excludedTrackIds.includes(track.id));
     });
     
     // Track pattern matching
@@ -370,8 +381,8 @@ function assertTagPattern(tracks, pattern) {
         let isMatch = false;
         
         // Check if pattern is "Jingle" - match against track type
-        if (expectedPattern === 'Jingle') {
-            isMatch = track.type === 'jingle';
+        if (expectedPattern.toLowerCase() === track.type) {
+            isMatch = true;
         } else {
             // Match against track tags
             isMatch = track.tags && Array.isArray(track.tags) && track.tags.includes(expectedPattern);
@@ -393,10 +404,6 @@ function assertTagPattern(tracks, pattern) {
         
         patternIndex++;
     }
-    
-    console.log(`  - Pattern verified: ${pattern.join(' -> ')}`);
-    console.log(`  - Tracks checked: ${filteredTracks.length} (excluded ${tracks.length - filteredTracks.length} news/ad triggers)`);
-    console.log(`  - Pattern cycles: ${Math.floor(filteredTracks.length / pattern.length)}`);
 }
 
 /**
@@ -520,6 +527,110 @@ function assertScheduledItem(tracks) {
     assert.equal(items, 2, "Number of expected items");
 }
 
+/*
+ * Assert that late song selection does not produce artist repeats
+ * @param {Array} tracks - Array of track objects
+ */
+function assertScheduledItemLateSelection(tracks) {
+    assert.ok(Array.isArray(tracks), 'Result should be an array');
+
+    const artistPositions = {};
+
+    let items = 0;
+    for(let i = 0; i < tracks.length; i++) {
+        // Only check songs (not jingles, news, etc.)
+        if (tracks[i].type !== 'song') {
+            continue;
+        }
+
+        if(tracks[i].tags.includes('SpecialTrack')) {
+            items++;
+            assert.ok('plays' in tracks[i] && tracks[i].plays < 2, "Invalid plays count");
+        }
+
+        const artist = tracks[i].artist || 'Unknown Artist';
+        
+        // Count occurrences
+        if (!artistPositions[artist]) {
+            artistPositions[artist] = [];
+        }
+        artistPositions[artist].push(i);
+    }
+
+    const minDistanceSeconds = 30 * 60; // 30 minutes in seconds
+    
+    for (const artist in artistPositions) {
+        const positions = artistPositions[artist];
+        
+        if (positions.length > 1) {
+            for (let i = 1; i < positions.length; i++) {
+                // Calculate time between this track and previous track by same artist
+                let timeBetween = 0;
+                for (let j = positions[i-1]; j < positions[i]; j++) {
+                    timeBetween += tracks[j].duration;
+                }
+
+                if(timeBetween < minDistanceSeconds) {
+                    console.log("oops");
+                }
+                
+                assert.ok(
+                    timeBetween >= minDistanceSeconds,
+                    `Artist "${artist}" has tracks at positions ${positions[i-1]} and ${positions[i]} ` +
+                    `with only ${Math.round(timeBetween/60)}m between them (minimum 30m required)`
+                );
+            }
+        }
+    }
+
+    assert.equal(items, 4, "Number of expected items");
+}
+
+/*
+ * Assert that moderation tracks remained on their position
+ * @param {Array} playlist - playlist tracks
+ * @param {Array} tracks - returned tracks
+ */
+function assertWorddistributionPreserve(playlist, tracks) {
+
+    const playlistFiltered = playlist.filter(track => track.type != 'jingle');
+    const tracksFiltered = tracks.filter(track => track.type != 'jingle');
+
+    for(var i = 0; i < playlistFiltered.length && i < tracksFiltered.length; i++) {
+        if(playlistFiltered[i].type == 'moderation') {
+            assert.ok(tracksFiltered[i].type === 'moderation', "Expected moderation at position " + i);
+        }
+    }
+}
+
+/*
+ * Assert that moderation tracks remained on their position
+ * @param {Array} playlist - playlist tracks
+ * @param {Array} tracks - returned tracks
+ */
+function assertWorddistributionLinked(playlist, tracks) {
+
+    const playlistFiltered = playlist.filter(track => track.type != 'jingle');
+    var bound = {};
+
+    for(var i = 0; i < playlistFiltered.length - 1; i++) {
+        if(playlistFiltered[i].type == 'moderation') {
+            bound[playlistFiltered[i + 1].id] = playlistFiltered[i].id;
+        }
+    }
+
+
+    const tracksFiltered = tracks.filter(track => track.type != 'jingle');
+
+    for(var i = 0; i < tracksFiltered.length; i++) {
+        var b = bound[tracksFiltered[i].id];
+        if(b) {
+            assert.ok(tracksFiltered[i - 1].id === b, "Expected moderation");
+        }
+    }
+}
+
+
 /**
  * Helper function to run a test multiple times with different seeds
  * @param {string} testName - Name of the test
@@ -534,6 +645,28 @@ function testWithMultipleSeeds(testName, testFn, iterations = 5) {
         });
     }
 }
+
+// Test: minimalOpts
+testWithMultipleSeeds('minimalOpts - basic shuffle', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_plain.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    
+    const opts = {
+        duration: duration,
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    // Assert duration constraints
+    assertDuration(result, duration);
+});
+
 
 // Test: noPatternSimple
 testWithMultipleSeeds('noPatternSimple - basic shuffle', (seed) => {
@@ -562,6 +695,174 @@ testWithMultipleSeeds('noPatternSimple - basic shuffle', (seed) => {
     assertJingleInterval(result, jingleInterval);
     assertArtistDistribution(result, 2);
 });
+
+// Test: patternSimpleNoJingles
+testWithMultipleSeeds('patternSimpleNoJingles - tag pattern without jingle', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_plain.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    // Options with only duration set to 7200 seconds (2 hours)
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time,
+        tagPattern : [ "K1", "K2", "K1", "K3", "K1", "K2", "K1", "K2", "K1", "K2", "K3", "K1"]
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    // Assert duration constraints
+    assertDuration(result, duration);
+    assertTagPattern(result, opts.tagPattern, true);
+    assertArtistDistribution(result, 2);
+    assertJingleInterval(result, jingleInterval);
+});
+
+
+// Test: patternSimpleTagWeights
+testWithMultipleSeeds('patternSimpleTagWeights - tag pattern with tag weights', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_plain.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    // Options with only duration set to 7200 seconds (2 hours)
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time,
+        tagPattern : [ "K1", "K2", "K1", "K3", "K1", "K2", "K1", "K2", "K1", "K2", "K3", "K1"],
+        tagWeights : {
+            'A' : 3,
+            'B' : 1,
+            'C' : -1
+        }
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    // Assert duration constraints
+    assertDuration(result, duration);
+    assertTagPattern(result, opts.tagPattern, true);
+    assertArtistDistribution(result, 2);
+    assertJingleInterval(result, jingleInterval);
+
+    var aTracks = countByTag(result, 'A');
+    var bTracks = countByTag(result, 'B');
+    var cTracks = countByTag(result, 'C');
+
+    console.log(aTracks + " > " + bTracks + " > " + cTracks);
+
+    assert.ok(aTracks > bTracks, "There should be more A tracks than B tracks");
+    assert.ok(bTracks > cTracks, "There should be more B tracks than C tracks");
+
+});
+
+
+// Test: patternSimpleTrackTypes
+testWithMultipleSeeds('patternSimpleTrackTypes - tag pattern with track types', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_plain.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    // Options with only duration set to 7200 seconds (2 hours)
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time,
+        tagPattern : [ "song", "song", "jingle"]
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    // Assert duration constraints
+    assertDuration(result, duration);
+    assertTagPattern(result, opts.tagPattern, false);
+    assertArtistDistribution(result, 2);
+});
+
+// Test: patternWithInvalidTag
+testWithMultipleSeeds('patternWithInvalidTag - tag pattern with an invalid tag', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_plain.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    // Options with only duration set to 7200 seconds (2 hours)
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time,
+        tagPattern : [ "K1", "K2", "K1", "K3", "K1", "KX", "KY", "K2", "K1", "K2", "K1", "K2", "K3"]
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    // Assert duration constraints
+    assertDuration(result, duration);
+    assertTagPattern(result,  [ "K1", "K2", "K1", "K3", "K1", "K2", "K1", "K2", "K1", "K2", "K3"], true);
+    assertArtistDistribution(result, 2);
+});
+
+
+// Test: patternSimpleNoJingles
+testWithMultipleSeeds('patternSimpleInvalidPattern - tag pattern invalid pattern', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_plain.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time,
+        tagPattern : [ "KX"]
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    assert.ok(result.length > 0);
+
+    // Assert duration constraints
+    assertDuration(result, duration);
+    assertArtistDistribution(result, 2);
+});
+
+
+
 
 // Test: patternSimple
 testWithMultipleSeeds('patternSimple - basic shuffle', (seed) => {
@@ -864,6 +1165,43 @@ testWithMultipleSeeds('noPatternScheduledItem - basic shuffle with a scheduled i
     assertScheduledItem(result);
 });
 
+
+// Test: noPatternScheduledItem2
+testWithMultipleSeeds('noPatternScheduledItem2 - basic shuffle with a scheduled item', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_scheduled_items.json');
+    
+    const trackStats = loadTrackStats();
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        protectFirstJingle : true,
+        time: time,
+        scheduled : [ {
+        "selection" : "random",
+        "trackType" : "moderation",
+        "index" : 1,
+        "exclude" : true,
+        "interval" : 1,
+        "id" : "d0b1c3c8-5366-43af-aefa-aa2612719aef",
+        "tag" : "CD-Vorstellung",
+        "minute" : 0
+        } ]
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    assert.ok(result[0].tags.includes("CD-Vorstellung"));
+
+});
+
+
 // Test: patternScheduledItem
 testWithMultipleSeeds('patternScheduledItem - tag pattern shuffle with a scheduled item', (seed) => {
     // Load tracks from the test resource file
@@ -963,3 +1301,221 @@ testWithMultipleSeeds('patternMixed - basic shuffle with mixed use cases', (seed
     assertTagPattern(result, opts.tagPattern);
 });
 
+
+// Test: noPatternScheduledItemLateSelection
+testWithMultipleSeeds('noPatternScheduledItemLateSelection - basic shuffle with a scheduled item and late song selection', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_plain.json');
+    const ids = [
+        2738902,
+        21823,
+        21051,
+        14985,
+        2158778,
+        14279,
+        14399,
+        13471,
+        14247,
+        21369,
+        2284327,
+        13793
+        ];
+    for(let i = 0; i < tracks.length; i++) {
+        if(ids.includes(tracks[i].id)) {
+            tracks[i].tags.push("SpecialTrack");
+        }
+    }
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time2,
+        scheduled : [ {
+            "selection" : "random",
+            "trackType" : "song",
+            "exclude" : true,
+            "interval" : 1,
+            "id" : "39381b2c-40a4-45e6-945c-96ba83fd4183",
+            "tag" : "SpecialTrack",
+            "minute" : 15
+            } ],
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+    assertScheduledItemLateSelection(result);
+    
+});
+
+// Test: patternScheduledItemLateSelection
+testWithMultipleSeeds('patternScheduledItemLateSelection - basic shuffle with a scheduled item and late song selection', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_plain.json');
+    const ids = [21823, 21051, 14985, 14399, 21369, 13793];
+    for(let i = 0; i < tracks.length; i++) {
+        if(ids.includes(tracks[i].id)) {
+            tracks[i].tags.push("SpecialTrack");
+        }
+    }
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        maxTracksPerArtist : 2,
+        time: time2,
+        tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ],
+        scheduled : [ {
+            "selection" : "random",
+            "trackType" : "song",
+            "exclude" : true,
+            "interval" : 1,
+            "id" : "39381b2c-40a4-45e6-945c-96ba83fd4183",
+            "tag" : "SpecialTrack",
+            "minute" : 15
+            } ],
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+    assertScheduledItemLateSelection(result);
+    assertTagPattern(result, opts.tagPattern, false, ids);
+    
+});
+
+
+// Test: noPatternWordDistributionPreserve
+testWithMultipleSeeds('noPatternWordDistributionPreserve - basic shuffle with preserved moderation tracks', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_moderation.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    // Options with only duration set to 7200 seconds (2 hours)
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        wordDistribution: "preserve",
+        maxTracksPerArtist : 2,
+        time: time
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    // Assert duration constraints
+    assertDuration(result, duration);
+    assertJingleInterval(result, jingleInterval);
+    assertArtistDistribution(result, 2);
+    assertWorddistributionPreserve(tracks, result);
+});
+
+// Test: PatternWordDistributionPreserve
+testWithMultipleSeeds('patternWordDistributionPreserve - basic shuffle with preserved moderation tracks', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_moderation.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    // Options with only duration set to 7200 seconds (2 hours)
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        wordDistribution: "preserve",
+        maxTracksPerArtist : 2,
+        time: time,
+        tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ],
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    // Assert duration constraints
+    assertDuration(result, duration);
+    assertWorddistributionPreserve(tracks, result);
+});
+
+// Test: noPatternWordDistributionLinkedNext
+testWithMultipleSeeds('noPatternWordDistributionLinkedNext - basic shuffle with linked moderation tracks', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_moderation.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    // Options with only duration set to 7200 seconds (2 hours)
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        wordDistribution: "link_next",
+        maxTracksPerArtist : 2,
+        time: time
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    // Assert duration constraints
+    assertDuration(result, duration);
+    assertJingleInterval(result, jingleInterval);
+    assertArtistDistribution(result, 2);
+    assertWorddistributionLinked(tracks, result);
+});
+
+// Test: patternWordDistributionLinkedNext
+testWithMultipleSeeds('patternWordDistributionLinkedNext - pattern shuffle with linked moderation tracks', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_moderation.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 20; // 20 minutes
+    
+    // Options with only duration set to 7200 seconds (2 hours)
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        wordDistribution: "link_next",
+        maxTracksPerArtist : 2,
+        tagPattern : [ "K1", "K2", "K1", "K3", "Jingle", "K1", "K2", "K1", "K2", "Jingle", "K1", "K2", "K3", "K1", "Jingle" ],
+        time: time
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    // Assert duration constraints
+    assertDuration(result, duration);
+    assertArtistDistribution(result, 2);
+    assertWorddistributionLinked(tracks, result);
+
+    const result2 = result.filter(t => t.type != 'moderation');
+    assertTagPattern(result2, opts.tagPattern, false);
+
+
+});

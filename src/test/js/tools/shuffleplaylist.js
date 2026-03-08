@@ -11,6 +11,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -22,7 +23,7 @@ if (args.length < 4) {
     process.exit(1);
 }
 
-const [token, stationId, playlistId, durationStr] = args;
+const [token, stationId, playlistId, durationStr, time, statsfile] = args;
 const duration = parseInt(durationStr, 10);
 
 if (isNaN(duration) || duration <= 0) {
@@ -87,15 +88,22 @@ function makeApiRequest(path) {
  */
 function executeShuffleFunction(tracks, opts, trackStats) {
     // Load the StationAdmin.js file
-    const shuffleFunctionPath = path.join(__dirname, '..', '..', 'main', 'javascript', 'shuffle', 'StationAdmin.js');
+    const shuffleFunctionPath = path.join(__dirname, '..', '..', '..', 'main', 'javascript', 'shuffle', 'StationAdmin.js');
     const shuffleFunctionCode = fs.readFileSync(shuffleFunctionPath, 'utf8');
     
     // The StationAdmin.js file contains an IIFE (Immediately Invoked Function Expression)
     // We need to extract the function and call it with our parameters
     // The file format is: ( function( tracks, opts, trackStats ){ ... })
     // We'll evaluate it and call it
+
+    // Use vm.runInThisContext with filename option to enable debugging
+    // This allows the debugger to map breakpoints to the actual source file
+    const shuffleFunction = vm.runInThisContext(shuffleFunctionCode, {
+        filename: shuffleFunctionPath,
+        lineOffset: 0,
+        columnOffset: 0
+    });
     
-    const shuffleFunction = eval(shuffleFunctionCode);
     return shuffleFunction(tracks, opts, trackStats);
 }
 
@@ -130,19 +138,31 @@ async function main() {
         
         // Add the duration to opts as numeric value
         opts.duration = duration;
+        if(time) {
+            opts.time = time;
+            opts.debug = true;
+        }
         
         console.log(`✓ Loaded shuffle options:`, JSON.stringify(opts, null, 2));
         console.log();
 
-        // Fetch track stats from last 24 hours (3rd parameter)
-        console.log('Fetching track statistics (24h)...');
-        const statsPath = `/stations/${stationId}/tracks/stats/24h`;
-        const trackStats = await makeApiRequest(statsPath);
-        
-        if (!Array.isArray(trackStats)) {
-            throw new Error('Unexpected trackStats response format');
+        var trackStats = [];
+
+        if(statsfile) {
+            var fileContent = fs.readFileSync(statsfile, 'utf8');
+            trackStats = JSON.parse(fileContent);
         }
-        console.log(`✓ Loaded ${trackStats.length} track statistics\n`);
+        else {
+            // Fetch track stats from last 24 hours (3rd parameter)
+            console.log('Fetching track statistics (24h)...');
+            const statsPath = `/stations/${stationId}/tracks/stats/24h`;
+            trackStats = await makeApiRequest(statsPath);
+            
+            if (!Array.isArray(trackStats)) {
+                throw new Error('Unexpected trackStats response format');
+            }
+            console.log(`✓ Loaded ${trackStats.length} track statistics\n`);
+        }
 
         // Execute the shuffle function
         console.log('Executing shuffle algorithm...');

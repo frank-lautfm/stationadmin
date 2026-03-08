@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "lib": ["ES2017", "DOM"],
+    "strict": false,
+    "noImplicitAny": false,
+    "outDir": ".",
+    "removeComments": true,
+    "declaration": false,
+    "sourceMap": false
+  },
+  "files": [
+    "StationAdmin.ts"
+  ]
+}
