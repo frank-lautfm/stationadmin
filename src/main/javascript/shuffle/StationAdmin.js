@@ -1,5 +1,5 @@
-// StationAdmin v4.0.0
-// 08.03.2026
+// StationAdmin v4.0.1
+// 09.03.2026
 
 (function (tracks, opts, trackStats) {
   const SONG = "song";
@@ -231,6 +231,8 @@
         songCnt++;
       }
       tracks[i].plays = 0;
+      tracks[i].use = false;
+      tracks[i].groupTags = [];
       if (schedulingRulesEnabled) {
         var skip = false;
         for (var t = 0; t < tracks[i].tags.length; t++) {
@@ -297,8 +299,6 @@
       }
       if (excludeFollowing) continue;
       tracksDuration += tracks[i].duration;
-      tracks[i].use = false;
-      tracks[i].groupTags = [];
       if (trackNameLimit > 0) {
         tracks[i].normTitle = normalizeTitle(tracks[i].title);
         tracks[i].groupTags = tracks[i].tags.filter((tag) => tag.startsWith("="));

@@ -1,5 +1,5 @@
-// StationAdmin v4.0.0
-// 08.03.2026
+// StationAdmin v4.0.1
+// 09.03.2026
 
 // Type definitions
 
@@ -424,6 +424,10 @@ interface ShuffleOptions {
       // (re)set plays 
       tracks[i].plays = 0;
 
+      // initialize
+      tracks[i].use = false;
+      tracks[i].groupTags = [];
+
       if (schedulingRulesEnabled) {
         var skip = false;
         for (var t = 0; t < tracks[i].tags.length; t++) {
@@ -495,8 +499,6 @@ interface ShuffleOptions {
       if (excludeFollowing) continue;
 
       tracksDuration += tracks[i].duration;
-      tracks[i].use = false;
-      tracks[i].groupTags = [];
 
       if (trackNameLimit > 0) {
         tracks[i].normTitle = normalizeTitle(tracks[i].title);
