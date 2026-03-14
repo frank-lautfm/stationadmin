@@ -1,5 +1,5 @@
-// StationAdmin v4.0.1
-// 09.03.2026
+// StationAdmin v4.0.3
+// 14.03.2026
 
 // Type definitions
 
@@ -672,7 +672,7 @@ interface ShuffleOptions {
       tracks: [track],
       minTime: minTime,
       maxTime: minTime + 1000 * 60 * 5,
-      jingleCollision: 'keep_both',
+      jingleCollision: 'skip_scheduled',
       type: JINGLE
     });
   }
@@ -704,6 +704,23 @@ interface ShuffleOptions {
     }
     var jingleIntervalMs = jingleIntervalMin * 60 * 1000;
 
+    // Collect the play times of jingles within scheduled news blocks.
+    // When a news block contains a jingle (firstJingle), the next regular jingle
+    // should be scheduled jingleInterval after that news jingle, not from the
+    // regular grid. This prevents jingles from appearing too soon after news.
+    var newsJingleTimes: number[] = [];
+    for (var n = 0; n < scheduledTracks.length; n++) {
+      if (scheduledTracks[n].type == NEWS && scheduledTracks[n].tracks) {
+        var trackTime = scheduledTracks[n].minTime;
+        for (var nt = 0; nt < scheduledTracks[n].tracks!.length; nt++) {
+          if (scheduledTracks[n].tracks![nt].type == JINGLE) {
+            newsJingleTimes.push(trackTime);
+          }
+          trackTime += scheduledTracks[n].tracks![nt].duration * 1000;
+        }
+      }
+    }
+
     var jingleOffset = 0;
     var jingleIdx = 0;
     var time = startTime;
@@ -726,8 +743,24 @@ interface ShuffleOptions {
     var endTime = startTime + duration * 1000;
     var jingleCnt = 0;
     while (time < endTime) {
-      pushScheduledJingle(jingles[jingleIdx], time);
+      // Check if this jingle slot falls within jingleInterval after a news jingle.
+      // If so, reset the timeline so the next jingle is jingleInterval after the news jingle.
+      var resetBase = -1;
+      for (var n = 0; n < newsJingleTimes.length; n++) {
+        if (time > newsJingleTimes[n] && time < newsJingleTimes[n] + jingleIntervalMs) {
+          resetBase = newsJingleTimes[n];
+          break;
+        }
+      }
+      if (resetBase > -1) {
+        // Reset: next jingle should be jingleInterval after the news jingle
+        jingleOffset = resetBase + jingleIntervalMs - startTime;
+        jingleCnt = 0;
+        time = startTime + jingleOffset;
+        continue;
+      }
 
+      pushScheduledJingle(jingles[jingleIdx], time);
       jingleIdx++;
       if (jingleIdx == jingles.length) {
         jingleIdx = 0;
@@ -735,6 +768,7 @@ interface ShuffleOptions {
           shuffle(jingles);
         }
       }
+
       jingleCnt++;
       time = startTime + jingleOffset + jingleCnt * jingleIntervalMs;
     }
@@ -1397,6 +1431,8 @@ interface ShuffleOptions {
               addScheduled = false;
               moveCnt++;
             }
+          } else if (nextScheduled.jingleCollision == 'skip_scheduled') {
+            addScheduled = false;
           } else if (nextScheduled.jingleCollision == 'remove_jingle') {
             if (lastIsJingle) {
               time -= playlistTracks[playlistTracks.length - 1].duration * 1000;
@@ -1669,12 +1705,12 @@ interface ShuffleOptions {
       }
     }
   }
-  if (tagPattern.length == 0 || !tagPatternContainsJingles) {
-    scheduleJingles();
-  }
 
   if (newsTrack != null) {
     scheduleNews();
+  }
+  if (tagPattern.length == 0 || !tagPatternContainsJingles) {
+    scheduleJingles();
   }
   if (adTrigger != null) {
     scheduleAdTriggers();

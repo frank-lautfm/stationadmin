@@ -1,5 +1,5 @@
-// StationAdmin v4.0.1
-// 09.03.2026
+// StationAdmin v4.0.3
+// 14.03.2026
 
 (function (tracks, opts, trackStats) {
   const SONG = "song";
@@ -454,7 +454,7 @@
       tracks: [track],
       minTime: minTime,
       maxTime: minTime + 1000 * 60 * 5,
-      jingleCollision: "keep_both",
+      jingleCollision: "skip_scheduled",
       type: JINGLE
     });
   }
@@ -481,6 +481,18 @@
       jingleIntervalMin = Math.floor(duration / numJingles / 60);
     }
     var jingleIntervalMs = jingleIntervalMin * 60 * 1000;
+    var newsJingleTimes = [];
+    for (var n = 0; n < scheduledTracks.length; n++) {
+      if (scheduledTracks[n].type == NEWS && scheduledTracks[n].tracks) {
+        var trackTime = scheduledTracks[n].minTime;
+        for (var nt = 0; nt < scheduledTracks[n].tracks.length; nt++) {
+          if (scheduledTracks[n].tracks[nt].type == JINGLE) {
+            newsJingleTimes.push(trackTime);
+          }
+          trackTime += scheduledTracks[n].tracks[nt].duration * 1000;
+        }
+      }
+    }
     var jingleOffset = 0;
     var jingleIdx = 0;
     var time = startTime;
@@ -499,6 +511,19 @@
     var endTime = startTime + duration * 1000;
     var jingleCnt = 0;
     while (time < endTime) {
+      var resetBase = -1;
+      for (var n = 0; n < newsJingleTimes.length; n++) {
+        if (time > newsJingleTimes[n] && time < newsJingleTimes[n] + jingleIntervalMs) {
+          resetBase = newsJingleTimes[n];
+          break;
+        }
+      }
+      if (resetBase > -1) {
+        jingleOffset = resetBase + jingleIntervalMs - startTime;
+        jingleCnt = 0;
+        time = startTime + jingleOffset;
+        continue;
+      }
       pushScheduledJingle(jingles[jingleIdx], time);
       jingleIdx++;
       if (jingleIdx == jingles.length) {
@@ -1086,6 +1111,8 @@
               addScheduled = false;
               moveCnt++;
             }
+          } else if (nextScheduled.jingleCollision == "skip_scheduled") {
+            addScheduled = false;
           } else if (nextScheduled.jingleCollision == "remove_jingle") {
             if (lastIsJingle) {
               time -= playlistTracks[playlistTracks.length - 1].duration * 1000;
@@ -1320,11 +1347,11 @@
       }
     }
   }
-  if (tagPattern.length == 0 || !tagPatternContainsJingles) {
-    scheduleJingles();
-  }
   if (newsTrack != null) {
     scheduleNews();
+  }
+  if (tagPattern.length == 0 || !tagPatternContainsJingles) {
+    scheduleJingles();
   }
   if (adTrigger != null) {
     scheduleAdTriggers();
