@@ -187,13 +187,14 @@ function assertJingleInterval(tracks, interval) {
         if (tracks[i].type === 'jingle') {
             jinglePositions.push({
                 index: i,
-                time: cumulativeDuration
+                time: cumulativeDuration,
+                durationBefore: i > 0 ? tracks[i - 1].duration : 0
             });
         }
         cumulativeDuration += tracks[i].duration;
     }
     
-    // Verify that at least one jingle exists
+    // Verify that at least one jingle i
     assert.ok(
         jinglePositions.length > 0,
         'At least one jingle should be present in the tracks'
@@ -201,10 +202,10 @@ function assertJingleInterval(tracks, interval) {
     
     // Check intervals between consecutive jingles
     const intervalSeconds = interval * 60;
-    const tolerance = 240; // 4 minutes tolerance in seconds (to account for track boundaries)
     
     for (let i = 1; i < jinglePositions.length; i++) {
         const timeDiff = (jinglePositions[i].time - jinglePositions[i-1].time);
+        const tolerance = Math.max(jinglePositions[i].durationBefore, jinglePositions[i -1].durationBefore, 240);
         const minInterval = intervalSeconds - tolerance;
         const maxInterval = intervalSeconds + tolerance;
         
@@ -627,6 +628,13 @@ function assertWorddistributionLinked(playlist, tracks) {
         if(b) {
             assert.ok(tracksFiltered[i - 1].id === b, "Expected moderation");
         }
+    }
+}
+
+function dumpTracks(tracks, t) {
+    for(var i = 0; i < tracks.length; i++) {
+        console.log(i + " " + new Date(t).toLocaleTimeString() + " " + tracks[i].type + " " + tracks[i].artist);
+        t += tracks[i].duration * 1000;
     }
 }
 
@@ -1519,3 +1527,94 @@ testWithMultipleSeeds('patternWordDistributionLinkedNext - pattern shuffle with 
 
 
 });
+
+
+// Test: noPatternNewsPlusJingle
+testWithMultipleSeeds('noPatternNewsPlusJingle - shuffle with news plus jingle', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_news_plus_jingle.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 12; 
+    
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        preserveFistJingle: true,
+        maxTracksPerArtist : 2,
+        time: time
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    assert.ok(result[0].id == 1, "First track should be news");
+    assert.ok(result[1].id == 3291198, "Second track must be opener jingle");
+
+    var startTime = new Date(time);
+
+    for(var i = 0; i < result.length; i++) {
+        if(result[i].id == 3291198) {
+            assert.ok(result[i-1].id == 1, "opener jingle must only appear after news");
+
+            var difference = result[i].duration;
+            for(var j = i + 1; j < result.length; j++) {
+                if(result[j].type == 'jingle') {
+                    assert.ok(difference / 60 >= (jingleInterval - 4), "Next jingle too soon: " + difference / 60);
+                    break;
+                }
+                difference += result[j].duration;
+            }
+        }
+    }
+
+});
+
+// Test: noPatternNewsPlusJingleNotFullHour
+testWithMultipleSeeds('noPatternNewsPlusJingleNotFullHour - shuffle with news plus jingle', (seed) => {
+    // Load tracks from the test resource file
+    const tracks = loadTracksFromFile('tracks_news_plus_jingle.json');
+    
+    // Empty array for track stats (no previous plays)
+    const trackStats = [];
+
+    const duration = 14400;
+    const jingleInterval = 12; 
+
+    const t = '2026-02-09T20:40:11+01:00';
+
+    const opts = {
+        duration: duration,
+        jingleInterval : jingleInterval,
+        preserveFistJingle: true,
+        maxTracksPerArtist : 2,
+        time: t
+    };
+    
+    // Execute the shuffle function with a seed for reproducible results
+    const result = executeShuffleFunction(tracks, opts, trackStats, seed);
+
+    assert.ok(result[0].id != 3291198, "No opener jingle");
+
+    var startTime = new Date(time);
+
+    for(var i = 0; i < result.length; i++) {
+        if(result[i].id == 3291198) {
+            assert.ok(result[i-1].id == 1, "opener jingle must only appear after news");
+
+            var difference = result[i].duration;
+            for(var j = i + 1; j < result.length; j++) {
+                if(result[j].type == 'jingle') {
+                    assert.ok(difference / 60 >= (jingleInterval - 4), "Next jingle too soon: " + difference / 60);
+                    break;
+                }
+                difference += result[j].duration;
+            }
+        }
+    }
+
+});
+

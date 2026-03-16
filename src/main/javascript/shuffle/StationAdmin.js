@@ -1,5 +1,5 @@
 // StationAdmin v4.0.3
-// 14.03.2026
+// 16.03.2026
 
 (function (tracks, opts, trackStats) {
   const SONG = "song";
@@ -452,14 +452,17 @@
   function pushScheduledJingle(track, minTime) {
     scheduledTracks.push({
       tracks: [track],
-      minTime: minTime,
-      maxTime: minTime + 1000 * 60 * 5,
+      minTime: minTime - 1000 * 30,
+      maxTime: minTime + 1000 * 60 * 6,
       jingleCollision: "skip_scheduled",
       type: JINGLE
     });
   }
   function scheduleJingles() {
-    var addFirstJingle = firstJingle != null && !startsWithNews;
+    var firstJingleInNews =
+      firstJingle != null &&
+      scheduledTracks.some((st) => st.type == NEWS && st.tracks != null && st.tracks.some((t) => t === firstJingle));
+    var addFirstJingle = firstJingle != null && !firstJingleInNews;
     if (!addFirstJingle && jingles.length == 0) return;
     if (addFirstJingle && jingles.length == 0) {
       pushScheduledJingle(firstJingle, startTime);
@@ -488,6 +491,7 @@
         for (var nt = 0; nt < scheduledTracks[n].tracks.length; nt++) {
           if (scheduledTracks[n].tracks[nt].type == JINGLE) {
             newsJingleTimes.push(trackTime);
+            log("News jingle at " + new Date(trackTime).toLocaleTimeString());
           }
           trackTime += scheduledTracks[n].tracks[nt].duration * 1000;
         }
@@ -504,19 +508,27 @@
       if (lastJinglePlay > -1) {
         jingleOffset = Math.max(0, jingleIntervalMin - lastJinglePlay) * 60 * 1000;
       } else {
-        jingleOffset = Math.floor(random() * jingleIntervalMin);
+        jingleOffset = Math.floor(random() * jingleIntervalMs);
       }
       time = startTime + jingleOffset;
     }
+    if (newsJingleTimes.length > 0 && startsWithNews) {
+      time = newsJingleTimes[0];
+    }
     var endTime = startTime + duration * 1000;
     var jingleCnt = 0;
+    var newsJingleIdx = 0;
     while (time < endTime) {
+      while (newsJingleIdx < newsJingleTimes.length && time >= newsJingleTimes[newsJingleIdx] + jingleIntervalMs) {
+        newsJingleIdx++;
+      }
       var resetBase = -1;
-      for (var n = 0; n < newsJingleTimes.length; n++) {
-        if (time > newsJingleTimes[n] && time < newsJingleTimes[n] + jingleIntervalMs) {
-          resetBase = newsJingleTimes[n];
-          break;
-        }
+      if (
+        newsJingleIdx < newsJingleTimes.length &&
+        time >= newsJingleTimes[newsJingleIdx] &&
+        time < newsJingleTimes[newsJingleIdx] + jingleIntervalMs
+      ) {
+        resetBase = newsJingleTimes[newsJingleIdx];
       }
       if (resetBase > -1) {
         jingleOffset = resetBase + jingleIntervalMs - startTime;
@@ -525,6 +537,7 @@
         continue;
       }
       pushScheduledJingle(jingles[jingleIdx], time);
+      log("jingle at " + new Date(time).toLocaleTimeString());
       jingleIdx++;
       if (jingleIdx == jingles.length) {
         jingleIdx = 0;
@@ -1101,6 +1114,7 @@
     var skipJingle = false;
     var addScheduled = true;
     var tracksAdded = false;
+    var skipSchduled = false;
     while (nextScheduled != null && time >= nextScheduled.minTime && addScheduled) {
       addScheduled = true;
       if (nextScheduled.jingleCollision != "keep_both") {
@@ -1108,6 +1122,7 @@
         if (lastIsJingle || nextIsJingle) {
           if (nextScheduled.jingleCollision == "move") {
             if (moveCnt < 2) {
+              skipSchduled = true;
               addScheduled = false;
               moveCnt++;
             }
@@ -1145,7 +1160,7 @@
         tracksAdded = true;
         nextScheduled = sIdx < scheduledTracks.length ? scheduledTracks[sIdx++] : null;
         moveCnt = 0;
-      } else if (time > nextScheduled.maxTime) {
+      } else if (time > nextScheduled.maxTime || skipSchduled) {
         nextScheduled = sIdx < scheduledTracks.length ? scheduledTracks[sIdx++] : null;
         moveCnt = 0;
       }
