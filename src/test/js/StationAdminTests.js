@@ -1584,7 +1584,7 @@ testWithMultipleSeeds('noPatternNewsPlusJingleNotFullHour - shuffle with news pl
     const duration = 14400;
     const jingleInterval = 12; 
 
-    const t = '2026-02-09T20:40:11+01:00';
+    const t = '2026-02-09T20:35:11+01:00';
 
     const opts = {
         duration: duration,
@@ -1599,7 +1599,8 @@ testWithMultipleSeeds('noPatternNewsPlusJingleNotFullHour - shuffle with news pl
 
     assert.ok(result[0].id != 3291198, "No opener jingle");
 
-    var startTime = new Date(time);
+    // dumpTracks(result, new Date(t).getTime());
+
 
     for(var i = 0; i < result.length; i++) {
         if(result[i].id == 3291198) {

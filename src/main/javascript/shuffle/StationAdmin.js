@@ -462,7 +462,7 @@
     var firstJingleInNews =
       firstJingle != null &&
       scheduledTracks.some((st) => st.type == NEWS && st.tracks != null && st.tracks.some((t) => t === firstJingle));
-    var addFirstJingle = firstJingle != null && !firstJingleInNews;
+    var addFirstJingle = firstJingle != null && !startsWithNews && !firstJingleInNews;
     if (!addFirstJingle && jingles.length == 0) return;
     if (addFirstJingle && jingles.length == 0) {
       pushScheduledJingle(firstJingle, startTime);
@@ -525,7 +525,7 @@
       var resetBase = -1;
       if (
         newsJingleIdx < newsJingleTimes.length &&
-        time >= newsJingleTimes[newsJingleIdx] &&
+        time >= newsJingleTimes[newsJingleIdx] - jingleIntervalMs / 3 &&
         time < newsJingleTimes[newsJingleIdx] + jingleIntervalMs
       ) {
         resetBase = newsJingleTimes[newsJingleIdx];
