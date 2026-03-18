@@ -178,6 +178,9 @@
         return;
       }
     }
+    if (track.type == MODERATION) {
+      track.score = track.score * 0.75;
+    }
     if (track.id in lastPlays && lastPlays[track.id] < 60 * avoidRepeat) {
       if (excludePreviousTracks) {
         track.score = 999999;
@@ -413,13 +416,16 @@
         continue;
       }
       var artistSegments = Math.max(1, Math.floor(numSegments / artistTracks.length));
-      var minSegment = artist.name in recentArtists ? 1 : 0;
+      var isModeration = artist.tracks[0].type == MODERATION;
+      var minSegment = !isModeration && artist.name in recentArtists ? 1 : 0;
       var currentSegment = minSegment;
-      var minDuration = segments[0].duration;
-      for (var s = minSegment + 1; s < artistSegments; s++) {
-        if (segments[s].duration < minDuration) {
-          currentSegment = s;
-          minDuration = segments[s].duration;
+      if (!isModeration) {
+        var minDuration = segments[0].duration;
+        for (var s = minSegment + 1; s < artistSegments; s++) {
+          if (segments[s].duration < minDuration) {
+            currentSegment = s;
+            minDuration = segments[s].duration;
+          }
         }
       }
       for (var t = 0; t < artistTracks.length; t++) {

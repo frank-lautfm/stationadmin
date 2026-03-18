@@ -1,5 +1,5 @@
-// StationAdmin v4.0.3
-// 16.03.2026
+// StationAdmin v4.0.4
+// 18.03.2026
 
 // Type definitions
 
@@ -358,6 +358,11 @@ interface ShuffleOptions {
         return;
       }
     }
+
+    if(track.type == MODERATION) {
+      track.score = track.score * 0.75;
+    }
+
     if (track.id in lastPlays && lastPlays[track.id] < 60 * avoidRepeat) {
       if (excludePreviousTracks) {
         track.score = 999999;
@@ -628,14 +633,18 @@ interface ShuffleOptions {
 
       var artistSegments = Math.max(1, Math.floor(numSegments / artistTracks.length));
 
+      var isModeration = artist.tracks[0].type == MODERATION;
+
       // find least filled segment that can act as first segment for this artist
-      var minSegment = artist.name in recentArtists ? 1 : 0;
+      var minSegment = !isModeration && artist.name in recentArtists ? 1 : 0;
       var currentSegment = minSegment;
-      var minDuration = segments[0].duration;
-      for (var s = minSegment + 1; s < artistSegments; s++) {
-        if (segments[s].duration < minDuration) {
-          currentSegment = s;
-          minDuration = segments[s].duration;
+      if(!isModeration) {
+        var minDuration = segments[0].duration;
+        for (var s = minSegment + 1; s < artistSegments; s++) {
+          if (segments[s].duration < minDuration) {
+            currentSegment = s;
+            minDuration = segments[s].duration;
+          }
         }
       }
 
