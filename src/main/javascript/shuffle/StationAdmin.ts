@@ -1,5 +1,5 @@
-// StationAdmin v4.0.4
-// 18.03.2026
+// StationAdmin v4.0.5
+// 20.03.2026
 
 // Type definitions
 
@@ -687,10 +687,12 @@ interface ShuffleOptions {
   }
 
   function scheduleJingles(): void {
+    /*
     var firstJingleInNews = firstJingle != null && scheduledTracks.some(
       st => st.type == NEWS && st.tracks != null && st.tracks.some(t => t === firstJingle)
     );
-    var addFirstJingle = firstJingle != null && !startsWithNews && !firstJingleInNews;
+    */
+    var addFirstJingle = firstJingle != null && !startsWithNews;
     if (!addFirstJingle && jingles.length == 0) return;
     if (addFirstJingle && jingles.length == 0) {
       // schedule first jingle at start
