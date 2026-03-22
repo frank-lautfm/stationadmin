@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1256,6 +1257,71 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
 
   public String getPlaylistJson(int playlistId) throws IOException {
     return this.ctx.getServer().getPlaylistJson(this.ctx.getStationId(), playlistId);
+  }
+
+  /**
+   * Assembles an extended JSON document for developer testing with StationAdmin.ts.
+   * Contains automation_algorithm_name, shuffle_opts, and the sorted list of full tracks.
+   *
+   * @param playlistId
+   * @return pretty-printed JSON string
+   * @throws IOException
+   */
+  public String getPlaylistExtendedJson(int playlistId) throws IOException {
+    // 1. Fetch playlist header: has automation_algorithm_name, shuffle_opts, and entries order
+    de.stationadmin.lfm.backend.Playlist rawPlaylist =
+        this.ctx.getServer().getPlaylist(this.ctx.getStationId(), playlistId);
+
+    // 2. Fetch full track objects as JSON string from /playlists/{id}/tracks
+    String tracksJson = this.ctx.getServer().getPlaylistTracksJson(this.ctx.getStationId(), playlistId);
+
+    // 3. Parse tracks JSON - response may be an array or an object with a "tracks" key
+    //    (same logic as readplaylisttracks.js lines 86-91)
+    ObjectMapper mapper = new ObjectMapper();
+    List<Map<String, Object>> trackList;
+    Object rawTracks = mapper.readValue(tracksJson, Object.class);
+    if (rawTracks instanceof List) {
+      @SuppressWarnings("unchecked")
+      List<Map<String, Object>> asList = (List<Map<String, Object>>) rawTracks;
+      trackList = asList;
+    } else if (rawTracks instanceof Map) {
+      @SuppressWarnings("unchecked")
+      Map<String, Object> asMap = (Map<String, Object>) rawTracks;
+      Object inner = asMap.get("tracks");
+      if (inner instanceof List) {
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> innerList = (List<Map<String, Object>>) inner;
+        trackList = innerList;
+      } else {
+        trackList = new ArrayList<Map<String, Object>>();
+      }
+    } else {
+      trackList = new ArrayList<Map<String, Object>>();
+    }
+
+    // 4. Sort tracks by playlist entry order (same logic as readplaylisttracks.js)
+    TrackRef[] entries = rawPlaylist.getEntries();
+    List<Map<String, Object>> sortedTracks = new ArrayList<Map<String, Object>>();
+    if (entries != null) {
+      for (TrackRef entry : entries) {
+        int trackId = entry.getTrackId();
+        for (Map<String, Object> track : trackList) {
+          Object id = track.get("id");
+          if (id != null && ((Number) id).intValue() == trackId) {
+            sortedTracks.add(track);
+            break;
+          }
+        }
+      }
+    }
+
+    // 5. Assemble result object with fields in the order expected by StationAdmin.ts
+    Map<String, Object> result = new LinkedHashMap<String, Object>();
+    result.put("automation_algorithm_name", rawPlaylist.getAutomationAlgorithm());
+    result.put("shuffle_opts", rawPlaylist.getShuffleOpts());
+    result.put("tracks", sortedTracks);
+
+    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
   }
 
 }

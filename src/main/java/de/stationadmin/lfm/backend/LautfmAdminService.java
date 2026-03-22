@@ -460,8 +460,19 @@ public class LautfmAdminService {
     response.close();
     
     ObjectMapper mapper = new ObjectMapper();
-    Object json = mapper.readValue(content, Object.class);   
-    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);    
+    Object json = mapper.readValue(content, Object.class);
+    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+  }
+
+  public String getPlaylistTracksJson(int stationId, int playlistId) throws IOException {
+    CloseableHttpResponse response = this.doGet("/stations/" + stationId + "/playlists/" + playlistId + "/tracks");
+    InputStream stream = response.getEntity().getContent();
+    String content = IOUtils.toString(stream, "UTF-8");
+    response.close();
+
+    ObjectMapper mapper = new ObjectMapper();
+    Object json = mapper.readValue(content, Object.class);
+    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
   }
 
   private TrackList getTracks(CloseableHttpResponse response) throws IOException {
