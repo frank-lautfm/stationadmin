@@ -1,5 +1,5 @@
-// StationAdmin v4.0.5
-// 20.03.2026
+// StationAdmin v4.0.6
+// 21.03.2026
 
 (function (tracks, opts, trackStats) {
   const SONG = "song";
@@ -360,10 +360,26 @@
     });
     var cDuration = 0;
     var cIdx = 0;
+    var usedTrackNames = new Set();
     while ((tagPattern.length > 0 || cDuration < remainingDuration) && cIdx < candidates.length) {
+      if (
+        trackNameLimit === 9999 &&
+        candidates[cIdx].groupTags &&
+        candidates[cIdx].groupTags.some(function (tg) {
+          return usedTrackNames.has(tg);
+        })
+      ) {
+        cIdx++;
+        continue;
+      }
       cDuration += candidates[cIdx].duration;
       candidates[cIdx].use = true;
       candidates[cIdx].plays = 0;
+      if (trackNameLimit === 9999 && candidates[cIdx].groupTags) {
+        candidates[cIdx].groupTags.forEach(function (tg) {
+          usedTrackNames.add(tg);
+        });
+      }
       cIdx++;
     }
     return artists;

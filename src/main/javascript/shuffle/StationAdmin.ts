@@ -1,5 +1,5 @@
-// StationAdmin v4.0.5
-// 20.03.2026
+// StationAdmin v4.0.6
+// 21.03.2026
 
 // Type definitions
 
@@ -564,10 +564,19 @@ interface ShuffleOptions {
     candidates.sort(function (a, b) { return a.score! - b.score!; });
     var cDuration = 0;
     var cIdx = 0;
+    var usedTrackNames: Set<string> = new Set<string>();
     while ((tagPattern.length > 0 || cDuration < remainingDuration) && cIdx < candidates.length) {
+      if (trackNameLimit === 9999 && candidates[cIdx].groupTags &&
+          candidates[cIdx].groupTags!.some(function(tg: string) { return usedTrackNames.has(tg); })) {
+        cIdx++;
+        continue;
+      }
       cDuration += candidates[cIdx].duration;
       candidates[cIdx].use = true;
       candidates[cIdx].plays = 0;
+      if (trackNameLimit === 9999 && candidates[cIdx].groupTags) {
+        candidates[cIdx].groupTags!.forEach(function(tg: string) { usedTrackNames.add(tg); });
+      }
       cIdx++;
     }
 
