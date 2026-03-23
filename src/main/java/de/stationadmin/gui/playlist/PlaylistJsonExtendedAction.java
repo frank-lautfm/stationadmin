@@ -51,7 +51,7 @@ public class PlaylistJsonExtendedAction extends AbstractAction {
    */
   public PlaylistJsonExtendedAction(ClientContext ctx, ValueModel playlistHolder) {
     super();
-    this.putValue(Action.NAME, ctx.getTextProvider().getString("action.playlist.json.extended"));
+    this.putValue(Action.NAME, ctx.getTextProvider().getString("action.playlist.json"));
     this.ctx = ctx;
     this.playlistHolder = playlistHolder;
     this.setEnabled(false);
@@ -73,7 +73,7 @@ public class PlaylistJsonExtendedAction extends AbstractAction {
       final String json = ctx.getAdminClient().getPlaylistService().getPlaylistExtendedJson(pl.getId());
 
       final JDialog dlg = new JDialog();
-      dlg.setTitle(pl.getName() + " - Erweiterte Rohdaten");
+      dlg.setTitle(pl.getName());
 
       final JTextArea ta = new JTextArea(30, 80);
       ta.setEditable(false);
@@ -84,7 +84,7 @@ public class PlaylistJsonExtendedAction extends AbstractAction {
       // Button panel
       JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-      JButton clipboardBtn = new JButton("In Zwischenablage kopieren");
+      JButton clipboardBtn = new JButton(ctx.getString("action.clipboard.copy"));
       clipboardBtn.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -93,7 +93,7 @@ public class PlaylistJsonExtendedAction extends AbstractAction {
         }
       });
 
-      JButton saveBtn = new JButton("Speichern...");
+      JButton saveBtn = new JButton(ctx.getString("save"));
       saveBtn.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {

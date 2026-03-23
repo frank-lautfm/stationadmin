@@ -47,7 +47,7 @@ public class PlaylistContainer extends JPanel {
     popupOnline.addSeparator();
     popupOnline.add(new ShuffleTesterAction(ctx, playlistSelectionHolder));
     popupOnline.addSeparator();
-    popupOnline.add(new PlaylistJsonAction(ctx, playlistSelectionHolder));
+    // popupOnline.add(new PlaylistJsonAction(ctx, playlistSelectionHolder));
     popupOnline.add(new PlaylistJsonExtendedAction(ctx, playlistSelectionHolder));
     popupOnline.add(new PlaylistShuffleOptsCopyAction(ctx, playlistSelectionHolder));
     popupOnline.addSeparator();

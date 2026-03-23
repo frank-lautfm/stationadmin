@@ -1317,6 +1317,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
 
     // 5. Assemble result object with fields in the order expected by StationAdmin.ts
     Map<String, Object> result = new LinkedHashMap<String, Object>();
+    result.put("id", rawPlaylist.getId());
     result.put("automation_algorithm_name", rawPlaylist.getAutomationAlgorithm());
     result.put("shuffle_opts", rawPlaylist.getShuffleOpts());
     result.put("tracks", sortedTracks);

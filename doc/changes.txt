@@ -8,7 +8,7 @@ Station Admin für laut.fm - Änderungen
 
 Version 5.5.2
 -------------
-[+] Anzeige erweiterter Rohdaten für die Playlist
+[#] Anzeige von Rohdaten mit kompletten Titelinformationen
 [+] Kopieren von Shuffle Opts per Menü
 [+] Englische Übersetzung ergänzt
 [+] Italiensche Übersetzung
