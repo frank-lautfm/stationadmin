@@ -2,6 +2,8 @@ package de.stationadmin.gui.playlist.config.shuffle;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.Console;
@@ -214,16 +216,24 @@ public class StationAdminOptsPanel extends JPanel {
 
     }
 
-    final ValueHolder trackNameLimit = new ValueHolder(getOptions().containsKey("trackNameLimit") ? getOptions().get("trackNameLimit") : 0);
+    final boolean isExcludeAll = getOptions().containsKey("trackNameLimit") && Integer.valueOf(9999).equals(getOptions().get("trackNameLimit"));
+    final ValueHolder trackNameLimit = new ValueHolder(isExcludeAll ? 0 : (getOptions().containsKey("trackNameLimit") ? getOptions().get("trackNameLimit") : 0));
     {
-      JPanel titleNameLimitPanel = new JPanel(new FormLayout("pref,2dlu,pref,2dlu,pref", "pref"));
-      titleNameLimitPanel.add(new JLabel(ctx.getTextProvider().getString("playlistcfg.advice.titlename.description.pre")), cc.xy(1, 1));
-      JTextField tf = BasicComponentFactory.createIntegerField(trackNameLimit, 0);
-      tf.setColumns(2);
-      titleNameLimitPanel.add(tf, cc.xy(3, 1));
-      titleNameLimitPanel.add(new JLabel(ctx.getTextProvider().getString("playlistcfg.advice.titlename.description.post")), cc.xy(5, 1));
+      // Wrap text-field row and checkbox in one sub-panel so they appear close together
+      CellConstraints icc = new CellConstraints();
+      JPanel trackNameLimitGroup = new JPanel(new FormLayout("pref", "pref,3dlu,pref"));
 
-      panel.add(titleNameLimitPanel, cc.xywh(2, row, 3, 1, CellConstraints.FILL, CellConstraints.CENTER));
+      JPanel titleNameLimitPanel = new JPanel(new FormLayout("pref,2dlu,pref,2dlu,pref", "pref"));
+      titleNameLimitPanel.add(new JLabel(ctx.getTextProvider().getString("playlistcfg.advice.titlename.description.pre")), icc.xy(1, 1));
+      final JTextField tf = BasicComponentFactory.createIntegerField(trackNameLimit, 0);
+      tf.setColumns(2);
+      if (isExcludeAll) {
+        tf.setEditable(false);
+      }
+      titleNameLimitPanel.add(tf, icc.xy(3, 1));
+      titleNameLimitPanel.add(new JLabel(ctx.getTextProvider().getString("playlistcfg.advice.titlename.description.post")), icc.xy(5, 1));
+
+      trackNameLimitGroup.add(titleNameLimitPanel, icc.xy(1, 1));
 
       trackNameLimit.addValueChangeListener(new PropertyChangeListener() {
         @Override
@@ -237,6 +247,26 @@ public class StationAdminOptsPanel extends JPanel {
         }
       });
 
+      JCheckBox excludeAllCb = new JCheckBox(ctx.getTextProvider().getString("playlistcfg.advice.titlename.excludecompletely"));
+      excludeAllCb.setSelected(isExcludeAll);
+      excludeAllCb.addItemListener(new ItemListener() {
+        @Override
+        public void itemStateChanged(ItemEvent e) {
+          if (e.getStateChange() == ItemEvent.SELECTED) {
+            tf.setText("");
+            tf.setEditable(false);
+            trackNameLimit.setValue(0);
+            getOptions().put("trackNameLimit", 9999);
+          } else {
+            tf.setEditable(true);
+            getOptions().remove("trackNameLimit");
+          }
+        }
+      });
+
+      trackNameLimitGroup.add(excludeAllCb, icc.xy(1, 3));
+
+      panel.add(trackNameLimitGroup, cc.xywh(2, row, 3, 1, CellConstraints.LEFT, CellConstraints.CENTER));
       row += 2;
     }
 

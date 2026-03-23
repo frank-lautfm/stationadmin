@@ -10,6 +10,7 @@ Version 5.5.2
 -------------
 [#] Anzeige von Rohdaten mit kompletten Titelinformationen
 [+] Kopieren von Shuffle Opts per Menü
+[+] "Wiederholungen völlig ausschließen" für gleichnamige Titel in der Shuffle-Konfiguration
 [+] Englische Übersetzung ergänzt
 [+] Italiensche Übersetzung
 
