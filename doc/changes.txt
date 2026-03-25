@@ -12,7 +12,7 @@ Version 5.5.2
 [+] Kopieren von Shuffle Opts per Menü
 [+] "Wiederholungen völlig ausschließen" für gleichnamige Titel in der Shuffle-Konfiguration
 [+] Englische Übersetzung ergänzt
-[+] Italiensche Übersetzung
+[+] Italienische Übersetzung
 
 
 Version 5.5.1
