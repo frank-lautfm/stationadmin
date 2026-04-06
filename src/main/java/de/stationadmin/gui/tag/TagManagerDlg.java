@@ -314,6 +314,15 @@ public class TagManagerDlg extends StationAdminFrame {
      */
     @Override
     public void actionPerformed(ActionEvent evt) {
+      if (JOptionPane.showConfirmDialog(TagManagerDlg.this, ctx.getString("titletagmanager.action.delete.confirm", tag.getName()), "",
+          JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+        try {
+          tagManager.deleteTag(tag.getName());
+        } catch (IOException e) {
+          ErrorInfo errorInfo = ctx.createErrorInfo(e, "titletagmanager.action.delete.failed");
+          JXErrorPane.showDialog(TagManagerDlg.this, errorInfo);
+        }
+      }
     }
 
     /**
