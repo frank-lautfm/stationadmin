@@ -75,7 +75,7 @@ public class PlaylistConfigExplain {
       if (entry.getTrack() != null && entry.getTrack().getArtist() != null && entry.getTrack().getTitle() != null) {
         if (!info.isAdTriggerIncluded() && (entry.getTrack().getArtist().contains("START_AD_BREAK") || entry.getTrack().getTitle().contains("START_AD_BREAK"))) {
           info.setAdTriggerIncluded(true);
-        } else if (entry.getTrackId() == TrackRegistry.LAUTFM_NEWS_ID) {
+        } else if (TrackRegistry.isLautfmNewsOrWheather(entry.getTrackId())) {
           info.setNewsIncluded(true);
         } else if (entry.getTrack() != null && entry.getTrack().getType() == BasicTrack.TYPE_JINGLE) {
           numJingles++;

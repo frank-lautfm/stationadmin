@@ -41,9 +41,13 @@ public class TrackRegistry extends AbstractBean {
   private Map<Integer, Integer> legacyIdMapping = new HashMap<Integer, Integer>();
   private boolean fullLegacyIdMappingLoaded = false;
   private Map<Integer, Integer> reverseLegacyIdMapping = new HashMap<Integer, Integer>();
+  
+  public static boolean isLautfmNewsOrWheather(int trackId) {
+  	return trackId >= 1 && trackId <= 3;
+  }
 
   public static boolean isSpecialTrack(int trackId) {
-  	return trackId == STANDARD_AD_TRIGGER_ID  || trackId == LAUTFM_NEWS_ID || trackId == STATIONADMIN_SEPARATOR;
+  	return isLautfmNewsOrWheather(trackId) || trackId == STANDARD_AD_TRIGGER_ID || trackId == STATIONADMIN_SEPARATOR;
   }
   
   /**
