@@ -26,7 +26,7 @@ public class SynchronizePlaylistsAction extends AbstractSynchronizeAction {
 
   @Override
   protected void performAction() throws Exception {
-    adminClient.getPlaylistService().synchronize();
+    adminClient.getPlaylistService().synchronize(true);
   }
 
 }

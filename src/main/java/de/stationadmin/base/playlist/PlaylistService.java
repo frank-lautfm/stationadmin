@@ -565,9 +565,25 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
   }
 
   /**
-   * Refetches and updates all online playlists
+   * Refetches and updates all online playlists without a full track update.
+   * Track data is only loaded from the server for tracks that are missing from the local registry.
+   * Use {@link #synchronize(boolean)} with <code>true</code> to enforce a full track update.
    */
   public void synchronize() throws IOException {
+    synchronize(false);
+  }
+
+  /**
+   * Refetches and updates all online playlists.
+   * Track data is only loaded from the server for tracks that have not been refreshed yet
+   * in this synchronization run.
+   *
+   * @param withFullTrackUpdate if <code>true</code>, all tracks in each playlist that have not
+   *        been refreshed yet in this run are fetched from the server, even if they are already
+   *        present in the local registry. Pass <code>true</code> only when performing an explicit
+   *        full synchronization.
+   */
+  public void synchronize(boolean withFullTrackUpdate) throws IOException {
     Map<Integer, Map<Integer, Long>> timestampMaps = new HashMap<Integer, Map<Integer, Long>>();
     for (Playlist playlist : this.playlistRegistry.getPlaylists(PlaylistType.ONLINE)) {
       timestampMaps.put(playlist.getId(), playlist.getTimestampMap());
@@ -595,7 +611,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
         this.ctx.updateStatus("getPlaylist", playlist.getDisplayName());
         de.stationadmin.lfm.backend.Playlist pl = ctx.getServer().getPlaylist(ctx.getStationId(), playlistInfo.getId());
 
-        this.loadPlaylistTracks(playlist, pl.getEntries(), refreshed);
+        this.loadPlaylistTracks(playlist, pl.getEntries(), refreshed, withFullTrackUpdate);
         updateMetaData(pl, playlist);
       } catch (Exception e) {
         log.error("error while loading titles for playlist " + playlistInfo.getTitle(), e);
@@ -609,7 +625,19 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     this.playlistModificationDetector.markClean();
   }
 
-  private void loadPlaylistTracks(Playlist playlist, TrackRef[] trackRefs, Set<Integer> refreshed) throws IOException {
+  /**
+   * Loads tracks for a playlist from the server.
+   *
+   * @param playlist            the playlist to populate
+   * @param trackRefs           track references from the server response
+   * @param refreshed           set of track IDs already refreshed in this synchronization run;
+   *                            updated by this method
+   * @param withFullTrackUpdate if <code>true</code>, tracks already present in the local registry
+   *                            but not yet refreshed in this run are also fetched from the server.
+   *                            If <code>false</code>, only tracks missing from the local registry
+   *                            are fetched.
+   */
+  private void loadPlaylistTracks(Playlist playlist, TrackRef[] trackRefs, Set<Integer> refreshed, boolean withFullTrackUpdate) throws IOException {
     if (trackRefs != null) {
       BasicTrack[] tracks = new BasicTrack[trackRefs.length];
       int[] missing = new int[trackRefs.length];
@@ -622,6 +650,9 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
           } else {
             missing[missingIdx++] = trackRefs[i].getTrackId();
           }
+        } else if (withFullTrackUpdate && !refreshed.contains(trackRefs[i].getTrackId())) {
+          // track exists locally but has not been refreshed yet in this run
+          missing[missingIdx++] = trackRefs[i].getTrackId();
         }
       }
 
@@ -654,6 +685,21 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
   }
 
   public void synchronize(int... playlistIds) throws IOException {
+    this.synchronize(false, playlistIds);
+  }
+
+  /**
+   * Refetches and updates the specified online playlists.
+   * Track data is only loaded from the server for tracks that have not been refreshed yet
+   * in this synchronization run.
+   *
+   * @param withFullTrackUpdate if <code>true</code>, all tracks in each playlist that have not
+   *        been refreshed yet in this run are fetched from the server, even if they are already
+   *        present in the local registry. Pass <code>true</code> only when performing an explicit
+   *        full synchronization.
+   * @param playlistIds         IDs of the playlists to synchronize
+   */
+  public void synchronize(boolean withFullTrackUpdate, int... playlistIds) throws IOException {
     this.ctx.checkSession();
     HashSet<Integer> ids = new HashSet<Integer>();
     for (int id : playlistIds) {
@@ -683,7 +729,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
         this.ctx.updateStatus("getPlaylist", playlist.getDisplayName());
 
         de.stationadmin.lfm.backend.Playlist pl = ctx.getServer().getPlaylist(ctx.getStationId(), playlist.getId());
-        this.loadPlaylistTracks(playlist, pl.getEntries(), refreshed);
+        this.loadPlaylistTracks(playlist, pl.getEntries(), refreshed, withFullTrackUpdate);
         updateMetaData(pl, playlist);
         this.savePlaylistAs(playlist, Integer.toString(playlist.getId()));
 

@@ -60,7 +60,7 @@ public class SynchronizationDialog extends JDialog {
     this.getContentPane().setLayout(new BorderLayout());
     this.setTitle("Synchronisierung - " + adminClient.getStation());
 
-    JXLabel description = new JXLabel("Es sind Daten auf dem laut.fm-Server verändert worden. Station Admin ist möglicherweise nicht auf dem aktuellen Stand. Was möchtest Du synchronisieren?");
+    JXLabel description = new JXLabel("Es sind Daten auf dem laut.fm-Server verï¿½ndert worden. Station Admin ist mï¿½glicherweise nicht auf dem aktuellen Stand. Was mï¿½chtest Du synchronisieren?");
     description.setLineWrap(true);
     this.getContentPane().add(description, BorderLayout.NORTH);
 
@@ -149,7 +149,7 @@ public class SynchronizationDialog extends JDialog {
           syncClientCfg = true;
         }
         if(synchronizePlaylistsAll.booleanValue()) {
-          adminClient.getPlaylistService().synchronize();
+          adminClient.getPlaylistService().synchronize(true);
           syncClientCfg = true;
         }
         if(synchronizeTags.booleanValue()) {

@@ -454,7 +454,7 @@ public class StationAdminClient {
     this.sessionCtx.checkSession();
     try {
       this.trackService.synchronize();
-      this.playlistService.synchronize();
+      this.playlistService.synchronize(true);
       this.tagManager.synchronize();
       this.schedule.synchronize();
       this.trackService.getTrackRegistry().removeUnused();
