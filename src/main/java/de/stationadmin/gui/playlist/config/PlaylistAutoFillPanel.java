@@ -1,5 +1,8 @@
 package de.stationadmin.gui.playlist.config;
 
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -7,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -27,9 +31,11 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.AutoFillRule;
+import de.stationadmin.base.playlist.NewsTrackOption;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.ShuffleScriptMeta;
 import de.stationadmin.gui.ClientContext;
+import de.stationadmin.gui.util.EnumListCellRenderer;
 
 public class PlaylistAutoFillPanel extends JPanel {
   private static final long serialVersionUID = -6015471156309531424L;
@@ -55,9 +61,6 @@ public class PlaylistAutoFillPanel extends JPanel {
     row += 2;
 
     {
-      // JCheckBox enabledCb =
-      // BasicComponentFactory.createCheckBox(model.getBufferedModel("enabled"),
-      // ctx.getString("playlistcfg.property.autofill.enabled"));
       JRadioButton offRb = BasicComponentFactory.createRadioButton(model.getBufferedModel("enabled"), Boolean.FALSE, ctx.getString("playlistcfg.property.autofill.disabled"));
       this.add(offRb, cc.xywh(2, row, 3, 1));
       row += 2;
@@ -184,10 +187,58 @@ public class PlaylistAutoFillPanel extends JPanel {
       row += 2;
     }
 
+    // News checkbox + news type combobox on the same row
     {
+      final ValueModel newsTypeModel = model.getBufferedModel("newsTrack");
+
       JCheckBox newsCb = BasicComponentFactory.createCheckBox(model.getBufferedModel("includeNews"), ctx.getString("playlistcfg.property.autofill.includeNews"));
-      this.add(newsCb, cc.xywh(2, row, 3, 1));
+      this.add(newsCb, cc.xy(2, row));
       dependentComponents.add(newsCb);
+
+      final JComboBox<NewsTrackOption> newsTypeCombo = new JComboBox<>(NewsTrackOption.values());
+      newsTypeCombo.setRenderer(new EnumListCellRenderer(ctx.getTextProvider(), "autofill.newstrack"));
+      newsTypeCombo.setPreferredSize(new Dimension(180, newsTypeCombo.getPreferredSize().height));
+
+      // Sync model -> combobox
+      Object currentNewsType = newsTypeModel.getValue();
+      if (currentNewsType instanceof NewsTrackOption) {
+        newsTypeCombo.setSelectedItem(currentNewsType);
+      } else {
+        newsTypeCombo.setSelectedItem(NewsTrackOption.NEWS_WITH_WEATHER);
+      }
+      newsTypeModel.addValueChangeListener(new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          if (evt.getNewValue() instanceof NewsTrackOption) {
+            newsTypeCombo.setSelectedItem(evt.getNewValue());
+          }
+        }
+      });
+
+      // Sync combobox -> model
+      newsTypeCombo.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          newsTypeModel.setValue(newsTypeCombo.getSelectedItem());
+        }
+      });
+
+      // Enable/disable combobox based on news checkbox state
+      boolean newsChecked = Boolean.TRUE.equals(model.getBufferedModel("includeNews").getValue());
+      newsTypeCombo.setEnabled(newsChecked);
+      model.getBufferedModel("includeNews").addValueChangeListener(new PropertyChangeListener() {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+          boolean enabled = Boolean.TRUE.equals(evt.getNewValue());
+          newsTypeCombo.setEnabled(enabled);
+        }
+      });
+
+      this.add(newsTypeCombo, cc.xy(4, row, CellConstraints.LEFT, CellConstraints.DEFAULT));
+      // newsTypeCombo is NOT added to dependentComponents directly for the outer
+      // enabled/disabled logic - its enabled state is controlled by the news checkbox above.
+      // However we still need it disabled when autofill itself is disabled:
+      dependentComponents.add(newsTypeCombo);
 
       row += 2;
     }
@@ -226,6 +277,19 @@ public class PlaylistAutoFillPanel extends JPanel {
         comp.setEnabled(enabled.booleanValue());
       } else {
         comp.setEnabled(false);
+      }
+    }
+
+    // After applying the global enabled state, re-apply the news-type combobox
+    // enabled state based on the news checkbox (it may have been overridden above)
+    if (enabled != null && Boolean.TRUE.equals(enabled.getValue())) {
+      boolean newsChecked = Boolean.TRUE.equals(model.getBufferedModel("includeNews").getValue());
+      // find the newsTypeCombo - it was the last item added to dependentComponents before adTrigger
+      // Re-apply: iterate dependentComponents and find JComboBox instances
+      for (JComponent comp : dependentComponents) {
+        if (comp instanceof JComboBox) {
+          comp.setEnabled(newsChecked);
+        }
       }
     }
 

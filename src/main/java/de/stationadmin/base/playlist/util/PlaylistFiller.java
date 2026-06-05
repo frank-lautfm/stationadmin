@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.stationadmin.base.playlist.NewsTrackOption;
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
@@ -37,6 +38,10 @@ public class PlaylistFiller {
     this.trackRegistry = trackService.getTrackRegistry();
     this.tagManager = tagManager;
   }
+  
+  private static boolean isNewsOrJingle(BasicTrack track) {
+  	return track.getType() == BasicTrack.TYPE_JINGLE || track.getType() == BasicTrack.TYPE_NEWS;
+  }
 
   /**
    * Fills a single playlist with tracks based on autofill rules (if enabled)
@@ -46,24 +51,18 @@ public class PlaylistFiller {
    */
   public void fillPlaylist(Playlist playlist) throws IOException, MissingSourceTracksException {
     if (playlist.getAutoFillRule().isEnabled()) {
-      BasicTrack preNewsJingle = null;
-      BasicTrack firstJingle = null;
-      if (playlist.getEntries().size() > 0) {
 
-        if (playlist.getEntries().size() > 1 && playlist.getEntry(0).getTrack().getType() == BasicTrack.TYPE_NEWS
-            && playlist.getEntry(1).getTrack().getType() == BasicTrack.TYPE_JINGLE) {
-          firstJingle = playlist.getEntry(1).getTrack();
-        } else if (playlist.getEntries().size() > 2 && playlist.getEntry(0).getTrack().getType() == BasicTrack.TYPE_JINGLE
-            && playlist.getEntry(1).getTrack().getType() == BasicTrack.TYPE_NEWS) {
-          preNewsJingle = playlist.getEntry(0).getTrack();
-          if (playlist.getEntry(2).getTrack().getType() == BasicTrack.TYPE_JINGLE) {
-            firstJingle = playlist.getEntry(2).getTrack();
-          }
-        } else if (playlist.getEntry(0).getTrack().getType() == BasicTrack.TYPE_JINGLE) {
-          firstJingle = playlist.getEntry(0).getTrack();
-        }
-      }
+    	List<BasicTrack> startTracks = new ArrayList<BasicTrack>();
+      boolean weatherWasAtBeginning = false;
+    	for(int i = 0; i < playlist.getEntries().size() && isNewsOrJingle(playlist.getEntry(i).getTrack()) ; i++) {
+    		startTracks.add(playlist.getEntry(i).getTrack());
+    		if(playlist.getEntry(i).getTrack().getId() == TrackRegistry.LAUTFM_NEWS_WEATHER_ID) {
+    			weatherWasAtBeginning = true;
+    		}
+    	}
+    	
 
+      // --- Build track pool from sources ---
       Map<Integer, BasicTrack> tracks = new HashMap<>();
 
       // Source: Tags
@@ -108,28 +107,57 @@ public class PlaylistFiller {
         throw new MissingSourceTracksException(playlist.getName());
       }
 
-      playlist.removeEntries(new ArrayList<Entry>(playlist.getEntries()));
+      ArrayList<BasicTrack> playlistTracks = new ArrayList<BasicTrack>();
+
+      NewsTrackOption newsOption = playlist.getAutoFillRule().getNewsTrack();
 
       if (playlist.getAutoFillRule().isIncludeNews()) {
-        if (preNewsJingle != null) {
-          if (trackList.remove(preNewsJingle)) {
-            playlist.addTrack(preNewsJingle);
+        // Add the appropriate news/weather track(s) at the beginning
+        switch (newsOption) {
+          case NEWS_WITH_WEATHER: {
+            BasicTrack newsWeatherTrack = trackService.getTrack(TrackRegistry.LAUTFM_NEWS_WEATHER_ID);
+            if (newsWeatherTrack != null) {
+              playlistTracks.add(newsWeatherTrack);
+            }
+            break;
+          }
+          case NEWS: {
+            BasicTrack newsTrack = trackService.getTrack(TrackRegistry.LAUTFM_NEWS_ID);
+            if (newsTrack != null) {
+            	playlistTracks.add(newsTrack);
+            }
+            break;
+          }
+          case WEATHER: {
+            BasicTrack weatherTrack = trackService.getTrack(TrackRegistry.LAUTFM_WEATHER_ID);
+            if (weatherTrack != null) {
+            	playlistTracks.add(weatherTrack);
+            }
+            break;
+          }
+          case NEWS_AND_WEATHER: {
+            // Add news track at beginning; weather track is handled after music tracks
+            // unless weather was already at the beginning of the original playlist
+            BasicTrack newsTrack = trackService.getTrack(TrackRegistry.LAUTFM_NEWS_ID);
+            if (newsTrack != null) {
+            	playlistTracks.add(newsTrack);
+            }
+            if (weatherWasAtBeginning) {
+              // Preserve weather at beginning as well
+              BasicTrack weatherTrack = trackService.getTrack(TrackRegistry.LAUTFM_WEATHER_ID);
+              if (weatherTrack != null) {
+                playlist.addTrack(weatherTrack);
+              }
+            }
+            break;
           }
         }
-        BasicTrack newsTrack = trackService.getTrack(TrackRegistry.LAUTFM_NEWS_ID);
-        if (newsTrack != null) {
-          playlist.addTrack(newsTrack);
-        }
       }
+      
 
-      if (firstJingle != null) {
-        if (trackList.remove(firstJingle)) {
-          playlist.addTrack(firstJingle);
-        }
-      }
-
+      // Add all music/remaining tracks
       for (BasicTrack track : trackList) {
-        playlist.addTrack(track);
+        playlistTracks.add(track);
       }
 
       PlaylistProfile profile = playlistService.getProfile(playlist.getProfileId());
@@ -139,12 +167,12 @@ public class PlaylistFiller {
         if (profile.getAdTrigger().getSeperatorId() > 0) {
           BasicTrack adSeparator = trackRegistry.getTrack(profile.getAdTrigger().getSeperatorId());
           if (adSeparator != null) {
-            playlist.addTrack(adSeparator);
+          	playlistTracks.add(adSeparator);
           }
         }
         BasicTrack adTrigger = profile.getAdTrigger().getTriggerId() > 0 ? trackRegistry.getTrack(profile.getAdTrigger().getTriggerId()) : trackRegistry.getStandardAdTrigger();
         if (adTrigger != null) {
-          playlist.addTrack(adTrigger);
+        	playlistTracks.add(adTrigger);
         }
       }
 
@@ -153,10 +181,33 @@ public class PlaylistFiller {
         for (TrackRule rule : profile.getTrackRules().getRules()) {
           BasicTrack track = trackRegistry.getTrack(rule.getTrackId());
           if (track != null && !tracks.containsKey(track.getId())) {
-            playlist.addTrack(track);
+          	playlistTracks.add(track);
           }
         }
       }
+
+      // For NEWS_AND_WEATHER: append weather track at the end if it was NOT at the beginning
+      if (playlist.getAutoFillRule().isIncludeNews() && newsOption == NewsTrackOption.NEWS_AND_WEATHER && !weatherWasAtBeginning) {
+        BasicTrack weatherTrack = trackService.getTrack(TrackRegistry.LAUTFM_WEATHER_ID);
+        if (weatherTrack != null) {
+        	playlistTracks.add(weatherTrack);
+        }
+      }
+      
+      // Now build the final playlist
+      playlist.removeEntries(new ArrayList<Entry>(playlist.getEntries()));
+      // start with start tracks and re-insert in original order if they still exist
+      for (BasicTrack track : startTracks) {
+				if(playlistTracks.remove(track)) {
+					playlist.addTrack(track);
+				}
+			}
+      
+      // then add remaining tracks
+      for(BasicTrack track : playlistTracks) {
+      	playlist.addTrack(track);
+      }
+       
     }
   }
 

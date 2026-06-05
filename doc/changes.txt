@@ -9,7 +9,8 @@ Station Admin für laut.fm - Änderungen
 Version 5.6.0
 -------------
 {*] Beim Synchronisieren blieben unter Umständen Änderungen in den Tracks unbemerkt. Wenn alles synchronisiert wird werden jetzt in jedem Fall auch Playlst-Tracks vom Server geladen.
-[#] laut.fm Tracks "Nachrichten" und "Wetter" werden als Special Tracks markiert, genau wie "Nachrichten & Wetter".  
+[+] laut.fm Tracks "Nachrichten" und "Wetter" werden als Special Tracks markiert, genau wie "Nachrichten & Wetter".  
+[+] Automatisches Befüllen unterstützt alle laut.fm-Nachrichtentracks
 
 
 Version 5.5.3

@@ -112,7 +112,7 @@ public class PlaylistShuffler {
             ctx.getJingles().add(title);
             jingleIds.add(title.getId());
           }
-          if (pos == 0 || (pos == 1 && entries.get(0).getTrackId() == TrackRegistry.LAUTFM_NEWS_ID)) {
+          if (pos == 0 || (pos == 1 && entries.get(0).getTrackId() == TrackRegistry.LAUTFM_NEWS_WEATHER_ID)) {
             ctx.setStartsWithJingle(true);
           }
         }

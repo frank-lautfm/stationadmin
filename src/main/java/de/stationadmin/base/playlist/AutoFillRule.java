@@ -18,6 +18,7 @@ public class AutoFillRule {
   private boolean includeAdTrigger = false;
   private boolean includeTrackRules = false;
   private boolean includeNews = false;
+  private NewsTrackOption newsTrack = NewsTrackOption.NEWS_WITH_WEATHER;
 
   public boolean isEnabled() {
     return enabled;
@@ -78,5 +79,13 @@ public class AutoFillRule {
 	public void setDuplicatesFromPlaylists(boolean duplicatesFromPlaylists) {
 		this.duplicatesFromPlaylists = duplicatesFromPlaylists;
 	}
+
+	 public NewsTrackOption getNewsTrack() {
+	   return newsTrack != null ? newsTrack : NewsTrackOption.NEWS_WITH_WEATHER;
+	 }
+
+	 public void setNewsTrack(NewsTrackOption newsTrack) {
+	   this.newsTrack = newsTrack;
+	 }
 
 }

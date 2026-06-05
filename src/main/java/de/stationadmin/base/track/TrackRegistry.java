@@ -25,7 +25,9 @@ import de.stationadmin.base.util.AbstractBean;
  */
 public class TrackRegistry extends AbstractBean {
   public static final int STANDARD_AD_TRIGGER_ID = 0;
-  public static final int LAUTFM_NEWS_ID = 1;
+  public static final int LAUTFM_NEWS_WEATHER_ID = 1;
+  public static final int LAUTFM_NEWS_ID = 2;
+  public static final int LAUTFM_WEATHER_ID = 3;
   public static final int STATIONADMIN_SEPARATOR = 8664493;
 
   

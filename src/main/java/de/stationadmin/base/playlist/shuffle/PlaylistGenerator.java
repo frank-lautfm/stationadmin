@@ -265,7 +265,7 @@ public class PlaylistGenerator {
     if (ctx.getProfile().isProtectFirstJingle() && playlist.getEntries().size() > 0 && !ctx.getProfile().isProtectAllJingles()) {
       // check if first title is jingle and protect it if so
       BasicTrack firstTrack = playlist.getEntries().get(0).getTrack();
-      if (firstTrack.getId() == TrackRegistry.LAUTFM_NEWS_ID && playlist.getEntries().size() > 1) {
+      if (firstTrack.getId() == TrackRegistry.LAUTFM_NEWS_WEATHER_ID && playlist.getEntries().size() > 1) {
         firstTrack = playlist.getEntries().get(1).getTrack();
       }
       if (firstTrack != null && firstTrack.getType() == BasicTrack.TYPE_JINGLE && (playlistEnhancer == null || !playlistEnhancer.excludeFromCorePlaylist(firstTrack))) {

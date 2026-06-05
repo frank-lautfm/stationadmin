@@ -26,13 +26,13 @@ public class NewsEngine implements PlaylistEnhancer {
 
   @Override
   public boolean excludeFromCorePlaylist(BasicTrack track) {
-    return track.getId() == TrackRegistry.LAUTFM_NEWS_ID;
+    return track.getId() == TrackRegistry.LAUTFM_NEWS_WEATHER_ID;
   }
 
   private boolean isApplicable(Playlist playlist) {
     if (shuffleMode) {
       for (Entry entry : playlist.getEntries()) {
-        if (entry.getTrackId() == TrackRegistry.LAUTFM_NEWS_ID) {
+        if (entry.getTrackId() == TrackRegistry.LAUTFM_NEWS_WEATHER_ID) {
           return true;
         }
       }
@@ -51,7 +51,7 @@ public class NewsEngine implements PlaylistEnhancer {
     boolean firstJingleAfterNews = (shuffleMode ? protectFirstJingle : playlist.getGenerateFirstJingleAfterNews()) && tracks.get(0).getType() == BasicTrack.TYPE_JINGLE;
     int newsLength = shuffleMode ? 150 : 160;
     try {
-      BasicTrack newsTrack = trackService.getTrack(TrackRegistry.LAUTFM_NEWS_ID);
+      BasicTrack newsTrack = trackService.getTrack(TrackRegistry.LAUTFM_NEWS_WEATHER_ID);
 
       int totalDuration = 0;
       for (int i = 0; i < tracks.size(); i++) { 
