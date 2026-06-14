@@ -101,9 +101,6 @@
 			</fileset>
 			<fileset dir="${basedir}/doc" includes="shufflescripts.readme.txt" />
 		</copy>
-		<copy todir="${dist.dir.app}/script">
-			<fileset dir="${src.dir.javascript}"/>
-		</copy>
 		
 
 		<copy todir="${dist.dir.app}//">
