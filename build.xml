@@ -44,6 +44,7 @@
 	<property name="dist.dir.app" value="${dist.dir}/application" />
 	<property name="dist.dir.lib" value="${dist.dir}/library" />
 	<property name="dist.dir.src" value="${dist.dir}/src" />
+	<property name="version.src.file" value="${src.dir.java}/de/stationadmin/base/Version.java" />
 
 
 	<!--
@@ -125,9 +126,33 @@
 				<attribute name="Class-Path" value="${jar.classpath}" />
 			</manifest>
 		</jar>
+
+		<!-- Read the version constants from Version.java using a JavaScript snippet (Nashorn, JDK 8) -->
+		<script language="javascript"><![CDATA[
+			var fs = new java.io.FileReader(project.getProperty("version.src.file"));
+			var br = new java.io.BufferedReader(fs);
+			var major = "", minor = "", step = "";
+			var line;
+			while ((line = br.readLine()) != null) {
+				var mMajor = line.match(/int\s+MAJOR\s*=\s*(\d+)/);
+				if (mMajor) major = mMajor[1];
+				var mMinor = line.match(/int\s+MINOR\s*=\s*(\d+)/);
+				if (mMinor) minor = mMinor[1];
+				var mStep  = line.match(/int\s+STEP\s*=\s*(\d+)/);
+				if (mStep)  step  = mStep[1];
+			}
+			br.close();
+			project.setProperty("app.version", major + "." + minor + "." + step);
+		]]></script>
+
+		<!-- Create versioned zip archive, e.g. StationAdmin-5.6.1.zip -->
+		<echo message="Creating zip archive: StationAdmin-${app.version}.zip" />
+		<zip destfile="${dist.dir}/StationAdmin-${app.version}.zip">
+			<fileset dir="${dist.dir.app}" />
+		</zip>
 	</target>
 
-  <target name="dist.tool.playlistimport" depends="dist">
+	 <target name="dist.tool.playlistimport" depends="dist">
 
     <mkdir dir="${build.dir}" />
      <javac srcdir="${basedir}/src/tools/playlistimport/java" destdir="${build.dir}" debug="${debug}" optimize="${optimize}" deprecation="${deprecation}" excludes="**/Test*.java" source="1.8" target="1.8" encoding="iso-8859-15">
