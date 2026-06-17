@@ -4,6 +4,7 @@
 /plans/
 /.vscode/
 /src/test/js/node_modules/
+/doc/wiki
 .project
 .classpath
 .settings

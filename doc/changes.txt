@@ -9,6 +9,7 @@ Station Admin für laut.fm - Änderungen
 Version 5.6.1
 -------------
 {*] Nachrichteneinstellungen waren nicht konfigurierbar wenn nur "Nachrichten" oder "Wetter"-Tracks in der Playlist enthalten sind.
+]+] Nachrichten als Tracktyp bei Programmelementen hinzugefügt
 
 
 Version 5.6.0
