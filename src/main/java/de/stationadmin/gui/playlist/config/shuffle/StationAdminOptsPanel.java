@@ -35,6 +35,7 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.Playlist.Entry;
 import de.stationadmin.base.tag.StaticTag;
+import de.stationadmin.base.track.BasicTrack;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.playlist.config.PlaylistConfigurationModel;
 import de.stationadmin.gui.util.EnumListCellRenderer;
@@ -272,7 +273,7 @@ public class StationAdminOptsPanel extends JPanel {
 
     boolean containsNews = false;
     for (Entry entry : model.getBean().getEntries()) {
-      if (entry.getTrackId() == 1) {
+      if (entry.getTrack().getType() == BasicTrack.TYPE_NEWS) {
         containsNews = true;
         break;
       }

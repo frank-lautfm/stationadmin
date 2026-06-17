@@ -6,6 +6,11 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 5.6.1
+-------------
+{*] Nachrichteneinstellungen waren nicht konfigurierbar wenn nur "Nachrichten" oder "Wetter"-Tracks in der Playlist enthalten sind.
+
+
 Version 5.6.0
 -------------
 {*] Beim Synchronisieren blieben unter Umständen Änderungen in den Tracks unbemerkt. Wenn alles synchronisiert wird werden jetzt in jedem Fall auch Playlst-Tracks vom Server geladen.
