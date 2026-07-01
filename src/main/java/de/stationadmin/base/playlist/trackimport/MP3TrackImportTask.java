@@ -8,11 +8,10 @@ import java.io.File;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.blinkenlights.jid3.ID3Exception;
-import org.blinkenlights.jid3.ID3Tag;
-import org.blinkenlights.jid3.MP3File;
-import org.blinkenlights.jid3.v1.ID3V1Tag;
-import org.blinkenlights.jid3.v2.ID3V2Tag;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
 
 import de.stationadmin.base.track.DetailedTrack;
 import de.stationadmin.base.util.MP3Util;
@@ -26,7 +25,7 @@ public class MP3TrackImportTask extends TrackImportTask {
   private static final Logger log = LogManager.getLogger(MP3TrackImportTask.class);
   private boolean resolved = false;
   private File file;
-  private ID3Tag tag;
+  private Tag tag;
 
   /**
    * Creates a new import task
@@ -39,7 +38,7 @@ public class MP3TrackImportTask extends TrackImportTask {
     this.file = file;
   }
 
-  public MP3TrackImportTask(File file, ID3Tag tag) {
+  public MP3TrackImportTask(File file, Tag tag) {
     super();
     this.file = file;
     this.tag = tag;
@@ -85,24 +84,15 @@ public class MP3TrackImportTask extends TrackImportTask {
       String album = null;
 
       try {
-        MP3File mp3File = new MP3File(file);
-        boolean hasID3V2Tags = false;
-        for (ID3Tag tag : mp3File.getTags()) {
-          if (tag instanceof ID3V1Tag && !hasID3V2Tags) {
-            artist = StringUtils.trimToNull(((ID3V1Tag) tag).getArtist());
-            title = StringUtils.trimToNull(((ID3V1Tag) tag).getTitle());
-            album = StringUtils.trimToNull(((ID3V1Tag) tag).getAlbum());
-            this.tag = tag;
-          }
-          if (tag instanceof ID3V2Tag) {
-            hasID3V2Tags = true;
-            artist = StringUtils.trimToNull(((ID3V2Tag) tag).getArtist());
-            title = StringUtils.trimToNull(((ID3V2Tag) tag).getTitle());
-            album = StringUtils.trimToNull(((ID3V2Tag) tag).getAlbum());
-            this.tag = tag;
-          }
+        AudioFile audioFile = AudioFileIO.read(file);
+        Tag t = audioFile.getTag();
+        if (t != null) {
+          artist = StringUtils.trimToNull(t.getFirst(FieldKey.ARTIST));
+          title = StringUtils.trimToNull(t.getFirst(FieldKey.TITLE));
+          album = StringUtils.trimToNull(t.getFirst(FieldKey.ALBUM));
+          this.tag = t;
         }
-      } catch (ID3Exception e) {
+      } catch (Exception e) {
         log.info("error while reading tags", e);
         this.setStatus(Status.NO_TAGS);
       }
@@ -125,7 +115,7 @@ public class MP3TrackImportTask extends TrackImportTask {
   /**
    * @return the tag
    */
-  public ID3Tag getTag() {
+  public Tag getTag() {
     return tag;
   }
 

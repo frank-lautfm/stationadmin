@@ -5,12 +5,12 @@ package de.stationadmin.gui.mp3explorer;
 
 import java.io.File;
 
-import org.blinkenlights.jid3.ID3Tag;
+import org.jaudiotagger.tag.Tag;
 
 
 public class MP3File {
   File file;
-  ID3Tag tag;
+  Tag tag;
   TrackStatus status = TrackStatus.UNRESOLVED;
   float size;
 
@@ -35,7 +35,7 @@ public class MP3File {
   /**
    * @return the tag
    */
-  public ID3Tag getTag() {
+  public Tag getTag() {
     return tag;
   }
 
@@ -43,7 +43,7 @@ public class MP3File {
    * @param tag
    *          the tag to set
    */
-  public void setTag(ID3Tag tag) {
+  public void setTag(Tag tag) {
     this.tag = tag;
   }
 

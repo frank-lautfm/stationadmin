@@ -5,11 +5,10 @@ package de.stationadmin.base.util;
 
 import java.io.File;
 
-import org.blinkenlights.jid3.ID3Exception;
-import org.blinkenlights.jid3.ID3Tag;
-import org.blinkenlights.jid3.MP3File;
-import org.blinkenlights.jid3.v1.ID3V1Tag;
-import org.blinkenlights.jid3.v2.ID3V2Tag;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
 
 import de.stationadmin.base.track.DetailedTrack;
 
@@ -20,26 +19,22 @@ import de.stationadmin.base.track.DetailedTrack;
  */
 public class MP3Util {
 
-  public static DetailedTrack getTitleInformation(ID3Tag tag) {
-    String artist = null;
-    String title = null;
-    String album = null;
+  public static DetailedTrack getTitleInformation(Tag tag) {
+    if (tag == null) {
+      return null;
+    }
+    String artist = tag.getFirst(FieldKey.ARTIST);
+    String title = tag.getFirst(FieldKey.TITLE);
+    String album = tag.getFirst(FieldKey.ALBUM);
 
-    if (tag instanceof ID3V1Tag) {
-      artist = ((ID3V1Tag) tag).getArtist();
-      title = ((ID3V1Tag) tag).getTitle();
-      album = ((ID3V1Tag) tag).getAlbum();
-    }
-    if (tag instanceof ID3V2Tag) {
-      artist = ((ID3V2Tag) tag).getArtist();
-      title = ((ID3V2Tag) tag).getTitle();
-      album = ((ID3V2Tag) tag).getAlbum();
-    }
-    if (artist != null && title != null) {
+    if (artist != null && !artist.trim().isEmpty()
+        && title != null && !title.trim().isEmpty()) {
       DetailedTrack t = new DetailedTrack();
-      t.setArtist(artist);
-      t.setTitle(title);
-      t.setAlbum(album);
+      t.setArtist(artist.trim());
+      t.setTitle(title.trim());
+      if (album != null && !album.trim().isEmpty()) {
+        t.setAlbum(album.trim());
+      }
       return t;
     }
 
@@ -47,40 +42,14 @@ public class MP3Util {
   }
 
   public static DetailedTrack getTitleInformation(File file) {
-    String artist = null;
-    String title = null;
-    String album = null;
-
     try {
-      MP3File mp3File = new MP3File(file);
-      for (ID3Tag tag : mp3File.getTags()) {
-        if (tag instanceof ID3V1Tag) {
-          artist = ((ID3V1Tag) tag).getArtist();
-          title = ((ID3V1Tag) tag).getTitle();
-          album = ((ID3V1Tag) tag).getAlbum();
-        }
-        if (tag instanceof ID3V2Tag) {
-          artist = ((ID3V2Tag) tag).getArtist();
-          title = ((ID3V2Tag) tag).getTitle();
-          album = ((ID3V2Tag) tag).getAlbum();
-        }
-        if (artist != null && title != null) {
-          break;
-        }
-      }
-    } catch (ID3Exception e) {
+      AudioFile audioFile = AudioFileIO.read(file);
+      Tag tag = audioFile.getTag();
+      return getTitleInformation(tag);
+    } catch (Exception e) {
+      // silently ignore unreadable files
     }
-
-    if (artist != null && title != null) {
-      DetailedTrack t = new DetailedTrack();
-      t.setArtist(artist);
-      t.setTitle(title);
-      t.setAlbum(album);
-      return t;
-    }
-
     return null;
-
   }
 
 }

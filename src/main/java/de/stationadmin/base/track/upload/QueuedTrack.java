@@ -1,11 +1,12 @@
 /**
- * 
+ *
  */
 package de.stationadmin.base.track.upload;
 
 import java.io.File;
 
 import de.stationadmin.base.track.DetailedTrack;
+import de.stationadmin.base.util.TrackMetaDataReaderFactory;
 import de.stationadmin.lfm.backend.TrackUpload;
 import de.stationadmin.lfm.backend.UploadResponse;
 
@@ -19,12 +20,15 @@ public class QueuedTrack {
   private DetailedTrack track;
   private UploadStatus status = UploadStatus.QUEUED;
   private boolean modified = false;
-  
+  /** Meta data read from the local file at queue time; may be null */
+  private DetailedTrack localMetaData;
+
   public QueuedTrack(File file) {
     this.file = new TrackUpload(file);
     if(file.length() < 1024 * 1024) {
       this.file.setPrivateTrack(true);
     }
+    this.localMetaData = TrackMetaDataReaderFactory.readMetaData(file);
   }
 
   /**
@@ -103,6 +107,24 @@ public class QueuedTrack {
    */
   public void setModified(boolean modified) {
     this.modified = modified;
+  }
+
+  /**
+   * Returns the meta data that was read from the local file when this track
+   * was added to the upload queue. May be <code>null</code> if the file
+   * contained no readable tags or the format is not supported.
+   *
+   * @return local meta data, or <code>null</code>
+   */
+  public DetailedTrack getLocalMetaData() {
+    return localMetaData;
+  }
+
+  /**
+   * @param localMetaData the localMetaData to set
+   */
+  public void setLocalMetaData(DetailedTrack localMetaData) {
+    this.localMetaData = localMetaData;
   }
 
 }

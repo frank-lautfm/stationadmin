@@ -15,10 +15,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 import org.apache.commons.lang.StringUtils;
-import org.blinkenlights.jid3.ID3Exception;
-import org.blinkenlights.jid3.ID3Tag;
-import org.blinkenlights.jid3.v1.ID3V1Tag;
-import org.blinkenlights.jid3.v2.ID3V2Tag;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.PlaylistType;
@@ -26,6 +24,7 @@ import de.stationadmin.base.playlist.trackimport.MP3TrackImportTask;
 import de.stationadmin.base.playlist.trackimport.TrackImportHandler;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.track.TrackService;
+import de.stationadmin.base.util.TrackMetaDataReaderFactory;
 import de.stationadmin.gui.TextProvider;
 
 /**
@@ -76,23 +75,30 @@ public class MP3DirectoryTableModel extends AbstractTableModel {
   public Object getValueAt(int rowIndex, int columnIndex) {
     Column col = Column.values()[columnIndex];
     MP3File file = this.files.get(rowIndex);
-    try {
-      switch (col) {
-      case FILENAME:
-        return file.file.getName();
-      case ALBUM:
-        return file.tag != null ? new Album(file.tag) : null;
-      case ARTIST:
-        return file.tag instanceof ID3V2Tag ? ((ID3V2Tag) file.tag).getArtist() : (file.tag instanceof ID3V1Tag ? ((ID3V1Tag) file.tag).getArtist() : null);
-      case TITLE:
-        return file.tag instanceof ID3V2Tag ? ((ID3V2Tag) file.tag).getTitle() : (file.tag instanceof ID3V1Tag ? ((ID3V1Tag) file.tag).getTitle() : null);
-      case TRACKNO:
-        return file.tag instanceof ID3V2Tag ? ((ID3V2Tag) file.tag).getTrackNumber() : 0;
-      case SIZE:
-        return file.size;
+    Tag tag = file.tag;
+    switch (col) {
+    case FILENAME:
+      return file.file.getName();
+    case ALBUM:
+      return tag != null ? new Album(tag) : null;
+    case ARTIST:
+      return tag != null ? StringUtils.trimToNull(tag.getFirst(FieldKey.ARTIST)) : null;
+    case TITLE:
+      return tag != null ? StringUtils.trimToNull(tag.getFirst(FieldKey.TITLE)) : null;
+    case TRACKNO:
+      if (tag != null) {
+        String trackStr = tag.getFirst(FieldKey.TRACK);
+        if (trackStr != null && !trackStr.trim().isEmpty()) {
+          try {
+            return Integer.parseInt(trackStr.trim());
+          } catch (NumberFormatException e) {
+            // ignore malformed track number
+          }
+        }
       }
-    } catch (ID3Exception e) {
-      return null;
+      return 0;
+    case SIZE:
+      return file.size;
     }
 
     return null;
@@ -131,15 +137,17 @@ public class MP3DirectoryTableModel extends AbstractTableModel {
     int trackNo;
     String name;
 
-    Album(ID3Tag tag) {
-      if (tag instanceof ID3V2Tag) {
-        this.name = ((ID3V2Tag) tag).getAlbum();
-        try {
-          this.trackNo = ((ID3V2Tag) tag).getTrackNumber();
-        } catch (Exception e) {
+    Album(Tag tag) {
+      if (tag != null) {
+        this.name = tag.getFirst(FieldKey.ALBUM);
+        String trackStr = tag.getFirst(FieldKey.TRACK);
+        if (trackStr != null && !trackStr.trim().isEmpty()) {
+          try {
+            this.trackNo = Integer.parseInt(trackStr.trim());
+          } catch (NumberFormatException e) {
+            // ignore malformed track number
+          }
         }
-      } else if (tag instanceof ID3V1Tag) {
-        this.name = ((ID3V1Tag) tag).getAlbum();
       }
     }
 
@@ -216,7 +224,7 @@ public class MP3DirectoryTableModel extends AbstractTableModel {
                 if (this.recursive) {
                   dirs.add(file);
                 }
-              } else if (file.getName().toLowerCase().endsWith(".mp3")) {
+              } else if (TrackMetaDataReaderFactory.isSupportedAudioFile(file)) {
                 MP3File entry = resolved.get(file.getAbsolutePath());
                 if (entry == null) {
                   entry = new MP3File();

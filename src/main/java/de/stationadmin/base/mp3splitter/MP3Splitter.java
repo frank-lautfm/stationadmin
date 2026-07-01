@@ -15,9 +15,10 @@ import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.blinkenlights.jid3.ID3Exception;
-import org.blinkenlights.jid3.MP3File;
-import org.blinkenlights.jid3.v2.ID3V2_3_0Tag;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
 
 import javazoom.jl.decoder.Bitstream;
 import javazoom.jl.decoder.BitstreamException;
@@ -150,30 +151,21 @@ public class MP3Splitter {
   private void tag(String filename, SplitPoint splitPoint) throws IOException {
     log.info("add ID3 tags to " + filename);
     try {
-      MP3File file = new MP3File(new File(filename));
-      if (file.getID3V2Tag() != null) {
-        file.removeID3V2Tag();
-        file.sync();
-      }
-      ID3V2_3_0Tag tag = new ID3V2_3_0Tag();
-      // ID3V1_1Tag tag = new ID3V1_1Tag();
+      AudioFile audioFile = AudioFileIO.read(new File(filename));
+      Tag tag = audioFile.getTagOrCreateAndSetDefault();
       if (splitPoint.getArtist() != null) {
-        tag.setArtist(splitPoint.getArtist());
+        tag.setField(FieldKey.ARTIST, splitPoint.getArtist());
       }
       if (splitPoint.getTitle() != null) {
-        tag.setTitle(splitPoint.getTitle());
+        tag.setField(FieldKey.TITLE, splitPoint.getTitle());
       }
       if (splitPoint.getAlbum() != null) {
-        tag.setAlbum(splitPoint.getAlbum());
+        tag.setField(FieldKey.ALBUM, splitPoint.getAlbum());
       }
-      file.setID3Tag(tag);
-      file.sync();
-
-    } catch (ID3Exception e) {
+      audioFile.commit();
+    } catch (Exception e) {
       log.error("tagging error", e);
-
     }
-
   }
 
 }
