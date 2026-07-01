@@ -23,7 +23,8 @@ public class TrackMetaDataReaderFactory {
 
   private static final List<TrackMetaDataReader> READERS = Arrays.asList(
       new MP3MetaDataReader(),
-      new AACMetaDataReader()
+      new AACMetaDataReader(),
+      new FLACMetaDataReader()
   );
 
   /**
