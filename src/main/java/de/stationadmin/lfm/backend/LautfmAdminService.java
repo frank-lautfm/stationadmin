@@ -3,6 +3,7 @@
  */
 package de.stationadmin.lfm.backend;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -823,6 +824,14 @@ public class LautfmAdminService {
     return map;
   }
   
+  private static ContentType resolveContentType(File file) {
+    String name = file.getName().toLowerCase();
+    if (name.endsWith(".aac") || name.endsWith(".m4a")) {
+      return ContentType.create("audio/aac");
+    }
+    return ContentType.create("audio/mp3");
+  }
+
   public UploadResponse uploadTrack(int stationId, TrackUpload track, final ProgressListener progressListener) throws IOException {
     final HttpPost filePost = new HttpPost(BASE_URL + "/stations/" + stationId + "/tracks");
     if (progressListener != null) {
@@ -831,7 +840,7 @@ public class LautfmAdminService {
     this.addAuthHeaders(filePost);
 
     HttpEntity entity = MultipartEntityBuilder.create()
-        .addBinaryBody("track", track.getFile(), ContentType.create("audio/mp3"), track.getFile().getName())
+        .addBinaryBody("track", track.getFile(), resolveContentType(track.getFile()), track.getFile().getName())
         .build();
 
     HttpEntityWrapper entityWrapper = new HttpEntityWrapper(entity) {

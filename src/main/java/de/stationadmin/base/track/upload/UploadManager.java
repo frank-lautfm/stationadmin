@@ -75,9 +75,14 @@ public class UploadManager extends AbstractBean {
 		return add(file, false);
 	}
 
+	private static boolean isSupportedAudioFile(File file) {
+		String name = file.getName().toLowerCase();
+		return name.endsWith(".mp3") || name.endsWith(".aac") || name.endsWith(".m4a");
+	}
+
 	public boolean add(File file, boolean forcePrivate) {
 		if (file.exists() && !file.isDirectory()) {
-			if (file.getName().toLowerCase().endsWith("mp3") && file.length() < 1024 * 1024 * 65) {
+			if (isSupportedAudioFile(file) && file.length() < 1024 * 1024 * 65) {
 				int oldRemaining = this.getNumberOfRemainingFiles();
 				QueuedTrack track = new QueuedTrack(file);
 				if (forcePrivate) {
@@ -89,7 +94,7 @@ public class UploadManager extends AbstractBean {
 				this.firePropertyChange("numberOfRemainingFiles", oldRemaining, this.getNumberOfRemainingFiles());
 				this.saveQueue();
 				return true;
-			} else if (file.getName().toLowerCase().endsWith(".m3u")) {
+			} else if (file.getName().toLowerCase().endsWith(".m3u") || file.getName().toLowerCase().endsWith("m3u")) {
 				boolean success = false;
 				try {
 					List<File> files = readM3u(file, null);
@@ -396,6 +401,20 @@ public class UploadManager extends AbstractBean {
 							entry.setTrack(track);
 							entry.setStatus(UploadStatus.COMPLETED);
 							System.out.println("processing completed " + entry.getFile().getFile().getName());
+							
+							// submit local meta data if the server track has none
+							if (isMetaDataMissing(track) && entry.getLocalMetaData() != null) {
+								try {
+									DetailedTrack merged = mergeLocalMetaData(track, entry.getLocalMetaData());
+									trackService.updateTrack(merged);
+									log.info("Submitted local meta data for track " + track.getId()
+											+ ": " + merged.getArtist() + " - " + merged.getTitle());
+									entry.setTrack(merged);
+								} catch (Exception e) {
+									log.warn("Failed to submit local meta data for track " + track.getId(), e);
+								}								
+							}
+							
 							addToProcessed(entry);
 							this.trackService.getTrackRegistry().registerOwnTrack(entry.getTrack());
 							tracksCompleted = true;
@@ -501,6 +520,29 @@ public class UploadManager extends AbstractBean {
 
 	public void setSlowerUploadEnabled(boolean slowerUploadEnabled) {
 		this.slowerUploadEnabled = slowerUploadEnabled;
+	}
+
+	/**
+	 * Returns <code>true</code> if the server track has neither artist nor title
+	 * set, indicating that meta data should be submitted from the local file.
+	 */
+	private boolean isMetaDataMissing(DetailedTrack track) {
+		return (track.getArtist() == null || track.getArtist().trim().length() == 0)
+				&& (track.getTitle() == null || track.getTitle().trim().length() == 0);
+	}
+
+	/**
+	 * Creates a copy of {@code serverTrack} with artist, title and (if present)
+	 * album taken from {@code local}.
+	 */
+	private DetailedTrack mergeLocalMetaData(DetailedTrack serverTrack, DetailedTrack local) {
+		DetailedTrack merged = new DetailedTrack(serverTrack);
+		merged.setArtist(local.getArtist());
+		merged.setTitle(local.getTitle());
+		if (local.getAlbum() != null && local.getAlbum().trim().length() > 0) {
+			merged.setAlbum(local.getAlbum());
+		}
+		return merged;
 	}
 
 }

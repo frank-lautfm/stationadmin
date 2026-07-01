@@ -191,7 +191,7 @@ public class UploadPanel extends JPanel {
       if (this.currentDir != null) {
         fileChooser.setCurrentDirectory(this.currentDir);
       }
-      fileChooser.setFileFilter(new FileNameExtensionFilter("mp3", "mp3", "m3u"));
+      fileChooser.setFileFilter(new FileNameExtensionFilter("Audio files (mp3, aac, m4a)", "mp3", "aac", "m4a", "m3u"));
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       fileChooser.setMultiSelectionEnabled(true);
       if (fileChooser.showOpenDialog(UploadPanel.this) == JFileChooser.APPROVE_OPTION) {
