@@ -6,10 +6,17 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+
+
+Version 5.7.0
+-------------
+{+] Unterstützung für weitere Audioformate im Upload und MP3-Explorer: .flac, .m4a, .aac, .wav
+
+
 Version 5.6.1
 -------------
 {*] Nachrichteneinstellungen waren nicht konfigurierbar wenn nur "Nachrichten" oder "Wetter"-Tracks in der Playlist enthalten sind.
-]+] Nachrichten als Tracktyp bei Programmelementen hinzugefügt
+[+] Nachrichten als Tracktyp bei Programmelementen hinzugefügt
 
 
 Version 5.6.0
