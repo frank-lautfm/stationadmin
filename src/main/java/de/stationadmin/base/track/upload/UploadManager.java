@@ -77,7 +77,7 @@ public class UploadManager extends AbstractBean {
 
 	private static boolean isSupportedAudioFile(File file) {
 		String name = file.getName().toLowerCase();
-		return name.endsWith(".mp3") || name.endsWith(".aac") || name.endsWith(".m4a") || name.endsWith(".flac");
+		return name.endsWith(".mp3") || name.endsWith(".aac") || name.endsWith(".m4a") || name.endsWith(".flac") || name.endsWith(".wav");
 	}
 
 	public boolean add(File file, boolean forcePrivate) {

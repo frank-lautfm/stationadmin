@@ -13,8 +13,8 @@ import de.stationadmin.base.track.DetailedTrack;
  * Factory that selects the appropriate {@link TrackMetaDataReader} for a given
  * audio file and delegates the meta data reading to it.
  * <p>
- * To support additional audio formats, implement {@link TrackMetaDataReader}
- * and add an instance to the {@code READERS} list.
+ * To support additional audio formats, add a new {@link JAudioTaggerMetaDataReader}
+ * instance to the {@code READERS} list with the desired file extensions.
  * </p>
  *
  * @author Frank Korf
@@ -22,9 +22,10 @@ import de.stationadmin.base.track.DetailedTrack;
 public class TrackMetaDataReaderFactory {
 
   private static final List<TrackMetaDataReader> READERS = Arrays.asList(
-      new MP3MetaDataReader(),
-      new AACMetaDataReader(),
-      new FLACMetaDataReader()
+      new JAudioTaggerMetaDataReader(".mp3"),
+      new JAudioTaggerMetaDataReader(".aac", ".m4a"),
+      new JAudioTaggerMetaDataReader(".flac"),
+      new JAudioTaggerMetaDataReader(".wav")
   );
 
   /**
