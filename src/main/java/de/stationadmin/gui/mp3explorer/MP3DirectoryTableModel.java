@@ -24,6 +24,7 @@ import de.stationadmin.base.playlist.trackimport.MP3TrackImportTask;
 import de.stationadmin.base.playlist.trackimport.TrackImportHandler;
 import de.stationadmin.base.tag.TagManager;
 import de.stationadmin.base.track.TrackService;
+import de.stationadmin.base.util.TrackMetaDataReaderFactory;
 import de.stationadmin.gui.TextProvider;
 
 /**
@@ -223,7 +224,7 @@ public class MP3DirectoryTableModel extends AbstractTableModel {
                 if (this.recursive) {
                   dirs.add(file);
                 }
-              } else if (file.getName().toLowerCase().endsWith(".mp3")) {
+              } else if (TrackMetaDataReaderFactory.isSupportedAudioFile(file)) {
                 MP3File entry = resolved.get(file.getAbsolutePath());
                 if (entry == null) {
                   entry = new MP3File();
