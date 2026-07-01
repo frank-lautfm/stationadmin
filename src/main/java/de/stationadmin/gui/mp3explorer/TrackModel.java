@@ -3,8 +3,7 @@
  */
 package de.stationadmin.gui.mp3explorer;
 
-import org.blinkenlights.jid3.v1.ID3V1Tag;
-import org.blinkenlights.jid3.v2.ID3V2Tag;
+import org.jaudiotagger.tag.FieldKey;
 
 import com.jgoodies.binding.beans.Model;
 
@@ -35,15 +34,11 @@ public class TrackModel extends Model {
   }
 
   public String getID3Artist() {
-    return (file.tag instanceof ID3V2Tag) ? ((ID3V2Tag) file.tag).getArtist() : (file.tag instanceof ID3V1Tag)
-        ? ((ID3V1Tag) file.tag).getArtist()
-        : null;
+    return file.tag != null ? file.tag.getFirst(FieldKey.ARTIST) : null;
   }
 
   public String getID3Name() {
-    return (file.tag instanceof ID3V2Tag) ? ((ID3V2Tag) file.tag).getTitle() : (file.tag instanceof ID3V1Tag)
-        ? ((ID3V1Tag) file.tag).getTitle()
-        : null;
+    return file.tag != null ? file.tag.getFirst(FieldKey.TITLE) : null;
   }
 
   /**
