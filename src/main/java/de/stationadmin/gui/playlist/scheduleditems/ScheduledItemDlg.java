@@ -34,6 +34,10 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import de.stationadmin.base.playlist.PlaylistService;
 import de.stationadmin.base.playlist.scheduled.ScheduledItem;
+import de.stationadmin.base.playlist.scheduled.TrackType;
+import de.stationadmin.base.tag.TagFile;
+import de.stationadmin.base.track.BasicTrack;
+import de.stationadmin.base.track.TrackRegistry;
 import de.stationadmin.gui.ClientContext;
 import de.stationadmin.gui.StationAdminFrame;
 import de.stationadmin.gui.util.AppUtils;
@@ -104,6 +108,8 @@ public class ScheduledItemDlg extends StationAdminFrame {
         }
         model.triggerCommit();
         if (item != null) {
+          // upgrade version 1 items to version 2 on save
+          item.setVersion(2);
           boolean isNew = false;
           if (ctx.getAdminClient().getPlaylistService().getScheduledItem(item.getId()) == null) {
             ctx.getAdminClient().getPlaylistService().addScheduledItem(item);
@@ -223,7 +229,11 @@ public class ScheduledItemDlg extends StationAdminFrame {
             if (container.getComponentCount() == 0) {
               System.out.println("add edtior");
               container.add(editor, BorderLayout.CENTER);
-
+            }
+            // check version-1 items for track type mismatch
+            ScheduledItem loadedItem = (ScheduledItem) evt.getNewValue();
+            if (loadedItem.getVersion() == 1 && loadedItem.getTag() != null) {
+              checkTrackTypeMismatch(loadedItem);
             }
           } else {
             container.removeAll();
@@ -243,7 +253,9 @@ public class ScheduledItemDlg extends StationAdminFrame {
 
         @Override
         public void actionPerformed(ActionEvent evt) {
-          selection.setValue(new ScheduledItem());
+          ScheduledItem newItem = new ScheduledItem();
+          newItem.setVersion(2);
+          selection.setValue(newItem);
         }
       });
 
@@ -265,6 +277,43 @@ public class ScheduledItemDlg extends StationAdminFrame {
 
     }
 
+  }
+
+  /**
+   * Checks if the tagged tracks of a version-1 item match the configured track type.
+   * Shows a warning dialog if a mismatch is detected.
+   */
+  private void checkTrackTypeMismatch(ScheduledItem item) {
+    try {
+      int[] ids = ctx.getAdminClient().getTagManager().getTrackIds(item.getTag());
+      if (ids == null || ids.length == 0) {
+        return;
+      }
+      int expectedBasicType = trackTypeToBasicType(item.getTrackType());
+      TrackRegistry registry = ctx.getAdminClient().getTrackService().getTrackRegistry();
+      for (int id : ids) {
+        BasicTrack track = registry.getTrack(id);
+        if (track != null && track.getType() != expectedBasicType) {
+          JOptionPane.showMessageDialog(this,
+              ctx.getString("scheduleditem.version1.hint"),
+              ctx.getString("scheduleditems.title"),
+              JOptionPane.WARNING_MESSAGE);
+          return;
+        }
+      }
+    } catch (Exception e) {
+      // silently ignore - do not block the editor from opening
+    }
+  }
+
+  private int trackTypeToBasicType(TrackType trackType) {
+    switch (trackType) {
+      case Song:       return BasicTrack.TYPE_MUSIC;
+      case Jingle:     return BasicTrack.TYPE_JINGLE;
+      case Moderation: return BasicTrack.TYPE_WORD;
+      case News:       return BasicTrack.TYPE_NEWS;
+      default:         return BasicTrack.TYPE_MUSIC;
+    }
   }
 
   @Override

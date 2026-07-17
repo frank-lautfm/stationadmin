@@ -12,6 +12,7 @@ public class ScheduledItem {
   private int introJingleId;
   private TrackSelectionMode selection = TrackSelectionMode.Random;
   private int trackIndex;
+  private int version = 1;
 
   public String getId() {
     return id;
@@ -69,6 +70,7 @@ public class ScheduledItem {
     map.put("tag", this.tag);
     map.put("trackType", this.trackType.name().toLowerCase());
     map.put("selection", this.selection.name().toLowerCase());
+    map.put("version", this.version);
     if(this.introJingleId > 0) {
       map.put("introJingleId", this.introJingleId);
     }
@@ -103,5 +105,13 @@ public int getTrackIndex() {
 
 public void setTrackIndex(int trackIndex) {
 	this.trackIndex = trackIndex;
+}
+
+public int getVersion() {
+	return version;
+}
+
+public void setVersion(int version) {
+	this.version = version;
 }
 }
