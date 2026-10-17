@@ -43,6 +43,10 @@ public class TagNameDlg extends JDialog {
   private static Integer[] months = new Integer[] {
     	1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
     };
+  
+  private static String[] weekdays = new String[] {
+    "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"
+  };
 
   
   private ValueHolder tagName = new ValueHolder();
@@ -61,7 +65,7 @@ public class TagNameDlg extends JDialog {
   private void initalize() {
     this.getContentPane().setLayout(new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,pref,5dlu,pref,5dlu"));
 
-    String[] tagTypes = new String[] { "standard", "date", "grouping" };
+    String[] tagTypes = new String[] { "standard", "date", "grouping", "weekday" };
     SelectionInList<String> tagTypeSelection = new SelectionInList<String>(tagTypes, this.tagType);
     JComboBox tagTypeCmb = BasicComponentFactory.createComboBox(tagTypeSelection, new DefaultListCellRenderer() {
       private static final long serialVersionUID = 3817876613492656987L;
@@ -91,6 +95,9 @@ public class TagNameDlg extends JDialog {
 				}
 				else if(value.equals("grouping")) {
 					newPanel = createGroupingPanel();
+				}
+				else if(value.equals("weekday")) {
+					newPanel = createWeekdayPanel();
 				}
 				else {
 					newPanel = createStandardPanel();
@@ -258,6 +265,47 @@ public class TagNameDlg extends JDialog {
   /**
    * @return the accepted
    */
+
+  @SuppressWarnings("rawtypes")
+  private JPanel createWeekdayPanel() {
+  	JPanel panel = new JPanel(new FormLayout("pref,pref,1dlu,pref:grow", "pref"));
+  	CellConstraints cc = new CellConstraints();
+  	panel.add(new JLabel("@"), cc.xy(1, 1));
+
+  	ValueHolder weekday = new ValueHolder("Montag");
+  	SelectionInList<String> weekdaySelection = new SelectionInList<String>(weekdays, weekday);
+  	JComboBox weekdayCmb = BasicComponentFactory.createComboBox(weekdaySelection);
+  	panel.add(weekdayCmb, cc.xy(2, 1));
+
+  	ValueHolder text = new ValueHolder();
+  	JTextField tf = BasicComponentFactory.createTextField(text);
+  	tf.setColumns(10);
+  	panel.add(tf, cc.xy(4, 1));
+  	
+  	PropertyChangeListener listener = new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				
+				StringBuffer buf = new StringBuffer();
+				buf.append("@");
+				buf.append(weekday.getString());
+				if(text.getString() != null && text.getString().length() > 0) {
+					buf.append(" ");
+					buf.append(text.getString());
+				}
+				
+				tagName.setValue(buf.toString());
+				
+			}
+		};
+		
+		weekday.addValueChangeListener(listener);
+		text.addValueChangeListener(listener);
+  	
+  	return panel;
+  }
+
   public boolean isAccepted() {
     return accepted;
   }
