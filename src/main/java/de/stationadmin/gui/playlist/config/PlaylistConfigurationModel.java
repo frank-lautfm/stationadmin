@@ -222,7 +222,7 @@ public class PlaylistConfigurationModel extends PresentationModel<Playlist> {
       case StationAdminShuffle:
         if (option.equals(TrackOrderOption.SHUFFLE_SERVER)) {
           ShuffleScriptMeta script = PlaylistService.getShuffleScriptMeta(shuffleScripts, shuffleType);
-          if (script.getOptsKey() != null && script.getOptsKey().equals("StationAdmin")) {
+          if (script != null && script.getOptsKey() != null && script.getOptsKey().equals("StationAdmin")) {
             activeProfiles.add(profile.getId());
           }
         }
