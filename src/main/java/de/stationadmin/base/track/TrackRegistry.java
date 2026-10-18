@@ -25,6 +25,8 @@ import de.stationadmin.base.util.AbstractBean;
  */
 public class TrackRegistry extends AbstractBean {
   public static final int STANDARD_AD_TRIGGER_ID = 0;
+  /** Also covers the variants AD_BREAK_BEFORE, AD_BREAK_AFTER and START_AD_BREAK. */
+  public static final String AD_BREAK_MARKER = "AD_BREAK";
   public static final int LAUTFM_NEWS_WEATHER_ID = 1;
   public static final int LAUTFM_NEWS_ID = 2;
   public static final int LAUTFM_WEATHER_ID = 3;
@@ -50,6 +52,18 @@ public class TrackRegistry extends AbstractBean {
 
   public static boolean isSpecialTrack(int trackId) {
   	return isLautfmNewsOrWheather(trackId) || trackId == STANDARD_AD_TRIGGER_ID || trackId == STATIONADMIN_SEPARATOR;
+  }
+
+  /**
+   * A track is an ad trigger if artist or title contains {@link #AD_BREAK_MARKER}. Additional text before or after is
+   * allowed, e.g. "AD_BREAK Superradio Jingle".
+   */
+  public static boolean isAdTrigger(BasicTrack track) {
+    return track != null && isAdTrigger(track.getArtist(), track.getTitle());
+  }
+
+  public static boolean isAdTrigger(String artist, String title) {
+    return (artist != null && artist.contains(AD_BREAK_MARKER)) || (title != null && title.contains(AD_BREAK_MARKER));
   }
   
   /**

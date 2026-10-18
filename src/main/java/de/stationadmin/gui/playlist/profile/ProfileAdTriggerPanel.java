@@ -221,7 +221,7 @@ public class ProfileAdTriggerPanel extends JPanel {
   private List<Integer> getAdSeparatorOptions() {
     ArrayList<BasicTrack> jingles = new ArrayList<BasicTrack>();
     for (BasicTrack track : ctx.getAdminClient().getTrackService().getTrackRegistry().getAllTracks()) {
-      if (track.getType() == BasicTrack.TYPE_JINGLE && !(track.getArtist().equals("START_AD_BREAK") || track.getTitle().equals("START_AD_BREAK"))) {
+      if (track.getType() == BasicTrack.TYPE_JINGLE && !TrackRegistry.isAdTrigger(track)) {
         jingles.add(track);
       }
     }
@@ -253,7 +253,7 @@ public class ProfileAdTriggerPanel extends JPanel {
     triggers.add(TrackRegistry.STANDARD_AD_TRIGGER_ID);
 
     for (BasicTrack track : ctx.getAdminClient().getTrackService().getTrackRegistry().getAllTracks()) {
-      if (track.getType() == BasicTrack.TYPE_JINGLE && track.getId() > 0 && (track.getArtist().equals("START_AD_BREAK") || track.getTitle().equals("START_AD_BREAK"))) {
+      if (track.getType() == BasicTrack.TYPE_JINGLE && track.getId() > 0 && TrackRegistry.isAdTrigger(track)) {
         triggers.add(track.getId());
       }
     }

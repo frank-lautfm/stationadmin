@@ -6,6 +6,7 @@ import java.util.List;
 
 import de.stationadmin.base.playlist.Playlist;
 import de.stationadmin.base.playlist.Playlist.Entry;
+import de.stationadmin.base.track.TrackRegistry;
 
 public class AdTriggerValidator implements PlaylistValidator {
 
@@ -15,8 +16,8 @@ public class AdTriggerValidator implements PlaylistValidator {
     List<Entry> adTriggers = null;
     if (!playlist.isShuffle()) {
       for (Entry entry : playlist.getEntries()) {
-        if (entry.getTrack() != null && entry.getTrack().getArtist() != null && entry.getTrack().getTitle() != null) {
-          if (entry.getTrack().getArtist().contains("START_AD_BREAK") || entry.getTrack().getTitle().contains("START_AD_BREAK")) {
+        if (entry.getTrack() != null) {
+          if (TrackRegistry.isAdTrigger(entry.getTrack())) {
             if (adTriggers == null) {
               adTriggers = new ArrayList<Playlist.Entry>();
             }

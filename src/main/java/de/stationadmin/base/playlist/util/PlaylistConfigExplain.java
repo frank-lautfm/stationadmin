@@ -73,7 +73,7 @@ public class PlaylistConfigExplain {
       Entry entry = playlist.getEntry(i);
       info.addTrack(entry.getTrackId());
       if (entry.getTrack() != null && entry.getTrack().getArtist() != null && entry.getTrack().getTitle() != null) {
-        if (!info.isAdTriggerIncluded() && (entry.getTrack().getArtist().contains("START_AD_BREAK") || entry.getTrack().getTitle().contains("START_AD_BREAK"))) {
+        if (!info.isAdTriggerIncluded() && TrackRegistry.isAdTrigger(entry.getTrack())) {
           info.setAdTriggerIncluded(true);
         } else if (TrackRegistry.isLautfmNewsOrWheather(entry.getTrackId())) {
           info.setNewsIncluded(true);

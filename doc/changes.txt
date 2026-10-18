@@ -13,6 +13,7 @@ Version 5.7.0
 {+] Unterstützung für weitere Audioformate im Upload und MP3-Explorer: .flac, .m4a, .aac, .wav
 [+] Konfiguration von Wochentag-Tags
 [+] Speichern von Programmelementen mit funktionierendem Tracktypfilter
+[+] Unterstützung für zusätzliche Ad-Trigger-Keywords
 
 
 Version 5.6.1
