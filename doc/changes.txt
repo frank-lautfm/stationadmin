@@ -6,7 +6,9 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
-
+Version 5.7.1
+-------------
+[#] Upload von Tracks mit Umlauten im Dateinamen verursachte Serverfehler
 
 Version 5.7.0
 -------------
