@@ -38,6 +38,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.ClassicHttpRequest;
@@ -839,7 +840,10 @@ public class LautfmAdminService {
     }
     this.addAuthHeaders(filePost);
 
+    // STRICT (the default) encodes part headers as US-ASCII, which mangles umlauts in the filename
     HttpEntity entity = MultipartEntityBuilder.create()
+        .setMode(HttpMultipartMode.LEGACY)
+        .setCharset(java.nio.charset.StandardCharsets.UTF_8)
         .addBinaryBody("track", track.getFile(), resolveContentType(track.getFile()), track.getFile().getName())
         .build();
 
