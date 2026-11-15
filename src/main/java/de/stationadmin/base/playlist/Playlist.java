@@ -1135,6 +1135,13 @@ public class Playlist extends AbstractBean {
     return metaDataModified;
   }
 
+  /**
+   * Flags the meta data (name, color, shuffle settings, ...) as modified so that it is written to the server on the next save.
+   */
+  public void markMetaDataModified() {
+    this.metaDataModified = true;
+  }
+
   public Map<String, Object> getShuffleOpts() {
     return shuffleOpts;
   }

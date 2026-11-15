@@ -434,6 +434,8 @@ public class BackupService implements Service {
 
     playlist.setTimestampMap(timestampMap);
     playlist.setProperties(properties);
+    // setProperties assigns fields directly; force meta data (shuffle opts/type, ...) to be pushed to the server
+    playlist.markMetaDataModified();
     return true;
   }
 
