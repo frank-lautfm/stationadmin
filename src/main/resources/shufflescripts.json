@@ -5,7 +5,9 @@
       "legacyNames": ["simple_shuffle", "bucket_automation", "bucket"],
       "optsKey":"bucket",
       "file":null,
-      "defaultOpts":null,
+      "defaultOpts":{
+        "pattern" : ""
+      },
       "supportsGlobalOpts":false
    },
    {  
