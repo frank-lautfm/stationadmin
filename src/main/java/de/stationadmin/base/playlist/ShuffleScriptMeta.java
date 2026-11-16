@@ -1,5 +1,6 @@
 package de.stationadmin.base.playlist;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -21,6 +22,7 @@ public class ShuffleScriptMeta {
 
   private String key;
   private String automationAlgorithm;
+  private List<String> legacyNames;
   private String defaultVersion;
   private String optsKey;
   private String file;
@@ -136,6 +138,34 @@ public class ShuffleScriptMeta {
 
   public void setAutomationAlgorithm(String automationAlgorithm) {
     this.automationAlgorithm = automationAlgorithm;
+  }
+
+  /**
+   * Former automation algorithm names that are mapped to this script
+   * (e.g. found in backups or local files)
+   */
+  public List<String> getLegacyNames() {
+    return legacyNames;
+  }
+
+  public void setLegacyNames(List<String> legacyNames) {
+    this.legacyNames = legacyNames;
+  }
+
+  /**
+   * Checks if the given name is a legacy automation algorithm name of this script
+   * @param name name to check (case insensitive)
+   */
+  public boolean isLegacyName(String name) {
+    if (name == null || legacyNames == null) {
+      return false;
+    }
+    for (String legacy : legacyNames) {
+      if (name.equalsIgnoreCase(legacy)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 

@@ -6,9 +6,14 @@ Station Admin für laut.fm - Änderungen
 [+] = Erweiterung
 [#] = Änderung
 
+Version 5.7.3
+-------------
+[#] Anpassung an laut.fm-Shufflescript
+
+
 Version 5.7.2
 -------------
-[#] Playlist-Import aus Backup setzte Metadaten (inklusive Shuffle-Verfahren) nicht
+[*] Playlist-Import aus Backup setzte Metadaten (inklusive Shuffle-Verfahren) nicht
 
 
 Version 5.7.1

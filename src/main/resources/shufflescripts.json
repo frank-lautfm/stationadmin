@@ -1,20 +1,11 @@
 ﻿[  
    {  
       "key":"basic",
-      "automationAlgorithm": "simple_shuffle",
-      "optsKey":null,
-      "file":null,
-      "defaultOpts":null,
-      "supportsGlobalOpts":false
-   },
-   {  
-      "key":"bucket",
-      "automationAlgorithm": "bucket_automation",
+      "automationAlgorithm": "laut_automation",
+      "legacyNames": ["simple_shuffle", "bucket_automation", "bucket"],
       "optsKey":"bucket",
       "file":null,
-      "defaultOpts":{  
-         "pattern":"song"
-      },
+      "defaultOpts":null,
       "supportsGlobalOpts":false
    },
    {  

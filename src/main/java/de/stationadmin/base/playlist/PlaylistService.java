@@ -482,7 +482,7 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
 
       ShuffleScriptMeta scriptMeta = getShuffleScriptMeta(shuffleScripts, playlist.getShuffleType());
       if (playlist.isShuffle()) {
-        head.setAutomationAlgorithm(scriptMeta != null ? scriptMeta.getAutomationAlgorithm() : "simple_shuffle");
+        head.setAutomationAlgorithm(scriptMeta != null ? scriptMeta.getAutomationAlgorithm() : "laut_automation");
       }
 
       if (playlist.getId() > -1) {
@@ -796,7 +796,8 @@ public class PlaylistService extends AbstractBean implements Service, ClientConf
     shuffleType = shuffleType.toLowerCase();
     ShuffleScriptMeta best = null;
     for (ShuffleScriptMeta script : shuffleScripts) {
-      if (shuffleType.equals(script.getKey().toLowerCase()) || shuffleType.equals(script.getAutomationAlgorithm())) {
+      if (shuffleType.equals(script.getKey().toLowerCase()) || shuffleType.equals(script.getAutomationAlgorithm())
+          || script.isLegacyName(shuffleType)) {
         return script;
       } else if (shuffleType.startsWith(script.getKey().toLowerCase() + "_")) {
         best = script;
