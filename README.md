@@ -2,6 +2,8 @@ Station Admin für laut.fm unterstützt Dich bei der Administration Deiner [laut
 
 Station Admin ist eine Java-Applikation und läuft dadurch sowohl unter Windows wie auch unter Linux oder MacOS. 
 
+**Hinweis**: Die neueste Version findest Du unter [Releases](https://github.com/frank-lautfm/stationadmin/releases).
+
 Station Admin bietet u. a. folgende Funktionen
 - Komfortables Bearbeiten von Playlists
 - Konfiguration der [Station Admin-Shuffle-Scripte](https://github.com/frank-lautfm/stationadmin-shuffle)
